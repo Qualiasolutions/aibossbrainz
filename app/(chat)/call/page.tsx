@@ -82,16 +82,16 @@ export default function CallPage() {
                   type="button"
                 >
                   {/* Content */}
-                  <div className="relative">
+                  <div className="relative flex flex-col items-center text-center">
                     {/* Avatar */}
-                    <div className="mb-6 size-20 overflow-hidden rounded-2xl bg-neutral-100">
+                    <div className="mb-6 size-28 overflow-hidden rounded-full bg-neutral-100 ring-4 ring-neutral-100">
                       {bot.avatar ? (
                         <Image
                           alt={bot.name}
                           className="size-full object-cover"
-                          height={80}
+                          height={112}
                           src={bot.avatar}
-                          width={80}
+                          width={112}
                         />
                       ) : (
                         <div
@@ -100,7 +100,7 @@ export default function CallPage() {
                             bot.color,
                           )}
                         >
-                          <span className="font-semibold text-xl text-white">
+                          <span className="font-semibold text-2xl text-white">
                             {botType === "collaborative"
                               ? "A&K"
                               : bot.name.charAt(0)}
