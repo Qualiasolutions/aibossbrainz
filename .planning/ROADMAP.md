@@ -12,7 +12,7 @@ v1.2 addresses 24 items from Alexandria's team feedback spreadsheet. The milesto
 
 ## Phases
 
-- [ ] **Phase 11: Critical Fixes & Auth Hardening** - Fix production bugs and auth UX issues
+- [x] **Phase 11: Critical Fixes & Auth Hardening** - Fix production bugs and auth UX issues
 - [ ] **Phase 12: Export & Copy Quality** - Clean PDF exports and copy/paste output
 - [ ] **Phase 13: AI Content & Voice** - Better AI deliverables and voice integration
 - [ ] **Phase 14: Homepage & SEO** - Public-facing page updates and meta-data
@@ -34,7 +34,7 @@ v1.2 addresses 24 items from Alexandria's team feedback spreadsheet. The milesto
 
 Plans:
 - [x] 11-01-PLAN.md -- Auth rate limiting fix, password min length (8), password show/hide toggle (BUG-01, AUTH-01, AUTH-02)
-- [ ] 11-02-PLAN.md -- Chat error recovery with clearError, improved error messages, safe auto-resume (BUG-02, BUG-03, BUG-04)
+- [x] 11-02-PLAN.md -- Chat error recovery with clearError, improved error messages, safe auto-resume (BUG-02, BUG-03, BUG-04)
 
 ### Phase 12: Export & Copy Quality
 **Goal**: Users get clean, professional output when exporting or copying chat content
@@ -105,7 +105,7 @@ Phase 11 first (critical fixes), then 12-15. Phases 12, 13, 14 can run in parall
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 11. Critical Fixes & Auth | v1.2 | 1/2 | In progress | - |
+| 11. Critical Fixes & Auth | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 12. Export & Copy Quality | v1.2 | 0/2 | Not started | - |
 | 13. AI Content & Voice | v1.2 | 0/2 | Not started | - |
 | 14. Homepage & SEO | v1.2 | 0/2 | Not started | - |
