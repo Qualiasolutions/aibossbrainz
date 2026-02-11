@@ -467,7 +467,7 @@ export const POST = withCsrf(async (request: Request) => {
       },
       onError: () => {
         apiLog.warn("Stream onError callback triggered");
-        return "Oops, an error occurred!";
+        return "Something went wrong generating a response. Please try again.";
       },
     });
 

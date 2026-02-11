@@ -28,7 +28,11 @@ export function useAutoResume({
     const mostRecentMessage = initialMessages.at(-1);
 
     if (mostRecentMessage?.role === "user") {
-      resumeStream();
+      try {
+        resumeStream();
+      } catch (error) {
+        console.warn("Failed to resume stream, displaying existing messages:", error);
+      }
     }
 
     // we intentionally run this once

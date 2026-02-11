@@ -142,6 +142,7 @@ export function Chat({
     stop,
     regenerate,
     resumeStream,
+    clearError,
   } = useChat<ChatMessage>({
     id,
     messages: initialMessages,
@@ -183,24 +184,30 @@ export function Chat({
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
     onError: (error) => {
-      if (error instanceof ChatSDKError) {
-        // Preserve the last sent message in input for retry
-        if (lastSentMessage) {
-          const text = lastSentMessage.parts
-            .filter((p) => p.type === "text")
-            .map((p) => p.text)
-            .join("");
-          setInput(text);
-        }
-
-        toast({
-          type: "error",
-          description: `${error.message} Your message has been restored in the input field.`,
-        });
-
-        // Clear the stored message after handling error
-        setLastSentMessage(null);
+      // Restore last sent message to input for retry
+      if (lastSentMessage) {
+        const text = lastSentMessage.parts
+          .filter((p) => p.type === "text")
+          .map((p) => p.text)
+          .join("");
+        setInput(text);
       }
+
+      // Show user-friendly message for ALL error types
+      const message = error instanceof ChatSDKError
+        ? error.message
+        : "Something went wrong generating a response. Please try again.";
+
+      toast({
+        type: "error",
+        description: `${message} Your message has been restored in the input field.`,
+      });
+
+      // Clear the stored message after handling error
+      setLastSentMessage(null);
+
+      // Reset status from "error" to "ready" so user can send new messages
+      clearError();
     },
   });
 
