@@ -202,10 +202,42 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
             className="flex items-center justify-center lg:justify-end"
           >
             <div className="w-full max-w-2xl xl:max-w-3xl relative">
-              {/* Decorative elements behind chat */}
+              {/* Decorative elements behind content */}
               <div className="absolute -inset-4 bg-gradient-to-r from-red-500/10 to-rose-500/10 rounded-3xl blur-2xl" />
               <div className="absolute -inset-1 bg-gradient-to-r from-stone-100 to-stone-50 rounded-3xl" />
-              <InteractiveChatDemo content={content} />
+              {content.hero.media_type === "image" && content.hero.media_url ? (
+                <Image
+                  src={content.hero.media_url}
+                  alt="AI Boss Brainz"
+                  width={800}
+                  height={600}
+                  className="relative rounded-2xl shadow-2xl"
+                  priority
+                />
+              ) : content.hero.media_type === "video" &&
+                content.hero.media_url ? (
+                <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl">
+                  {content.hero.media_url.includes("youtube.com") ||
+                  content.hero.media_url.includes("youtu.be") ||
+                  content.hero.media_url.includes("vimeo.com") ? (
+                    <iframe
+                      src={content.hero.media_url}
+                      className="w-full h-full"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      title="AI Boss Brainz"
+                    />
+                  ) : (
+                    <video
+                      src={content.hero.media_url}
+                      controls
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+              ) : (
+                <InteractiveChatDemo content={content} />
+              )}
             </div>
           </motion.div>
         </div>

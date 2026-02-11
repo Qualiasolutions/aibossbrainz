@@ -332,6 +332,60 @@ export default function LandingPageCMSPage() {
                 </CardContent>
               </Card>
 
+              <Card>
+                <CardHeader>
+                  <CardTitle>Hero Media</CardTitle>
+                  <CardDescription>
+                    Choose what displays in the hero section right side. Default
+                    shows the interactive chat demo.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Media Type</Label>
+                    <Select
+                      value={getFieldValue("hero", "media_type") || "none"}
+                      onValueChange={(value) =>
+                        updateField("hero", "media_type", value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">
+                          Interactive Chat Demo (default)
+                        </SelectItem>
+                        <SelectItem value="image">Image</SelectItem>
+                        <SelectItem value="video">Video</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {getFieldValue("hero", "media_type") &&
+                    getFieldValue("hero", "media_type") !== "none" && (
+                      <div className="space-y-2">
+                        <Label>Media URL</Label>
+                        <Input
+                          value={getFieldValue("hero", "media_url")}
+                          onChange={(e) =>
+                            updateField("hero", "media_url", e.target.value)
+                          }
+                          placeholder={
+                            getFieldValue("hero", "media_type") === "video"
+                              ? "https://www.youtube.com/embed/..."
+                              : "https://example.com/image.jpg"
+                          }
+                        />
+                        <p className="text-xs text-stone-500">
+                          {getFieldValue("hero", "media_type") === "video"
+                            ? "YouTube/Vimeo embed URL or direct video file URL"
+                            : "Direct image URL or Vercel Blob URL"}
+                        </p>
+                      </div>
+                    )}
+                </CardContent>
+              </Card>
+
               {/* Live Preview */}
               <Card className="bg-stone-50">
                 <CardHeader>

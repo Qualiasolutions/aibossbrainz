@@ -28,6 +28,9 @@ const nextConfig: NextConfig = {
       {
         hostname: "images.squarespace-cdn.com",
       },
+      {
+        hostname: "*.public.blob.vercel-storage.com",
+      },
     ],
   },
 

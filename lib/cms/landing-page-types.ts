@@ -7,6 +7,8 @@ export type LandingPageCMSContent = {
     cta_primary_link: string;
     cta_secondary_text: string;
     cta_secondary_link: string;
+    media_type: "none" | "image" | "video";
+    media_url: string;
   };
   executives: {
     section_title: string;
@@ -83,6 +85,8 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
     cta_primary_link: "/signup",
     cta_secondary_text: "View Pricing",
     cta_secondary_link: "/pricing",
+    media_type: "none" as const,
+    media_url: "",
   },
   executives: {
     section_title: "Meet Your",
