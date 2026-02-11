@@ -99,7 +99,12 @@ export async function exportConversationToPDF(
     footerY,
   );
 
-  const filename = `${personality.name.split(" ")[0]}-conversation-${new Date().toISOString().split("T")[0]}.pdf`;
+  const safeTitle = chatTitle
+    .replace(/[^a-zA-Z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 60);
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const filename = `${safeTitle}-${timestamp}.pdf`;
   doc.save(filename);
 }
 
@@ -183,7 +188,12 @@ export async function exportConversationToExcel(
   });
   const url = URL.createObjectURL(blob);
 
-  const filename = `${personality.name.split(" ")[0]}-conversation-${new Date().toISOString().split("T")[0]}.xlsx`;
+  const safeExcelTitle = chatTitle
+    .replace(/[^a-zA-Z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 60);
+  const excelTimestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const filename = `${safeExcelTitle}-${excelTimestamp}.xlsx`;
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;

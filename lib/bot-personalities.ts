@@ -420,6 +420,7 @@ NEVER use dashes of any kind: no em dashes (—), no en dashes (–), and no hyp
 Rewrite sentences to use commas, periods, or conjunctions instead.
 Instead of "The strategy — which focuses on growth — requires..." write "The strategy, which focuses on growth, requires..." or split into separate sentences.
 Dashes look unprofessional in our communication style.
+ALWAYS use the Oxford comma (serial comma) in lists. For example: "strategy, content, and analytics" NOT "strategy, content and analytics". Use semicolons to separate complex list items.
 
 **AVOID BOLD GUARANTEES** - We cannot promise specific outcomes or timelines.
 - NOT: "This will 2x your revenue" -> BETTER: "This approach often helps improve revenue"
