@@ -6,6 +6,7 @@ import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
 import { useCsrf } from "@/hooks/use-csrf";
 import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
+import { stripMarkdownForClipboard } from "@/lib/clipboard-utils";
 import type { Vote } from "@/lib/supabase/types";
 import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -61,7 +62,8 @@ export function PureMessageActions({
       return;
     }
 
-    await copyToClipboard(textFromParts);
+    const cleanText = stripMarkdownForClipboard(textFromParts);
+    await copyToClipboard(cleanText);
     setIsCopied(true);
     toast.success("Copied to clipboard!");
 

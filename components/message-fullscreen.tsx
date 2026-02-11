@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 import type { BotType } from "@/lib/bot-personalities";
 import { BOT_PERSONALITIES } from "@/lib/bot-personalities";
+import { stripMarkdownForClipboard } from "@/lib/clipboard-utils";
 import { Response } from "./elements/response";
 import { CopyIcon } from "./icons";
 import { Button } from "./ui/button";
@@ -38,7 +39,8 @@ export function MessageFullscreen({
       return;
     }
 
-    await copyToClipboard(content);
+    const cleanText = stripMarkdownForClipboard(content);
+    await copyToClipboard(cleanText);
     toast.success("Copied to clipboard!");
   };
 
