@@ -21,7 +21,7 @@ export async function exportConversationToPDF(
   const personality = BOT_PERSONALITIES[botType];
   const date = new Date().toLocaleDateString();
   const doc = new jsPDF("p", "mm", "a4");
-  let y = STYLES.marginTop;
+  let y: number = STYLES.marginTop;
 
   // Title header
   doc.setFont("helvetica", "normal", "bold");

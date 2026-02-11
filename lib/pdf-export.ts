@@ -24,7 +24,7 @@ export async function exportToPDF(
     await import("jspdf-autotable");
 
     const doc = new jsPDF("p", "mm", "a4");
-    let y = STYLES.marginTop;
+    let y: number = STYLES.marginTop;
 
     // Header: Executive name
     doc.setFont("helvetica", "normal", "bold");
