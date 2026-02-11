@@ -82,15 +82,19 @@ export const EnhancedChatMessage = memo(
 
           {/* Message content with enhanced typography */}
           <div className="message-text prose prose-stone max-w-none pl-3 text-stone-700 selection:bg-rose-100 selection:text-rose-900">
-            {safeContent ? (
-              <Response
-                mode={isTyping ? "streaming" : "static"}
-                parseIncompleteMarkdown={isTyping}
-              >
-                {safeContent}
-              </Response>
+            {safeContent || isTyping ? (
+              <>
+                {safeContent ? (
+                  <Response
+                    mode={isTyping ? "streaming" : "static"}
+                    parseIncompleteMarkdown={isTyping}
+                  >
+                    {safeContent}
+                  </Response>
+                ) : null}
+                {!safeContent && isTyping ? <TypingIndicator /> : null}
+              </>
             ) : null}
-            {!safeContent && isTyping ? <TypingIndicator /> : null}
           </div>
         </div>
       </div>

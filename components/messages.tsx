@@ -12,6 +12,17 @@ import { Conversation, ConversationContent } from "./elements/conversation";
 import { Greeting } from "./greeting";
 import { PreviewMessage, ThinkingMessage } from "./message";
 
+// Helper to check if last assistant message has actual text content
+function getLastAssistantMessageContent(messages: ChatMessage[]): string {
+  const lastAssistant = messages.filter((m) => m.role === "assistant").at(-1);
+  if (!lastAssistant) return "";
+  return lastAssistant.parts
+    .filter((p) => p.type === "text")
+    .map((p) => p.text)
+    .join("")
+    .trim();
+}
+
 type MessagesProps = {
   chatId: string;
   status: UseChatHelpers<ChatMessage>["status"];
@@ -91,7 +102,8 @@ function PureMessages({
             {(status === "submitted" ||
               (status === "streaming" &&
                 (messages.length === 0 ||
-                  messages[messages.length - 1]?.role === "user"))) && (
+                  messages[messages.length - 1]?.role === "user" ||
+                  !getLastAssistantMessageContent(messages)))) && (
               <ThinkingMessage botType={selectedBotType} key="thinking" />
             )}
           </AnimatePresence>

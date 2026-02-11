@@ -84,9 +84,7 @@ export function Chat({
   // Cleanup timeout on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
-      if (flushTimeoutRef.current) {
-        clearTimeout(flushTimeoutRef.current);
-      }
+      // Cleanup if needed
     };
   }, []);
 
@@ -104,11 +102,6 @@ export function Chat({
   const [lastSentMessage, setLastSentMessage] = useState<ChatMessage | null>(null);
   const currentModelIdRef = useRef(currentModelId);
   const selectedBotRef = useRef(initialBotType);
-
-  // Batch dataStream updates to reduce re-renders during streaming
-  // Accumulates data parts and flushes every 100ms
-  const dataStreamBufferRef = useRef<any[]>([]);
-  const flushTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
@@ -152,7 +145,7 @@ export function Chat({
   } = useChat<ChatMessage>({
     id,
     messages: initialMessages,
-    experimental_throttle: 30,
+    experimental_throttle: 5,
     generateId: generateUUID,
     transport: new DefaultChatTransport({
       api: "/api/chat",
@@ -176,40 +169,17 @@ export function Chat({
       },
     }),
     onData: (dataPart) => {
-      // Batch updates to reduce re-renders (80% fewer during streaming)
-      dataStreamBufferRef.current.push(dataPart);
-
-      // Handle usage data immediately (important for UI feedback)
+      // Handle usage data for UI feedback
       if (dataPart.type === "data-usage") {
         setUsage(dataPart.data);
       }
 
-      // Flush batched updates every 30ms for smooth streaming
-      if (!flushTimeoutRef.current) {
-        flushTimeoutRef.current = setTimeout(() => {
-          if (dataStreamBufferRef.current.length > 0) {
-            setDataStream((ds) => [
-              ...(ds || []),
-              ...dataStreamBufferRef.current,
-            ]);
-            dataStreamBufferRef.current = [];
-          }
-          flushTimeoutRef.current = null;
-        }, 30);
-      }
+      // Stream immediately for smoother typewriter effect
+      setDataStream((ds) => [...(ds || []), dataPart]);
     },
     onFinish: () => {
       // Clear stored message on successful completion
       setLastSentMessage(null);
-      // Flush any remaining batched data
-      if (dataStreamBufferRef.current.length > 0) {
-        setDataStream((ds) => [...(ds || []), ...dataStreamBufferRef.current]);
-        dataStreamBufferRef.current = [];
-      }
-      if (flushTimeoutRef.current) {
-        clearTimeout(flushTimeoutRef.current);
-        flushTimeoutRef.current = null;
-      }
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
     onError: (error) => {
