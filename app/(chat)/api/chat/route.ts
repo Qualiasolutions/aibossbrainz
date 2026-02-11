@@ -110,7 +110,7 @@ export function getStreamContext() {
   return globalStreamContext;
 }
 
-export const POST = withCsrf(async (request: Request) => {
+export const POST = async (request: Request) => {
   // Create request-scoped logger
   const apiLog = apiRequestLogger("/api/chat");
   apiLog.start();
@@ -496,7 +496,7 @@ export const POST = withCsrf(async (request: Request) => {
     });
     return new ChatSDKError("offline:chat").toResponse();
   }
-});
+};
 
 export const DELETE = withCsrf(async (request: Request) => {
   const { searchParams } = new URL(request.url);
