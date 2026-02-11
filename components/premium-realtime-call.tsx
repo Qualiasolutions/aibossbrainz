@@ -496,10 +496,9 @@ export function PremiumRealtimeCall({
         <h1 className="mb-1 text-2xl font-semibold text-neutral-900 md:text-3xl">
           {bot.name}
         </h1>
-        <p className="mb-1 text-xs font-medium tracking-wide uppercase text-red-700">
+        <p className="mb-10 text-xs font-medium tracking-wide uppercase text-red-700">
           {bot.role}
         </p>
-        <p className="mb-10 text-sm text-neutral-400">{getStatusText()}</p>
 
         {/* Controls */}
         <div className="flex items-center gap-6">
