@@ -17,7 +17,6 @@ import {
   isVoiceServiceAvailable,
   markVoiceServiceUnavailable,
 } from "@/lib/voice/service-status";
-import { stripMarkdownForTTS } from "@/lib/voice/strip-markdown-tts";
 import { useCsrf } from "@/hooks/use-csrf";
 
 type AutoSpeakState = "idle" | "loading" | "playing" | "paused" | "error";
@@ -248,16 +247,15 @@ export const useAutoSpeak = ({
       }
 
       // Extract text content from message parts
-      let textContent = lastMessage.parts
+      // NOTE: Do NOT strip markdown here — the voice API handles stripping
+      // internally, and collaborative mode needs the speaker markers
+      // (e.g. **Alexandria (CMO):**) intact to route each segment to the
+      // correct voice.
+      const textContent = lastMessage.parts
         ?.filter((part) => part.type === "text")
         .map((part) => part.text)
         .join("\n")
         .trim();
-
-      // Clean text for TTS using shared utility
-      if (textContent) {
-        textContent = stripMarkdownForTTS(textContent);
-      }
 
       if (textContent) {
         lastSpokenMessageIdRef.current = lastMessage.id;
