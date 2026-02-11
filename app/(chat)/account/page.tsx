@@ -337,29 +337,6 @@ export default function AccountPage() {
     return plans[type as keyof typeof plans] || "No Plan";
   };
 
-  // Get available upgrade plans based on current subscription
-  const getAvailableUpgrades = (): UpgradePlan[] => {
-    const currentType = subscription?.subscriptionType;
-
-    // Trial users can upgrade to any plan
-    if (currentType === "trial" || !currentType) {
-      return upgradePlans;
-    }
-
-    // Monthly users can upgrade to annual or lifetime
-    if (currentType === "monthly") {
-      return upgradePlans.filter((p) => p.id === "annual" || p.id === "lifetime");
-    }
-
-    // Annual users can upgrade to lifetime only
-    if (currentType === "annual") {
-      return upgradePlans.filter((p) => p.id === "lifetime");
-    }
-
-    // Lifetime users - no upgrades available
-    return [];
-  };
-
   const handleUpgrade = async (planId: string) => {
     setUpgradeLoading(planId);
     try {
@@ -517,148 +494,174 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* Plans Section - Shows all 3 plans with current plan highlighted */}
-        <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600">
-              <Sparkles className="size-5 text-white" />
+        {/* Plans Section */}
+        <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+          {/* Dark header */}
+          <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 px-6 py-8 text-center">
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
+              <Sparkles className="size-6 text-rose-400" />
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-stone-900">
-                {subscription?.subscriptionType === "trial" || !subscription?.subscriptionType
-                  ? "Choose Your Plan"
-                  : "Available Plans"}
-              </h2>
-              <p className="text-sm text-stone-500">
-                {subscription?.subscriptionType === "trial" || !subscription?.subscriptionType
-                  ? "Select a plan to continue accessing Alexandria and Kim"
-                  : "View all plans and upgrade anytime"}
-              </p>
-            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-white">
+              {subscription?.subscriptionType === "trial" ||
+              !subscription?.subscriptionType
+                ? "Choose Your Plan"
+                : "Your Membership"}
+            </h2>
+            <p className="mt-2 text-sm text-stone-400">
+              {subscription?.subscriptionType === "trial" ||
+              !subscription?.subscriptionType
+                ? "Unlock unlimited access to Alexandria and Kim"
+                : "Manage your membership and explore upgrades"}
+            </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
-            {upgradePlans.map((plan) => {
-              const isCurrentPlan = plan.id === subscription?.subscriptionType;
-              const isUpgrade = getAvailableUpgrades().some((p) => p.id === plan.id);
+          <div className="p-6">
+            <div className="grid gap-4 md:grid-cols-3">
+              {upgradePlans.map((plan) => {
+                const isCurrentPlan =
+                  plan.id === subscription?.subscriptionType;
 
-              return (
-                <div
-                  key={plan.id}
-                  className={`relative overflow-hidden rounded-2xl border transition-all ${
-                    isCurrentPlan
-                      ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-green-50 shadow-lg shadow-emerald-500/10 ring-2 ring-emerald-400"
-                      : plan.popular
-                        ? "border-red-300 bg-gradient-to-br from-red-50 to-rose-50 shadow-md shadow-red-500/10 hover:shadow-lg"
-                        : "border-stone-200 bg-stone-50/50 hover:border-stone-300 hover:shadow-lg"
-                  }`}
-                >
-                  {plan.popular && !isCurrentPlan && (
-                    <div className="absolute -right-10 top-4 rotate-45 bg-gradient-to-r from-red-600 to-rose-600 px-10 py-1 text-center text-xs font-bold text-white shadow-sm">
-                      BEST VALUE
-                    </div>
-                  )}
+                return (
+                  <div
+                    key={plan.id}
+                    className={`group relative flex flex-col overflow-hidden rounded-xl border transition-all duration-300 ${
+                      isCurrentPlan
+                        ? "border-emerald-300 bg-emerald-50/50 shadow-lg ring-2 ring-emerald-300"
+                        : plan.popular
+                          ? "border-rose-200 bg-white shadow-md hover:-translate-y-1 hover:border-rose-300 hover:shadow-xl"
+                          : "border-stone-200 bg-white hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-lg"
+                    }`}
+                  >
+                    {/* Top accent bar */}
+                    <div
+                      className={`h-1 w-full ${
+                        isCurrentPlan
+                          ? "bg-gradient-to-r from-emerald-400 to-green-500"
+                          : plan.popular
+                            ? "bg-gradient-to-r from-rose-500 to-red-600"
+                            : "bg-gradient-to-r from-stone-300 to-stone-400"
+                      }`}
+                    />
 
-                  {isCurrentPlan && (
-                    <div className="absolute -right-10 top-4 rotate-45 bg-gradient-to-r from-emerald-600 to-green-600 px-10 py-1 text-center text-xs font-bold text-white shadow-sm">
-                      CURRENT PLAN
-                    </div>
-                  )}
-
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div
-                        className={`flex size-10 items-center justify-center rounded-xl ${
-                          isCurrentPlan
-                            ? "bg-gradient-to-br from-emerald-500 to-green-600 text-white"
-                            : plan.popular
-                              ? "bg-gradient-to-br from-red-500 to-rose-600 text-white"
-                              : "bg-stone-200 text-stone-600"
-                        }`}
-                      >
-                        {isCurrentPlan ? (
-                          <Check className="size-5" />
-                        ) : plan.popular ? (
-                          <Star className="size-5" />
-                        ) : (
-                          <Crown className="size-5" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg text-stone-900">{plan.name}</h3>
-                        <p className="text-xs text-stone-500">{plan.description}</p>
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold text-stone-900">
-                          {plan.price}
+                    {/* Badge */}
+                    {plan.popular && !isCurrentPlan && (
+                      <div className="absolute right-3 top-4">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-rose-500 to-red-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+                          <Star className="size-3" />
+                          Most Popular
                         </span>
-                        <span className="text-lg text-stone-500">{plan.period}</span>
                       </div>
-                    </div>
-
-                    {plan.savings && (
-                      <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1.5 text-xs font-semibold text-green-700">
-                        <Gift className="size-3.5" />
-                        {plan.savings}
+                    )}
+                    {isCurrentPlan && (
+                      <div className="absolute right-3 top-4">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+                          <Check className="size-3" />
+                          Active
+                        </span>
                       </div>
                     )}
 
-                    <ul className="mb-5 space-y-2.5">
-                      {plan.features.map((feature, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
-                          <Check className="size-4 shrink-0 text-emerald-500 mt-0.5" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="flex flex-1 flex-col p-5 pt-4">
+                      {/* Plan name */}
+                      <div className="mb-4">
+                        <h3 className="text-base font-bold text-stone-900">
+                          {plan.name}
+                        </h3>
+                        <p className="mt-0.5 text-xs text-stone-500">
+                          {plan.description}
+                        </p>
+                      </div>
 
-                    <Button
-                      size="lg"
-                      className={`w-full gap-2 ${
-                        isCurrentPlan
-                          ? "bg-emerald-600 hover:bg-emerald-700"
-                          : plan.popular
-                            ? "shadow-md shadow-red-500/20"
-                            : "bg-stone-900 hover:bg-stone-800"
-                      }`}
-                      onClick={() => !isCurrentPlan && handleUpgrade(plan.id)}
-                      disabled={isCurrentPlan || upgradeLoading === plan.id}
-                    >
-                      {upgradeLoading === plan.id ? (
-                        <>
-                          <Loader2 className="size-4 animate-spin" />
-                          Processing...
-                        </>
-                      ) : isCurrentPlan ? (
-                        <>
-                          <Check className="size-4" />
-                          Current Plan
-                        </>
-                      ) : (
-                        <>
-                          {subscription?.subscriptionType === "trial" || !subscription?.subscriptionType
-                            ? "Get Started"
-                            : "Upgrade"}
-                          <ArrowRight className="size-4" />
-                        </>
+                      {/* Price */}
+                      <div className="mb-4">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-extrabold tracking-tight text-stone-900">
+                            {plan.price}
+                          </span>
+                          <span className="text-sm font-medium text-stone-400">
+                            {plan.period}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Savings badge */}
+                      {plan.savings && (
+                        <div className="mb-4">
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-700">
+                            <Gift className="size-3" />
+                            {plan.savings}
+                          </span>
+                        </div>
                       )}
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
 
-          {subscription?.subscriptionType === "trial" && (
-            <div className="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
-              <span className="font-semibold">Trial ending soon?</span> Your trial
-              includes full access to all features. Choose a plan above to continue
-              working with Alexandria and Kim.
+                      {/* Features */}
+                      <ul className="mb-6 flex-1 space-y-2.5">
+                        {plan.features.map((feature, i) => (
+                          <li
+                            key={i}
+                            className="flex items-start gap-2.5 text-sm text-stone-600"
+                          >
+                            <div
+                              className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full ${
+                                isCurrentPlan
+                                  ? "bg-emerald-100 text-emerald-600"
+                                  : "bg-rose-50 text-rose-500"
+                              }`}
+                            >
+                              <Check className="size-2.5" strokeWidth={3} />
+                            </div>
+                            <span className="leading-tight">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {/* CTA Button */}
+                      <Button
+                        size="lg"
+                        className={`w-full gap-2 font-semibold transition-all duration-200 ${
+                          isCurrentPlan
+                            ? "bg-emerald-600 shadow-sm hover:bg-emerald-700"
+                            : plan.popular
+                              ? "bg-gradient-to-r from-rose-600 to-red-600 shadow-md shadow-rose-500/20 hover:from-rose-700 hover:to-red-700 hover:shadow-lg hover:shadow-rose-500/30"
+                              : "bg-stone-900 hover:bg-stone-800"
+                        }`}
+                        onClick={() => !isCurrentPlan && handleUpgrade(plan.id)}
+                        disabled={isCurrentPlan || upgradeLoading === plan.id}
+                      >
+                        {upgradeLoading === plan.id ? (
+                          <>
+                            <Loader2 className="size-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : isCurrentPlan ? (
+                          <>
+                            <Check className="size-4" />
+                            Current Plan
+                          </>
+                        ) : (
+                          <>
+                            {subscription?.subscriptionType === "trial" ||
+                            !subscription?.subscriptionType
+                              ? "Get Started"
+                              : "Upgrade Now"}
+                            <ArrowRight className="size-4" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          )}
+
+            {subscription?.subscriptionType === "trial" && (
+              <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+                <span className="font-semibold">Trial ending soon?</span> Your
+                trial includes full access to all features. Choose a plan above
+                to continue working with Alexandria and Kim.
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Profile Section */}

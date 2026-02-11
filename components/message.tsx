@@ -105,7 +105,7 @@ const PurePreviewMessage = ({
             "gap-2 md:gap-4": message.parts?.some(
               (p) => p.type === "text" && p.text?.trim(),
             ),
-            "min-h-96": message.role === "assistant" && requiresScrollPadding,
+            "min-h-16": message.role === "assistant" && requiresScrollPadding,
           })}
         >
           {attachmentsFromMessage.length > 0 && (
@@ -462,9 +462,7 @@ export const ThinkingMessage = ({
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-stone-500">
-                    Thinking...
-                  </span>
+                  <span className="text-xs text-stone-500">Thinking...</span>
                 </div>
               </div>
             </div>
