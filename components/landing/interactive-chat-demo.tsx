@@ -378,7 +378,7 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
               href="/login"
               className="group flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-br from-red-500 to-red-600 px-4 text-xs font-semibold text-white shadow-md transition-all hover:from-red-600 hover:to-red-700 hover:shadow-lg"
             >
-              <span>Try Free</span>
+              <span>Start 14-Day Free Trial</span>
               <Sparkles className="size-3 transition-transform group-hover:rotate-12" />
             </Link>
           </div>

@@ -58,7 +58,7 @@ const SUBSCRIPTION_DURATION: Record<
   { unit: "days" | "months" | "years"; value: number }
 > = {
   pending: { unit: "days", value: 0 },
-  trial: { unit: "days", value: 7 },
+  trial: { unit: "days", value: 14 },
   monthly: { unit: "months", value: 1 },
   annual: { unit: "months", value: 12 },
   lifetime: { unit: "years", value: 100 },

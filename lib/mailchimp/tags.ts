@@ -104,7 +104,7 @@ async function applyTagWithRetry(
 
 /**
  * Apply the trial tag to a user who has verified their email.
- * This adds them to the 7-day trial email automation.
+ * This adds them to the 14-day trial email automation.
  *
  * @param email - User's email address
  * @returns Result indicating success or failure

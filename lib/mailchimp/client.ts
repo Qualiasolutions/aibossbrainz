@@ -41,7 +41,7 @@ export function getMailchimpClient(): typeof mailchimp | null {
  */
 export const MAILCHIMP_TAGS = {
   /** Applied when user verifies email during trial signup */
-  TRIAL: "7-Day Free Trial: AI Boss Brainz",
+  TRIAL: "14-Day Free Trial: AI Boss Brainz",
   /** Applied when user purchases monthly subscription */
   PAID_MONTHLY: "AI Boss Brainz Monthly",
   /** Applied when user purchases annual or lifetime subscription */

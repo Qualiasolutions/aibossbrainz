@@ -230,7 +230,7 @@ export function PaywallModal({
                       </>
                     ) : (
                       <>
-                        Get Started
+                        Start 14-Day Free Trial
                         <ArrowRight className="size-4" />
                       </>
                     )}

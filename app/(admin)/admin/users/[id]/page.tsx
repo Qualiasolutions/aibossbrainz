@@ -20,7 +20,7 @@ function formatDate(dateString: string | null | undefined): string {
 function formatSubscriptionType(type: string | null | undefined): string {
   switch (type) {
     case "trial":
-      return "Trial (7 days)";
+      return "Trial (14 days)";
     case "monthly":
       return "Monthly";
     case "annual":

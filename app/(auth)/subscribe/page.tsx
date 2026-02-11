@@ -296,7 +296,7 @@ function WelcomeStep({ onContinue }: { onContinue: () => void }) {
                 onClick={onContinue}
                 className="h-12 w-full bg-stone-900 text-white shadow-lg shadow-stone-900/10 transition-all hover:bg-stone-800"
               >
-                Get Started
+                Start 14-Day Free Trial
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </motion.div>

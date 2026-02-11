@@ -74,7 +74,7 @@ const pricingPlans: PricingPlan[] = [
         icon: Check,
       },
     ],
-    cta: "Get Started",
+    cta: "Start 14-Day Free Trial",
     ctaLink: "/signup?plan=monthly",
   },
   {
@@ -111,7 +111,7 @@ const pricingPlans: PricingPlan[] = [
         highlight: true,
       },
     ],
-    cta: "Get Best Value",
+    cta: "Start 14-Day Free Trial",
     ctaLink: "/signup?plan=annual",
   },
   {
@@ -576,7 +576,7 @@ export default function PricingPage() {
             </Link>
             <Link href="/signup">
               <Button size="lg" className="gap-2 shadow-lg shadow-red-500/20">
-                Get Started
+                Start 14-Day Free Trial
                 <ArrowRight className="size-4" />
               </Button>
             </Link>

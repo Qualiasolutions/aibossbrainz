@@ -90,7 +90,7 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
                 size="lg"
                 className="gap-2 bg-gradient-to-r from-red-600 to-red-700 px-8 py-6 text-base font-semibold text-white shadow-xl hover:from-red-700 hover:to-red-800"
               >
-                Get Started Free
+                Start 14-Day Free Trial
                 <ArrowRight className="size-4" />
               </Button>
             </Link>
@@ -297,7 +297,7 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
                   size="lg"
                   className="gap-2 bg-gradient-to-r from-red-600 to-rose-600 px-10 py-6 text-base font-semibold text-white shadow-xl hover:from-red-700 hover:to-rose-700"
                 >
-                  Start Free Trial
+                  Start 14-Day Free Trial
                   <ArrowRight className="size-4" />
                 </Button>
               </Link>

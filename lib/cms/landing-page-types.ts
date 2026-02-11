@@ -68,8 +68,8 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
     title_highlight: "Your Sales & Marketing Experts 24/7",
     subtitle:
       "AI-powered. Expert-led. Get high-level sales and marketing strategy built to grow your brand, results-obsessed, and ready to drop strategies that work.",
-    cta_primary_text: "Sign In",
-    cta_primary_link: "/login",
+    cta_primary_text: "Start 14-Day Free Trial",
+    cta_primary_link: "/signup",
     cta_secondary_text: "View Pricing",
     cta_secondary_link: "/pricing",
   },
@@ -111,8 +111,8 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
     title: "This Is How You Grow Without Being Great at Sales or Marketing",
     subtitle:
       "You don't need to be a sales expert or marketing genius to grow - you just need the right messaging and strategy. Thousands of entrepreneurs are using our proven tools to scale. Stop second-guessing every move. Start dominating.",
-    cta_primary_text: "Sign In",
-    cta_primary_link: "/login",
+    cta_primary_text: "Start 14-Day Free Trial",
+    cta_primary_link: "/signup",
     cta_secondary_text: "View Pricing",
     cta_secondary_link: "/pricing",
   },

@@ -63,7 +63,7 @@ function formatSubscriptionType(
 ): string {
   switch (type) {
     case "trial":
-      return "Trial (7 days)";
+      return "Trial (14 days)";
     case "monthly":
       return "Monthly";
     case "annual":
@@ -487,7 +487,7 @@ export function UsersTable({
                   <SelectValue placeholder="Select subscription type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="trial">Trial (7 days)</SelectItem>
+                  <SelectItem value="trial">Trial (14 days)</SelectItem>
                   <SelectItem value="monthly">Monthly</SelectItem>
                   <SelectItem value="annual">Annual</SelectItem>
                   <SelectItem value="lifetime">Lifetime</SelectItem>
@@ -541,7 +541,7 @@ export function UsersTable({
                   <SelectValue placeholder="Select subscription type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="trial">Trial (7 days)</SelectItem>
+                  <SelectItem value="trial">Trial (14 days)</SelectItem>
                   <SelectItem value="monthly">Monthly</SelectItem>
                   <SelectItem value="annual">Annual</SelectItem>
                   <SelectItem value="lifetime">Lifetime</SelectItem>
