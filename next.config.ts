@@ -31,47 +31,10 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Security headers
-  async headers() {
-    // CSP directives - allow necessary resources while blocking XSS
-    const cspDirectives = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https: http:",
-      "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://esymbjpzjjkffpfqukxw.supabase.co wss://esymbjpzjjkffpfqukxw.supabase.co https://openrouter.ai https://api.elevenlabs.io https://api.tavily.com https://vercel.live https://va.vercel-scripts.com https://*.sentry.io",
-      "media-src 'self' blob:",
-      "frame-src 'self' https://vercel.live https://js.stripe.com",
-      "frame-ancestors 'none'",
-      "form-action 'self'",
-      "base-uri 'self'",
-      "object-src 'none'",
-    ].join("; ");
-
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
-          {
-            key: "Content-Security-Policy",
-            value: cspDirectives,
-          },
-        ],
-      },
-    ];
-  },
+  // Security headers are defined in vercel.json (single source of truth)
+  // This avoids conflicts between next.config.ts and vercel.json headers.
+  // vercel.json includes: CSP, HSTS, X-Frame-Options, X-Content-Type-Options,
+  // Referrer-Policy, Permissions-Policy, and embed-specific overrides.
 
   // Redirect www to non-www for canonical URLs
   async redirects() {
