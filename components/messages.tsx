@@ -88,10 +88,26 @@ function PureMessages({
           ))}
 
           <AnimatePresence>
+            {/* Show thinking message when:
+                1. Status is "submitted" (waiting for response)
+                2. Status is "streaming" but last message is from user (no assistant response yet)
+                3. Status is "streaming", last message is assistant, but it has no text content yet
+            */}
             {(status === "submitted" ||
               (status === "streaming" &&
                 messages.length > 0 &&
-                messages[messages.length - 1]?.role === "user")) && (
+                (() => {
+                  const lastMessage = messages[messages.length - 1];
+                  if (lastMessage?.role === "user") return true;
+                  // Check if assistant message has no text content yet
+                  if (lastMessage?.role === "assistant") {
+                    const hasTextContent = lastMessage.parts?.some(
+                      (p) => p.type === "text" && p.text?.trim()
+                    );
+                    return !hasTextContent;
+                  }
+                  return false;
+                })())) && (
               <ThinkingMessage botType={selectedBotType} key="thinking" />
             )}
           </AnimatePresence>

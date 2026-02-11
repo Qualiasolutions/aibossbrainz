@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { memo } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import type { BotType } from "@/lib/bot-personalities";
 import { BOT_PERSONALITIES } from "@/lib/bot-personalities";
 import { Response } from "./elements/response";
@@ -14,44 +14,144 @@ type EnhancedChatMessageProps = {
   isTyping?: boolean;
 };
 
-const ThinkingState = () => {
-  return (
-    <div className="flex items-center gap-2 py-0.5">
-      <div className="flex gap-1">
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            animate={{
-              y: [0, -4, 0],
-              opacity: [0.5, 1, 0.5],
-            }}
-            className="size-1.5 rounded-full bg-gradient-to-br from-rose-500 to-rose-600"
-            key={i}
-            transition={{
-              duration: 1.2,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-              delay: i * 0.15,
-            }}
-          />
-        ))}
+/**
+ * Streaming cursor that blinks while AI is typing
+ */
+const StreamingCursor = memo(() => (
+  <motion.span
+    animate={{ opacity: [1, 0, 1] }}
+    className="ml-0.5 inline-block h-[1.1em] w-[2px] bg-rose-500/70 align-text-bottom"
+    transition={{
+      duration: 0.8,
+      repeat: Number.POSITIVE_INFINITY,
+      ease: "easeInOut",
+    }}
+  />
+));
+StreamingCursor.displayName = "StreamingCursor";
+
+/**
+ * Typewriter wrapper that reveals text with a subtle animation
+ */
+const TypewriterContent = memo(
+  ({
+    content,
+    isStreaming,
+  }: {
+    content: string;
+    isStreaming: boolean;
+  }) => {
+    const [displayedLength, setDisplayedLength] = useState(0);
+    const previousContentRef = useRef("");
+    const targetLengthRef = useRef(0);
+    const animationRef = useRef<number | null>(null);
+
+    useEffect(() => {
+      // If content shrinks or resets, reset displayed length
+      if (content.length < previousContentRef.current.length) {
+        setDisplayedLength(content.length);
+        previousContentRef.current = content;
+        targetLengthRef.current = content.length;
+        return;
+      }
+
+      previousContentRef.current = content;
+      targetLengthRef.current = content.length;
+
+      // If not streaming, show full content immediately
+      if (!isStreaming) {
+        setDisplayedLength(content.length);
+        return;
+      }
+
+      // Typewriter animation: catch up to target length
+      const animateTypewriter = () => {
+        setDisplayedLength((current) => {
+          const target = targetLengthRef.current;
+
+          if (current >= target) {
+            return current;
+          }
+
+          // Calculate how many characters to add per frame
+          // Faster for larger gaps, minimum 1 character per frame
+          const gap = target - current;
+          const charsToAdd = Math.max(1, Math.ceil(gap * 0.15));
+
+          const nextLength = Math.min(current + charsToAdd, target);
+
+          // Continue animation if not at target
+          if (nextLength < target) {
+            animationRef.current = requestAnimationFrame(animateTypewriter);
+          }
+
+          return nextLength;
+        });
+      };
+
+      // Start animation
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      animationRef.current = requestAnimationFrame(animateTypewriter);
+
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
+    }, [content, isStreaming]);
+
+    // When streaming ends, ensure we show full content
+    useEffect(() => {
+      if (!isStreaming) {
+        setDisplayedLength(content.length);
+      }
+    }, [isStreaming, content.length]);
+
+    const displayedContent = content.slice(0, displayedLength);
+    const showCursor = isStreaming && displayedLength < content.length;
+
+    return (
+      <div className="message-text prose prose-stone max-w-none pl-3 text-stone-700 selection:bg-rose-100 selection:text-rose-900">
+        <Response
+          mode={isStreaming ? "streaming" : "static"}
+          parseIncompleteMarkdown={isStreaming}
+        >
+          {displayedContent}
+        </Response>
+        {showCursor && <StreamingCursor />}
       </div>
-      <span className="text-xs text-stone-500">Thinking...</span>
-    </div>
-  );
-};
+    );
+  },
+  (prev, next) =>
+    prev.content === next.content && prev.isStreaming === next.isStreaming,
+);
+TypewriterContent.displayName = "TypewriterContent";
 
 export const EnhancedChatMessage = memo(
   ({ role, content, botType, isTyping }: EnhancedChatMessageProps) => {
     const safeContent = content?.trim() ? content : "";
-    const isThinking = !safeContent && isTyping;
+    const hasContent = !!safeContent;
 
+    // For user messages
     if (role !== "assistant") {
       return (
         <div className="ml-auto max-w-[85%] rounded-2xl border border-stone-200 bg-gradient-to-br from-white to-stone-50 px-4 py-1.5 text-sm text-stone-800 shadow-sm transition-all hover:shadow-md sm:max-w-[70%]">
           {safeContent ? <Response>{safeContent}</Response> : null}
-          {isThinking ? <ThinkingState /> : null}
         </div>
       );
+    }
+
+    // For assistant messages: if no content and still typing, don't render
+    // (ThinkingMessage in messages.tsx handles the loading state)
+    if (!hasContent && isTyping) {
+      return null;
+    }
+
+    // If no content and not typing, also don't render (edge case)
+    if (!hasContent) {
+      return null;
     }
 
     const personality =
@@ -59,39 +159,20 @@ export const EnhancedChatMessage = memo(
 
     return (
       <div className="max-w-[85%] sm:max-w-[75%] lg:max-w-[65%]">
-        <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-gradient-to-br from-white to-stone-50/50 shadow-sm transition-all hover:shadow-md">
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-2xl border border-stone-200 bg-gradient-to-br from-white to-stone-50/50 shadow-sm transition-all hover:shadow-md"
+          initial={{ opacity: 0, y: 4 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
           {/* Subtle executive accent line */}
           <div className="absolute left-0 top-3 bottom-3 w-0.5 rounded-full bg-gradient-to-b from-rose-400 to-rose-600" />
-
-          {/* Shimmer effect while thinking */}
-          {isThinking && (
-            <motion.div
-              animate={{ x: ["-100%", "100%"] }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-100/20 to-transparent"
-              transition={{
-                duration: 2,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-          )}
 
           <div className="relative flex flex-col gap-2 px-4 py-2">
             {/* Header with avatar and name */}
             <div className="flex items-center gap-3 pl-3">
               {personality.avatar && (
                 <div className="relative shrink-0">
-                  {isThinking && (
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.1, 0.4] }}
-                      className="absolute inset-0 rounded-full bg-gradient-to-br from-rose-400 to-rose-500"
-                      transition={{
-                        duration: 2,
-                        repeat: Number.POSITIVE_INFINITY,
-                        ease: "easeInOut",
-                      }}
-                    />
-                  )}
                   <Image
                     alt={`${personality.name} avatar`}
                     className="relative size-8 rounded-full border-2 border-rose-100 shadow-sm"
@@ -99,13 +180,13 @@ export const EnhancedChatMessage = memo(
                     src={personality.avatar}
                     width={32}
                   />
-                  {/* Status dot: pulse while thinking, green when active */}
-                  {isThinking ? (
+                  {/* Status dot: blinking while streaming, green when done */}
+                  {isTyping ? (
                     <motion.span
-                      animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
+                      animate={{ opacity: [1, 0.4, 1] }}
                       className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-white bg-rose-500 shadow-sm"
                       transition={{
-                        duration: 1.5,
+                        duration: 0.6,
                         repeat: Number.POSITIVE_INFINITY,
                         ease: "easeInOut",
                       }}
@@ -119,29 +200,19 @@ export const EnhancedChatMessage = memo(
                 <span className="font-semibold text-sm text-stone-800">
                   {personality.name}
                 </span>
-                {isThinking ? (
-                  <ThinkingState />
-                ) : (
-                  <span className="text-xs text-stone-500">
-                    {personality.role}
-                  </span>
-                )}
+                <span className="text-xs text-stone-500">
+                  {personality.role}
+                </span>
               </div>
             </div>
 
-            {/* Message content */}
-            {safeContent && (
-              <div className="message-text prose prose-stone max-w-none pl-3 text-stone-700 selection:bg-rose-100 selection:text-rose-900">
-                <Response
-                  mode={isTyping ? "streaming" : "static"}
-                  parseIncompleteMarkdown={isTyping}
-                >
-                  {safeContent}
-                </Response>
-              </div>
-            )}
+            {/* Message content with typewriter effect */}
+            <TypewriterContent
+              content={safeContent}
+              isStreaming={isTyping ?? false}
+            />
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   },
