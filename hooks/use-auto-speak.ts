@@ -17,6 +17,7 @@ import {
   isVoiceServiceAvailable,
   markVoiceServiceUnavailable,
 } from "@/lib/voice/service-status";
+import { stripMarkdownForTTS } from "@/lib/voice/strip-markdown-tts";
 
 type AutoSpeakState = "idle" | "loading" | "playing" | "paused" | "error";
 
@@ -251,27 +252,9 @@ export const useAutoSpeak = ({
         .join("\n")
         .trim();
 
-      // Strip code blocks and code-related phrases for cleaner voice output
+      // Clean text for TTS using shared utility
       if (textContent) {
-        // Remove code blocks (```...```)
-        textContent = textContent.replace(/```[\s\S]*?```/g, "");
-        // Remove inline code (`...`)
-        textContent = textContent.replace(/`[^`]+`/g, "");
-        // Remove phrases referring to code examples
-        textContent = textContent.replace(
-          /see the (code )?example (displayed )?(above|below)/gi,
-          "",
-        );
-        textContent = textContent.replace(
-          /as shown (in the )?(code )?(above|below)/gi,
-          "",
-        );
-        textContent = textContent.replace(
-          /here'?s? (the |an? )?(code )?example:?/gi,
-          "",
-        );
-        // Clean up extra whitespace
-        textContent = textContent.replace(/\n{3,}/g, "\n\n").trim();
+        textContent = stripMarkdownForTTS(textContent);
       }
 
       if (textContent) {

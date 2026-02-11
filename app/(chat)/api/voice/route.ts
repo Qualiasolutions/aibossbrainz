@@ -1,11 +1,10 @@
+import { after } from "next/server";
 import { z } from "zod";
 import { getVoiceConfig, MAX_TTS_TEXT_LENGTH } from "@/lib/ai/voice-config";
+import { recordAnalytics } from "@/lib/analytics/queries";
+import { apiRequestLogger } from "@/lib/api-logging";
 import { getMessageCountByUserId } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
-import { apiRequestLogger } from "@/lib/api-logging";
-import { recordAnalytics } from "@/lib/analytics/queries";
-import { voiceBreadcrumb } from "@/lib/sentry";
-import { after } from "next/server";
 import {
   CircuitBreakerError,
   withElevenLabsResilience,
@@ -15,7 +14,12 @@ import {
   getRateLimitHeaders,
 } from "@/lib/security/rate-limiter";
 import { withCsrf } from "@/lib/security/with-csrf";
+import { voiceBreadcrumb } from "@/lib/sentry";
 import { createClient } from "@/lib/supabase/server";
+import {
+  parseCollaborativeSegments,
+  stripMarkdownForTTS,
+} from "@/lib/voice/strip-markdown-tts";
 
 // Zod schema for voice API input validation
 const voiceRequestSchema = z.object({
@@ -112,7 +116,7 @@ export const POST = withCsrf(async (request: Request) => {
       ) {
         // Filter out empty segments, strip markdown from each, and generate audio in parallel
         const validSegments = segments
-          .map((s) => ({ ...s, text: stripMarkdown(s.text) }))
+          .map((s) => ({ ...s, text: stripMarkdownForTTS(s.text) }))
           .filter((s) => s.text.trim());
 
         if (validSegments.length === 0) {
@@ -149,7 +153,10 @@ export const POST = withCsrf(async (request: Request) => {
         }
 
         // Record voice analytics for collaborative mode
-        const totalTextLength = validSegments.reduce((sum, s) => sum + s.text.length, 0);
+        const totalTextLength = validSegments.reduce(
+          (sum, s) => sum + s.text.length,
+          0,
+        );
         const estimatedMinutes = Math.max(1, Math.ceil(totalTextLength / 750));
         after(() => recordAnalytics(user.id, "voice", estimatedMinutes));
 
@@ -163,7 +170,7 @@ export const POST = withCsrf(async (request: Request) => {
     }
 
     // Strip markdown formatting for cleaner speech (single voice path)
-    const cleanText = stripMarkdown(truncatedText);
+    const cleanText = stripMarkdownForTTS(truncatedText);
 
     if (!cleanText.trim()) {
       return new ChatSDKError("bad_request:api").toResponse();
@@ -262,149 +269,6 @@ export const POST = withCsrf(async (request: Request) => {
   }
 });
 
-// Precompiled regex patterns for better performance
-// Flexible patterns to handle various AI-generated formats
-const MARKDOWN_PATTERNS = {
-  // Match **Alexandria (CMO):** or **Alexandria (CMO)**: or **Alexandria:** etc.
-  executiveAlexandria: /\*\*Alexandria\s*(?:\(CMO\))?\s*:?\*\*\s*:?\s*/gi,
-  // Match **Kim (CSO):** or **Kim (CSO)**: or **Kim:** etc.
-  executiveKim: /\*\*Kim\s*(?:\(CSO\))?\s*:?\*\*\s*:?\s*/gi,
-  // Match **Joint Strategy:** or **Joint Strategy**: etc.
-  jointStrategy: /\*\*Joint\s+Strategy\s*:?\*\*\s*:?\s*/gi,
-  // Match standalone Alexandria: or Alexandria (CMO):
-  standaloneAlexandria: /^Alexandria\s*(?:\(CMO\))?\s*:\s*/gim,
-  // Match standalone Kim: or Kim (CSO):
-  standaloneKim: /^Kim\s*(?:\(CSO\))?\s*:\s*/gim,
-  headers: /^#{1,6}\s+/gm,
-  bold: /\*\*([^*]+)\*\*/g,
-  italic: /\*([^*]+)\*/g,
-  boldAlt: /__([^_]+)__/g,
-  italicAlt: /_([^_]+)_/g,
-  links: /\[([^\]]+)\]\([^)]+\)/g,
-  images: /!\[([^\]]*)\]\([^)]+\)/g,
-  codeBlocks: /```[\s\S]*?```/g,
-  inlineCode: /`([^`]+)`/g,
-  blockquotes: /^>\s+/gm,
-  horizontalRules: /^---+$/gm,
-  // Table patterns - skip entire tables instead of just removing pipes
-  tableRows: /^\|[^\n]+\|$/gm,
-  tableSeparators: /^[-|:\s]+$/gm,
-  multipleNewlines: /\n{3,}/g,
-};
-
-// Types for collaborative voice segments
-interface SpeakerSegment {
-  speaker: "alexandria" | "kim";
-  text: string;
-}
-
-/**
- * Parse collaborative mode text into speaker segments.
- * Identifies sections by various formats of executive markers.
- * Joint Strategy sections alternate between voices for variety.
- *
- * Supported formats:
- * - **Alexandria (CMO):** (colon inside bold)
- * - **Alexandria (CMO)**: (colon outside bold)
- * - **Alexandria:** (without role)
- * - Alexandria (CMO): (without bold)
- * - Same variations for Kim and Joint Strategy
- */
-function parseCollaborativeSegments(text: string): SpeakerSegment[] {
-  const segments: SpeakerSegment[] = [];
-
-  // More flexible patterns to match speaker markers in various formats
-  // Handles: **Name (Role):** OR **Name (Role)**: OR **Name:** OR Name (Role): OR Name:
-  const speakerPatterns = [
-    // **Alexandria (CMO):** or **Alexandria (CMO)**: (with or without colon inside bold)
-    /\*\*Alexandria\s*(?:\(CMO\))?\s*:?\*\*\s*:?/gi,
-    // **Kim (CSO):** or **Kim (CSO)**: (with or without colon inside bold)
-    /\*\*Kim\s*(?:\(CSO\))?\s*:?\*\*\s*:?/gi,
-    // **Joint Strategy:** or **Joint Strategy**:
-    /\*\*Joint\s+Strategy\s*:?\*\*\s*:?/gi,
-    // Non-bold versions: Alexandria (CMO): or Alexandria:
-    /(?:^|\n)Alexandria\s*(?:\(CMO\))?\s*:/gim,
-    // Non-bold versions: Kim (CSO): or Kim:
-    /(?:^|\n)Kim\s*(?:\(CSO\))?\s*:/gim,
-  ];
-
-  // Find all speaker markers and their positions
-  const markers: {
-    index: number;
-    speaker: "alexandria" | "kim" | "joint";
-    length: number;
-  }[] = [];
-
-  // Search with each pattern
-  for (const pattern of speakerPatterns) {
-    pattern.lastIndex = 0;
-    let match: RegExpExecArray | null;
-
-    while ((match = pattern.exec(text)) !== null) {
-      const markerText = match[0].toLowerCase();
-      let speaker: "alexandria" | "kim" | "joint";
-
-      if (markerText.includes("alexandria")) {
-        speaker = "alexandria";
-      } else if (markerText.includes("kim")) {
-        speaker = "kim";
-      } else {
-        speaker = "joint";
-      }
-
-      // Avoid duplicates at the same position
-      const existsAtPosition = markers.some(
-        (m) => Math.abs(m.index - match!.index) < 5,
-      );
-      if (!existsAtPosition) {
-        markers.push({
-          index: match.index,
-          speaker,
-          length: match[0].length,
-        });
-      }
-    }
-  }
-
-  // Sort markers by position
-  markers.sort((a, b) => a.index - b.index);
-
-  // If no markers found, return the whole text as alexandria (default)
-  if (markers.length === 0) {
-    return [{ speaker: "alexandria", text }];
-  }
-
-  // Extract text before first marker if any
-  if (markers[0].index > 0) {
-    const beforeText = text.slice(0, markers[0].index).trim();
-    if (beforeText) {
-      segments.push({ speaker: "alexandria", text: beforeText });
-    }
-  }
-
-  // Extract text for each marker section
-  for (let i = 0; i < markers.length; i++) {
-    const marker = markers[i];
-    const startIndex = marker.index + marker.length;
-    const endIndex = markers[i + 1]?.index ?? text.length;
-    const sectionText = text.slice(startIndex, endIndex).trim();
-
-    if (sectionText) {
-      // Joint Strategy alternates voices, starting with Alexandria
-      const speaker =
-        marker.speaker === "joint"
-          ? segments.length % 2 === 0
-            ? "alexandria"
-            : "kim"
-          : marker.speaker;
-
-      segments.push({ speaker, text: sectionText });
-    }
-  }
-
-  return segments;
-}
-
 /**
  * Generate audio for a single segment using ElevenLabs API.
  */
@@ -475,43 +339,4 @@ async function generateAudioForSegment(
   });
 
   return response.arrayBuffer();
-}
-
-// Helper function to strip markdown for cleaner TTS
-function stripMarkdown(text: string): string {
-  let result = text
-    // Remove executive name prefixes (collaborative mode)
-    .replace(MARKDOWN_PATTERNS.executiveAlexandria, "")
-    .replace(MARKDOWN_PATTERNS.executiveKim, "")
-    .replace(MARKDOWN_PATTERNS.jointStrategy, "")
-    // Remove standalone executive names at start of lines
-    .replace(MARKDOWN_PATTERNS.standaloneAlexandria, "")
-    .replace(MARKDOWN_PATTERNS.standaloneKim, "")
-    // Remove headers
-    .replace(MARKDOWN_PATTERNS.headers, "")
-    // Remove bold/italic
-    .replace(MARKDOWN_PATTERNS.bold, "$1")
-    .replace(MARKDOWN_PATTERNS.italic, "$1")
-    .replace(MARKDOWN_PATTERNS.boldAlt, "$1")
-    .replace(MARKDOWN_PATTERNS.italicAlt, "$1")
-    // Remove links but keep text
-    .replace(MARKDOWN_PATTERNS.links, "$1")
-    // Remove images
-    .replace(MARKDOWN_PATTERNS.images, "")
-    // Remove code blocks entirely - don't reference them verbally as it confuses users
-    .replace(MARKDOWN_PATTERNS.codeBlocks, "")
-    // Remove inline code
-    .replace(MARKDOWN_PATTERNS.inlineCode, "$1")
-    // Remove blockquotes
-    .replace(MARKDOWN_PATTERNS.blockquotes, "")
-    // Remove horizontal rules
-    .replace(MARKDOWN_PATTERNS.horizontalRules, "");
-
-  // Remove tables entirely - don't reference them verbally as it confuses users
-  result = result
-    .replace(MARKDOWN_PATTERNS.tableRows, "")
-    .replace(MARKDOWN_PATTERNS.tableSeparators, "");
-
-  // Clean up multiple newlines
-  return result.replace(MARKDOWN_PATTERNS.multipleNewlines, "\n\n").trim();
 }
