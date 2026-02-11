@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
+import { chatBreadcrumb } from "@/lib/sentry";
 import { cn } from "@/lib/utils";
 
 interface ExecutiveSwitchProps {
@@ -147,6 +148,10 @@ export function ExecutiveSwitch({
   }, [isOpen]);
 
   const handleExecutiveSelect = (executive: BotType) => {
+    // Track executive switch for Sentry breadcrumbs
+    if (executive !== selectedExecutive) {
+      chatBreadcrumb.executiveSwitched(selectedExecutive, executive);
+    }
     onExecutiveChange(executive);
     setIsOpen(false);
   };

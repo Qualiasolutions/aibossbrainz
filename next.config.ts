@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://openrouter.ai https://api.elevenlabs.io https://api.tavily.com https://vercel.live https://va.vercel-scripts.com https://*.sentry.io",
+      "connect-src 'self' https://wubiidettbyavutahgjb.supabase.co wss://wubiidettbyavutahgjb.supabase.co https://openrouter.ai https://api.elevenlabs.io https://api.tavily.com https://vercel.live https://va.vercel-scripts.com https://*.sentry.io",
       "media-src 'self' blob:",
       "frame-src 'self' https://vercel.live https://js.stripe.com",
       "frame-ancestors 'none'",

@@ -5,6 +5,9 @@ const REDIS_URL = process.env.REDIS_URL;
 // Rate limit window in seconds (24 hours)
 const RATE_LIMIT_WINDOW = 24 * 60 * 60;
 
+// Auth rate limit window in minutes (shorter window for auth attempts)
+const AUTH_RATE_LIMIT_WINDOW = 15 * 60; // 15 minutes
+
 // Retry configuration
 const REDIS_RETRY_DELAY_MS = 30_000; // 30 seconds between retry attempts
 const REDIS_MAX_RETRIES = 3; // Max retries before longer backoff
@@ -227,4 +230,97 @@ export function getRateLimitHeaders(
     "X-RateLimit-Remaining": String(remaining),
     "X-RateLimit-Reset": String(Math.floor(reset.getTime() / 1000)),
   };
+}
+
+/**
+ * IP-based rate limit key format for auth endpoints
+ */
+function getAuthRateLimitKey(ip: string, action: "login" | "signup" | "reset"): string {
+  const windowStart = Math.floor(Date.now() / (AUTH_RATE_LIMIT_WINDOW * 1000));
+  return `authratelimit:${action}:${ip}:${windowStart}`;
+}
+
+/**
+ * Checks IP-based rate limit for auth endpoints (login, signup, password reset).
+ * Uses a shorter window (15 minutes) to prevent brute force attacks.
+ *
+ * @param ip - Client IP address
+ * @param action - Type of auth action
+ * @param maxAttempts - Maximum allowed attempts per window (default: 5 for login, 3 for signup)
+ * @returns Object with allowed status and remaining attempts
+ */
+export async function checkAuthRateLimit(
+  ip: string,
+  action: "login" | "signup" | "reset",
+  maxAttempts: number = 5,
+): Promise<{
+  allowed: boolean;
+  remaining: number;
+  current: number;
+  reset: Date;
+}> {
+  const redis = await getRedisClient();
+
+  // Default to allowing if Redis unavailable (fail-open for auth to prevent DoS)
+  if (!redis) {
+    return {
+      allowed: true,
+      remaining: maxAttempts,
+      current: 0,
+      reset: new Date(Date.now() + AUTH_RATE_LIMIT_WINDOW * 1000),
+    };
+  }
+
+  const key = getAuthRateLimitKey(ip, action);
+
+  try {
+    // Atomic increment and get
+    const current = await redis.incr(key);
+
+    // Set expiry on first request of window
+    if (current === 1) {
+      await redis.expire(key, AUTH_RATE_LIMIT_WINDOW);
+    }
+
+    const remaining = Math.max(0, maxAttempts - current);
+    const allowed = current <= maxAttempts;
+
+    return {
+      allowed,
+      remaining,
+      current,
+      reset: new Date(Date.now() + AUTH_RATE_LIMIT_WINDOW * 1000),
+    };
+  } catch {
+    // Redis error, fail-open to prevent auth DoS
+    return {
+      allowed: true,
+      remaining: maxAttempts,
+      current: 0,
+      reset: new Date(Date.now() + AUTH_RATE_LIMIT_WINDOW * 1000),
+    };
+  }
+}
+
+/**
+ * Resets auth rate limit for an IP (admin use)
+ */
+export async function resetAuthRateLimit(
+  ip: string,
+  action: "login" | "signup" | "reset",
+): Promise<boolean> {
+  const redis = await getRedisClient();
+
+  if (!redis) {
+    return false;
+  }
+
+  const key = getAuthRateLimitKey(ip, action);
+
+  try {
+    await redis.del(key);
+    return true;
+  } catch {
+    return false;
+  }
 }

@@ -53,6 +53,8 @@ import {
 import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { apiRequestLogger, getApiLogger } from "@/lib/api-logging";
+import { recordAnalytics } from "@/lib/analytics/queries";
+import { chatBreadcrumb } from "@/lib/sentry";
 import {
   checkRateLimit,
   getRateLimitHeaders,
@@ -217,6 +219,7 @@ export const POST = withCsrf(async (request: Request) => {
         title: "New conversation",
         visibility: selectedVisibilityType,
       });
+      chatBreadcrumb.chatCreated(id);
 
       // Generate title and classify topic in background (non-blocking)
       after(async () => {
@@ -276,6 +279,9 @@ export const POST = withCsrf(async (request: Request) => {
       }),
       createStreamId({ streamId, chatId: id }),
     ]);
+
+    // Track message sent breadcrumb
+    chatBreadcrumb.messageSent(id, selectedBotType);
 
     // Format canvas context for AI consumption
     const canvasContext = formatCanvasContext(
@@ -383,6 +389,9 @@ export const POST = withCsrf(async (request: Request) => {
       onFinish: async ({ messages }) => {
         apiLog.success({ phase: "streaming_complete", messageCount: messages.length });
 
+        // Track message received breadcrumb
+        chatBreadcrumb.messageReceived(id, selectedBotType);
+
         await saveMessages({
           messages: messages.map((currentMessage) => {
             // Safely extract botType from message metadata
@@ -413,10 +422,20 @@ export const POST = withCsrf(async (request: Request) => {
               chatId: id,
               context: finalMergedUsage,
             });
+            // Record token usage analytics
+            const inputTokens = finalMergedUsage.inputTokens || 0;
+            const outputTokens = finalMergedUsage.outputTokens || 0;
+            const totalTokens = inputTokens + outputTokens;
+            if (totalTokens > 0) {
+              after(() => recordAnalytics(user.id, "token", totalTokens));
+            }
           } catch (err) {
             console.warn("Unable to persist last usage for chat", id, err);
           }
         }
+
+        // Record message analytics
+        after(() => recordAnalytics(user.id, "message", messages.length));
 
         // Generate conversation summary for cross-chat memory (in background)
         // Use messages from onFinish callback instead of re-fetching from DB
@@ -500,6 +519,8 @@ export const DELETE = withCsrf(async (request: Request) => {
   }
 
   const deletedChat = await deleteChatById({ id });
+
+  chatBreadcrumb.chatDeleted(id);
 
   return Response.json(deletedChat, { status: 200 });
 });

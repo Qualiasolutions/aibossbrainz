@@ -3,6 +3,9 @@ import { getVoiceConfig, MAX_TTS_TEXT_LENGTH } from "@/lib/ai/voice-config";
 import { getMessageCountByUserId } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import { apiRequestLogger } from "@/lib/api-logging";
+import { recordAnalytics } from "@/lib/analytics/queries";
+import { voiceBreadcrumb } from "@/lib/sentry";
+import { after } from "next/server";
 import {
   CircuitBreakerError,
   withElevenLabsResilience,
@@ -81,6 +84,9 @@ export const POST = withCsrf(async (request: Request) => {
 
     const { text, botType } = parseResult.data;
 
+    // Track voice request breadcrumb
+    voiceBreadcrumb.ttsRequested(botType);
+
     // Truncate text if too long (schema already validates max, but truncate for safety)
     const truncatedText = text.slice(0, MAX_TTS_TEXT_LENGTH);
 
@@ -141,6 +147,11 @@ export const POST = withCsrf(async (request: Request) => {
           combined.set(new Uint8Array(buffer), offset);
           offset += buffer.byteLength;
         }
+
+        // Record voice analytics for collaborative mode
+        const totalTextLength = validSegments.reduce((sum, s) => sum + s.text.length, 0);
+        const estimatedMinutes = Math.max(1, Math.ceil(totalTextLength / 750));
+        after(() => recordAnalytics(user.id, "voice", estimatedMinutes));
 
         return new Response(combined, {
           headers: {
@@ -208,6 +219,11 @@ export const POST = withCsrf(async (request: Request) => {
 
     // Stream the audio response
     apiLog.success({ botType, textLength: cleanText.length });
+
+    // Record voice analytics (estimate minutes from text length)
+    // Average speaking rate is ~150 words per minute, average word is 5 characters
+    const estimatedMinutes = Math.max(1, Math.ceil(cleanText.length / 750));
+    after(() => recordAnalytics(user.id, "voice", estimatedMinutes));
 
     return new Response(response.body, {
       headers: {

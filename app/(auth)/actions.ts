@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { checkAuthRateLimit } from "@/lib/security/rate-limiter";
+import { headers } from "next/headers";
 
 const authFormSchema = z.object({
   email: z.string().email(),
@@ -57,6 +59,21 @@ export const login = async (
       password: formData.get("password"),
     });
 
+    // Get client IP for rate limiting
+    const requestHeaders = headers();
+    const ip =
+      requestHeaders.get("x-forwarded-for")?.split(",")[0].trim() ||
+      requestHeaders.get("x-real-ip") ||
+      requestHeaders.get("x-vercel-forwarded-for")?.split(",")[0].trim() ||
+      "unknown";
+
+    // Check rate limit (5 attempts per 15 minutes per IP)
+    const rateLimit = await checkAuthRateLimit(ip, "login", 5);
+    if (!rateLimit.allowed) {
+      console.warn("[Login] Rate limit exceeded for IP:", ip);
+      return { status: "failed" }; // Don't reveal rate limit to user
+    }
+
     const supabase = await createClient();
     const { error } = await supabase.auth.signInWithPassword({
       email: validatedData.email,
@@ -86,6 +103,21 @@ export const signup = async (
       email: formData.get("email"),
       password: formData.get("password"),
     });
+
+    // Get client IP for rate limiting
+    const requestHeaders = headers();
+    const ip =
+      requestHeaders.get("x-forwarded-for")?.split(",")[0].trim() ||
+      requestHeaders.get("x-real-ip") ||
+      requestHeaders.get("x-vercel-forwarded-for")?.split(",")[0].trim() ||
+      "unknown";
+
+    // Check rate limit (3 attempts per 15 minutes per IP for signup)
+    const rateLimit = await checkAuthRateLimit(ip, "signup", 3);
+    if (!rateLimit.allowed) {
+      console.warn("[Signup] Rate limit exceeded for IP:", ip);
+      return { status: "failed" }; // Don't reveal rate limit to user
+    }
 
     const plan = formData.get("plan") as string | null;
     const baseUrl =
@@ -139,6 +171,21 @@ export const requestPasswordReset = async (
     const validatedData = emailSchema.parse({
       email: formData.get("email"),
     });
+
+    // Get client IP for rate limiting
+    const requestHeaders = headers();
+    const ip =
+      requestHeaders.get("x-forwarded-for")?.split(",")[0].trim() ||
+      requestHeaders.get("x-real-ip") ||
+      requestHeaders.get("x-vercel-forwarded-for")?.split(",")[0].trim() ||
+      "unknown";
+
+    // Check rate limit (3 attempts per 15 minutes per IP for password reset)
+    const rateLimit = await checkAuthRateLimit(ip, "reset", 3);
+    if (!rateLimit.allowed) {
+      console.warn("[Password Reset] Rate limit exceeded for IP:", ip);
+      return { status: "success" }; // Always return success to prevent email enumeration
+    }
 
     const supabase = await createClient();
 

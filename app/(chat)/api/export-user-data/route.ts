@@ -4,6 +4,7 @@ import {
   logAuditWithRequest,
 } from "@/lib/audit/logger";
 import { ChatSDKError } from "@/lib/errors";
+import { recordAnalytics } from "@/lib/analytics/queries";
 import {
   checkRateLimit,
   getRateLimitHeaders,
@@ -217,6 +218,9 @@ export async function GET(request: Request) {
         totalDocuments: exportData._metadata.totalDocuments,
       },
     });
+
+    // Record export analytics
+    await recordAnalytics(user.id, "export", 1);
 
     // Return as downloadable JSON
     const filename = `user-data-export-${user.id.slice(0, 8)}-${Date.now()}.json`;
