@@ -99,9 +99,9 @@ export function SidebarUserNav({
               asChild
               className="rounded-lg px-3 py-2.5 cursor-pointer focus:bg-rose-50 focus:text-rose-600"
             >
-              <Link href="/pricing">
+              <Link href="/subscription">
                 <CreditCard className="mr-2.5 h-4 w-4 text-rose-500" />
-                <span className="text-sm font-medium">Pricing</span>
+                <span className="text-sm font-medium">Subscription</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
