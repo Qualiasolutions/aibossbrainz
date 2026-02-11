@@ -3,6 +3,7 @@ import Form from "next/form";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { PasswordInput } from "./password-input";
 
 export function AuthForm({
   action,
@@ -45,14 +46,13 @@ export function AuthForm({
           Password
         </Label>
 
-        <Input
+        <PasswordInput
           autoComplete="current-password"
           className="h-11 border-stone-200 bg-white focus:border-stone-400 focus:ring-stone-400"
           id="password"
           name="password"
           placeholder="Enter your password"
           required
-          type="password"
         />
       </div>
 

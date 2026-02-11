@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 
 const authFormSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(8),
 });
 
 const emailSchema = z.object({
@@ -15,8 +15,8 @@ const emailSchema = z.object({
 });
 
 const passwordResetSchema = z.object({
-  password: z.string().min(6),
-  confirmPassword: z.string().min(6),
+  password: z.string().min(8),
+  confirmPassword: z.string().min(8),
 });
 
 export type LoginActionState = {
@@ -60,11 +60,11 @@ export const login = async (
     });
 
     // Get client IP for rate limiting
-    const requestHeaders = headers();
+    const headersList = await headers();
     const ip =
-      requestHeaders.get("x-forwarded-for")?.split(",")[0].trim() ||
-      requestHeaders.get("x-real-ip") ||
-      requestHeaders.get("x-vercel-forwarded-for")?.split(",")[0].trim() ||
+      headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      headersList.get("x-real-ip") ||
+      headersList.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
       "unknown";
 
     // Check rate limit (5 attempts per 15 minutes per IP)
@@ -105,11 +105,11 @@ export const signup = async (
     });
 
     // Get client IP for rate limiting
-    const requestHeaders = headers();
+    const headersList = await headers();
     const ip =
-      requestHeaders.get("x-forwarded-for")?.split(",")[0].trim() ||
-      requestHeaders.get("x-real-ip") ||
-      requestHeaders.get("x-vercel-forwarded-for")?.split(",")[0].trim() ||
+      headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      headersList.get("x-real-ip") ||
+      headersList.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
       "unknown";
 
     // Check rate limit (3 attempts per 15 minutes per IP for signup)
@@ -173,11 +173,11 @@ export const requestPasswordReset = async (
     });
 
     // Get client IP for rate limiting
-    const requestHeaders = headers();
+    const headersList = await headers();
     const ip =
-      requestHeaders.get("x-forwarded-for")?.split(",")[0].trim() ||
-      requestHeaders.get("x-real-ip") ||
-      requestHeaders.get("x-vercel-forwarded-for")?.split(",")[0].trim() ||
+      headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      headersList.get("x-real-ip") ||
+      headersList.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
       "unknown";
 
     // Check rate limit (3 attempts per 15 minutes per IP for password reset)

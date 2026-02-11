@@ -57,7 +57,7 @@ function SignupContent() {
       toast({
         type: "error",
         description:
-          "Please enter a valid email and password (min 6 characters).",
+          "Please enter a valid email and password (min 8 characters).",
       });
     } else if (state.status === "weak_password") {
       toast({

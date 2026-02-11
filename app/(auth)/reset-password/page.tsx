@@ -7,10 +7,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useActionState, useEffect, useState } from "react";
 import { AuthShell } from "@/components/auth-shell";
+import { PasswordInput } from "@/components/password-input";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type ResetPasswordActionState, resetPassword } from "../actions";
 
@@ -177,7 +177,7 @@ function ResetPasswordContent() {
           >
             New Password
           </Label>
-          <Input
+          <PasswordInput
             autoComplete="new-password"
             autoFocus
             className="h-11 border-stone-200 bg-white focus:border-stone-400 focus:ring-stone-400"
@@ -185,7 +185,6 @@ function ResetPasswordContent() {
             name="password"
             placeholder="Min 8 characters"
             required
-            type="password"
             minLength={8}
           />
         </div>
@@ -196,15 +195,14 @@ function ResetPasswordContent() {
           >
             Confirm Password
           </Label>
-          <Input
+          <PasswordInput
             autoComplete="new-password"
             className="h-11 border-stone-200 bg-white focus:border-stone-400 focus:ring-stone-400"
             id="confirmPassword"
             name="confirmPassword"
             placeholder="Re-enter your password"
             required
-            type="password"
-            minLength={6}
+            minLength={8}
           />
         </div>
         <SubmitButton isSuccessful={isSuccessful}>Reset Password</SubmitButton>
