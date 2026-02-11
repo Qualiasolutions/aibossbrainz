@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** v1.2 Client Feedback Sweep - Phase 15 complete
+**Current focus:** v1.2 Client Feedback Sweep - Phase 14 in progress
 
 ## Current Position
 
-Phase: 15 of 15 (Billing, Knowledge Base & Platform)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-11 -- Completed 15-03-PLAN.md (User Category & Multi-Select Reactions)
+Phase: 14 of 15 (Homepage & SEO)
+Plan: 2 of 2 in current phase (14-02 complete, 14-01 running in parallel)
+Status: In progress
+Last activity: 2026-02-11 -- Completed 14-02-PLAN.md (SEO Meta-Data, Contact Tagline & Hero Media CMS)
 
-Progress: [#########.] 82% (9/11 plans)
+Progress: [##########] 91% (10/11 plans, 14-01 still running)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9 (v1.2)
+- Total plans completed: 10 (v1.2)
 - Average duration: 4min
-- Total execution time: 33min
+- Total execution time: 36min
 
 **By Phase:**
 
@@ -30,12 +30,15 @@ Progress: [#########.] 82% (9/11 plans)
 | 11 | 2/2 | 6min | 3min |
 | 12 | 2/2 | 8min | 4min |
 | 13 | 2/2 | 6min | 3min |
+| 14 | 1/2 | 3min | 3min |
 | 15 | 3/3 | 13min | 4min |
 
 ## Accumulated Context
 
 ### Decisions
 
+- CSP frame-src managed in vercel.json (single source of truth for security headers), not next.config.ts
+- Hero media_type defaults to "none" so InteractiveChatDemo renders by default with zero behavior change
 - Reaction toggle semantics: POST always toggles reaction (server checks existence), eliminates need for separate DELETE calls from client
 - Reaction backward compat: GET response includes both userReactions (array) and legacy userReaction (single) field
 - Revenue filter defaults to Clients Only to avoid inflating metrics with team subscriptions
@@ -71,6 +74,7 @@ Progress: [#########.] 82% (9/11 plans)
 - 15-01: Stripe billing portal with optional config ID, webhook plan-change sync, Cancel Anytime copy
 - 15-02: Fireflies transcript ingestion endpoint, Supabase KB table, merged filesystem+DB KB loader, admin UI
 - 15-03: Admin user category (team/client) toggle, filtered revenue analytics, multi-select reaction system
+- 14-02: SEO meta-data "Your Sales and Marketing Secret Weapon", contact tagline, CMS hero media swap (none/image/video)
 
 **v1.1 (Shipped 2026-02-02):**
 - Phases 6-10 complete
@@ -85,12 +89,14 @@ Progress: [#########.] 82% (9/11 plans)
 - Mailchimp module ready: lib/mailchimp/
 - pnpm build fails locally due to missing env vars (Supabase URL/key) -- not a code issue
 - Source: Product feedback spreadsheet from Alexandria's team (61 items, 24 selected for v1.2)
-- KB migration needs to be applied via Supabase SQL Editor before ingestion works
-- Run `pnpm gen:types` after migration to get proper TypeScript types
-- 15-03 migration (userType default + reaction constraint) needs to be applied via Supabase SQL Editor
+- All Supabase migrations applied (knowledge_base_content table, userType default, reaction constraint)
+- New migration pending: 20260211_phase14_hero_media_cms.sql (hero media CMS rows)
+- Run `pnpm gen:types` after deployment to get proper TypeScript types for knowledge_base_content
+- Stripe portal requires STRIPE_PORTAL_CONFIG_ID env var + Dashboard config for plan switching
+- Fireflies ingestion requires FIREFLIES_API_KEY env var
 
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Phase 15 complete (all plans done)
-Resume: Phases 14 still needs execution; all other phases complete
+Stopped at: 14-02 complete, 14-01 running in parallel
+Resume: 14-01 may still be executing; once both summaries exist, phase 14 and v1.2 are complete
