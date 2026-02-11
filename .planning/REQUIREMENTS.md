@@ -94,17 +94,38 @@ Deferred to future release. Tracked but not in current roadmap.
 
 ## Traceability
 
-(Updated during roadmap creation)
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| BUG-01 | Phase 11 | Pending |
+| BUG-02 | Phase 11 | Pending |
+| BUG-03 | Phase 11 | Pending |
+| BUG-04 | Phase 11 | Pending |
+| AUTH-01 | Phase 11 | Pending |
+| AUTH-02 | Phase 11 | Pending |
+| EXPORT-01 | Phase 12 | Pending |
+| EXPORT-02 | Phase 12 | Pending |
+| EXPORT-03 | Phase 12 | Pending |
+| EXPORT-04 | Phase 12 | Pending |
+| AI-01 | Phase 13 | Pending |
+| AI-02 | Phase 13 | Pending |
+| VOICE-01 | Phase 13 | Pending |
+| LAND-01 | Phase 14 | Pending |
+| LAND-02 | Phase 14 | Pending |
+| LAND-03 | Phase 14 | Pending |
+| LAND-04 | Phase 14 | Pending |
+| SEO-01 | Phase 14 | Pending |
+| SEO-02 | Phase 14 | Pending |
+| BILL-01 | Phase 15 | Pending |
+| BILL-02 | Phase 15 | Pending |
+| KB-01 | Phase 15 | Pending |
+| USER-01 | Phase 15 | Pending |
+| UX-01 | Phase 15 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 24 total
-- Mapped to phases: 0
-- Unmapped: 24
+- Mapped to phases: 24
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-11*
-*Last updated: 2026-02-11 after initial definition*
+*Last updated: 2026-02-11 after roadmap creation*
