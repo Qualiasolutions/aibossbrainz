@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** v1.2 Client Feedback Sweep - Phase 13 complete
+**Current focus:** v1.2 Client Feedback Sweep - Phase 15 in progress
 
 ## Current Position
 
-Phase: 13 of 15 (AI Content & Voice)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-11 -- Completed 13-02-PLAN.md (Voice Call Persistence)
+Phase: 15 of 15 (Billing, Knowledge Base & Platform)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-11 -- Completed 15-01-PLAN.md (Billing Portal & Cancel Anytime Copy)
 
-Progress: [######....] 55% (6/11 plans)
+Progress: [#######...] 64% (7/11 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6 (v1.2)
+- Total plans completed: 7 (v1.2)
 - Average duration: 3min
-- Total execution time: 20min
+- Total execution time: 21min
 
 **By Phase:**
 
@@ -30,11 +30,14 @@ Progress: [######....] 55% (6/11 plans)
 | 11 | 2/2 | 6min | 3min |
 | 12 | 2/2 | 8min | 4min |
 | 13 | 2/2 | 6min | 3min |
+| 15 | 1/3 | 1min | 1min |
 
 ## Accumulated Context
 
 ### Decisions
 
+- Portal config ID optional: STRIPE_PORTAL_CONFIG_ID env var enables plan switching; portal works with Stripe defaults if not set
+- Plan change webhook reuses activateSubscription() to sync subscription type on upgrade/downgrade
 - v1.2 roadmap: 5 phases (11-15), 24 requirements, standard depth
 - Phase 11 first (auth is broken in production), then 12-15
 - PasswordInput: all password fields use PasswordInput component, never plain Input with type=password
@@ -59,6 +62,7 @@ Progress: [######....] 55% (6/11 plans)
 - 12-02: Copy/paste quality -- stripMarkdownForClipboard utility, clean text in clipboard from both copy locations
 - 13-01: AI content generation prompts + consolidated TTS preprocessing utility with suggestions stripping
 - 13-02: Voice call TTS fix (botType param), per-session realtime voice chats with titles, SWR sidebar refresh
+- 15-01: Stripe billing portal with optional config ID, webhook plan-change sync, Cancel Anytime copy
 
 **v1.1 (Shipped 2026-02-02):**
 - Phases 6-10 complete
@@ -77,5 +81,5 @@ Progress: [######....] 55% (6/11 plans)
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Phase 13 complete
-Resume: `/gsd:execute-phase 14` (next phase)
+Stopped at: Phase 15, plan 1 complete
+Resume: `/gsd:execute-phase 15` (plan 2 next)
