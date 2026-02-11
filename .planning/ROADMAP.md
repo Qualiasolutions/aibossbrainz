@@ -4,7 +4,7 @@
 
 - v1.0 MVP - Phases 1-5 (shipped)
 - v1.1 Branding & Billing - Phases 6-10 (shipped 2026-02-02)
-- v1.2 Client Feedback Sweep - Phases 11-15 (in progress)
+- v1.2 Client Feedback Sweep - Phases 11-15 (shipped 2026-02-11)
 
 ## Overview
 
@@ -15,8 +15,8 @@ v1.2 addresses 24 items from Alexandria's team feedback spreadsheet. The milesto
 - [x] **Phase 11: Critical Fixes & Auth Hardening** - Fix production bugs and auth UX issues
 - [x] **Phase 12: Export & Copy Quality** - Clean PDF exports and copy/paste output
 - [x] **Phase 13: AI Content & Voice** - Better AI deliverables and voice integration
-- [ ] **Phase 14: Homepage & SEO** - Public-facing page updates and meta-data
-- [ ] **Phase 15: Billing, Knowledge Base & Platform** - Billing options, Fireflies ingestion, analytics categories, reaction UX
+- [x] **Phase 14: Homepage & SEO** - Public-facing page updates and meta-data
+- [x] **Phase 15: Billing, Knowledge Base & Platform** - Billing options, Fireflies ingestion, analytics categories, reaction UX
 
 ## Phase Details
 
@@ -78,8 +78,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 14-01-PLAN.md -- Homepage layout updates: executive bios as text, checkup section, social icons (LAND-01, LAND-03, LAND-04)
-- [ ] 14-02-PLAN.md -- Hero media CMS swap + SEO meta-data + contact tagline (LAND-02, SEO-01, SEO-02)
+- [x] 14-01-PLAN.md -- Homepage layout updates: executive bios as text, checkup section, social icons (LAND-01, LAND-03, LAND-04)
+- [x] 14-02-PLAN.md -- Hero media CMS swap + SEO meta-data + contact tagline (LAND-02, SEO-01, SEO-02)
 
 ### Phase 15: Billing, Knowledge Base & Platform
 **Goal**: Platform has upgraded billing options, external knowledge ingestion, user segmentation, and richer message interactions
@@ -94,9 +94,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 15-01-PLAN.md -- Billing portal upgrade/downgrade config + pricing copy update (BILL-01, BILL-02)
-- [ ] 15-02-PLAN.md -- Fireflies transcript ingestion into knowledge base via Supabase (KB-01)
-- [ ] 15-03-PLAN.md -- User categories in analytics + multi-select reactions (USER-01, UX-01)
+- [x] 15-01-PLAN.md -- Billing portal upgrade/downgrade config + pricing copy update (BILL-01, BILL-02)
+- [x] 15-02-PLAN.md -- Fireflies transcript ingestion into knowledge base via Supabase (KB-01)
+- [x] 15-03-PLAN.md -- User categories in analytics + multi-select reactions (USER-01, UX-01)
 
 ## Progress
 
@@ -108,8 +108,8 @@ Phase 11 first (critical fixes), then 12-15. Phases 12, 13, 14 can run in parall
 | 11. Critical Fixes & Auth | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 12. Export & Copy Quality | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 13. AI Content & Voice | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 14. Homepage & SEO | v1.2 | 0/2 | Not started | - |
-| 15. Billing, KB & Platform | v1.2 | 0/3 | Not started | - |
+| 14. Homepage & SEO | v1.2 | 2/2 | Complete | 2026-02-11 |
+| 15. Billing, KB & Platform | v1.2 | 3/3 | Complete | 2026-02-11 |
 
 ---
 *Roadmap created: 2026-02-11*
