@@ -43,19 +43,19 @@ export function MessageFullscreen({
   };
 
   const handleExportPDF = async () => {
-    if (!contentRef.current) {
+    if (!content) {
       toast.error("Content not available for export");
       return;
     }
 
     setIsExporting(true);
     try {
-      // Dynamic import to reduce initial bundle size (~700KB savings)
+      // Dynamic import to reduce initial bundle size
       const { exportToPDF } = await import("@/lib/pdf-export");
 
       const timestamp = new Date().toISOString().split("T")[0];
       const filename = `${personality.name.replace(/\s+/g, "-")}-message-${timestamp}`;
-      await exportToPDF(contentRef.current, filename);
+      await exportToPDF(content, filename, personality.name, personality.role);
       toast.success("PDF exported successfully!");
     } catch (_error) {
       toast.error("Failed to export PDF");
