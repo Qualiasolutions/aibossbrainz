@@ -99,7 +99,9 @@ export function Chat({
   const [isSwotPanelOpen, setIsSwotPanelOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   // Store last sent message for retry on error
-  const [lastSentMessage, setLastSentMessage] = useState<ChatMessage | null>(null);
+  const [lastSentMessage, setLastSentMessage] = useState<ChatMessage | null>(
+    null,
+  );
   const currentModelIdRef = useRef(currentModelId);
   const selectedBotRef = useRef(initialBotType);
 
@@ -194,9 +196,10 @@ export function Chat({
       }
 
       // Show user-friendly message for ALL error types
-      const message = error instanceof ChatSDKError
-        ? error.message
-        : "Something went wrong generating a response. Please try again.";
+      const message =
+        error instanceof ChatSDKError
+          ? error.message
+          : "Something went wrong generating a response. Please try again.";
 
       toast({
         type: "error",

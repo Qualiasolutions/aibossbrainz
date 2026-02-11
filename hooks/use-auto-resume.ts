@@ -31,7 +31,10 @@ export function useAutoResume({
       try {
         resumeStream();
       } catch (error) {
-        console.warn("Failed to resume stream, displaying existing messages:", error);
+        console.warn(
+          "Failed to resume stream, displaying existing messages:",
+          error,
+        );
       }
     }
 
