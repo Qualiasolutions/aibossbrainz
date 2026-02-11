@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** v1.2 Client Feedback Sweep - Phase 15 in progress
+**Current focus:** v1.2 Client Feedback Sweep - Phase 15 complete
 
 ## Current Position
 
 Phase: 15 of 15 (Billing, Knowledge Base & Platform)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-11 -- Completed 15-02-PLAN.md (Fireflies Knowledge Base Ingestion)
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-02-11 -- Completed 15-03-PLAN.md (User Category & Multi-Select Reactions)
 
-Progress: [########..] 73% (8/11 plans)
+Progress: [#########.] 82% (9/11 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8 (v1.2)
-- Average duration: 3min
-- Total execution time: 24min
+- Total plans completed: 9 (v1.2)
+- Average duration: 4min
+- Total execution time: 33min
 
 **By Phase:**
 
@@ -30,12 +30,15 @@ Progress: [########..] 73% (8/11 plans)
 | 11 | 2/2 | 6min | 3min |
 | 12 | 2/2 | 8min | 4min |
 | 13 | 2/2 | 6min | 3min |
-| 15 | 2/3 | 4min | 2min |
+| 15 | 3/3 | 13min | 4min |
 
 ## Accumulated Context
 
 ### Decisions
 
+- Reaction toggle semantics: POST always toggles reaction (server checks existence), eliminates need for separate DELETE calls from client
+- Reaction backward compat: GET response includes both userReactions (array) and legacy userReaction (single) field
+- Revenue filter defaults to Clients Only to avoid inflating metrics with team subscriptions
 - KB Supabase content: Separate admin page at /admin/knowledge-base rather than embedding in settings (server component constraint)
 - KB graceful degradation: If knowledge_base_content table doesn't exist, loader silently falls back to filesystem-only
 - KB types: Using 'as any' cast for untyped table queries until types are regenerated
@@ -67,6 +70,7 @@ Progress: [########..] 73% (8/11 plans)
 - 13-02: Voice call TTS fix (botType param), per-session realtime voice chats with titles, SWR sidebar refresh
 - 15-01: Stripe billing portal with optional config ID, webhook plan-change sync, Cancel Anytime copy
 - 15-02: Fireflies transcript ingestion endpoint, Supabase KB table, merged filesystem+DB KB loader, admin UI
+- 15-03: Admin user category (team/client) toggle, filtered revenue analytics, multi-select reaction system
 
 **v1.1 (Shipped 2026-02-02):**
 - Phases 6-10 complete
@@ -83,9 +87,10 @@ Progress: [########..] 73% (8/11 plans)
 - Source: Product feedback spreadsheet from Alexandria's team (61 items, 24 selected for v1.2)
 - KB migration needs to be applied via Supabase SQL Editor before ingestion works
 - Run `pnpm gen:types` after migration to get proper TypeScript types
+- 15-03 migration (userType default + reaction constraint) needs to be applied via Supabase SQL Editor
 
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Phase 15, plan 2 complete
-Resume: `/gsd:execute-phase 15` (plan 3 next)
+Stopped at: Phase 15 complete (all plans done)
+Resume: Phases 14 still needs execution; all other phases complete
