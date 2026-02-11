@@ -91,12 +91,12 @@ Plans:
   3. Fireflies call transcripts can be ingested into the executive knowledge base for context-aware responses
   4. Analytics dashboard distinguishes team vs client users to show only realized revenue
   5. User can apply multiple reaction types to a single message
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 15-01: Billing portal options and pricing copy
-- [ ] 15-02: Fireflies transcript ingestion
-- [ ] 15-03: User categories in analytics and multi-select reactions
+- [ ] 15-01-PLAN.md -- Billing portal upgrade/downgrade config + pricing copy update (BILL-01, BILL-02)
+- [ ] 15-02-PLAN.md -- Fireflies transcript ingestion into knowledge base via Supabase (KB-01)
+- [ ] 15-03-PLAN.md -- User categories in analytics + multi-select reactions (USER-01, UX-01)
 
 ## Progress
 
