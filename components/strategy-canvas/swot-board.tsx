@@ -80,7 +80,7 @@ export function SwotBoard({ compact = false }: SwotBoardProps) {
     };
     setData((prev) => ({
       ...prev,
-      [quadrant]: [...prev[quadrant], newNote],
+      [quadrant]: [...(prev[quadrant] || []), newNote],
     }));
     // Auto-expand when adding
     setExpandedQuadrants((prev) => new Set([...prev, quadrant]));
@@ -90,7 +90,7 @@ export function SwotBoard({ compact = false }: SwotBoardProps) {
     (quadrant: keyof SwotData, id: string, content: string) => {
       setData((prev) => ({
         ...prev,
-        [quadrant]: prev[quadrant].map((note) =>
+        [quadrant]: (prev[quadrant] || []).map((note) =>
           note.id === id ? { ...note, content } : note,
         ),
       }));
@@ -102,7 +102,7 @@ export function SwotBoard({ compact = false }: SwotBoardProps) {
     (quadrant: keyof SwotData, id: string) => {
       setData((prev) => ({
         ...prev,
-        [quadrant]: prev[quadrant].filter((note) => note.id !== id),
+        [quadrant]: (prev[quadrant] || []).filter((note) => note.id !== id),
       }));
     },
     [setData],
@@ -139,7 +139,7 @@ export function SwotBoard({ compact = false }: SwotBoardProps) {
 
     // Add each quadrant
     for (const quadrant of quadrants) {
-      const notes = data[quadrant.key];
+      const notes = data[quadrant.key] || [];
       html += `
         <div style="margin-bottom: 24px; padding: 16px; border-radius: 8px; background: #f9fafb; border: 1px solid #e5e7eb;">
           <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1a1a1a;">${quadrant.label}</h3>
@@ -251,7 +251,7 @@ export function SwotBoard({ compact = false }: SwotBoardProps) {
         {/* Accordion Sections */}
         <div className="space-y-1">
           {quadrants.map((quadrant) => {
-            const notes = data[quadrant.key];
+            const notes = data[quadrant.key] || [];
             const isExpanded = expandedQuadrants.has(quadrant.key);
 
             return (
@@ -420,7 +420,7 @@ export function SwotBoard({ compact = false }: SwotBoardProps) {
       {/* SWOT Grid - Clean Executive Style */}
       <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-neutral-200 bg-neutral-200 dark:border-neutral-800 dark:bg-neutral-800 sm:grid-cols-2">
         {quadrants.map((quadrant, index) => {
-          const notes = data[quadrant.key];
+          const notes = data[quadrant.key] || [];
           const isHovered = hoveredQuadrant === quadrant.key;
 
           return (

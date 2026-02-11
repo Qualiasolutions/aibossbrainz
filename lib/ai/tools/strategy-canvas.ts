@@ -128,18 +128,40 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
             >)
           : {};
 
-        // Generate items with IDs
-        const newItems = items.map((content) => ({
-          id: generateUUID(),
-          content,
-          color: "slate",
-        }));
+        // Journey canvas stores items in a flat `touchpoints` array
+        // with a `stage` field, not as top-level section keys.
+        if (canvasType === "journey") {
+          const journeyData = currentData as unknown as {
+            touchpoints?: Array<{
+              id: string;
+              stage: string;
+              content: string;
+              type: string;
+            }>;
+          };
+          if (!journeyData.touchpoints) {
+            journeyData.touchpoints = [];
+          }
+          const newTouchpoints = items.map((content) => ({
+            id: generateUUID(),
+            stage: section,
+            content,
+            type: "touchpoint" as const,
+          }));
+          journeyData.touchpoints.push(...newTouchpoints);
+        } else {
+          // SWOT, BMC, Brainstorm: use section keys directly
+          const newItems = items.map((content) => ({
+            id: generateUUID(),
+            content,
+            color: "slate",
+          }));
 
-        // Merge new items into the section
-        if (!currentData[section]) {
-          currentData[section] = [];
+          if (!currentData[section]) {
+            currentData[section] = [];
+          }
+          currentData[section].push(...newItems);
         }
-        currentData[section].push(...newItems);
 
         // Save back to the canvas
         await saveStrategyCanvas({

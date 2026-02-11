@@ -89,7 +89,7 @@ export function CustomerJourney({ compact = false }: CustomerJourneyProps) {
       defaultData: defaultJourneyData,
       fetchFn: csrfFetch,
     });
-  const touchpoints = data.touchpoints;
+  const touchpoints = data.touchpoints || [];
   const setTouchpoints = (
     updater:
       | JourneyTouchpoint[]
@@ -98,7 +98,9 @@ export function CustomerJourney({ compact = false }: CustomerJourneyProps) {
     setData((prev) => ({
       ...prev,
       touchpoints:
-        typeof updater === "function" ? updater(prev.touchpoints) : updater,
+        typeof updater === "function"
+          ? updater(prev.touchpoints || [])
+          : updater,
     }));
   };
 

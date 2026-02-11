@@ -47,13 +47,14 @@ export function BrainstormBoard({ compact = false }: BrainstormBoardProps) {
       defaultData: defaultBrainstormData,
       fetchFn: csrfFetch,
     });
-  const notes = data.notes;
+  const notes = data.notes || [];
   const setNotes = (
     updater: StickyNoteType[] | ((prev: StickyNoteType[]) => StickyNoteType[]),
   ) => {
     setData((prev) => ({
       ...prev,
-      notes: typeof updater === "function" ? updater(prev.notes) : updater,
+      notes:
+        typeof updater === "function" ? updater(prev.notes || []) : updater,
     }));
   };
 

@@ -116,7 +116,7 @@ export function BusinessModelCanvas({
     };
     setData((prev) => ({
       ...prev,
-      [section]: [...prev[section], newNote],
+      [section]: [...(prev[section] || []), newNote],
     }));
     setExpandedSections((prev) => new Set([...prev, section]));
   };
@@ -125,7 +125,7 @@ export function BusinessModelCanvas({
     (section: keyof BusinessModelData, id: string, content: string) => {
       setData((prev) => ({
         ...prev,
-        [section]: prev[section].map((note) =>
+        [section]: (prev[section] || []).map((note) =>
           note.id === id ? { ...note, content } : note,
         ),
       }));
@@ -137,7 +137,7 @@ export function BusinessModelCanvas({
     (section: keyof BusinessModelData, id: string) => {
       setData((prev) => ({
         ...prev,
-        [section]: prev[section].filter((note) => note.id !== id),
+        [section]: (prev[section] || []).filter((note) => note.id !== id),
       }));
     },
     [setData],
@@ -204,7 +204,7 @@ export function BusinessModelCanvas({
         {/* Accordion Sections */}
         <div className="space-y-1">
           {sections.map((section) => {
-            const notes = data[section.key];
+            const notes = data[section.key] || [];
             const isExpanded = expandedSections.has(section.key);
 
             return (

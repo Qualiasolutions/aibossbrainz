@@ -54,10 +54,10 @@ function formatNotes(notes: StickyNote[]): string {
 
 function formatSwot(data: SwotData): string {
   const sections = [
-    { label: "Strengths", items: data.strengths },
-    { label: "Weaknesses", items: data.weaknesses },
-    { label: "Opportunities", items: data.opportunities },
-    { label: "Threats", items: data.threats },
+    { label: "Strengths", items: data.strengths || [] },
+    { label: "Weaknesses", items: data.weaknesses || [] },
+    { label: "Opportunities", items: data.opportunities || [] },
+    { label: "Threats", items: data.threats || [] },
   ];
 
   const hasContent = sections.some((s) =>
@@ -72,15 +72,15 @@ function formatSwot(data: SwotData): string {
 
 function formatBmc(data: BusinessModelData): string {
   const sections = [
-    { label: "Key Partners", items: data.keyPartners },
-    { label: "Key Activities", items: data.keyActivities },
-    { label: "Key Resources", items: data.keyResources },
-    { label: "Value Propositions", items: data.valuePropositions },
-    { label: "Customer Relationships", items: data.customerRelationships },
-    { label: "Channels", items: data.channels },
-    { label: "Customer Segments", items: data.customerSegments },
-    { label: "Cost Structure", items: data.costStructure },
-    { label: "Revenue Streams", items: data.revenueStreams },
+    { label: "Key Partners", items: data.keyPartners || [] },
+    { label: "Key Activities", items: data.keyActivities || [] },
+    { label: "Key Resources", items: data.keyResources || [] },
+    { label: "Value Propositions", items: data.valuePropositions || [] },
+    { label: "Customer Relationships", items: data.customerRelationships || [] },
+    { label: "Channels", items: data.channels || [] },
+    { label: "Customer Segments", items: data.customerSegments || [] },
+    { label: "Cost Structure", items: data.costStructure || [] },
+    { label: "Revenue Streams", items: data.revenueStreams || [] },
   ];
 
   const hasContent = sections.some((s) =>
