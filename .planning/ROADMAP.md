@@ -14,7 +14,7 @@ v1.2 addresses 24 items from Alexandria's team feedback spreadsheet. The milesto
 
 - [x] **Phase 11: Critical Fixes & Auth Hardening** - Fix production bugs and auth UX issues
 - [x] **Phase 12: Export & Copy Quality** - Clean PDF exports and copy/paste output
-- [ ] **Phase 13: AI Content & Voice** - Better AI deliverables and voice integration
+- [x] **Phase 13: AI Content & Voice** - Better AI deliverables and voice integration
 - [ ] **Phase 14: Homepage & SEO** - Public-facing page updates and meta-data
 - [ ] **Phase 15: Billing, Knowledge Base & Platform** - Billing options, Fireflies ingestion, analytics categories, reaction UX
 
@@ -62,8 +62,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 13-01-PLAN.md -- AI content generation prompts + consolidated voice text preprocessing (AI-01, AI-02)
-- [ ] 13-02-PLAN.md -- Voice call TTS bug fix + per-session realtime chat persistence (VOICE-01)
+- [x] 13-01-PLAN.md -- AI content generation prompts + consolidated voice text preprocessing (AI-01, AI-02)
+- [x] 13-02-PLAN.md -- Voice call TTS bug fix + per-session realtime chat persistence (VOICE-01)
 
 ### Phase 14: Homepage & SEO
 **Goal**: Public-facing pages reflect current branding, accurate meta-data, and support media management
@@ -107,7 +107,7 @@ Phase 11 first (critical fixes), then 12-15. Phases 12, 13, 14 can run in parall
 |-------|-----------|----------------|--------|-----------|
 | 11. Critical Fixes & Auth | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 12. Export & Copy Quality | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 13. AI Content & Voice | v1.2 | 0/2 | Not started | - |
+| 13. AI Content & Voice | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 14. Homepage & SEO | v1.2 | 0/2 | Not started | - |
 | 15. Billing, KB & Platform | v1.2 | 0/3 | Not started | - |
 
