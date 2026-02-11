@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BotType } from "@/lib/bot-personalities";
 import type { ChatMessage } from "@/lib/types";
+import { useCsrf } from "@/hooks/use-csrf";
 
 export type VoiceCallStatus =
   | "idle"
@@ -50,6 +51,8 @@ export function useVoiceCall({
   status,
   sendMessage,
 }: UseVoiceCallProps): UseVoiceCallReturn {
+  const { csrfFetch } = useCsrf();
+
   // State
   const [voiceCallOpen, setVoiceCallOpen] = useState(false);
   const [voiceCallStatus, setVoiceCallStatus] =
@@ -143,7 +146,7 @@ export function useVoiceCall({
       setVoiceCallStatus("speaking");
 
       try {
-        const response = await fetch("/api/voice", {
+        const response = await csrfFetch("/api/voice", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text, botType: selectedBot }),
@@ -178,7 +181,7 @@ export function useVoiceCall({
         console.error("TTS error:", err);
       }
     },
-    [selectedBot],
+    [selectedBot, csrfFetch],
   );
 
   // Start voice listening - defined with useCallback to avoid circular deps

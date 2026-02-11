@@ -13,6 +13,7 @@ import {
   subscribeToAudioChanges,
 } from "@/lib/audio-manager";
 import type { BotType } from "@/lib/bot-personalities";
+import { useCsrf } from "@/hooks/use-csrf";
 
 export type VoicePlayerState =
   | "idle"
@@ -25,6 +26,7 @@ export const useVoicePlayer = () => {
   const [state, setState] = useState<VoicePlayerState>("idle");
   const [error, setError] = useState<string | null>(null);
   const currentPlayIdRef = useRef<string | null>(null);
+  const { csrfFetch } = useCsrf();
 
   // Subscribe to global audio state changes
   useEffect(() => {
@@ -86,7 +88,7 @@ export const useVoicePlayer = () => {
       setAbortController(abortController);
 
       try {
-        const response = await fetch("/api/voice", {
+        const response = await csrfFetch("/api/voice", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -167,7 +169,7 @@ export const useVoicePlayer = () => {
         }
       }
     },
-    [],
+    [csrfFetch],
   );
 
   // Cleanup on unmount

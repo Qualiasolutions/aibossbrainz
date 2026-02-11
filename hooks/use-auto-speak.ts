@@ -18,6 +18,7 @@ import {
   markVoiceServiceUnavailable,
 } from "@/lib/voice/service-status";
 import { stripMarkdownForTTS } from "@/lib/voice/strip-markdown-tts";
+import { useCsrf } from "@/hooks/use-csrf";
 
 type AutoSpeakState = "idle" | "loading" | "playing" | "paused" | "error";
 
@@ -52,6 +53,7 @@ export const useAutoSpeak = ({
   const lastSpokenMessageIdRef = useRef<string | null>(null);
   const wasStreamingRef = useRef(false);
   const currentPlayIdRef = useRef<string | null>(null);
+  const { csrfFetch } = useCsrf();
 
   // Persist auto-speak setting to localStorage
   useEffect(() => {
@@ -119,7 +121,7 @@ export const useAutoSpeak = ({
     setAbortController(abortController);
 
     try {
-      const response = await fetch("/api/voice", {
+      const response = await csrfFetch("/api/voice", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -215,7 +217,7 @@ export const useAutoSpeak = ({
         currentPlayIdRef.current = null;
       }
     }
-  }, []);
+  }, [csrfFetch]);
 
   // Track when streaming starts
   useEffect(() => {

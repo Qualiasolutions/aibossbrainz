@@ -9,6 +9,7 @@ import {
   stopAllAudio,
 } from "@/lib/audio-manager";
 import type { BotType } from "@/lib/bot-personalities";
+import { useCsrf } from "@/hooks/use-csrf";
 
 const SESSION_KEY = "alecci-greeted";
 
@@ -38,6 +39,7 @@ export function useGreetingSpeech({
   const [state, setState] = useState<GreetingState>("idle");
   const hasGreetedRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { csrfFetch } = useCsrf();
 
   const speak = useCallback(
     async (text: string) => {
@@ -48,7 +50,7 @@ export function useGreetingSpeech({
       setAbortController(abortController);
 
       try {
-        const response = await fetch("/api/voice", {
+        const response = await csrfFetch("/api/voice", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -117,7 +119,7 @@ export function useGreetingSpeech({
         setState("error");
       }
     },
-    [botType],
+    [botType, csrfFetch],
   );
 
   const stop = useCallback(() => {
