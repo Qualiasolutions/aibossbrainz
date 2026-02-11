@@ -2,19 +2,19 @@
 
 ## Current Position
 
-Phase: Ready for next milestone
-Plan: Not started
-Status: **v1.1 ARCHIVED**
-Last activity: 2026-02-02 — v1.1 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-11 — Milestone v1.2 started
 
-Progress: [Ready for next milestone]
+Progress: [Defining requirements]
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-02)
+See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Planning next milestone
+**Current focus:** v1.2 Client Feedback Sweep
 
 ## Accumulated Context
 
@@ -41,9 +41,11 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 - v1.1 archives: milestones/v1.1-ROADMAP.md, milestones/v1.1-REQUIREMENTS.md
 - Mailchimp module ready: lib/mailchimp/
 - Admin backfill endpoint: POST /api/admin/mailchimp/backfill
+- Source: Product feedback spreadsheet from Alexandria's team (61 items)
+- Auth rate-limit bug found: app/(auth)/actions.ts references wrong variable name
 
 ## Session Continuity
 
-Last session: 2026-02-02
-Stopped at: v1.1 milestone archived
-Resume: `/gsd:new-milestone` when ready
+Last session: 2026-02-11
+Stopped at: Defining v1.2 requirements
+Resume: Complete requirements → roadmap

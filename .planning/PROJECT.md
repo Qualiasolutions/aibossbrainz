@@ -8,7 +8,22 @@ AI-powered executive consulting SaaS for sales and marketing strategy. Two AI pe
 
 Founders get instant, actionable sales and marketing strategy from AI executives who remember context and deliver frameworks-based guidance.
 
-## Current State (v1.1 Shipped)
+## Current Milestone: v1.2 Client Feedback Sweep
+
+**Goal:** Address all outstanding product feedback from Alexandria's team — fix bugs, improve exports, enhance UX, update copy, and add missing features.
+
+**Target features:**
+- Fix auth rate limiting bug (signup/password reset broken)
+- Fix PDF/HTML export issues (HTML in exports, file sizes, naming, thread export)
+- Voice call Q&A history integration
+- AI content generation improvements (emails, social copy — not just strategy)
+- Billing portal upgrade options
+- Meta-data and copy updates (pricing page, contact page, link previews)
+- Password UX improvements (show/hide toggle, min-length consistency)
+- Homepage updates (bios, media embed CMS, social icons)
+- User category system for analytics
+
+## Previous State (v1.1 Shipped)
 
 **Shipped:** 2026-02-02
 **Client:** Alecci Media (Alexandria)
@@ -55,7 +70,7 @@ Founders get instant, actionable sales and marketing strategy from AI executives
 
 ### Active
 
-(None - next milestone requirements to be defined with `/gsd:new-milestone`)
+See `.planning/REQUIREMENTS.md` for v1.2 requirements
 
 ### Out of Scope
 
@@ -84,4 +99,4 @@ Founders get instant, actionable sales and marketing strategy from AI executives
 
 ---
 
-*Last updated: 2026-02-02 after v1.1 milestone completion*
+*Last updated: 2026-02-11 after v1.2 milestone start*
