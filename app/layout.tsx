@@ -17,8 +17,7 @@ export const metadata: Metadata = {
     default: "AI Boss Brainz",
     template: "%s | AI Boss Brainz",
   },
-  description:
-    "Executive consulting for sales and marketing strategy. Available 24/7.",
+  description: "Your Sales and Marketing Secret Weapon",
   keywords: [
     "AI consulting",
     "marketing strategy",
@@ -44,8 +43,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "AI Boss Brainz",
     title: "AI Boss Brainz",
-    description:
-      "Executive consulting for sales and marketing strategy. Available 24/7.",
+    description: "Your Sales and Marketing Secret Weapon",
     images: [
       {
         url: "/opengraph-image.png",
@@ -58,8 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "AI Boss Brainz",
-    description:
-      "Executive consulting for sales and marketing strategy. Available 24/7.",
+    description: "Your Sales and Marketing Secret Weapon",
     images: ["/twitter-image.png"],
     creator: "@aleccimedia",
   },

@@ -90,7 +90,10 @@ export default function ContactPage() {
             <h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
               Get in Touch
             </h1>
-            <p className="mx-auto max-w-2xl text-muted-foreground">
+            <p className="mx-auto max-w-2xl text-lg font-medium text-red-600">
+              Sales and Marketing Strategy 24/7
+            </p>
+            <p className="mx-auto mt-2 max-w-2xl text-muted-foreground">
               Have questions about our AI Executive Team? We'd love to hear from
               you. Send us a message and we'll respond within 24 hours.
             </p>
