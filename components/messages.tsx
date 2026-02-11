@@ -1,6 +1,6 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
-import { AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowDownIcon } from "lucide-react";
 import { memo } from "react";
 import { useMessages } from "@/hooks/use-messages";
@@ -9,8 +9,9 @@ import type { Vote } from "@/lib/supabase/types";
 import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Conversation, ConversationContent } from "./elements/conversation";
+import { EnhancedChatMessage } from "./enhanced-chat-message";
 import { Greeting } from "./greeting";
-import { PreviewMessage, ThinkingMessage } from "./message";
+import { PreviewMessage } from "./message";
 
 type MessagesProps = {
   chatId: string;
@@ -87,30 +88,24 @@ function PureMessages({
             />
           ))}
 
-          <AnimatePresence>
-            {/* Show thinking message when:
-                1. Status is "submitted" (waiting for response)
-                2. Status is "streaming" but last message is from user (no assistant response yet)
-                3. Status is "streaming", last message is assistant, but it has no text content yet
-            */}
-            {(status === "submitted" ||
-              (status === "streaming" &&
-                messages.length > 0 &&
-                (() => {
-                  const lastMessage = messages[messages.length - 1];
-                  if (lastMessage?.role === "user") return true;
-                  // Check if assistant message has no text content yet
-                  if (lastMessage?.role === "assistant") {
-                    const hasTextContent = lastMessage.parts?.some(
-                      (p) => p.type === "text" && p.text?.trim()
-                    );
-                    return !hasTextContent;
-                  }
-                  return false;
-                })())) && (
-              <ThinkingMessage botType={selectedBotType} key="thinking" />
+          {/* Inline loading indicator before assistant message exists */}
+          {status === "submitted" &&
+            messages.length > 0 &&
+            messages[messages.length - 1]?.role === "user" && (
+              <motion.div
+                animate={{ opacity: 1 }}
+                className="w-full"
+                initial={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <EnhancedChatMessage
+                  botType={selectedBotType}
+                  content=""
+                  isTyping={true}
+                  role="assistant"
+                />
+              </motion.div>
             )}
-          </AnimatePresence>
 
           <div
             className="min-h-[24px] min-w-[24px] shrink-0"

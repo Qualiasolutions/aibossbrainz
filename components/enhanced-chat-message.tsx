@@ -169,14 +169,8 @@ export const EnhancedChatMessage = memo(
       );
     }
 
-    // For assistant messages: if no content and still typing, don't render
-    // (ThinkingMessage in messages.tsx handles the loading state)
-    if (!hasContent && isTyping) {
-      return null;
-    }
-
-    // If no content and not typing, also don't render (edge case)
-    if (!hasContent) {
+    // If no content and not typing, don't render (edge case)
+    if (!hasContent && !isTyping) {
       return null;
     }
 
@@ -232,11 +226,29 @@ export const EnhancedChatMessage = memo(
               </div>
             </div>
 
-            {/* Message content with typewriter effect */}
-            <TypewriterContent
-              content={safeContent}
-              isStreaming={isTyping ?? false}
-            />
+            {/* Message content with typewriter effect or loading dots */}
+            {hasContent ? (
+              <TypewriterContent
+                content={safeContent}
+                isStreaming={isTyping ?? false}
+              />
+            ) : (
+              <div className="flex items-center gap-1.5 pl-3 py-2">
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="size-1.5 rounded-full bg-stone-400"
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{
+                      duration: 1.2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                      delay: i * 0.2,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
