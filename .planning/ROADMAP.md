@@ -59,11 +59,11 @@ Plans:
   1. When asked, AI generates ready-to-use content (email drafts, social media posts, ad copy) not just strategic advice
   2. Voice playback intelligently skips tables and charts instead of reading them cell-by-cell
   3. Questions asked during a voice call and the AI answers appear in the chat history afterward
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 13-01: AI content generation prompt engineering
-- [ ] 13-02: Voice table-skipping and Q&A history persistence
+- [ ] 13-01-PLAN.md -- AI content generation prompts + consolidated voice text preprocessing (AI-01, AI-02)
+- [ ] 13-02-PLAN.md -- Voice call TTS bug fix + per-session realtime chat persistence (VOICE-01)
 
 ### Phase 14: Homepage & SEO
 **Goal**: Public-facing pages reflect current branding, accurate meta-data, and support media management
