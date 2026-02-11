@@ -17,10 +17,10 @@ Requirements for the Client Feedback Sweep milestone. Each maps to roadmap phase
 
 ### Export & PDF (EXPORT)
 
-- [ ] **EXPORT-01**: PDF exports strip all HTML tags and render clean formatted text (Row 7)
-- [ ] **EXPORT-02**: User can export an entire chat thread as a single PDF, not just one message (Row 8)
-- [ ] **EXPORT-03**: PDF file sizes are optimized to be smaller (Row 34)
-- [ ] **EXPORT-04**: Copy/paste from chat produces clean text without HTML markup (Row 42)
+- [x] **EXPORT-01**: PDF exports strip all HTML tags and render clean formatted text (Row 7)
+- [x] **EXPORT-02**: User can export an entire chat thread as a single PDF, not just one message (Row 8)
+- [x] **EXPORT-03**: PDF file sizes are optimized to be smaller (Row 34)
+- [x] **EXPORT-04**: Copy/paste from chat produces clean text without HTML markup (Row 42)
 
 ### AI Content Quality (AI)
 
@@ -102,10 +102,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | BUG-04 | Phase 11 | Pending |
 | AUTH-01 | Phase 11 | Pending |
 | AUTH-02 | Phase 11 | Pending |
-| EXPORT-01 | Phase 12 | Pending |
-| EXPORT-02 | Phase 12 | Pending |
-| EXPORT-03 | Phase 12 | Pending |
-| EXPORT-04 | Phase 12 | Pending |
+| EXPORT-01 | Phase 12 | Done |
+| EXPORT-02 | Phase 12 | Done |
+| EXPORT-03 | Phase 12 | Done |
+| EXPORT-04 | Phase 12 | Done |
 | AI-01 | Phase 13 | Pending |
 | AI-02 | Phase 13 | Pending |
 | VOICE-01 | Phase 13 | Pending |

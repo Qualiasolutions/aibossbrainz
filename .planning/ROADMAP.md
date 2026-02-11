@@ -13,7 +13,7 @@ v1.2 addresses 24 items from Alexandria's team feedback spreadsheet. The milesto
 ## Phases
 
 - [x] **Phase 11: Critical Fixes & Auth Hardening** - Fix production bugs and auth UX issues
-- [ ] **Phase 12: Export & Copy Quality** - Clean PDF exports and copy/paste output
+- [x] **Phase 12: Export & Copy Quality** - Clean PDF exports and copy/paste output
 - [ ] **Phase 13: AI Content & Voice** - Better AI deliverables and voice integration
 - [ ] **Phase 14: Homepage & SEO** - Public-facing page updates and meta-data
 - [ ] **Phase 15: Billing, Knowledge Base & Platform** - Billing options, Fireflies ingestion, analytics categories, reaction UX
@@ -48,8 +48,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 12-01-PLAN.md -- Native text PDF engine + rewrite single-message and thread exports (EXPORT-01, EXPORT-02, EXPORT-03)
-- [ ] 12-02-PLAN.md -- Clipboard copy markdown stripping for clean paste output (EXPORT-04)
+- [x] 12-01-PLAN.md -- Native text PDF engine + rewrite single-message and thread exports (EXPORT-01, EXPORT-02, EXPORT-03)
+- [x] 12-02-PLAN.md -- Clipboard copy markdown stripping for clean paste output (EXPORT-04)
 
 ### Phase 13: AI Content & Voice
 **Goal**: AI executives produce actionable deliverables (not just strategy) and voice features work seamlessly with chat
@@ -106,7 +106,7 @@ Phase 11 first (critical fixes), then 12-15. Phases 12, 13, 14 can run in parall
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 11. Critical Fixes & Auth | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 12. Export & Copy Quality | v1.2 | 0/2 | Not started | - |
+| 12. Export & Copy Quality | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 13. AI Content & Voice | v1.2 | 0/2 | Not started | - |
 | 14. Homepage & SEO | v1.2 | 0/2 | Not started | - |
 | 15. Billing, KB & Platform | v1.2 | 0/3 | Not started | - |
