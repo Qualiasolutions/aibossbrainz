@@ -1,9 +1,9 @@
 "use server";
 
-import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
-import { checkAuthRateLimit } from "@/lib/security/rate-limiter";
 import { headers } from "next/headers";
+import { z } from "zod";
+import { checkAuthRateLimit } from "@/lib/security/rate-limiter";
+import { createClient } from "@/lib/supabase/server";
 
 const authFormSchema = z.object({
   email: z.string().email(),

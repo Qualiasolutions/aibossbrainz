@@ -21,7 +21,10 @@ export const env = createEnv({
       .min(1, "OPENROUTER_API_KEY is required for AI chat"),
     SUPABASE_SERVICE_ROLE_KEY: z
       .string()
-      .min(1, "SUPABASE_SERVICE_ROLE_KEY is required for server-side operations")
+      .min(
+        1,
+        "SUPABASE_SERVICE_ROLE_KEY is required for server-side operations",
+      )
       .optional(),
     STRIPE_SECRET_KEY: z
       .string()
@@ -29,7 +32,10 @@ export const env = createEnv({
       .optional(),
     STRIPE_WEBHOOK_SECRET: z
       .string()
-      .min(1, "STRIPE_WEBHOOK_SECRET is required for Stripe webhook verification")
+      .min(
+        1,
+        "STRIPE_WEBHOOK_SECRET is required for Stripe webhook verification",
+      )
       .optional(),
     ELEVENLABS_API_KEY: z.string().optional(),
     TAVILY_API_KEY: z.string().optional(),
@@ -43,7 +49,9 @@ export const env = createEnv({
     // Email notifications
     RESEND_FROM_EMAIL: z.string().email().optional(),
     // Logging
-    LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).optional(),
+    LOG_LEVEL: z
+      .enum(["fatal", "error", "warn", "info", "debug", "trace"])
+      .optional(),
     // Testing
     PLAYWRIGHT: z.string().optional(),
     CI_PLAYWRIGHT: z.string().optional(),

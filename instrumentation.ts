@@ -1,5 +1,5 @@
-import { registerOTel } from "@vercel/otel";
 import * as Sentry from "@sentry/nextjs";
+import { registerOTel } from "@vercel/otel";
 import { env } from "@/lib/env";
 
 export async function register() {
@@ -49,7 +49,13 @@ export async function register() {
 
         // Remove sensitive data from extras
         if (event.extra) {
-          const sensitiveKeys = ["password", "token", "secret", "apiKey", "key"];
+          const sensitiveKeys = [
+            "password",
+            "token",
+            "secret",
+            "apiKey",
+            "key",
+          ];
           for (const key of Object.keys(event.extra)) {
             if (sensitiveKeys.some((s) => key.toLowerCase().includes(s))) {
               event.extra[key] = "[REDACTED]";

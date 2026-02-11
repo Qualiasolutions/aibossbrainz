@@ -1,7 +1,10 @@
 import * as Sentry from "@sentry/nextjs";
 
 export async function register() {
-  if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.NEXT_PUBLIC_SENTRY_DSN
+  ) {
     Sentry.init({
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 

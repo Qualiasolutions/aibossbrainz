@@ -1,4 +1,5 @@
 import { MessageSquare, Sparkles, TrendingUp, Users } from "lucide-react";
+import { redirect } from "next/navigation";
 import { ConversationsPreview } from "@/components/admin/conversations-preview";
 import {
   DashboardGrid,
@@ -11,20 +12,19 @@ import { SubscriptionStats } from "@/components/admin/subscription-stats";
 import { SupportPreview } from "@/components/admin/support-preview";
 import { UsersPreview } from "@/components/admin/users-preview";
 import {
+  type ActivityLogEntry,
+  type AdminStats,
+  type ConversationPreview,
   getAdminStats,
   getRecentActivity,
   getRecentConversations,
   getRecentSupportTickets,
   getRecentUsers,
   getSubscriptionStats,
-  type AdminStats,
-  type ActivityLogEntry,
   type SubscriptionStats as SubscriptionStatsType,
-  type UserPreview,
-  type ConversationPreview,
   type SupportTicketPreview,
+  type UserPreview,
 } from "@/lib/admin/queries";
-import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +38,9 @@ async function safeGetAdminStats(): Promise<AdminStats | null> {
   }
 }
 
-async function safeGetRecentActivity(limit: number): Promise<ActivityLogEntry[]> {
+async function safeGetRecentActivity(
+  limit: number,
+): Promise<ActivityLogEntry[]> {
   try {
     return await getRecentActivity(limit);
   } catch (error) {
@@ -65,7 +67,9 @@ async function safeGetRecentUsers(limit: number): Promise<UserPreview[]> {
   }
 }
 
-async function safeGetRecentConversations(limit: number): Promise<ConversationPreview[]> {
+async function safeGetRecentConversations(
+  limit: number,
+): Promise<ConversationPreview[]> {
   try {
     return await getRecentConversations(limit);
   } catch (error) {
@@ -74,7 +78,9 @@ async function safeGetRecentConversations(limit: number): Promise<ConversationPr
   }
 }
 
-async function safeGetRecentSupportTickets(limit: number): Promise<SupportTicketPreview[]> {
+async function safeGetRecentSupportTickets(
+  limit: number,
+): Promise<SupportTicketPreview[]> {
   try {
     return await getRecentSupportTickets(limit);
   } catch (error) {
@@ -166,7 +172,21 @@ export default async function AdminDashboard() {
       id: "subscriptions",
       title: "Subscriptions",
       size: "medium",
-      component: <SubscriptionStats stats={subscriptionStats ?? { trial: 0, monthly: 0, annual: 0, lifetime: 0, expired: 0, mrr: 0, activeSubscribers: 0 }} />,
+      component: (
+        <SubscriptionStats
+          stats={
+            subscriptionStats ?? {
+              trial: 0,
+              monthly: 0,
+              annual: 0,
+              lifetime: 0,
+              expired: 0,
+              mrr: 0,
+              activeSubscribers: 0,
+            }
+          }
+        />
+      ),
     },
     {
       id: "executive-usage",

@@ -262,7 +262,9 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-200"
           >
             <div className="size-1.5 rounded-full bg-green-500" />
-            <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">Live</span>
+            <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wide">
+              Live
+            </span>
           </motion.div>
         </div>
 
@@ -287,8 +289,12 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
                 </svg>
               </div>
               <div>
-                <span className="text-xs font-bold text-stone-900">Interactive Demo</span>
-                <p className="text-[10px] text-stone-500">Try it free, no signup</p>
+                <span className="text-xs font-bold text-stone-900">
+                  Interactive Demo
+                </span>
+                <p className="text-[10px] text-stone-500">
+                  Try it free, no signup
+                </p>
               </div>
             </div>
 
@@ -300,7 +306,11 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
                   img: content.executives.alex_image,
                   label: content.executives.alex_name.split(" ")[0],
                 },
-                { id: "kim" as const, img: content.executives.kim_image, label: content.executives.kim_name.split(" ")[0] },
+                {
+                  id: "kim" as const,
+                  img: content.executives.kim_image,
+                  label: content.executives.kim_name.split(" ")[0],
+                },
                 { id: "collaborative" as const, icon: true, label: "Both" },
               ].map((exec) => (
                 <motion.button
@@ -353,7 +363,11 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
                     <motion.div
                       layoutId="activeExec"
                       className="absolute inset-0 rounded-full ring-2 ring-red-400"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                      }}
                     />
                   )}
                 </motion.button>
@@ -380,7 +394,11 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
               >
                 <motion.div
                   animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
                   className="mb-5 relative"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-rose-400 rounded-full blur-xl opacity-30" />
@@ -405,7 +423,8 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
                   Experience AI Executive Consulting
                 </h3>
                 <p className="mb-5 max-w-xs text-sm text-stone-500 leading-relaxed">
-                  Ask our AI executives anything about marketing strategy, sales optimization, or business growth.
+                  Ask our AI executives anything about marketing strategy, sales
+                  optimization, or business growth.
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
                   {suggestedQuestions.map((q, i) => (
@@ -443,10 +462,13 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
                     <div className="max-w-[90%] sm:max-w-[85%]">
                       <div className="relative flex flex-col gap-2 rounded-2xl border border-stone-200/50 bg-gradient-to-br from-white to-stone-50/80 px-4 py-3 shadow-sm">
                         {/* Gradient accent bar */}
-                        <div className={cn(
-                          "absolute bottom-3 left-0 top-3 w-1 rounded-full bg-gradient-to-b",
-                          getExecutiveInfo(message.botType || "collaborative").gradient
-                        )} />
+                        <div
+                          className={cn(
+                            "absolute bottom-3 left-0 top-3 w-1 rounded-full bg-gradient-to-b",
+                            getExecutiveInfo(message.botType || "collaborative")
+                              .gradient,
+                          )}
+                        />
 
                         <div className="flex items-center gap-2.5 pl-3">
                           <div className="relative">
@@ -519,10 +541,12 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
               >
                 <div className="max-w-[85%]">
                   <div className="relative flex flex-col gap-2 rounded-2xl border border-stone-200/50 bg-gradient-to-br from-white to-stone-50/80 px-4 py-3 shadow-sm">
-                    <div className={cn(
-                      "absolute bottom-3 left-0 top-3 w-1 rounded-full bg-gradient-to-b",
-                      getExecutiveInfo(selectedExec).gradient
-                    )} />
+                    <div
+                      className={cn(
+                        "absolute bottom-3 left-0 top-3 w-1 rounded-full bg-gradient-to-b",
+                        getExecutiveInfo(selectedExec).gradient,
+                      )}
+                    />
                     <div className="flex items-center gap-2.5 pl-3">
                       <div className="relative">
                         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-400 to-rose-500 opacity-20 blur-sm animate-pulse" />
@@ -551,7 +575,7 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
                                   ? "bg-gradient-to-br from-red-500 to-rose-600"
                                   : selectedExec === "kim"
                                     ? "bg-gradient-to-br from-stone-700 to-stone-900"
-                                    : "bg-gradient-to-br from-red-500 to-stone-800"
+                                    : "bg-gradient-to-br from-red-500 to-stone-800",
                               )}
                             />
                           ))}
@@ -648,7 +672,10 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
                 <span>{`${5 - messages.filter((m) => m.role === "user").length} free messages remaining`}</span>
               )}
               {" • "}
-              <Link href="/login" className="text-red-500 hover:text-red-600 underline decoration-red-300 underline-offset-2 font-semibold">
+              <Link
+                href="/login"
+                className="text-red-500 hover:text-red-600 underline decoration-red-300 underline-offset-2 font-semibold"
+              >
                 Sign up for unlimited
               </Link>
             </p>

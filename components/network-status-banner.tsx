@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Wifi, WifiOff, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 /**
  * Network status banner that shows when connection is lost or restored.
@@ -21,7 +21,10 @@ export function NetworkStatusBanner() {
   const pathname = usePathname();
 
   // Don't show on public/demo pages where network status is less critical
-  const isProtectedRoute = pathname?.startsWith("/chat") || pathname?.startsWith("/new") || pathname?.startsWith("/analytics");
+  const isProtectedRoute =
+    pathname?.startsWith("/chat") ||
+    pathname?.startsWith("/new") ||
+    pathname?.startsWith("/analytics");
 
   useEffect(() => {
     // Initialize online status
@@ -73,9 +76,7 @@ export function NetworkStatusBanner() {
   return (
     <div
       className={`fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-4 py-2 transition-all duration-300 ${
-        isOnline
-          ? "bg-green-600 text-white"
-          : "bg-red-600 text-white"
+        isOnline ? "bg-green-600 text-white" : "bg-red-600 text-white"
       }`}
     >
       <div className="flex items-center gap-2 mx-auto">

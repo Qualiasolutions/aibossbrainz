@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { safeParseJson } from "@/lib/api-utils";
 import { apiRequestLogger } from "@/lib/api-logging";
+import { safeParseJson } from "@/lib/api-utils";
 import {
   ensureUserExists,
   getUserProfile,
@@ -13,10 +13,22 @@ import type { BotType } from "@/lib/supabase/types";
 
 // Validation schema for profile updates
 const profileUpdateSchema = z.object({
-  displayName: z.string().max(100, "Display name too long").optional().nullable(),
-  companyName: z.string().max(200, "Company name too long").optional().nullable(),
+  displayName: z
+    .string()
+    .max(100, "Display name too long")
+    .optional()
+    .nullable(),
+  companyName: z
+    .string()
+    .max(200, "Company name too long")
+    .optional()
+    .nullable(),
   industry: z.string().max(100, "Industry too long").optional().nullable(),
-  businessGoals: z.string().max(2000, "Business goals too long").optional().nullable(),
+  businessGoals: z
+    .string()
+    .max(2000, "Business goals too long")
+    .optional()
+    .nullable(),
   preferredBotType: z
     .enum(["alexandria", "kim", "collaborative"])
     .optional()
@@ -26,12 +38,37 @@ const profileUpdateSchema = z.object({
     .max(2000, "Products/services description too long")
     .optional()
     .nullable(),
-  websiteUrl: z.string().url("Invalid URL format").or(z.literal("")).optional().nullable(),
-  targetMarket: z.string().max(500, "Target market too long").optional().nullable(),
-  competitors: z.string().max(500, "Competitors too long").optional().nullable(),
-  annualRevenue: z.string().max(50, "Revenue range too long").optional().nullable(),
-  yearsInBusiness: z.string().max(50, "Years in business too long").optional().nullable(),
-  employeeCount: z.string().max(50, "Employee count too long").optional().nullable(),
+  websiteUrl: z
+    .string()
+    .url("Invalid URL format")
+    .or(z.literal(""))
+    .optional()
+    .nullable(),
+  targetMarket: z
+    .string()
+    .max(500, "Target market too long")
+    .optional()
+    .nullable(),
+  competitors: z
+    .string()
+    .max(500, "Competitors too long")
+    .optional()
+    .nullable(),
+  annualRevenue: z
+    .string()
+    .max(50, "Revenue range too long")
+    .optional()
+    .nullable(),
+  yearsInBusiness: z
+    .string()
+    .max(50, "Years in business too long")
+    .optional()
+    .nullable(),
+  employeeCount: z
+    .string()
+    .max(50, "Employee count too long")
+    .optional()
+    .nullable(),
   completeOnboarding: z.boolean().optional(),
 });
 
@@ -119,7 +156,9 @@ export const POST = withCsrf(async (request: Request) => {
       companyName: d.companyName ?? undefined,
       industry: d.industry ?? undefined,
       businessGoals: d.businessGoals ?? undefined,
-      preferredBotType: (d.preferredBotType ?? undefined) as BotType | undefined,
+      preferredBotType: (d.preferredBotType ?? undefined) as
+        | BotType
+        | undefined,
       productsServices: d.productsServices ?? undefined,
       websiteUrl: d.websiteUrl || undefined,
       targetMarket: d.targetMarket ?? undefined,
@@ -130,7 +169,10 @@ export const POST = withCsrf(async (request: Request) => {
       completeOnboarding: d.completeOnboarding,
     });
 
-    apiLog.success({ userId: user.id, completeOnboarding: d.completeOnboarding });
+    apiLog.success({
+      userId: user.id,
+      completeOnboarding: d.completeOnboarding,
+    });
 
     return Response.json({ success: true });
   } catch (error) {

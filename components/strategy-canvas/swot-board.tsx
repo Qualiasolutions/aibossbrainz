@@ -185,14 +185,28 @@ export function SwotBoard({ compact = false }: SwotBoardProps) {
       let position = marginTop;
 
       // First page
-      pdf.addImage(imgData, "PNG", marginLeft, position, contentWidth, imgHeight);
+      pdf.addImage(
+        imgData,
+        "PNG",
+        marginLeft,
+        position,
+        contentWidth,
+        imgHeight,
+      );
       heightLeft -= contentHeight;
 
       // Additional pages
       while (heightLeft > 0) {
         position = marginTop - (imgHeight - heightLeft);
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", marginLeft, position, contentWidth, imgHeight);
+        pdf.addImage(
+          imgData,
+          "PNG",
+          marginLeft,
+          position,
+          contentWidth,
+          imgHeight,
+        );
         heightLeft -= contentHeight;
       }
 

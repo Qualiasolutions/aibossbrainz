@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Bookmark,
-  HelpCircle,
-  Lightbulb,
-  Plus,
-  Rocket,
-} from "lucide-react";
+import { Bookmark, HelpCircle, Lightbulb, Plus, Rocket } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";

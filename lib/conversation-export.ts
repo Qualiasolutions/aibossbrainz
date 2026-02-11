@@ -76,11 +76,7 @@ export async function exportConversationToPDF(
     } else {
       doc.setTextColor(185, 28, 28);
     }
-    doc.text(
-      isUser ? "You" : msgPersonality.name,
-      STYLES.marginLeft,
-      y,
-    );
+    doc.text(isUser ? "You" : msgPersonality.name, STYLES.marginLeft, y);
     y += 6;
 
     // Message content

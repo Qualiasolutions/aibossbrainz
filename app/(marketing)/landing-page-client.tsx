@@ -74,7 +74,10 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
     <section className="relative min-h-[100svh] overflow-hidden bg-gradient-to-br from-white via-stone-50/50 to-white">
       {/* Animated gradient mesh background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-[800px] h-[800px] bg-gradient-to-br from-red-50/40 via-rose-50/20 to-transparent rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div
+          className="absolute top-0 right-1/4 w-[800px] h-[800px] bg-gradient-to-br from-red-50/40 via-rose-50/20 to-transparent rounded-full blur-[100px] animate-pulse"
+          style={{ animationDuration: "8s" }}
+        />
         <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-stone-100/60 to-transparent rounded-full blur-[80px]" />
       </div>
 
@@ -172,7 +175,11 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-4 h-4 text-red-500 fill-current" viewBox="0 0 20 20">
+                    <svg
+                      key={i}
+                      className="w-4 h-4 text-red-500 fill-current"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                     </svg>
                   ))}
@@ -257,7 +264,10 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
   ];
 
   return (
-    <section ref={ref} className="relative bg-gradient-to-b from-stone-50 to-white py-24 sm:py-32 lg:py-40 overflow-hidden">
+    <section
+      ref={ref}
+      className="relative bg-gradient-to-b from-stone-50 to-white py-24 sm:py-32 lg:py-40 overflow-hidden"
+    >
       {/* Background decoration */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-red-100/50 rounded-full blur-[120px]" />
@@ -286,8 +296,19 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
               <span className="relative z-10 bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
                 {content.executives.section_title_highlight}
               </span>
-              <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
-                <path d="M0 4C50 2 100 6 150 4C175 3 190 5 200 4" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="text-red-200" />
+              <svg
+                className="absolute -bottom-2 left-0 w-full"
+                height="8"
+                viewBox="0 0 200 8"
+                fill="none"
+              >
+                <path
+                  d="M0 4C50 2 100 6 150 4C175 3 190 5 200 4"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  className="text-red-200"
+                />
               </svg>
             </span>
           </h2>
@@ -315,7 +336,9 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
                 <div className="w-3 h-3 rounded-full bg-amber-400" />
                 <div className="w-3 h-3 rounded-full bg-stone-300" />
               </div>
-              <span className="ml-2 text-sm font-medium text-stone-500">Executive Team</span>
+              <span className="ml-2 text-sm font-medium text-stone-500">
+                Executive Team
+              </span>
             </div>
 
             {/* Chat-style messages */}
@@ -329,7 +352,7 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
                   className={cn(
                     "flex gap-4 p-5 rounded-2xl border",
                     exec.accentLight,
-                    exec.borderColor
+                    exec.borderColor,
                   )}
                 >
                   {/* Avatar */}
@@ -350,7 +373,12 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
                   {/* Message content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className={cn("text-lg sm:text-xl font-bold", exec.textColor)}>
+                      <h3
+                        className={cn(
+                          "text-lg sm:text-xl font-bold",
+                          exec.textColor,
+                        )}
+                      >
                         {exec.name}
                       </h3>
                       <span className="text-xs font-bold uppercase tracking-wider text-stone-400">
@@ -474,7 +502,10 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
   ];
 
   return (
-    <section ref={ref} className="relative bg-stone-950 py-24 sm:py-32 lg:py-40 overflow-hidden">
+    <section
+      ref={ref}
+      className="relative bg-stone-950 py-24 sm:py-32 lg:py-40 overflow-hidden"
+    >
       {/* Animated background */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:64px_64px]" />
@@ -508,13 +539,19 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
               key={b.title}
               initial={{ opacity: 0, y: 40 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.1 + i * 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              transition={{
+                delay: 0.1 + i * 0.12,
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               className="group relative flex flex-col bg-stone-900/50 backdrop-blur-sm p-8 transition-all duration-500 hover:bg-stone-900/80"
             >
               {/* Hover glow */}
-              <div className={cn(
-                "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-b from-transparent via-white/5 to-transparent rounded-xl",
-              )} />
+              <div
+                className={cn(
+                  "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-b from-transparent via-white/5 to-transparent rounded-xl",
+                )}
+              />
 
               {/* Number */}
               <span className="mb-6 text-xs font-bold tabular-nums text-stone-600 group-hover:text-stone-500 transition-colors">
@@ -527,7 +564,7 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
                 transition={{ duration: 0.2 }}
                 className={cn(
                   "mb-6 flex size-14 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg",
-                  b.gradient
+                  b.gradient,
                 )}
               >
                 <b.icon className="size-6 text-white" />
@@ -594,7 +631,10 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="relative bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 py-24 sm:py-32 lg:py-40 overflow-hidden">
+    <section
+      ref={ref}
+      className="relative bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 py-24 sm:py-32 lg:py-40 overflow-hidden"
+    >
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Grid pattern */}
@@ -670,7 +710,9 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
                   size="lg"
                   className="group relative gap-2 overflow-hidden bg-gradient-to-r from-red-600 to-rose-600 px-10 py-6 text-base font-semibold text-white shadow-2xl shadow-red-600/30 transition-all hover:shadow-red-600/50 hover:scale-105"
                 >
-                  <span className="relative z-10">{content.cta.cta_primary_text}</span>
+                  <span className="relative z-10">
+                    {content.cta.cta_primary_text}
+                  </span>
                   <ArrowRight className="relative z-10 size-4 transition-transform group-hover:translate-x-1" />
                   <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-rose-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Button>
@@ -694,15 +736,35 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
               className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-stone-500"
             >
               <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-5 h-5 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Start for free</span>
               </div>
               <div className="w-px h-4 bg-stone-700" />
               <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-5 h-5 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Cancel anytime</span>
               </div>

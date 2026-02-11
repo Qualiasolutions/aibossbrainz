@@ -279,7 +279,8 @@ function renderCodeBlock(
 
   // Page break check for entire code block (if it fits on a page)
   if (
-    blockHeight < STYLES.pageHeight - STYLES.marginTop - STYLES.marginBottom
+    blockHeight <
+    STYLES.pageHeight - STYLES.marginTop - STYLES.marginBottom
   ) {
     if (y + blockHeight > STYLES.pageHeight - STYLES.marginBottom) {
       doc.addPage();
@@ -311,9 +312,7 @@ function renderCodeBlock(
       doc.addPage();
       codeY = STYLES.marginTop + padding;
       // Draw continuation background
-      const remainingLines =
-        allWrapped.length -
-        allWrapped.indexOf(line);
+      const remainingLines = allWrapped.length - allWrapped.indexOf(line);
       const remainHeight = remainingLines * lineHeightMm + padding * 2;
       doc.setFillColor(...STYLES.codeBackground);
       doc.roundedRect(
@@ -381,12 +380,7 @@ function renderHorizontalRule(doc: jsPDF, y: number): number {
   y += 3;
   doc.setDrawColor(...STYLES.dividerColor);
   doc.setLineWidth(0.5);
-  doc.line(
-    STYLES.marginLeft,
-    y,
-    STYLES.pageWidth - STYLES.marginRight,
-    y,
-  );
+  doc.line(STYLES.marginLeft, y, STYLES.pageWidth - STYLES.marginRight, y);
   y += 3 + STYLES.blockSpacing;
   return y;
 }

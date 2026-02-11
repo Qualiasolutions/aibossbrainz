@@ -120,8 +120,8 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
           string,
           Array<{ id: string; content: string; color: string }>
         > = existingCanvas?.data &&
-          typeof existingCanvas.data === "object" &&
-          !Array.isArray(existingCanvas.data)
+        typeof existingCanvas.data === "object" &&
+        !Array.isArray(existingCanvas.data)
           ? (existingCanvas.data as Record<
               string,
               Array<{ id: string; content: string; color: string }>

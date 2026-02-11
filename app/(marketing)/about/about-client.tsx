@@ -15,22 +15,26 @@ const features = [
   {
     icon: Zap,
     title: "Instant Expert Advice",
-    description: "Get strategic guidance in seconds, not days. Our AI executives draw from 40+ years of combined Fortune 500 experience.",
+    description:
+      "Get strategic guidance in seconds, not days. Our AI executives draw from 40+ years of combined Fortune 500 experience.",
   },
   {
     icon: Users,
     title: "Dual Executive Perspectives",
-    description: "Access both marketing brilliance (Alexandria) and sales mastery (Kim) - or collaborate with both simultaneously.",
+    description:
+      "Access both marketing brilliance (Alexandria) and sales mastery (Kim) - or collaborate with both simultaneously.",
   },
   {
     icon: Building2,
     title: "Fortune 500 DNA",
-    description: "Strategies and frameworks refined at the world's largest companies, now available for your business.",
+    description:
+      "Strategies and frameworks refined at the world's largest companies, now available for your business.",
   },
   {
     icon: Award,
     title: "Proven Results",
-    description: "Hundreds of brands and founders have used our methodologies to scale their businesses effectively.",
+    description:
+      "Hundreds of brands and founders have used our methodologies to scale their businesses effectively.",
   },
 ];
 
@@ -74,10 +78,10 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
             {...fadeIn(2)}
             className="mt-8 max-w-2xl mx-auto text-lg leading-relaxed text-stone-600"
           >
-            We built AI Boss Brainz to give founders and business leaders instant access
-            to executive-level strategy without the premium price tag. Drawing from 40+
-            years of combined Fortune 500 experience, our AI executives help you make
-            smarter decisions faster.
+            We built AI Boss Brainz to give founders and business leaders
+            instant access to executive-level strategy without the premium price
+            tag. Drawing from 40+ years of combined Fortune 500 experience, our
+            AI executives help you make smarter decisions faster.
           </motion.p>
 
           <motion.div {...fadeIn(3)} className="mt-10">
@@ -108,19 +112,20 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
               Why We Built This
             </h2>
             <p className="text-stone-600 leading-relaxed mb-6">
-              Every founder faces the same challenge: you need expert guidance, but hiring
-              a CMO or CSO costs hundreds of thousands per year. Consultants are expensive
-              and slow. Generic AI tools lack real business context.
+              Every founder faces the same challenge: you need expert guidance,
+              but hiring a CMO or CSO costs hundreds of thousands per year.
+              Consultants are expensive and slow. Generic AI tools lack real
+              business context.
             </p>
             <p className="text-stone-600 leading-relaxed mb-6">
-              AI Boss Brainz bridges that gap. Our AI executives embody the strategies,
-              frameworks, and thinking patterns of seasoned Fortune 500 leaders—available
-              instantly whenever you need them.
+              AI Boss Brainz bridges that gap. Our AI executives embody the
+              strategies, frameworks, and thinking patterns of seasoned Fortune
+              500 leaders—available instantly whenever you need them.
             </p>
             <p className="text-stone-600 leading-relaxed">
-              Whether you&apos;re stuck on a go-to-market strategy, need to improve sales
-              conversion, or want to refine your brand positioning—our AI executives are
-              ready to help, 24/7.
+              Whether you&apos;re stuck on a go-to-market strategy, need to
+              improve sales conversion, or want to refine your brand
+              positioning—our AI executives are ready to help, 24/7.
             </p>
           </motion.div>
         </div>
@@ -210,8 +215,9 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
                 {content.executives.alex_role}
               </p>
               <p className="text-stone-600 leading-relaxed mb-6">
-                Brand strategist with Fortune 500 experience. Specializes in go-to-market
-                strategy, brand positioning, and digital campaigns that drive growth.
+                Brand strategist with Fortune 500 experience. Specializes in
+                go-to-market strategy, brand positioning, and digital campaigns
+                that drive growth.
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 {content.executives.alex_expertise.split(",").map((skill) => (
@@ -250,8 +256,9 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
                 {content.executives.kim_role}
               </p>
               <p className="text-stone-600 leading-relaxed mb-6">
-                Revenue architect and sales optimization expert. Helps build pipelines,
-                improve conversion rates, and close deals more effectively.
+                Revenue architect and sales optimization expert. Helps build
+                pipelines, improve conversion rates, and close deals more
+                effectively.
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 {content.executives.kim_expertise.split(",").map((skill) => (
@@ -281,8 +288,8 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
               Ready to Transform Your Business Strategy?
             </h2>
             <p className="text-lg text-stone-400 mb-10 max-w-2xl mx-auto">
-              Join hundreds of founders and entrepreneurs who are already using AI Boss
-              Brainz to make smarter decisions, faster.
+              Join hundreds of founders and entrepreneurs who are already using
+              AI Boss Brainz to make smarter decisions, faster.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login">

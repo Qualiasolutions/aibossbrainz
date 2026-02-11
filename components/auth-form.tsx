@@ -1,9 +1,9 @@
 import Form from "next/form";
 
 import { cn } from "@/lib/utils";
+import { PasswordInput } from "./password-input";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { PasswordInput } from "./password-input";
 
 export function AuthForm({
   action,

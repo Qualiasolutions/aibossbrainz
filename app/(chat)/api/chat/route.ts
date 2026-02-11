@@ -30,6 +30,8 @@ import { strategyCanvas } from "@/lib/ai/tools/strategy-canvas";
 import { updateDocument } from "@/lib/ai/tools/update-document";
 import { webSearch } from "@/lib/ai/tools/web-search";
 import { classifyTopic } from "@/lib/ai/topic-classifier";
+import { recordAnalytics } from "@/lib/analytics/queries";
+import { apiRequestLogger, getApiLogger } from "@/lib/api-logging";
 import type { Session } from "@/lib/artifacts/server";
 import type { BotType, FocusMode } from "@/lib/bot-personalities";
 import { isProductionEnvironment } from "@/lib/constants";
@@ -52,14 +54,12 @@ import {
 } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
-import { apiRequestLogger, getApiLogger } from "@/lib/api-logging";
-import { recordAnalytics } from "@/lib/analytics/queries";
-import { chatBreadcrumb } from "@/lib/sentry";
 import {
   checkRateLimit,
   getRateLimitHeaders,
 } from "@/lib/security/rate-limiter";
 import { withCsrf } from "@/lib/security/with-csrf";
+import { chatBreadcrumb } from "@/lib/sentry";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/types";
 import type { ChatMessage } from "@/lib/types";
@@ -387,7 +387,10 @@ export const POST = withCsrf(async (request: Request) => {
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
-        apiLog.success({ phase: "streaming_complete", messageCount: messages.length });
+        apiLog.success({
+          phase: "streaming_complete",
+          messageCount: messages.length,
+        });
 
         // Track message received breadcrumb
         chatBreadcrumb.messageReceived(id, selectedBotType);

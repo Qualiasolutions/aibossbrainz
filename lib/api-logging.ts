@@ -3,16 +3,20 @@
  * Provides request-scoped logging with request IDs and user context
  */
 
-import { type Logger } from "pino";
-import { logger as baseLogger } from "./logger";
 import { headers } from "next/headers";
+import type { Logger } from "pino";
+import { logger as baseLogger } from "./logger";
 
 /**
  * Get or create a request-scoped logger
  * This reads the x-request-id header that middleware sets
  */
-export async function getApiLogger(context?: { requestId?: string; userId?: string; route?: string }): Promise<Logger> {
-  const requestId = context?.requestId || await getRequestIdFromHeaders();
+export async function getApiLogger(context?: {
+  requestId?: string;
+  userId?: string;
+  route?: string;
+}): Promise<Logger> {
+  const requestId = context?.requestId || (await getRequestIdFromHeaders());
   const childLogger = baseLogger.child({
     ...(requestId && { requestId }),
     ...(context?.userId && { userId: context.userId }),
@@ -84,11 +88,17 @@ export function apiRequestLogger(route: string) {
         phase: "error",
         duration,
         ...context,
-        error: error instanceof Error ? {
-          name: error.name,
-          message: error.message,
-          stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
-        } : { error: String(error) },
+        error:
+          error instanceof Error
+            ? {
+                name: error.name,
+                message: error.message,
+                stack:
+                  process.env.NODE_ENV === "development"
+                    ? error.stack
+                    : undefined,
+              }
+            : { error: String(error) },
       };
       childLogger?.error(errorContext, `Request failed: ${route}`);
     },
@@ -121,7 +131,10 @@ export function apiRequestLogger(route: string) {
  */
 export async function withApiLogging<T>(
   route: string,
-  handler: (request: Request, logger: ReturnType<typeof apiRequestLogger>) => Promise<T>,
+  handler: (
+    request: Request,
+    logger: ReturnType<typeof apiRequestLogger>,
+  ) => Promise<T>,
   request: Request,
   context?: { userId?: string },
 ): Promise<T> {
@@ -155,10 +168,16 @@ export function logExternalCall(
 
   return {
     start() {
-      childLogger.info({ phase: "start" }, `${service} ${context.operation} started`);
+      childLogger.info(
+        { phase: "start" },
+        `${service} ${context.operation} started`,
+      );
     },
     success(data?: Record<string, unknown>) {
-      childLogger.info({ phase: "complete", ...data }, `${service} ${context.operation} completed`);
+      childLogger.info(
+        { phase: "complete", ...data },
+        `${service} ${context.operation} completed`,
+      );
     },
     error(error: unknown, data?: Record<string, unknown>) {
       childLogger.error(
@@ -181,7 +200,11 @@ export function logDbQuery(
   operation: "select" | "insert" | "update" | "delete",
 ) {
   return {
-    execute(context?: { requestId?: string; userId?: string; recordCount?: number }) {
+    execute(context?: {
+      requestId?: string;
+      userId?: string;
+      recordCount?: number;
+    }) {
       const requestId = context?.requestId || crypto.randomUUID().slice(0, 8);
       const childLogger = baseLogger.child({
         requestId,

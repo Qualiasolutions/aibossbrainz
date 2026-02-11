@@ -227,50 +227,53 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     }
   }, [csrfFetch, deleteId, id, mutate, router]);
 
-  const handlePinToggle = useCallback(async (chatId: string, isPinned: boolean) => {
-    // Optimistically update the SWR cache
-    mutate(
-      (chatHistories) => {
-        if (chatHistories) {
-          return chatHistories.map((chatHistory) => ({
-            ...chatHistory,
-            chats: chatHistory.chats.map((chat) =>
-              chat.id === chatId ? { ...chat, isPinned } : chat,
-            ),
-          }));
-        }
-      },
-      { revalidate: false },
-    );
-
-    try {
-      const response = await csrfFetch("/api/chat", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: chatId, isPinned }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update pin status");
-      }
-    } catch (_error) {
-      // Rollback on failure
+  const handlePinToggle = useCallback(
+    async (chatId: string, isPinned: boolean) => {
+      // Optimistically update the SWR cache
       mutate(
         (chatHistories) => {
           if (chatHistories) {
             return chatHistories.map((chatHistory) => ({
               ...chatHistory,
               chats: chatHistory.chats.map((chat) =>
-                chat.id === chatId ? { ...chat, isPinned: !isPinned } : chat,
+                chat.id === chatId ? { ...chat, isPinned } : chat,
               ),
             }));
           }
         },
         { revalidate: false },
       );
-      toast.error(isPinned ? "Failed to pin chat" : "Failed to unpin chat");
-    }
-  }, [csrfFetch, mutate]);
+
+      try {
+        const response = await csrfFetch("/api/chat", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: chatId, isPinned }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update pin status");
+        }
+      } catch (_error) {
+        // Rollback on failure
+        mutate(
+          (chatHistories) => {
+            if (chatHistories) {
+              return chatHistories.map((chatHistory) => ({
+                ...chatHistory,
+                chats: chatHistory.chats.map((chat) =>
+                  chat.id === chatId ? { ...chat, isPinned: !isPinned } : chat,
+                ),
+              }));
+            }
+          },
+          { revalidate: false },
+        );
+        toast.error(isPinned ? "Failed to pin chat" : "Failed to unpin chat");
+      }
+    },
+    [csrfFetch, mutate],
+  );
 
   const onDeleteRequest = useCallback((chatId: string) => {
     setDeleteId(chatId);
@@ -475,157 +478,157 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
                       : `No conversations match "${searchQuery}"`}
                 </div>
               ) : (
-                  <div className="flex flex-col gap-8">
-                    {groupedChats.pinned.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-1.5 px-2 py-1 font-semibold text-[11px] text-red-600 uppercase tracking-[0.25em]">
-                          <svg
-                            className="size-3 fill-red-500"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                          Pinned
-                        </div>
-                        {groupedChats.pinned.map((chat, index) => (
-                          <div key={chat.id}>
-                            <ChatItem
-                              chat={chat}
-                              isActive={chat.id === id}
-                              onDelete={onDeleteRequest}
-                              onPinToggle={handlePinToggle}
-                              setOpenMobile={setOpenMobile}
-                            />
-                            {index < groupedChats.pinned.length - 1 && (
-                              <div className="relative mx-3 my-2">
-                                <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-amber-200/40 to-transparent" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                <div className="flex flex-col gap-8">
+                  {groupedChats.pinned.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-1.5 px-2 py-1 font-semibold text-[11px] text-red-600 uppercase tracking-[0.25em]">
+                        <svg
+                          className="size-3 fill-red-500"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        Pinned
                       </div>
-                    )}
+                      {groupedChats.pinned.map((chat, index) => (
+                        <div key={chat.id}>
+                          <ChatItem
+                            chat={chat}
+                            isActive={chat.id === id}
+                            onDelete={onDeleteRequest}
+                            onPinToggle={handlePinToggle}
+                            setOpenMobile={setOpenMobile}
+                          />
+                          {index < groupedChats.pinned.length - 1 && (
+                            <div className="relative mx-3 my-2">
+                              <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-amber-200/40 to-transparent" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                    {groupedChats.today.length > 0 && (
-                      <div>
-                        <div className="px-2 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
-                          Today
-                        </div>
-                        {groupedChats.today.map((chat, index) => (
-                          <div key={chat.id}>
-                            <ChatItem
-                              chat={chat}
-                              isActive={chat.id === id}
-                              onDelete={onDeleteRequest}
-                              onPinToggle={handlePinToggle}
-                              setOpenMobile={setOpenMobile}
-                            />
-                            {index < groupedChats.today.length - 1 && (
-                              <div className="relative mx-3 my-2">
-                                <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                  {groupedChats.today.length > 0 && (
+                    <div>
+                      <div className="px-2 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
+                        Today
                       </div>
-                    )}
+                      {groupedChats.today.map((chat, index) => (
+                        <div key={chat.id}>
+                          <ChatItem
+                            chat={chat}
+                            isActive={chat.id === id}
+                            onDelete={onDeleteRequest}
+                            onPinToggle={handlePinToggle}
+                            setOpenMobile={setOpenMobile}
+                          />
+                          {index < groupedChats.today.length - 1 && (
+                            <div className="relative mx-3 my-2">
+                              <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                    {groupedChats.yesterday.length > 0 && (
-                      <div>
-                        <div className="px-2 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
-                          Yesterday
-                        </div>
-                        {groupedChats.yesterday.map((chat, index) => (
-                          <div key={chat.id}>
-                            <ChatItem
-                              chat={chat}
-                              isActive={chat.id === id}
-                              onDelete={onDeleteRequest}
-                              onPinToggle={handlePinToggle}
-                              setOpenMobile={setOpenMobile}
-                            />
-                            {index < groupedChats.yesterday.length - 1 && (
-                              <div className="relative mx-3 my-2">
-                                <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                  {groupedChats.yesterday.length > 0 && (
+                    <div>
+                      <div className="px-2 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
+                        Yesterday
                       </div>
-                    )}
+                      {groupedChats.yesterday.map((chat, index) => (
+                        <div key={chat.id}>
+                          <ChatItem
+                            chat={chat}
+                            isActive={chat.id === id}
+                            onDelete={onDeleteRequest}
+                            onPinToggle={handlePinToggle}
+                            setOpenMobile={setOpenMobile}
+                          />
+                          {index < groupedChats.yesterday.length - 1 && (
+                            <div className="relative mx-3 my-2">
+                              <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                    {groupedChats.lastWeek.length > 0 && (
-                      <div>
-                        <div className="px-3 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
-                          Last 7 days
-                        </div>
-                        {groupedChats.lastWeek.map((chat, index) => (
-                          <div key={chat.id}>
-                            <ChatItem
-                              chat={chat}
-                              isActive={chat.id === id}
-                              onDelete={onDeleteRequest}
-                              onPinToggle={handlePinToggle}
-                              setOpenMobile={setOpenMobile}
-                            />
-                            {index < groupedChats.lastWeek.length - 1 && (
-                              <div className="relative mx-3 my-2">
-                                <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                  {groupedChats.lastWeek.length > 0 && (
+                    <div>
+                      <div className="px-3 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
+                        Last 7 days
                       </div>
-                    )}
+                      {groupedChats.lastWeek.map((chat, index) => (
+                        <div key={chat.id}>
+                          <ChatItem
+                            chat={chat}
+                            isActive={chat.id === id}
+                            onDelete={onDeleteRequest}
+                            onPinToggle={handlePinToggle}
+                            setOpenMobile={setOpenMobile}
+                          />
+                          {index < groupedChats.lastWeek.length - 1 && (
+                            <div className="relative mx-3 my-2">
+                              <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                    {groupedChats.lastMonth.length > 0 && (
-                      <div>
-                        <div className="px-3 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
-                          Last 30 days
-                        </div>
-                        {groupedChats.lastMonth.map((chat, index) => (
-                          <div key={chat.id}>
-                            <ChatItem
-                              chat={chat}
-                              isActive={chat.id === id}
-                              onDelete={onDeleteRequest}
-                              onPinToggle={handlePinToggle}
-                              setOpenMobile={setOpenMobile}
-                            />
-                            {index < groupedChats.lastMonth.length - 1 && (
-                              <div className="relative mx-3 my-2">
-                                <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                  {groupedChats.lastMonth.length > 0 && (
+                    <div>
+                      <div className="px-3 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
+                        Last 30 days
                       </div>
-                    )}
+                      {groupedChats.lastMonth.map((chat, index) => (
+                        <div key={chat.id}>
+                          <ChatItem
+                            chat={chat}
+                            isActive={chat.id === id}
+                            onDelete={onDeleteRequest}
+                            onPinToggle={handlePinToggle}
+                            setOpenMobile={setOpenMobile}
+                          />
+                          {index < groupedChats.lastMonth.length - 1 && (
+                            <div className="relative mx-3 my-2">
+                              <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                    {groupedChats.older.length > 0 && (
-                      <div>
-                        <div className="px-3 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
-                          Older than last month
-                        </div>
-                        {groupedChats.older.map((chat, index) => (
-                          <div key={chat.id}>
-                            <ChatItem
-                              chat={chat}
-                              isActive={chat.id === id}
-                              onDelete={onDeleteRequest}
-                              onPinToggle={handlePinToggle}
-                              setOpenMobile={setOpenMobile}
-                            />
-                            {index < groupedChats.older.length - 1 && (
-                              <div className="relative mx-3 my-2">
-                                <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                  {groupedChats.older.length > 0 && (
+                    <div>
+                      <div className="px-3 py-1 text-neutral-500 font-semibold text-xs uppercase tracking-wide">
+                        Older than last month
                       </div>
-                    )}
-                  </div>
+                      {groupedChats.older.map((chat, index) => (
+                        <div key={chat.id}>
+                          <ChatItem
+                            chat={chat}
+                            isActive={chat.id === id}
+                            onDelete={onDeleteRequest}
+                            onPinToggle={handlePinToggle}
+                            setOpenMobile={setOpenMobile}
+                          />
+                          {index < groupedChats.older.length - 1 && (
+                            <div className="relative mx-3 my-2">
+                              <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
           </SidebarMenu>
 

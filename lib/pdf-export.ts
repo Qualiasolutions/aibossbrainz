@@ -43,12 +43,7 @@ export async function exportToPDF(
     // Divider line
     doc.setDrawColor(...STYLES.dividerColor);
     doc.setLineWidth(0.5);
-    doc.line(
-      STYLES.marginLeft,
-      y,
-      STYLES.pageWidth - STYLES.marginRight,
-      y,
-    );
+    doc.line(STYLES.marginLeft, y, STYLES.pageWidth - STYLES.marginRight, y);
     y += 10;
 
     // Parse markdown and render content blocks
@@ -63,12 +58,7 @@ export async function exportToPDF(
     }
     doc.setDrawColor(...STYLES.dividerColor);
     doc.setLineWidth(0.5);
-    doc.line(
-      STYLES.marginLeft,
-      y,
-      STYLES.pageWidth - STYLES.marginRight,
-      y,
-    );
+    doc.line(STYLES.marginLeft, y, STYLES.pageWidth - STYLES.marginRight, y);
     y += 6;
 
     // Footer text

@@ -1,14 +1,14 @@
 "use client";
 
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { LandingPageCMSContent } from "@/lib/cms/landing-page-types";
+import { cn } from "@/lib/utils";
 
 interface MarketingLayoutClientProps {
   children: React.ReactNode;
@@ -79,12 +79,14 @@ function Header({
                 href={link.href}
                 className="relative px-4 py-2 text-sm font-medium transition-colors group"
               >
-                <span className={cn(
-                  "relative z-10 transition-colors",
-                  pathname === link.href
-                    ? "text-stone-900"
-                    : "text-stone-600 group-hover:text-stone-900",
-                )}>
+                <span
+                  className={cn(
+                    "relative z-10 transition-colors",
+                    pathname === link.href
+                      ? "text-stone-900"
+                      : "text-stone-600 group-hover:text-stone-900",
+                  )}
+                >
                   {link.label}
                 </span>
                 {pathname === link.href && (
@@ -107,7 +109,9 @@ function Header({
                 size="sm"
                 className="relative overflow-hidden bg-gradient-to-r from-red-600 to-red-700 shadow-lg shadow-red-600/20 hover:from-red-700 hover:to-red-800 transition-all hover:shadow-xl hover:shadow-red-600/30 hover:scale-105"
               >
-                <span className="relative z-10">{isLoggedIn ? "Go to Chat" : "Sign In"}</span>
+                <span className="relative z-10">
+                  {isLoggedIn ? "Go to Chat" : "Sign In"}
+                </span>
               </Button>
             </Link>
 

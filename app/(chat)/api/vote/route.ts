@@ -51,7 +51,10 @@ export async function GET(request: Request) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
-    return new ChatSDKError("bad_request:api", "Failed to get votes").toResponse();
+    return new ChatSDKError(
+      "bad_request:api",
+      "Failed to get votes",
+    ).toResponse();
   }
 }
 
@@ -60,10 +63,7 @@ export const PATCH = withCsrf(async (request: Request) => {
     const body = await safeParseJson(request);
     const parsed = voteSchema.safeParse(body);
     if (!parsed.success) {
-      return Response.json(
-        { error: parsed.error.flatten() },
-        { status: 400 },
-      );
+      return Response.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
     const { chatId, messageId, type } = parsed.data;

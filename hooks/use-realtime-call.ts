@@ -39,9 +39,15 @@ export function useRealtimeCall({
   const statusRef = useRef(status);
   const isMutedRef = useRef(isMuted);
   const isSpeakingRef = useRef(isSpeaking);
-  useEffect(() => { statusRef.current = status; }, [status]);
-  useEffect(() => { isMutedRef.current = isMuted; }, [isMuted]);
-  useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+  useEffect(() => {
+    isSpeakingRef.current = isSpeaking;
+  }, [isSpeaking]);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -110,7 +116,11 @@ export function useRealtimeCall({
           audio.onended = () => {
             setIsSpeaking(false);
             // Resume listening after AI finishes speaking
-            if (statusRef.current === "active" && recognitionRef.current && !isMutedRef.current) {
+            if (
+              statusRef.current === "active" &&
+              recognitionRef.current &&
+              !isMutedRef.current
+            ) {
               try {
                 recognitionRef.current.start();
                 setIsListening(true);
@@ -215,7 +225,11 @@ export function useRealtimeCall({
 
       recognition.onend = () => {
         // Restart recognition if call is still active and not muted
-        if (statusRef.current === "active" && !isMutedRef.current && !isSpeakingRef.current) {
+        if (
+          statusRef.current === "active" &&
+          !isMutedRef.current &&
+          !isSpeakingRef.current
+        ) {
           try {
             recognition.start();
           } catch (_e) {
@@ -294,7 +308,11 @@ export function useRealtimeCall({
         setIsListening(false);
       } else {
         // Resume listening if call is active and AI is not speaking
-        if (statusRef.current === "active" && recognitionRef.current && !isSpeakingRef.current) {
+        if (
+          statusRef.current === "active" &&
+          recognitionRef.current &&
+          !isSpeakingRef.current
+        ) {
           try {
             recognitionRef.current.start();
             setIsListening(true);

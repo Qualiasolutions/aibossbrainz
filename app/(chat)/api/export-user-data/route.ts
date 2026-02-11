@@ -1,10 +1,10 @@
+import { recordAnalytics } from "@/lib/analytics/queries";
 import {
   AuditActions,
   AuditResources,
   logAuditWithRequest,
 } from "@/lib/audit/logger";
 import { ChatSDKError } from "@/lib/errors";
-import { recordAnalytics } from "@/lib/analytics/queries";
 import {
   checkRateLimit,
   getRateLimitHeaders,

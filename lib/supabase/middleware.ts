@@ -22,7 +22,8 @@ export function generateRequestId(request: NextRequest): string {
  * This can be imported in API routes to use the request ID from headers
  */
 export function getRequestLogger(request: NextRequest) {
-  const requestId = request.headers.get("x-request-id") || generateRequestId(request);
+  const requestId =
+    request.headers.get("x-request-id") || generateRequestId(request);
   return logger.child({ requestId });
 }
 

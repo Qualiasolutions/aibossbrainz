@@ -235,7 +235,10 @@ export function getRateLimitHeaders(
 /**
  * IP-based rate limit key format for auth endpoints
  */
-function getAuthRateLimitKey(ip: string, action: "login" | "signup" | "reset"): string {
+function getAuthRateLimitKey(
+  ip: string,
+  action: "login" | "signup" | "reset",
+): string {
   const windowStart = Math.floor(Date.now() / (AUTH_RATE_LIMIT_WINDOW * 1000));
   return `authratelimit:${action}:${ip}:${windowStart}`;
 }

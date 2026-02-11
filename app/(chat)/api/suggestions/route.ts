@@ -43,6 +43,9 @@ export async function GET(request: Request) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
-    return new ChatSDKError("bad_request:api", "Failed to get suggestions").toResponse();
+    return new ChatSDKError(
+      "bad_request:api",
+      "Failed to get suggestions",
+    ).toResponse();
   }
 }
