@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** v1.2 Client Feedback Sweep - Phase 14 in progress
+**Current focus:** v1.2 Client Feedback Sweep - Phase 14 complete, all phases done
 
 ## Current Position
 
-Phase: 14 of 15 (Homepage & SEO)
-Plan: 2 of 2 in current phase (14-02 complete, 14-01 running in parallel)
-Status: In progress
-Last activity: 2026-02-11 -- Completed 14-02-PLAN.md (SEO Meta-Data, Contact Tagline & Hero Media CMS)
+Phase: 15 of 15 (all complete)
+Plan: 2 of 2 in phase 14 (both complete)
+Status: v1.2 milestone complete
+Last activity: 2026-02-11 -- Completed 14-01-PLAN.md (Executive Bios, Social Icons, Checkup Section)
 
-Progress: [##########] 91% (10/11 plans, 14-01 still running)
+Progress: [###########] 100% (11/11 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10 (v1.2)
+- Total plans completed: 11 (v1.2)
 - Average duration: 4min
-- Total execution time: 36min
+- Total execution time: 41min
 
 **By Phase:**
 
@@ -30,7 +30,7 @@ Progress: [##########] 91% (10/11 plans, 14-01 still running)
 | 11 | 2/2 | 6min | 3min |
 | 12 | 2/2 | 8min | 4min |
 | 13 | 2/2 | 6min | 3min |
-| 14 | 1/2 | 3min | 3min |
+| 14 | 2/2 | 8min | 4min |
 | 15 | 3/3 | 13min | 4min |
 
 ## Accumulated Context
@@ -61,10 +61,13 @@ Progress: [##########] 91% (10/11 plans, 14-01 still running)
 - Content generation: CONTENT_GENERATION_INSTRUCTIONS constant injected per-executive with persona voice notes
 - Voice chat titles: first 50 chars of user message, truncated at word boundary with "..." suffix
 - Voice chatId tracking: always update to latest (each realtime call creates new per-session chat)
+- Executive bios: 2-column grid cards with CMS-driven descriptions, not chat-bubble window chrome
+- Checkup section: Placed between ExecutiveCards and BenefitsGrid for natural content flow
+- Footer social icons: Globe (aleccimedia.com) + Facebook + LinkedIn, X/Twitter removed
 
 ### Completed
 
-**v1.2 (In Progress):**
+**v1.2 (Complete):**
 - 11-01: Auth rate-limit crash fix, 8-char password min, PasswordInput show/hide toggle
 - 11-02: Chat error recovery with clearError, user-friendly toasts, safe auto-resume
 - 12-01: PDF export rewrite -- native jsPDF text rendering, markdown parser, page-break-aware renderer
@@ -75,6 +78,7 @@ Progress: [##########] 91% (10/11 plans, 14-01 still running)
 - 15-02: Fireflies transcript ingestion endpoint, Supabase KB table, merged filesystem+DB KB loader, admin UI
 - 15-03: Admin user category (team/client) toggle, filtered revenue analytics, multi-select reaction system
 - 14-02: SEO meta-data "Your Sales and Marketing Secret Weapon", contact tagline, CMS hero media swap (none/image/video)
+- 14-01: Executive bios as plain text descriptions, red checkup section ($97/$1K+/$6K), footer social icons (Globe+Facebook+LinkedIn)
 
 **v1.1 (Shipped 2026-02-02):**
 - Phases 6-10 complete
@@ -90,7 +94,7 @@ Progress: [##########] 91% (10/11 plans, 14-01 still running)
 - pnpm build fails locally due to missing env vars (Supabase URL/key) -- not a code issue
 - Source: Product feedback spreadsheet from Alexandria's team (61 items, 24 selected for v1.2)
 - All Supabase migrations applied (knowledge_base_content table, userType default, reaction constraint)
-- New migration pending: 20260211_phase14_hero_media_cms.sql (hero media CMS rows)
+- New migrations pending: 20260211_phase14_hero_media_cms.sql, 20260211_phase14_homepage_cms_fields.sql
 - Run `pnpm gen:types` after deployment to get proper TypeScript types for knowledge_base_content
 - Stripe portal requires STRIPE_PORTAL_CONFIG_ID env var + Dashboard config for plan switching
 - Fireflies ingestion requires FIREFLIES_API_KEY env var
@@ -98,5 +102,5 @@ Progress: [##########] 91% (10/11 plans, 14-01 still running)
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: 14-02 complete, 14-01 running in parallel
-Resume: 14-01 may still be executing; once both summaries exist, phase 14 and v1.2 are complete
+Stopped at: v1.2 complete -- all 11 plans across 5 phases executed
+Resume: v1.2 milestone fully complete. Next milestone planning needed.
