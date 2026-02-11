@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** v1.2 Client Feedback Sweep - Phase 13 in progress
+**Current focus:** v1.2 Client Feedback Sweep - Phase 13 complete
 
 ## Current Position
 
 Phase: 13 of 15 (AI Content & Voice)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-11 -- Completed 13-01-PLAN.md (AI Content Generation & Voice Preprocessing)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-11 -- Completed 13-02-PLAN.md (Voice Call Persistence)
 
-Progress: [#####.....] 45% (5/11 plans)
+Progress: [######....] 55% (6/11 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5 (v1.2)
-- Average duration: 4min
-- Total execution time: 18min
+- Total plans completed: 6 (v1.2)
+- Average duration: 3min
+- Total execution time: 20min
 
 **By Phase:**
 
@@ -29,7 +29,7 @@ Progress: [#####.....] 45% (5/11 plans)
 |-------|-------|-------|----------|
 | 11 | 2/2 | 6min | 3min |
 | 12 | 2/2 | 8min | 4min |
-| 13 | 1/2 | 4min | 4min |
+| 13 | 2/2 | 6min | 3min |
 
 ## Accumulated Context
 
@@ -47,6 +47,8 @@ Progress: [#####.....] 45% (5/11 plans)
 - Voice preprocessing: Single shared utility at lib/voice/strip-markdown-tts.ts for all TTS text cleaning
 - Tables in TTS: Replaced with verbal cue instead of silent removal
 - Content generation: CONTENT_GENERATION_INSTRUCTIONS constant injected per-executive with persona voice notes
+- Voice chat titles: first 50 chars of user message, truncated at word boundary with "..." suffix
+- Voice chatId tracking: always update to latest (each realtime call creates new per-session chat)
 
 ### Completed
 
@@ -56,6 +58,7 @@ Progress: [#####.....] 45% (5/11 plans)
 - 12-01: PDF export rewrite -- native jsPDF text rendering, markdown parser, page-break-aware renderer
 - 12-02: Copy/paste quality -- stripMarkdownForClipboard utility, clean text in clipboard from both copy locations
 - 13-01: AI content generation prompts + consolidated TTS preprocessing utility with suggestions stripping
+- 13-02: Voice call TTS fix (botType param), per-session realtime voice chats with titles, SWR sidebar refresh
 
 **v1.1 (Shipped 2026-02-02):**
 - Phases 6-10 complete
@@ -74,5 +77,5 @@ Progress: [#####.....] 45% (5/11 plans)
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Phase 13, plan 1 complete
-Resume: Continue with 13-02-PLAN.md
+Stopped at: Phase 13 complete
+Resume: `/gsd:execute-phase 14` (next phase)
