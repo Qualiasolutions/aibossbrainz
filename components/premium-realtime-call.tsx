@@ -499,37 +499,7 @@ export function PremiumRealtimeCall({
         <p className="mb-1 text-xs font-medium tracking-wide uppercase text-red-700">
           {bot.role}
         </p>
-        <p className="mb-8 text-sm text-neutral-400">{getStatusText()}</p>
-
-        {/* Transcript display */}
-        {(transcript || aiResponse) && (
-          <div className="mb-8 w-full max-w-lg space-y-3 rounded-2xl border border-neutral-100 bg-neutral-50 p-5">
-            {transcript && (
-              <div className="flex justify-end">
-                <div className="max-w-[85%] rounded-2xl bg-neutral-900 px-4 py-3 text-white">
-                  <p className="mb-1 text-[10px] font-semibold tracking-wide uppercase text-neutral-400">
-                    You
-                  </p>
-                  <p className="text-sm leading-relaxed">{transcript}</p>
-                </div>
-              </div>
-            )}
-            {aiResponse && (
-              <div className="flex justify-start">
-                <div className="max-w-[85%] rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-neutral-800">
-                  <p className="mb-1 text-[10px] font-semibold tracking-wide uppercase text-red-600">
-                    {bot.name.split(" ")[0]}
-                  </p>
-                  <p className="text-sm leading-relaxed">
-                    {aiResponse.length > 200
-                      ? `${aiResponse.slice(0, 200)}...`
-                      : aiResponse}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        <p className="mb-10 text-sm text-neutral-400">{getStatusText()}</p>
 
         {/* Controls */}
         <div className="flex items-center gap-6">
@@ -575,19 +545,8 @@ export function PremiumRealtimeCall({
         </div>
       </div>
 
-      {/* Bottom tips */}
-      <div className="border-t border-neutral-100 px-6 py-5 text-center">
-        <p className="text-xs text-neutral-400">
-          {callState === "active" && !isMuted && (
-            <>Speak naturally. Response will follow after a brief pause.</>
-          )}
-          {callState === "active" && isMuted && (
-            <>Unmute to continue the conversation.</>
-          )}
-          {callState === "processing" && <>Processing your message.</>}
-          {callState === "speaking" && <>Listening to response.</>}
-        </p>
-      </div>
+      {/* Bottom spacer */}
+      <div className="py-6" />
     </div>
   );
 }
