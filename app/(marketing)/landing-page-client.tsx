@@ -265,7 +265,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
   );
 }
 
-// Executive Cards - Chat Style Layout (Single Box)
+// Executive Cards - Plain Text Description Layout
 function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
@@ -276,22 +276,20 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
       role: content.executives.alex_role,
       image: content.executives.alex_image,
       expertise: content.executives.alex_expertise.split(","),
-      accent: "from-red-500 to-rose-600",
-      accentLight: "bg-red-50",
+      description: content.executives.alex_description,
       textColor: "text-red-700",
-      borderColor: "border-red-200",
-      description: "Brand strategist with Fortune 500 experience",
+      borderColor: "border-red-100",
+      ringColor: "ring-red-100",
     },
     {
       name: content.executives.kim_name,
       role: content.executives.kim_role,
       image: content.executives.kim_image,
       expertise: content.executives.kim_expertise.split(","),
-      accent: "from-stone-800 to-stone-950",
-      accentLight: "bg-stone-100",
+      description: content.executives.kim_description,
       textColor: "text-stone-700",
       borderColor: "border-stone-200",
-      description: "Revenue architect and sales optimization expert",
+      ringColor: "ring-stone-100",
     },
   ];
 
@@ -306,7 +304,7 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
         <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-stone-200/50 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -349,125 +347,73 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
           </p>
         </motion.div>
 
-        {/* Chat Style Executive Box */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="relative"
-        >
-          {/* Glow effect */}
-          <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-red-500/20 via-rose-500/20 to-stone-500/20 blur-xl" />
-
-          {/* Main container */}
-          <div className="relative bg-white rounded-3xl border border-stone-100 shadow-2xl shadow-stone-200/50 overflow-hidden">
-            {/* Header bar */}
-            <div className="flex items-center gap-3 px-6 py-4 bg-stone-50 border-b border-stone-100">
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-400" />
-                <div className="w-3 h-3 rounded-full bg-amber-400" />
-                <div className="w-3 h-3 rounded-full bg-stone-300" />
-              </div>
-              <span className="ml-2 text-sm font-medium text-stone-500">
-                Executive Team
-              </span>
-            </div>
-
-            {/* Chat-style messages */}
-            <div className="p-6 sm:p-8 space-y-6">
-              {executives.map((exec, i) => (
-                <motion.div
-                  key={exec.name}
-                  initial={{ opacity: 0, x: i === 0 ? -20 : 20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ delay: 0.2 + i * 0.15, duration: 0.5 }}
+        {/* Executive Cards Grid */}
+        <div className="grid gap-8 md:grid-cols-2">
+          {executives.map((exec, i) => (
+            <motion.div
+              key={exec.name}
+              initial={{ opacity: 0, y: 40 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{
+                delay: 0.2 + i * 0.15,
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className={cn(
+                "relative rounded-2xl border bg-white p-8 shadow-lg shadow-stone-200/50 transition-shadow hover:shadow-xl",
+                exec.borderColor,
+              )}
+            >
+              {/* Avatar + Name */}
+              <div className="flex items-center gap-5 mb-5">
+                <div
                   className={cn(
-                    "flex gap-4 p-5 rounded-2xl border",
-                    exec.accentLight,
-                    exec.borderColor,
+                    "size-20 shrink-0 overflow-hidden rounded-full ring-4 shadow-md",
+                    exec.ringColor,
                   )}
                 >
-                  {/* Avatar */}
-                  <div className="relative shrink-0">
-                    <div className="size-16 sm:size-20 overflow-hidden rounded-full ring-2 ring-white shadow-lg">
-                      <Image
-                        src={exec.image}
-                        alt={exec.name}
-                        width={80}
-                        height={80}
-                        className="size-full object-cover"
-                      />
-                    </div>
-                    {/* Status indicator */}
-                    <div className="absolute bottom-0 right-0 size-4 rounded-full border-2 border-white bg-green-500" />
-                  </div>
-
-                  {/* Message content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3
-                        className={cn(
-                          "text-lg sm:text-xl font-bold",
-                          exec.textColor,
-                        )}
-                      >
-                        {exec.name}
-                      </h3>
-                      <span className="text-xs font-bold uppercase tracking-wider text-stone-400">
-                        {exec.role}
-                      </span>
-                    </div>
-                    <p className="text-sm text-stone-600 leading-relaxed mb-3">
-                      {exec.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {exec.expertise.map((skill) => (
-                        <span
-                          key={skill}
-                          className="px-3 py-1 text-xs font-medium rounded-md bg-white/80 border border-stone-200 text-stone-600"
-                        >
-                          {skill.trim()}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 bg-stone-50 border-t border-stone-100 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-stone-500">
-                <div className="flex -space-x-2">
-                  {executives.map((exec) => (
-                    <div
-                      key={exec.name}
-                      className="size-8 rounded-full ring-2 ring-white overflow-hidden bg-stone-200"
-                    >
-                      <Image
-                        src={exec.image}
-                        alt={exec.name}
-                        width={32}
-                        height={32}
-                        className="size-full object-cover"
-                      />
-                    </div>
-                  ))}
+                  <Image
+                    src={exec.image}
+                    alt={exec.name}
+                    width={80}
+                    height={80}
+                    className="size-full object-cover"
+                  />
                 </div>
-                <span className="ml-2">Available 24/7</span>
+                <div>
+                  <h3
+                    className={cn(
+                      "text-xl font-bold tracking-tight",
+                      exec.textColor,
+                    )}
+                  >
+                    {exec.name}
+                  </h3>
+                  <p className="text-sm font-medium text-stone-500">
+                    {exec.role}
+                  </p>
+                </div>
               </div>
-              <Link href="/login">
-                <Button
-                  size="sm"
-                  className="gap-2 bg-stone-900 text-white hover:bg-stone-800 transition-all"
-                >
-                  Start Chatting
-                  <ArrowRight className="size-3" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </motion.div>
+
+              {/* Description */}
+              <p className="text-stone-600 leading-relaxed mb-5">
+                {exec.description}
+              </p>
+
+              {/* Expertise tags */}
+              <div className="flex flex-wrap gap-2">
+                {exec.expertise.map((skill) => (
+                  <span
+                    key={skill}
+                    className="px-3 py-1 text-xs font-medium rounded-md bg-stone-50 border border-stone-200 text-stone-600"
+                  >
+                    {skill.trim()}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
         {/* CTA for both executives */}
         <motion.div
@@ -483,6 +429,97 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
             >
               Chat with Both Executives
               <Users className="size-4" />
+            </Button>
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Checkup Section - Red styled, items ordered lowest to highest value
+function CheckupSection({ content }: { content: LandingPageCMSContent }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const items = [
+    {
+      title: content.checkup.item_1_title,
+      value: content.checkup.item_1_value,
+    },
+    {
+      title: content.checkup.item_2_title,
+      value: content.checkup.item_2_value,
+    },
+    {
+      title: content.checkup.item_3_title,
+      value: content.checkup.item_3_value,
+    },
+  ];
+
+  return (
+    <section
+      ref={ref}
+      className="relative bg-gradient-to-br from-red-600 to-red-700 py-20 sm:py-28 overflow-hidden"
+    >
+      {/* Background texture */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:48px_48px]" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/30 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-red-800/30 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        {/* Section title */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7 }}
+          className="text-center mb-14"
+        >
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+            {content.checkup.section_title}
+          </h2>
+        </motion.div>
+
+        {/* Items grid */}
+        <div className="grid gap-6 sm:grid-cols-3">
+          {items.map((item, i) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{
+                delay: 0.15 + i * 0.12,
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="relative rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-8 text-center transition-all hover:bg-white/15"
+            >
+              <div className="text-4xl sm:text-5xl font-bold text-white mb-3">
+                {item.value}
+              </div>
+              <p className="text-white/90 text-sm sm:text-base leading-relaxed font-medium">
+                {item.title}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.6, duration: 0.6 }}
+          className="mt-12 text-center"
+        >
+          <Link href="/pricing">
+            <Button
+              size="lg"
+              className="gap-2 bg-white px-8 py-6 text-base font-semibold text-red-700 shadow-xl hover:bg-white/90 transition-all hover:scale-105"
+            >
+              See All Plans
+              <ArrowRight className="size-4" />
             </Button>
           </Link>
         </motion.div>
@@ -813,6 +850,7 @@ export function LandingPageClient({ content }: LandingPageClientProps) {
     <>
       <HeroSection content={content} />
       <ExecutiveCards content={content} />
+      <CheckupSection content={content} />
       <BenefitsGrid content={content} />
       <CTASection content={content} />
     </>

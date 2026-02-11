@@ -229,6 +229,9 @@ export default function LandingPageCMSPage() {
               <Palette className="h-4 w-4" />
               Theme
             </TabsTrigger>
+            <TabsTrigger value="checkup" className="gap-2">
+              Checkup
+            </TabsTrigger>
             <TabsTrigger value="header-footer" className="gap-2">
               Header/Footer
             </TabsTrigger>
@@ -546,6 +549,21 @@ export default function LandingPageCMSPage() {
                         placeholder="Brand Strategy,Go-to-Market,Digital Campaigns"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        value={getFieldValue("executives", "alex_description")}
+                        onChange={(e) =>
+                          updateField(
+                            "executives",
+                            "alex_description",
+                            e.target.value,
+                          )
+                        }
+                        rows={3}
+                        placeholder="Brief bio description..."
+                      />
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -606,6 +624,21 @@ export default function LandingPageCMSPage() {
                           )
                         }
                         placeholder="Enterprise Sales,Pipeline Growth,Deal Closing"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        value={getFieldValue("executives", "kim_description")}
+                        onChange={(e) =>
+                          updateField(
+                            "executives",
+                            "kim_description",
+                            e.target.value,
+                          )
+                        }
+                        rows={3}
+                        placeholder="Brief bio description..."
                       />
                     </div>
                   </CardContent>
@@ -989,6 +1022,68 @@ export default function LandingPageCMSPage() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Checkup Section */}
+          <TabsContent value="checkup">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sales & Marketing Checkup</CardTitle>
+                <CardDescription>
+                  Manage the checkup section items displayed on the landing page.
+                  Items are ordered from lowest to highest value.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label>Section Title</Label>
+                  <Input
+                    value={getFieldValue("checkup", "section_title")}
+                    onChange={(e) =>
+                      updateField("checkup", "section_title", e.target.value)
+                    }
+                    placeholder="What You Get with Annual"
+                  />
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-3">
+                  {[1, 2, 3].map((num) => (
+                    <div key={num} className="space-y-4 rounded-lg border border-stone-200 p-4">
+                      <p className="text-sm font-semibold text-stone-700">
+                        Item {num}
+                      </p>
+                      <div className="space-y-2">
+                        <Label>Title</Label>
+                        <Input
+                          value={getFieldValue("checkup", `item_${num}_title`)}
+                          onChange={(e) =>
+                            updateField(
+                              "checkup",
+                              `item_${num}_title`,
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Value</Label>
+                        <Input
+                          value={getFieldValue("checkup", `item_${num}_value`)}
+                          onChange={(e) =>
+                            updateField(
+                              "checkup",
+                              `item_${num}_value`,
+                              e.target.value,
+                            )
+                          }
+                          placeholder="$97"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
