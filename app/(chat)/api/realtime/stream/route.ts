@@ -99,7 +99,11 @@ export async function POST(request: Request) {
       return response;
     }
 
-    const { message, botType = "collaborative" } = await request.json();
+    const {
+      message,
+      botType = "collaborative",
+      chatId: existingChatId,
+    } = await request.json();
 
     if (!message || typeof message !== "string") {
       return new ChatSDKError("bad_request:api").toResponse();
@@ -219,64 +223,66 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
     }
 
     // Save messages to chat history for real-time calls
-    // Create a new chat per voice session with a descriptive title
-    let savedChatId: string | null = null;
+    // Reuse existing chat if chatId provided, otherwise create a new one
+    let savedChatId: string | null = existingChatId || null;
     try {
       const supabase = await createClient();
 
-      const chatId = crypto.randomUUID();
-      savedChatId = chatId;
+      if (!savedChatId) {
+        // Create a new chat for this voice call session
+        const chatId = crypto.randomUUID();
 
-      // Generate descriptive title from user message
-      let title = message.trim();
-      if (title.length > 50) {
-        title = `${title.slice(0, 50).replace(/\s+\S*$/, "")}...`;
+        let title = message.trim();
+        if (title.length > 50) {
+          title = `${title.slice(0, 50).replace(/\s+\S*$/, "")}...`;
+        }
+        if (!title) {
+          title = "Voice Call";
+        }
+
+        const { error: insertError } = await supabase.from("Chat").insert({
+          id: chatId,
+          userId: user.id,
+          title,
+        });
+
+        if (insertError) {
+          console.error("Failed to create voice call chat:", insertError);
+        } else {
+          savedChatId = chatId;
+        }
       }
-      if (!title) {
-        title = "Voice Call";
+
+      if (savedChatId) {
+        const now = new Date().toISOString();
+
+        const messages: DBMessage[] = [
+          {
+            id: crypto.randomUUID(),
+            chatId: savedChatId,
+            role: "user",
+            parts: [{ type: "text", text: message }],
+            attachments: null,
+            botType: null,
+            deletedAt: null,
+            createdAt: now,
+          },
+          {
+            id: crypto.randomUUID(),
+            chatId: savedChatId,
+            role: "assistant",
+            parts: [{ type: "text", text: responseText }],
+            attachments: null,
+            botType: botType as BotType,
+            deletedAt: null,
+            createdAt: new Date(Date.now() + 1).toISOString(),
+          },
+        ];
+
+        await saveMessages({ messages });
       }
-
-      const { error: insertError } = await supabase.from("Chat").insert({
-        id: chatId,
-        userId: user.id,
-        title,
-        botType: botType as BotType,
-      });
-      if (insertError) {
-        console.error("Failed to create voice call chat:", insertError);
-      }
-
-      const now = new Date().toISOString();
-
-      // Save both user and assistant messages with all required fields
-      const messages: DBMessage[] = [
-        {
-          id: crypto.randomUUID(),
-          chatId,
-          role: "user",
-          parts: [{ type: "text", text: message }],
-          attachments: null,
-          botType: null,
-          deletedAt: null,
-          createdAt: now,
-        },
-        {
-          id: crypto.randomUUID(),
-          chatId,
-          role: "assistant",
-          parts: [{ type: "text", text: responseText }],
-          attachments: null,
-          botType: botType as BotType,
-          deletedAt: null,
-          createdAt: now,
-        },
-      ];
-
-      await saveMessages({ messages });
-      console.log("Voice call messages saved to chat:", chatId);
     } catch (saveError) {
       console.error("Failed to save voice call messages:", saveError);
-      // Continue anyway - audio response is primary
     }
 
     return Response.json({

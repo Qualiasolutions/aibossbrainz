@@ -94,6 +94,7 @@ export function PremiumRealtimeCall({
           body: JSON.stringify({
             message: text,
             botType,
+            chatId: voiceCallChatId,
           }),
           signal: abortControllerRef.current.signal,
         });
@@ -107,7 +108,7 @@ export function PremiumRealtimeCall({
         const audioUrl = data.audioUrl;
         const chatId = data.chatId;
 
-        if (chatId) {
+        if (chatId && !voiceCallChatId) {
           setVoiceCallChatId(chatId);
         }
 
@@ -150,7 +151,7 @@ export function PremiumRealtimeCall({
         setIsAiSpeaking(false);
       }
     },
-    [botType, isMuted],
+    [botType, isMuted, voiceCallChatId],
   );
 
   // Initialize speech recognition
