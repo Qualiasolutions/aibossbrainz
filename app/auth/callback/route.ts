@@ -146,6 +146,7 @@ export async function GET(request: Request) {
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const plan = searchParams.get("plan");
+  const next = searchParams.get("next");
 
   const supabase = await createClient();
 
@@ -158,6 +159,10 @@ export async function GET(request: Request) {
     }
 
     if (!error && data.user) {
+      // Recovery flow: redirect to next page (e.g. /reset-password) with session established
+      if (next?.startsWith("/") && !next.startsWith("//")) {
+        return NextResponse.redirect(`${origin}${next}`);
+      }
       return handleAuthenticatedUser(data.user, origin, plan);
     }
   }
@@ -175,6 +180,10 @@ export async function GET(request: Request) {
     }
 
     if (!error && data.user) {
+      // Recovery flow: redirect to next page with session established
+      if (next?.startsWith("/") && !next.startsWith("//")) {
+        return NextResponse.redirect(`${origin}${next}`);
+      }
       return handleAuthenticatedUser(data.user, origin, plan);
     }
   }
