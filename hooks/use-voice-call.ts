@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getVoiceForBot } from "@/lib/ai/voice-config";
 import type { BotType } from "@/lib/bot-personalities";
 import type { ChatMessage } from "@/lib/types";
 
@@ -144,11 +143,10 @@ export function useVoiceCall({
       setVoiceCallStatus("speaking");
 
       try {
-        const voiceId = getVoiceForBot(selectedBot);
         const response = await fetch("/api/voice", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, voiceId }),
+          body: JSON.stringify({ text, botType: selectedBot }),
         });
 
         if (!response.ok) {
