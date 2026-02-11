@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, MicOff, PhoneOff, Settings, Volume2 } from "lucide-react";
+import { Mic, MicOff, PhoneOff, Volume2 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -56,7 +56,6 @@ export function PremiumRealtimeCall({
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
     analyserRef.current.getByteFrequencyData(dataArray);
 
-    // Calculate average level
     const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
     setAudioLevel(average / 255);
 
@@ -108,7 +107,6 @@ export function PremiumRealtimeCall({
         const audioUrl = data.audioUrl;
         const chatId = data.chatId;
 
-        // Always store the latest chatId (each call creates a new per-session chat)
         if (chatId) {
           setVoiceCallChatId(chatId);
         }
@@ -117,7 +115,6 @@ export function PremiumRealtimeCall({
         setCallState("speaking");
         setIsAiSpeaking(true);
 
-        // Play audio response
         if (audioUrl) {
           const audio = new Audio(audioUrl);
           currentAudioRef.current = audio;
@@ -125,7 +122,6 @@ export function PremiumRealtimeCall({
           audio.onended = () => {
             setIsAiSpeaking(false);
             setCallState("active");
-            // Resume listening
             if (recognitionRef.current && !isMuted) {
               try {
                 recognitionRef.current.start();
@@ -183,23 +179,20 @@ export function PremiumRealtimeCall({
         if (result.isFinal) {
           finalTranscript += `${result[0].transcript} `;
 
-          // Clear silence timeout
           if (silenceTimeoutRef.current) {
             clearTimeout(silenceTimeoutRef.current);
           }
 
-          // Set timeout to send after brief silence
           silenceTimeoutRef.current = setTimeout(() => {
             if (finalTranscript.trim()) {
               const textToSend = finalTranscript.trim();
               finalTranscript = "";
               setTranscript("");
 
-              // Stop listening while processing
               recognition.stop();
               sendToAI(textToSend);
             }
-          }, 1200); // 1.2 second silence threshold
+          }, 1200);
         } else {
           interim += result[0].transcript;
         }
@@ -216,7 +209,6 @@ export function PremiumRealtimeCall({
     };
 
     recognition.onend = () => {
-      // Restart if still in active state and not muted
       if (callState === "active" && !isMuted && !isAiSpeaking) {
         try {
           recognition.start();
@@ -234,16 +226,13 @@ export function PremiumRealtimeCall({
     setCallState("requesting-permissions");
 
     try {
-      // Request microphone
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
 
       setCallState("connecting");
 
-      // Initialize audio analysis
       await initAudioAnalysis(stream);
 
-      // Initialize speech recognition
       const recognition = initSpeechRecognition();
       if (!recognition) {
         setCallState("idle");
@@ -251,7 +240,6 @@ export function PremiumRealtimeCall({
       }
       recognitionRef.current = recognition;
 
-      // Start recognition
       recognition.start();
       callStartTimeRef.current = Date.now();
       setCallState("active");
@@ -266,19 +254,16 @@ export function PremiumRealtimeCall({
 
   // End the call
   const endCall = useCallback(() => {
-    // Stop recognition
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
 
-    // Stop audio
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
     }
 
-    // Stop media stream
     if (mediaStreamRef.current) {
       for (const track of mediaStreamRef.current.getTracks()) {
         track.stop();
@@ -286,23 +271,19 @@ export function PremiumRealtimeCall({
       mediaStreamRef.current = null;
     }
 
-    // Abort requests
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
 
-    // Clear timeouts
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
     }
 
-    // Stop animation
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
 
-    // Close audio context
     if (audioContextRef.current) {
       audioContextRef.current.close();
       audioContextRef.current = null;
@@ -311,10 +292,8 @@ export function PremiumRealtimeCall({
     setCallState("ended");
     toast.success("Call ended");
 
-    // Invalidate chat history so new voice chat appears in sidebar
     mutate("/api/history");
 
-    // Pass chatId to parent for redirect
     setTimeout(() => onEndCall(voiceCallChatId || undefined), 1500);
   }, [onEndCall, voiceCallChatId, mutate]);
 
@@ -395,15 +374,15 @@ export function PremiumRealtimeCall({
   const getStatusText = () => {
     switch (callState) {
       case "requesting-permissions":
-        return "Requesting microphone access...";
+        return "Requesting microphone access";
       case "connecting":
-        return "Connecting...";
+        return "Connecting";
       case "active":
-        return isMuted ? "Muted" : "Listening...";
+        return isMuted ? "Muted" : "Listening";
       case "processing":
-        return "Thinking...";
+        return "Thinking";
       case "speaking":
-        return `${bot.name.split(" ")[0]} is speaking...`;
+        return `${bot.name.split(" ")[0]} is speaking`;
       case "ended":
         return "Call ended";
       default:
@@ -411,127 +390,137 @@ export function PremiumRealtimeCall({
     }
   };
 
+  const isCallActive =
+    callState === "active" ||
+    callState === "processing" ||
+    callState === "speaking";
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-stone-900 via-stone-950 to-black">
+    <div className="fixed inset-0 z-50 flex flex-col bg-white">
       {/* Top bar */}
-      <div className="flex items-center justify-between p-6">
+      <div className="flex items-center justify-between border-b border-neutral-100 px-8 py-5">
         <div className="flex items-center gap-3">
           <div
             className={cn(
-              "size-3 rounded-full",
-              callState === "active" ||
-                callState === "processing" ||
-                callState === "speaking"
+              "size-2 rounded-full transition-colors",
+              isCallActive
                 ? "animate-pulse bg-emerald-500"
                 : callState === "connecting" ||
                     callState === "requesting-permissions"
-                  ? "animate-pulse bg-yellow-500"
-                  : "bg-stone-600",
+                  ? "animate-pulse bg-amber-500"
+                  : "bg-neutral-300",
             )}
           />
-          <span className="text-sm text-stone-400">
-            {callState === "active" ||
-            callState === "processing" ||
-            callState === "speaking"
-              ? formatDuration(callDuration)
-              : getStatusText()}
+          <span className="text-sm font-medium text-neutral-500">
+            {isCallActive ? formatDuration(callDuration) : getStatusText()}
           </span>
         </div>
-        <Button
-          className="text-stone-400 hover:text-white"
-          size="icon"
-          variant="ghost"
-        >
-          <Settings className="size-5" />
-        </Button>
+        <p className="text-xs font-medium tracking-wide uppercase text-neutral-400">
+          Voice Call
+        </p>
       </div>
 
       {/* Main content */}
       <div className="flex flex-1 flex-col items-center justify-center px-6">
-        {/* Avatar with waveform */}
-        <div className="relative mb-8">
+        {/* Avatar with visualization */}
+        <div className="relative mb-10">
           {/* Outer ring - audio visualization */}
           <div
             className={cn(
-              "absolute inset-0 rounded-full transition-all duration-150",
+              "absolute -inset-4 rounded-full border-2 transition-all duration-200",
               isAiSpeaking
-                ? "bg-gradient-to-br from-rose-500/30 to-pink-500/30"
-                : "bg-white/5",
+                ? "border-red-200"
+                : audioLevel > 0.05
+                  ? "border-neutral-200"
+                  : "border-transparent",
             )}
             style={{
-              transform: `scale(${1 + (isAiSpeaking ? 0.15 : audioLevel * 0.3)})`,
-              opacity:
-                callState === "active" || callState === "speaking" ? 1 : 0.5,
+              transform: `scale(${1 + (isAiSpeaking ? 0.08 : audioLevel * 0.15)})`,
+              opacity: isCallActive ? 1 : 0.3,
             }}
           />
 
-          {/* Inner ring */}
+          {/* Second ring */}
           <div
             className={cn(
-              "absolute inset-2 rounded-full bg-gradient-to-br transition-opacity duration-300",
-              bot.color,
-              isAiSpeaking ? "opacity-40" : "opacity-20",
+              "absolute -inset-8 rounded-full border transition-all duration-300",
+              isAiSpeaking
+                ? "border-red-100"
+                : audioLevel > 0.1
+                  ? "border-neutral-100"
+                  : "border-transparent",
             )}
+            style={{
+              transform: `scale(${1 + (isAiSpeaking ? 0.04 : audioLevel * 0.08)})`,
+              opacity: isCallActive ? 0.6 : 0,
+            }}
           />
 
           {/* Avatar */}
-          <div
-            className={cn(
-              "relative flex size-40 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br shadow-2xl md:size-48",
-              bot.color,
-            )}
-          >
+          <div className="relative size-36 overflow-hidden rounded-full bg-neutral-100 shadow-lg shadow-neutral-200/80 md:size-44">
             {bot.avatar ? (
               <Image
                 alt={bot.name}
                 className="size-full object-cover"
-                height={192}
+                height={176}
                 src={bot.avatar}
-                width={192}
+                width={176}
               />
             ) : (
-              <span className="font-bold text-5xl text-white">
-                {botType === "collaborative" ? "A&K" : bot.name.charAt(0)}
-              </span>
+              <div
+                className={cn(
+                  "flex size-full items-center justify-center bg-gradient-to-br",
+                  bot.color,
+                )}
+              >
+                <span className="font-semibold text-4xl text-white">
+                  {botType === "collaborative" ? "A&K" : bot.name.charAt(0)}
+                </span>
+              </div>
             )}
           </div>
 
           {/* Speaking indicator */}
           {isAiSpeaking && (
-            <div className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1">
-              <span className="h-2 w-1 animate-[bounce_0.5s_ease-in-out_infinite] rounded-full bg-rose-500" />
-              <span className="h-3 w-1 animate-[bounce_0.5s_ease-in-out_infinite_0.1s] rounded-full bg-rose-500" />
-              <span className="h-4 w-1 animate-[bounce_0.5s_ease-in-out_infinite_0.2s] rounded-full bg-rose-500" />
-              <span className="h-3 w-1 animate-[bounce_0.5s_ease-in-out_infinite_0.3s] rounded-full bg-rose-500" />
-              <span className="h-2 w-1 animate-[bounce_0.5s_ease-in-out_infinite_0.4s] rounded-full bg-rose-500" />
+            <div className="absolute -bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-0.5">
+              <span className="h-2.5 w-0.5 animate-[bounce_0.6s_ease-in-out_infinite] rounded-full bg-red-500" />
+              <span className="h-4 w-0.5 animate-[bounce_0.6s_ease-in-out_infinite_0.1s] rounded-full bg-red-500" />
+              <span className="h-5 w-0.5 animate-[bounce_0.6s_ease-in-out_infinite_0.2s] rounded-full bg-red-500" />
+              <span className="h-4 w-0.5 animate-[bounce_0.6s_ease-in-out_infinite_0.3s] rounded-full bg-red-500" />
+              <span className="h-2.5 w-0.5 animate-[bounce_0.6s_ease-in-out_infinite_0.4s] rounded-full bg-red-500" />
             </div>
           )}
         </div>
 
         {/* Name and status */}
-        <h1 className="mb-2 font-semibold text-2xl text-white md:text-3xl">
+        <h1 className="mb-1 text-2xl font-semibold text-neutral-900 md:text-3xl">
           {bot.name}
         </h1>
-        <p className="mb-8 text-stone-400">{getStatusText()}</p>
+        <p className="mb-1 text-xs font-medium tracking-wide uppercase text-red-700">
+          {bot.role}
+        </p>
+        <p className="mb-8 text-sm text-neutral-400">{getStatusText()}</p>
 
         {/* Transcript display */}
         {(transcript || aiResponse) && (
-          <div className="mb-8 w-full max-w-lg space-y-4 rounded-2xl bg-white/5 p-6 backdrop-blur-sm">
+          <div className="mb-8 w-full max-w-lg space-y-3 rounded-2xl border border-neutral-100 bg-neutral-50 p-5">
             {transcript && (
               <div className="flex justify-end">
-                <div className="max-w-[85%] rounded-2xl bg-blue-500/20 px-4 py-3 text-blue-100">
-                  <p className="mb-1 font-medium text-blue-300 text-xs">You</p>
-                  <p className="text-sm">{transcript}</p>
+                <div className="max-w-[85%] rounded-2xl bg-neutral-900 px-4 py-3 text-white">
+                  <p className="mb-1 text-[10px] font-semibold tracking-wide uppercase text-neutral-400">
+                    You
+                  </p>
+                  <p className="text-sm leading-relaxed">{transcript}</p>
                 </div>
               </div>
             )}
             {aiResponse && (
               <div className="flex justify-start">
-                <div className="max-w-[85%] rounded-2xl bg-rose-500/20 px-4 py-3 text-rose-100">
-                  <p className="mb-1 font-medium text-rose-300 text-xs">
+                <div className="max-w-[85%] rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-neutral-800">
+                  <p className="mb-1 text-[10px] font-semibold tracking-wide uppercase text-red-600">
                     {bot.name.split(" ")[0]}
                   </p>
-                  <p className="text-sm">
+                  <p className="text-sm leading-relaxed">
                     {aiResponse.length > 200
                       ? `${aiResponse.slice(0, 200)}...`
                       : aiResponse}
@@ -547,10 +536,10 @@ export function PremiumRealtimeCall({
           {/* Mute button */}
           <Button
             className={cn(
-              "size-16 rounded-full transition-all",
+              "size-14 rounded-full transition-all",
               isMuted
-                ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                : "bg-white/10 text-white hover:bg-white/20",
+                ? "border-2 border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+                : "border-2 border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50",
             )}
             disabled={
               callState === "connecting" ||
@@ -560,43 +549,43 @@ export function PremiumRealtimeCall({
             size="icon"
           >
             {isMuted ? (
-              <MicOff className="size-6" />
+              <MicOff className="size-5" />
             ) : (
-              <Mic className="size-6" />
+              <Mic className="size-5" />
             )}
           </Button>
 
           {/* End call button */}
           <Button
-            className="size-20 rounded-full bg-red-500 text-white shadow-lg shadow-red-500/30 transition-all hover:bg-red-600 hover:scale-105"
+            className="size-16 rounded-full bg-red-600 text-white shadow-lg shadow-red-200 transition-all hover:bg-red-700 hover:shadow-red-300 hover:scale-105"
             onClick={endCall}
             size="icon"
           >
-            <PhoneOff className="size-8" />
+            <PhoneOff className="size-6" />
           </Button>
 
-          {/* Volume button (placeholder) */}
+          {/* Volume button */}
           <Button
-            className="size-16 rounded-full bg-white/10 text-white transition-all hover:bg-white/20"
+            className="size-14 rounded-full border-2 border-neutral-200 bg-white text-neutral-700 transition-all hover:bg-neutral-50"
             disabled
             size="icon"
           >
-            <Volume2 className="size-6" />
+            <Volume2 className="size-5" />
           </Button>
         </div>
       </div>
 
       {/* Bottom tips */}
-      <div className="p-6 text-center">
-        <p className="text-sm text-stone-500">
+      <div className="border-t border-neutral-100 px-6 py-5 text-center">
+        <p className="text-xs text-neutral-400">
           {callState === "active" && !isMuted && (
-            <>Speak naturally. I'll respond when you pause.</>
+            <>Speak naturally. Response will follow after a brief pause.</>
           )}
           {callState === "active" && isMuted && (
-            <>Unmute to continue talking.</>
+            <>Unmute to continue the conversation.</>
           )}
-          {callState === "processing" && <>Processing your message...</>}
-          {callState === "speaking" && <>Listening to response...</>}
+          {callState === "processing" && <>Processing your message.</>}
+          {callState === "speaking" && <>Listening to response.</>}
         </p>
       </div>
     </div>
