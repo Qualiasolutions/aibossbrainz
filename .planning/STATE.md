@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 15 of 15 (Billing, Knowledge Base & Platform)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-11 -- Completed 15-01-PLAN.md (Billing Portal & Cancel Anytime Copy)
+Last activity: 2026-02-11 -- Completed 15-02-PLAN.md (Fireflies Knowledge Base Ingestion)
 
-Progress: [#######...] 64% (7/11 plans)
+Progress: [########..] 73% (8/11 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7 (v1.2)
+- Total plans completed: 8 (v1.2)
 - Average duration: 3min
-- Total execution time: 21min
+- Total execution time: 24min
 
 **By Phase:**
 
@@ -30,12 +30,15 @@ Progress: [#######...] 64% (7/11 plans)
 | 11 | 2/2 | 6min | 3min |
 | 12 | 2/2 | 8min | 4min |
 | 13 | 2/2 | 6min | 3min |
-| 15 | 1/3 | 1min | 1min |
+| 15 | 2/3 | 4min | 2min |
 
 ## Accumulated Context
 
 ### Decisions
 
+- KB Supabase content: Separate admin page at /admin/knowledge-base rather than embedding in settings (server component constraint)
+- KB graceful degradation: If knowledge_base_content table doesn't exist, loader silently falls back to filesystem-only
+- KB types: Using 'as any' cast for untyped table queries until types are regenerated
 - Portal config ID optional: STRIPE_PORTAL_CONFIG_ID env var enables plan switching; portal works with Stripe defaults if not set
 - Plan change webhook reuses activateSubscription() to sync subscription type on upgrade/downgrade
 - v1.2 roadmap: 5 phases (11-15), 24 requirements, standard depth
@@ -63,6 +66,7 @@ Progress: [#######...] 64% (7/11 plans)
 - 13-01: AI content generation prompts + consolidated TTS preprocessing utility with suggestions stripping
 - 13-02: Voice call TTS fix (botType param), per-session realtime voice chats with titles, SWR sidebar refresh
 - 15-01: Stripe billing portal with optional config ID, webhook plan-change sync, Cancel Anytime copy
+- 15-02: Fireflies transcript ingestion endpoint, Supabase KB table, merged filesystem+DB KB loader, admin UI
 
 **v1.1 (Shipped 2026-02-02):**
 - Phases 6-10 complete
@@ -77,9 +81,11 @@ Progress: [#######...] 64% (7/11 plans)
 - Mailchimp module ready: lib/mailchimp/
 - pnpm build fails locally due to missing env vars (Supabase URL/key) -- not a code issue
 - Source: Product feedback spreadsheet from Alexandria's team (61 items, 24 selected for v1.2)
+- KB migration needs to be applied via Supabase SQL Editor before ingestion works
+- Run `pnpm gen:types` after migration to get proper TypeScript types
 
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Phase 15, plan 1 complete
-Resume: `/gsd:execute-phase 15` (plan 2 next)
+Stopped at: Phase 15, plan 2 complete
+Resume: `/gsd:execute-phase 15` (plan 3 next)
