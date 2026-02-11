@@ -36,8 +36,8 @@ const StreamingCursor = memo(() => (
 StreamingCursor.displayName = "StreamingCursor";
 
 /**
- * Optimized typewriter animation with smooth reveal
- * PERF: Uses throttled RAF and larger character chunks for 30fps instead of 60fps
+ * Typewriter animation that reveals text character-by-character.
+ * Keeps animating even after streaming ends until all text is revealed.
  */
 const TypewriterContent = memo(
   ({
@@ -48,18 +48,31 @@ const TypewriterContent = memo(
     isStreaming: boolean;
   }) => {
     const [displayedLength, setDisplayedLength] = useState(0);
-    const previousContentRef = useRef("");
-    const targetLengthRef = useRef(0);
     const animationRef = useRef<number | null>(null);
     const lastFrameTimeRef = useRef(0);
+    const targetLengthRef = useRef(0);
+    // Track if this component ever streamed (vs loaded from history)
+    const hasStreamedRef = useRef(false);
+    const mountedWithStreamingRef = useRef(isStreaming);
 
-    // Throttled animation at ~30fps for smooth performance
+    // Mark that we've seen streaming content
+    if (isStreaming) {
+      hasStreamedRef.current = true;
+    }
+
+    const stopAnimation = useCallback(() => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    }, []);
+
     const animateTypewriter = useCallback(() => {
       const now = performance.now();
       const elapsed = now - lastFrameTimeRef.current;
 
-      // Throttle to ~30fps (33ms between frames)
-      if (elapsed < 33) {
+      // ~45fps for smooth feel
+      if (elapsed < 22) {
         animationRef.current = requestAnimationFrame(animateTypewriter);
         return;
       }
@@ -70,17 +83,15 @@ const TypewriterContent = memo(
         const target = targetLengthRef.current;
 
         if (current >= target) {
+          // Reached target, stop animating
           return current;
         }
 
-        // Calculate characters to add: larger chunks for smoother feel
-        // Min 3 chars, scales up with gap size (25% of gap)
-        const gap = target - current;
-        const charsToAdd = Math.max(3, Math.ceil(gap * 0.25));
-
+        // Reveal 2-6 characters per frame for a visible typewriter effect
+        const charsToAdd = Math.min(6, Math.max(2, Math.ceil((target - current) * 0.08)));
         const nextLength = Math.min(current + charsToAdd, target);
 
-        // Continue animation if not at target
+        // Keep animation going if not done
         if (nextLength < target) {
           animationRef.current = requestAnimationFrame(animateTypewriter);
         }
@@ -89,52 +100,47 @@ const TypewriterContent = memo(
       });
     }, []);
 
-    useEffect(() => {
-      // If content shrinks or resets, reset displayed length
-      if (content.length < previousContentRef.current.length) {
-        setDisplayedLength(content.length);
-        previousContentRef.current = content;
-        targetLengthRef.current = content.length;
-        return;
-      }
+    const startAnimation = useCallback(() => {
+      stopAnimation();
+      animationRef.current = requestAnimationFrame(animateTypewriter);
+    }, [stopAnimation, animateTypewriter]);
 
-      previousContentRef.current = content;
+    useEffect(() => {
       targetLengthRef.current = content.length;
 
-      // If not streaming, show full content immediately
-      if (!isStreaming) {
+      // If this message was loaded from history (never streamed), show immediately
+      if (!hasStreamedRef.current && !mountedWithStreamingRef.current) {
         setDisplayedLength(content.length);
         return;
       }
 
-      // Start animation
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-      animationRef.current = requestAnimationFrame(animateTypewriter);
+      // Content grew — animate to reveal new characters
+      startAnimation();
 
-      return () => {
-        if (animationRef.current) {
-          cancelAnimationFrame(animationRef.current);
-        }
-      };
-    }, [content, isStreaming, animateTypewriter]);
+      return stopAnimation;
+    }, [content, startAnimation, stopAnimation]);
 
-    // When streaming ends, ensure we show full content
+    // When streaming ends, DON'T jump to end — let animation finish naturally
+    // Just ensure the animation is running to catch up to final content
     useEffect(() => {
-      if (!isStreaming) {
-        setDisplayedLength(content.length);
+      if (!isStreaming && hasStreamedRef.current) {
+        targetLengthRef.current = content.length;
+        startAnimation();
       }
-    }, [isStreaming, content.length]);
+    }, [isStreaming, content.length, startAnimation]);
+
+    // Cleanup on unmount
+    useEffect(() => stopAnimation, [stopAnimation]);
 
     const displayedContent = content.slice(0, displayedLength);
-    const showCursor = isStreaming && displayedLength < content.length;
+    const isRevealing = displayedLength < content.length;
+    const showCursor = isRevealing;
 
     return (
       <div className="message-text prose prose-stone max-w-none pl-3 text-stone-700 selection:bg-rose-100 selection:text-rose-900">
         <Response
-          mode={isStreaming ? "streaming" : "static"}
-          parseIncompleteMarkdown={isStreaming}
+          mode={isRevealing ? "streaming" : "static"}
+          parseIncompleteMarkdown={isRevealing}
         >
           {displayedContent}
         </Response>
