@@ -20,7 +20,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
 
 interface PricingFeature {
   text: string;
@@ -455,9 +455,16 @@ export default function PricingPage() {
   const handleSelectPlan = async (planId: string) => {
     setLoading(planId);
     try {
+      await initCsrfToken();
+      const csrfToken = getCsrfToken() || "";
+
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+        credentials: "include",
         body: JSON.stringify({ planId }),
       });
 
