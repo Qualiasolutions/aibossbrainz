@@ -4,6 +4,7 @@ import { Mic, MicOff, PhoneOff, Settings, Volume2 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useSWRConfig } from "swr";
 import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -26,6 +27,7 @@ export function PremiumRealtimeCall({
   botType,
   onEndCall,
 }: PremiumRealtimeCallProps) {
+  const { mutate } = useSWRConfig();
   const [callState, setCallState] = useState<CallState>("idle");
   const [isMuted, setIsMuted] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -106,8 +108,8 @@ export function PremiumRealtimeCall({
         const audioUrl = data.audioUrl;
         const chatId = data.chatId;
 
-        // Store the chatId for redirect when call ends
-        if (chatId && !voiceCallChatId) {
+        // Always store the latest chatId (each call creates a new per-session chat)
+        if (chatId) {
           setVoiceCallChatId(chatId);
         }
 
@@ -309,9 +311,12 @@ export function PremiumRealtimeCall({
     setCallState("ended");
     toast.success("Call ended");
 
+    // Invalidate chat history so new voice chat appears in sidebar
+    mutate("/api/history");
+
     // Pass chatId to parent for redirect
     setTimeout(() => onEndCall(voiceCallChatId || undefined), 1500);
-  }, [onEndCall, voiceCallChatId]);
+  }, [onEndCall, voiceCallChatId, mutate]);
 
   // Toggle mute
   const toggleMute = useCallback(() => {

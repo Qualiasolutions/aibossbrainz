@@ -219,33 +219,31 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
     }
 
     // Save messages to chat history for real-time calls
-    // Create or use a dedicated "Voice Call" chat for this user
+    // Create a new chat per voice session with a descriptive title
     let savedChatId: string | null = null;
     try {
       const supabase = await createClient();
 
-      // Get or create voice call chat for this user
-      const { data: existingChat, error: fetchError } = await supabase
-        .from("Chat")
-        .select("id")
-        .eq("userId", user.id)
-        .eq("title", "Voice Call")
-        .maybeSingle();
-
-      const chatId = existingChat?.id || crypto.randomUUID();
+      const chatId = crypto.randomUUID();
       savedChatId = chatId;
 
-      // If chat doesn't exist, create it first
-      if (!existingChat) {
-        const { error: insertError } = await supabase.from("Chat").insert({
-          id: chatId,
-          userId: user.id,
-          title: "Voice Call",
-          botType: botType as BotType,
-        });
-        if (insertError) {
-          console.error("Failed to create voice call chat:", insertError);
-        }
+      // Generate descriptive title from user message
+      let title = message.trim();
+      if (title.length > 50) {
+        title = `${title.slice(0, 50).replace(/\s+\S*$/, "")}...`;
+      }
+      if (!title) {
+        title = "Voice Call";
+      }
+
+      const { error: insertError } = await supabase.from("Chat").insert({
+        id: chatId,
+        userId: user.id,
+        title,
+        botType: botType as BotType,
+      });
+      if (insertError) {
+        console.error("Failed to create voice call chat:", insertError);
       }
 
       const now = new Date().toISOString();
@@ -274,7 +272,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
         },
       ];
 
-      const saveResult = await saveMessages({ messages });
+      await saveMessages({ messages });
       console.log("Voice call messages saved to chat:", chatId);
     } catch (saveError) {
       console.error("Failed to save voice call messages:", saveError);
