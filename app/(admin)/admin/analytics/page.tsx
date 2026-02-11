@@ -1,12 +1,23 @@
 import { Activity, MessageSquare, TrendingUp, Users } from "lucide-react";
 import { ExecutiveBreakdown } from "@/components/admin/executive-breakdown";
+import { RevenueFilter } from "@/components/admin/revenue-filter";
 import { StatsCard } from "@/components/admin/stats-card";
-import { getAdminStats, getAllUsers } from "@/lib/admin/queries";
+import {
+  getAdminStats,
+  getAllUsers,
+  getClientOnlyStats,
+  getSubscriptionStats,
+} from "@/lib/admin/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
-  const [stats, users] = await Promise.all([getAdminStats(), getAllUsers()]);
+  const [stats, users, allSubStats, clientSubStats] = await Promise.all([
+    getAdminStats(),
+    getAllUsers(),
+    getSubscriptionStats(),
+    getClientOnlyStats(),
+  ]);
 
   // Calculate additional metrics
   const avgMessagesPerUser =
@@ -65,6 +76,11 @@ export default async function AnalyticsPage() {
           changeType="neutral"
           icon={Activity}
         />
+      </div>
+
+      {/* Revenue Filter - Clients Only vs All Users */}
+      <div className="mb-8">
+        <RevenueFilter allStats={allSubStats} clientStats={clientSubStats} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2 mb-8">

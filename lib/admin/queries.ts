@@ -574,14 +574,23 @@ export interface SubscriptionStats {
   activeSubscribers: number;
 }
 
-export async function getSubscriptionStats(): Promise<SubscriptionStats> {
+export async function getSubscriptionStats(options?: {
+  userTypeFilter?: string;
+}): Promise<SubscriptionStats> {
   const supabase = createServiceClient();
 
   // Get subscription counts by type
-  const { data: users } = await supabase
+  let query = supabase
     .from("User")
     .select("subscriptionType, subscriptionStatus")
     .is("deletedAt", null);
+
+  // Filter by user type when specified (e.g., 'client' to exclude team users from revenue)
+  if (options?.userTypeFilter) {
+    query = query.eq("userType", options.userTypeFilter);
+  }
+
+  const { data: users } = await query;
 
   const stats = {
     trial: 0,
@@ -621,6 +630,11 @@ export async function getSubscriptionStats(): Promise<SubscriptionStats> {
     stats.monthly * MONTHLY_PRICE + stats.annual * ANNUAL_MONTHLY_EQUIVALENT;
 
   return { ...stats, mrr };
+}
+
+// Get subscription stats filtered to clients only (excludes team/internal users from revenue)
+export async function getClientOnlyStats(): Promise<SubscriptionStats> {
+  return getSubscriptionStats({ userTypeFilter: "client" });
 }
 
 export interface UserPreview {

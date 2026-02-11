@@ -1,8 +1,10 @@
 import { ArrowLeft } from "lucide-react";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { UserTypeSelector } from "@/components/admin/user-type-selector";
 import { Button } from "@/components/ui/button";
-import { getUserById } from "@/lib/admin/queries";
+import { getUserById, updateUserByAdmin } from "@/lib/admin/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +32,12 @@ function formatSubscriptionType(type: string | null | undefined): string {
     default:
       return "None";
   }
+}
+
+async function updateUserType(userId: string, userType: string) {
+  "use server";
+  await updateUserByAdmin(userId, { userType });
+  revalidatePath(`/admin/users/${userId}`);
 }
 
 export default async function UserDetailsPage({
@@ -89,6 +97,16 @@ export default async function UserDetailsPage({
             <div>
               <dt className="text-sm text-neutral-500">Industry</dt>
               <dd className="text-neutral-900">{user.industry || "Not set"}</dd>
+            </div>
+            <div>
+              <dt className="text-sm text-neutral-500 mb-1">User Category</dt>
+              <dd>
+                <UserTypeSelector
+                  userId={user.id}
+                  currentType={user.userType ?? "client"}
+                  updateAction={updateUserType}
+                />
+              </dd>
             </div>
             <div>
               <dt className="text-sm text-neutral-500">Business Goals</dt>
