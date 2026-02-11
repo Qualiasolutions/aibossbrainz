@@ -20,6 +20,17 @@ export type LandingPageCMSContent = {
     kim_role: string;
     kim_image: string;
     kim_expertise: string;
+    alex_description: string;
+    kim_description: string;
+  };
+  checkup: {
+    section_title: string;
+    item_1_title: string;
+    item_1_value: string;
+    item_2_title: string;
+    item_2_value: string;
+    item_3_title: string;
+    item_3_value: string;
   };
   benefits: {
     section_title: string;
@@ -87,6 +98,19 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
     kim_role: "Chief Sales Officer",
     kim_image: "https://i.ibb.co/m7vk4JF/KIM-3.png",
     kim_expertise: "Enterprise Sales,Pipeline Growth,Deal Closing",
+    alex_description:
+      "Brand strategist with Fortune 500 experience. Specializes in go-to-market strategy, brand positioning, and digital campaigns that drive growth.",
+    kim_description:
+      "Revenue architect and sales optimization expert. Helps build pipelines, improve conversion rates, and close deals more effectively.",
+  },
+  checkup: {
+    section_title: "What You Get with Annual",
+    item_1_title: "The Sales & Marketing Checkup",
+    item_1_value: "$97",
+    item_2_title: "Access to Our Resource Library",
+    item_2_value: "$1,000+",
+    item_3_title: "Monthly Group Sales & Marketing Strategy Call",
+    item_3_value: "$6,000",
   },
   benefits: {
     section_title: "Get the Move-the-Needle Strategies Now",

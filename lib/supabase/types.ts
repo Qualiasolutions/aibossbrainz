@@ -103,7 +103,8 @@ export type LandingPageSection =
   | "cta"
   | "theme"
   | "header"
-  | "footer";
+  | "footer"
+  | "checkup";
 
 export interface LandingPageContent {
   id: string;

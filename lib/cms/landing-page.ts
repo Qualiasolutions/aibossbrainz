@@ -44,6 +44,7 @@ async function fetchLandingPageContentUncached(): Promise<LandingPageCMSContent>
       theme: { ...defaultLandingPageContent.theme, ...content.theme },
       header: { ...defaultLandingPageContent.header, ...content.header },
       footer: { ...defaultLandingPageContent.footer, ...content.footer },
+      checkup: { ...defaultLandingPageContent.checkup, ...content.checkup },
     };
   } catch (err) {
     console.error("[CMS] Error in fetchLandingPageContent:", err);
