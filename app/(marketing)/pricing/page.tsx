@@ -333,7 +333,7 @@ function FAQSection() {
     {
       question: "Can I cancel my subscription?",
       answer:
-        "Yes! You can cancel anytime with our monthly plan. We believe in earning your business every month. If you're not satisfied within the first 30 days, we offer a full refund, no questions asked.",
+        "Your subscription is yours to control -- upgrade, downgrade, or cancel whenever you want. No penalties, no hassle.",
     },
     {
       question: "What is 24/7 Access?",
@@ -434,13 +434,13 @@ function GuaranteeSection() {
               <Check className="size-8" />
             </div>
             <h3 className="mt-6 font-bold text-2xl text-white sm:text-3xl">
-              30-Day Money-Back Guarantee
+              Cancel Anytime. No Strings Attached.
             </h3>
             <p className="mx-auto mt-4 max-w-lg text-stone-300">
-              If you're not completely satisfied with your membership within the
-              first 30 days, we'll refund your payment in full. No questions
-              asked. We're confident you'll love working with our AI executive
-              team.
+              Your membership is completely flexible. Cancel anytime with no
+              penalties or hidden fees. We're confident you'll love working with
+              our AI executive team -- and we'll keep earning your business every
+              month.
             </p>
           </div>
         </motion.div>

@@ -242,7 +242,7 @@ export function PaywallModal({
             {/* Footer */}
             <div className="border-t border-stone-100 bg-stone-50 px-6 py-4 text-center sm:px-8">
               <p className="text-sm text-stone-500">
-                30-day money-back guarantee. Cancel anytime.
+                Cancel anytime. No strings attached.
               </p>
             </div>
           </motion.div>
