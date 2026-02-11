@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  BookOpen,
   ChevronLeft,
   Globe,
   Headphones,
@@ -41,6 +42,11 @@ const navItems = [
     title: "Analytics",
     href: "/admin/analytics",
     icon: BarChart3,
+  },
+  {
+    title: "Knowledge Base",
+    href: "/admin/knowledge-base",
+    icon: BookOpen,
   },
   {
     title: "Landing Page",

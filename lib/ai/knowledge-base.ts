@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { requestCoalescer } from "@/lib/request-coalescer";
+import { createServiceClient } from "@/lib/supabase/server";
 
 const KNOWLEDGE_BASE_PATH = path.join(process.cwd(), "knowledge-base");
 
@@ -268,6 +269,64 @@ function evictOldestEntries(): void {
   }
 }
 
+/**
+ * Fetches knowledge base content stored in Supabase (e.g., ingested Fireflies transcripts).
+ * Returns formatted content string, or empty string if table doesn't exist or query fails.
+ */
+async function getSupabaseKnowledgeContent(
+  botType: string,
+): Promise<string> {
+  try {
+    const supabase = createServiceClient();
+
+    // Determine which bot_type values to include
+    let botTypes: string[];
+    if (botType === "collaborative") {
+      botTypes = ["alexandria", "kim", "shared"];
+    } else if (botType === "alexandria") {
+      botTypes = ["alexandria", "shared"];
+    } else if (botType === "kim") {
+      botTypes = ["kim", "shared"];
+    } else {
+      return "";
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from("knowledge_base_content")
+      .select("title, content, source, created_at")
+      .in("bot_type", botTypes)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      // Table might not exist yet -- degrade gracefully
+      console.warn(
+        "[Knowledge Base] Supabase query failed (table may not exist):",
+        error.message,
+      );
+      return "";
+    }
+
+    if (!data || data.length === 0) {
+      return "";
+    }
+
+    return data
+      .map(
+        (row: {
+          title: string;
+          content: string;
+          source: string;
+          created_at: string;
+        }) => `\n\n--- ${row.title} (from ${row.source}) ---\n${row.content}`,
+      )
+      .join("");
+  } catch (err) {
+    console.warn("[Knowledge Base] Supabase content load failed:", err);
+    return "";
+  }
+}
+
 export async function getKnowledgeBaseContent(
   botType: string,
 ): Promise<string> {
@@ -322,6 +381,12 @@ export async function getKnowledgeBaseContent(
           }
         } else {
           return "";
+        }
+
+        // Append ingested content from Supabase (transcripts, manual entries)
+        const dbContent = await getSupabaseKnowledgeContent(botType);
+        if (dbContent) {
+          content += `\n\n=== Ingested Knowledge ===\n${dbContent}`;
         }
 
         // Evict old entries before adding new one
