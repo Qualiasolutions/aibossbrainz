@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** v1.2 Client Feedback Sweep - Phase 13 next
+**Current focus:** v1.2 Client Feedback Sweep - Phase 13 in progress
 
 ## Current Position
 
-Phase: 12 of 15 (Export & Copy Quality)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-11 -- Completed 12-02-PLAN.md (Copy/Paste Quality)
+Phase: 13 of 15 (AI Content & Voice)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-11 -- Completed 13-01-PLAN.md (AI Content Generation & Voice Preprocessing)
 
-Progress: [####......] 36% (4/11 plans)
+Progress: [#####.....] 45% (5/11 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (v1.2)
+- Total plans completed: 5 (v1.2)
 - Average duration: 4min
-- Total execution time: 14min
+- Total execution time: 18min
 
 **By Phase:**
 
@@ -29,6 +29,7 @@ Progress: [####......] 36% (4/11 plans)
 |-------|-------|-------|----------|
 | 11 | 2/2 | 6min | 3min |
 | 12 | 2/2 | 8min | 4min |
+| 13 | 1/2 | 4min | 4min |
 
 ## Accumulated Context
 
@@ -43,6 +44,9 @@ Progress: [####......] 36% (4/11 plans)
 - PDF export: Replace html2canvas screenshot approach with jsPDF native text API for all text PDFs; keep html2canvas only for SWOT board
 - PDF rendering pipeline: markdown -> parseMarkdown() -> PDFBlock[] -> renderBlocksToPDF() -> jsPDF doc
 - Clipboard copy: Default to stripped plain text (no markdown syntax) for clipboard copy; preserve code content, convert links to "text (url)" format
+- Voice preprocessing: Single shared utility at lib/voice/strip-markdown-tts.ts for all TTS text cleaning
+- Tables in TTS: Replaced with verbal cue instead of silent removal
+- Content generation: CONTENT_GENERATION_INSTRUCTIONS constant injected per-executive with persona voice notes
 
 ### Completed
 
@@ -51,6 +55,7 @@ Progress: [####......] 36% (4/11 plans)
 - 11-02: Chat error recovery with clearError, user-friendly toasts, safe auto-resume
 - 12-01: PDF export rewrite -- native jsPDF text rendering, markdown parser, page-break-aware renderer
 - 12-02: Copy/paste quality -- stripMarkdownForClipboard utility, clean text in clipboard from both copy locations
+- 13-01: AI content generation prompts + consolidated TTS preprocessing utility with suggestions stripping
 
 **v1.1 (Shipped 2026-02-02):**
 - Phases 6-10 complete
@@ -69,5 +74,5 @@ Progress: [####......] 36% (4/11 plans)
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Phase 12 complete
-Resume: `/gsd:execute-phase 13` (next phase)
+Stopped at: Phase 13, plan 1 complete
+Resume: Continue with 13-02-PLAN.md
