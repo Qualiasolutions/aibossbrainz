@@ -291,7 +291,15 @@ export const POST = async (request: Request) => {
       })),
     );
 
+    // Extract message text for performance optimization
+    const messageText = message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => (part as { type: "text"; text: string }).text)
+      .join(" ");
+
     // Build system prompt with personalization (now async)
+    // PERF: Pass messageText and messageCount so we can skip expensive
+    // personalization queries for simple messages like "hi"
     const systemPromptText = await systemPrompt({
       selectedChatModel,
       requestHints,
@@ -300,6 +308,8 @@ export const POST = async (request: Request) => {
       knowledgeBaseContent,
       canvasContext,
       userId: user.id,
+      messageText,
+      messageCount: messagesFromDb.length,
     });
 
     let finalMergedUsage: AppUsage | undefined;

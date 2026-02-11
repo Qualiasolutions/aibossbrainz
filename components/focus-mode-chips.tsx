@@ -12,7 +12,7 @@ import {
   Target,
   Users,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type BotType,
   FOCUS_MODES,
@@ -50,13 +50,14 @@ export function FocusModeChips({
   const availableModes = getFocusModesForBot(botType);
 
   // Check scroll position to show/hide arrows
-  const checkScroll = () => {
+  // PERF: Wrapped in useCallback to prevent unnecessary re-renders
+  const checkScroll = useCallback(() => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       setShowLeftArrow(scrollLeft > 0);
       setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 10);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkScroll();

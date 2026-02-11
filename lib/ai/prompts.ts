@@ -135,6 +135,8 @@ export const systemPrompt = async ({
   knowledgeBaseContent = "",
   canvasContext = "",
   userId,
+  messageText = "",
+  messageCount = 0,
 }: {
   selectedChatModel: string;
   requestHints: RequestHints;
@@ -143,6 +145,10 @@ export const systemPrompt = async ({
   knowledgeBaseContent?: string;
   canvasContext?: string;
   userId?: string;
+  /** Current message text - used for lightweight context detection */
+  messageText?: string;
+  /** Total messages in conversation - used for lightweight context detection */
+  messageCount?: number;
 }): Promise<string> => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
   let botSystemPrompt = getSystemPrompt(botType, focusMode);
@@ -152,8 +158,14 @@ export const systemPrompt = async ({
     botSystemPrompt += `\n\nSMART CONTEXT DETECTION: If the user specifically addresses one executive (e.g., "Kim, what do you think?" or "@alexandria your take?" or "Alexandria alone"), respond ONLY as that executive. Look for natural cues like names, "you" directed at one person, or explicit requests. When responding as one executive, start with their name and don't include the other's perspective.`;
   }
 
-  // Add personalization context if userId provided
-  if (userId) {
+  // PERFORMANCE OPTIMIZATION: Skip expensive personalization for simple messages
+  // Only load full personalization context for:
+  // - Messages longer than 100 chars (substantive questions)
+  // - Conversations beyond the first 2 messages (established context)
+  const shouldLoadPersonalization =
+    userId && (messageText.length > 100 || messageCount > 2);
+
+  if (shouldLoadPersonalization) {
     try {
       const personalizationContext = await buildPersonalizationContext(userId);
       const personalizationPrompt = formatPersonalizationPrompt(

@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, useCallback } from "react";
 import type { BotType } from "@/lib/bot-personalities";
 import { BOT_PERSONALITIES } from "@/lib/bot-personalities";
 import { Response } from "./elements/response";
@@ -15,14 +15,19 @@ type EnhancedChatMessageProps = {
 };
 
 /**
- * Streaming cursor that blinks while AI is typing
+ * Premium streaming cursor with smooth pulse animation
  */
 const StreamingCursor = memo(() => (
   <motion.span
-    animate={{ opacity: [1, 0, 1] }}
-    className="ml-0.5 inline-block h-[1.1em] w-[2px] bg-rose-500/70 align-text-bottom"
+    initial={{ opacity: 0, scaleY: 0.8 }}
+    animate={{
+      opacity: [0.7, 1, 0.7],
+      scaleY: [0.9, 1, 0.9],
+    }}
+    exit={{ opacity: 0, scaleY: 0.8 }}
+    className="ml-0.5 inline-block h-[1.1em] w-[2px] rounded-full bg-gradient-to-b from-rose-400 to-rose-600 align-text-bottom shadow-sm shadow-rose-500/30"
     transition={{
-      duration: 0.8,
+      duration: 1,
       repeat: Number.POSITIVE_INFINITY,
       ease: "easeInOut",
     }}
@@ -31,7 +36,8 @@ const StreamingCursor = memo(() => (
 StreamingCursor.displayName = "StreamingCursor";
 
 /**
- * Typewriter wrapper that reveals text with a subtle animation
+ * Optimized typewriter animation with smooth reveal
+ * PERF: Uses throttled RAF and larger character chunks for 30fps instead of 60fps
  */
 const TypewriterContent = memo(
   ({
@@ -45,6 +51,43 @@ const TypewriterContent = memo(
     const previousContentRef = useRef("");
     const targetLengthRef = useRef(0);
     const animationRef = useRef<number | null>(null);
+    const lastFrameTimeRef = useRef(0);
+
+    // Throttled animation at ~30fps for smooth performance
+    const animateTypewriter = useCallback(() => {
+      const now = performance.now();
+      const elapsed = now - lastFrameTimeRef.current;
+
+      // Throttle to ~30fps (33ms between frames)
+      if (elapsed < 33) {
+        animationRef.current = requestAnimationFrame(animateTypewriter);
+        return;
+      }
+
+      lastFrameTimeRef.current = now;
+
+      setDisplayedLength((current) => {
+        const target = targetLengthRef.current;
+
+        if (current >= target) {
+          return current;
+        }
+
+        // Calculate characters to add: larger chunks for smoother feel
+        // Min 3 chars, scales up with gap size (25% of gap)
+        const gap = target - current;
+        const charsToAdd = Math.max(3, Math.ceil(gap * 0.25));
+
+        const nextLength = Math.min(current + charsToAdd, target);
+
+        // Continue animation if not at target
+        if (nextLength < target) {
+          animationRef.current = requestAnimationFrame(animateTypewriter);
+        }
+
+        return nextLength;
+      });
+    }, []);
 
     useEffect(() => {
       // If content shrinks or resets, reset displayed length
@@ -64,31 +107,6 @@ const TypewriterContent = memo(
         return;
       }
 
-      // Typewriter animation: catch up to target length
-      const animateTypewriter = () => {
-        setDisplayedLength((current) => {
-          const target = targetLengthRef.current;
-
-          if (current >= target) {
-            return current;
-          }
-
-          // Calculate how many characters to add per frame
-          // Faster for larger gaps, minimum 1 character per frame
-          const gap = target - current;
-          const charsToAdd = Math.max(1, Math.ceil(gap * 0.15));
-
-          const nextLength = Math.min(current + charsToAdd, target);
-
-          // Continue animation if not at target
-          if (nextLength < target) {
-            animationRef.current = requestAnimationFrame(animateTypewriter);
-          }
-
-          return nextLength;
-        });
-      };
-
       // Start animation
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -100,7 +118,7 @@ const TypewriterContent = memo(
           cancelAnimationFrame(animationRef.current);
         }
       };
-    }, [content, isStreaming]);
+    }, [content, isStreaming, animateTypewriter]);
 
     // When streaming ends, ensure we show full content
     useEffect(() => {
@@ -120,7 +138,9 @@ const TypewriterContent = memo(
         >
           {displayedContent}
         </Response>
-        {showCursor && <StreamingCursor />}
+        <AnimatePresence>
+          {showCursor && <StreamingCursor />}
+        </AnimatePresence>
       </div>
     );
   },

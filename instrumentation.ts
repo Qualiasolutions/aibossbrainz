@@ -6,6 +6,20 @@ export async function register() {
   // Register OpenTelemetry
   registerOTel({ serviceName: "ai-chatbot" });
 
+  // PERFORMANCE: Preload knowledge base on server startup
+  // This eliminates cold start latency for the first chat request
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    import("@/lib/ai/knowledge-base")
+      .then(({ preloadKnowledgeBase }) => {
+        preloadKnowledgeBase().catch((err) => {
+          console.warn("[Instrumentation] Knowledge base preload failed:", err);
+        });
+      })
+      .catch(() => {
+        // Silently ignore import failures in non-Node environments
+      });
+  }
+
   // Initialize Sentry for server-side
   if (process.env.NODE_ENV === "production" && env.SENTRY_DSN) {
     Sentry.init({

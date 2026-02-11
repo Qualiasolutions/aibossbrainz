@@ -10,6 +10,13 @@ import {
 } from "./shared";
 
 // ============================================
+// PERFORMANCE: User existence cache
+// ============================================
+// Caches verified user IDs to avoid redundant DB checks on every request.
+// Safe for serverless: resets on cold start (acceptable trade-off).
+const verifiedUserIds = new Set<string>();
+
+// ============================================
 // USER QUERIES
 // ============================================
 
@@ -65,6 +72,11 @@ export async function ensureUserExists({
   id: string;
   email: string;
 }) {
+  // PERFORMANCE: Fast path - skip DB check if already verified this session
+  if (verifiedUserIds.has(id)) {
+    return { id };
+  }
+
   try {
     // Use service client to bypass RLS for user creation
     const supabase = createServiceClient();
@@ -77,6 +89,8 @@ export async function ensureUserExists({
       .single();
 
     if (existingUser) {
+      // Cache for future requests
+      verifiedUserIds.add(id);
       return existingUser;
     }
 
@@ -149,6 +163,8 @@ export async function ensureUserExists({
       console.log(
         `[ensureUserExists] Archived old user (${emailUser.id}) and created new user (${id}) for re-signup`,
       );
+      // Cache the new user ID
+      verifiedUserIds.add(id);
       return newUser ?? { id };
     }
 
@@ -178,12 +194,17 @@ export async function ensureUserExists({
           .select("id")
           .eq("id", id)
           .single();
-        if (raceUser) return raceUser;
+        if (raceUser) {
+          verifiedUserIds.add(id);
+          return raceUser;
+        }
       }
       console.error("[ensureUserExists] Upsert error:", error);
       throw error;
     }
 
+    // Cache the verified user ID
+    verifiedUserIds.add(id);
     return data ?? { id };
   } catch (error) {
     console.error("ensureUserExists error:", error);
