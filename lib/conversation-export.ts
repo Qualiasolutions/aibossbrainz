@@ -24,7 +24,7 @@ export async function exportConversationToPDF(
   let y: number = STYLES.marginTop;
 
   // Title header
-  doc.setFont("helvetica", "normal", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
   doc.setTextColor(...STYLES.headingColor);
   const titleLines = doc.splitTextToSize(chatTitle, STYLES.contentWidth);
@@ -32,7 +32,7 @@ export async function exportConversationToPDF(
   y += titleLines.length * 20 * 0.3528 * STYLES.lineHeight + 3;
 
   // Subtitle: conversation with executive + date
-  doc.setFont("helvetica", "normal", "normal");
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
   doc.setTextColor(...STYLES.mutedColor);
   doc.text(
@@ -69,7 +69,7 @@ export async function exportConversationToPDF(
     }
 
     // Speaker name (colored: user=#333, bot=#b91c1c)
-    doc.setFont("helvetica", "normal", "bold");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     if (isUser) {
       doc.setTextColor(51, 51, 51);
@@ -90,7 +90,7 @@ export async function exportConversationToPDF(
 
   // Footer on last page
   const footerY = STYLES.pageHeight - 15;
-  doc.setFont("helvetica", "normal", "italic");
+  doc.setFont("helvetica", "italic");
   doc.setFontSize(STYLES.footerSize);
   doc.setTextColor(...STYLES.mutedColor);
   doc.text(

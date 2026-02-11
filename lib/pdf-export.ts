@@ -27,14 +27,14 @@ export async function exportToPDF(
     let y: number = STYLES.marginTop;
 
     // Header: Executive name
-    doc.setFont("helvetica", "normal", "bold");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
     doc.setTextColor(...STYLES.headingColor);
     doc.text(executiveName, STYLES.marginLeft, y);
     y += 7;
 
     // Header: Executive role
-    doc.setFont("helvetica", "normal", "normal");
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.setTextColor(...STYLES.mutedColor);
     doc.text(executiveRole, STYLES.marginLeft, y);
@@ -62,7 +62,7 @@ export async function exportToPDF(
     y += 6;
 
     // Footer text
-    doc.setFont("helvetica", "normal", "italic");
+    doc.setFont("helvetica", "italic");
     doc.setFontSize(STYLES.footerSize);
     doc.setTextColor(153, 153, 153);
     doc.text(

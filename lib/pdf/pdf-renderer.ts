@@ -86,7 +86,7 @@ function renderHeading(
     y = STYLES.marginTop;
   }
 
-  doc.setFont("helvetica", "normal", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(fontSize);
   doc.setTextColor(...STYLES.headingColor);
 
@@ -155,7 +155,7 @@ function renderList(
     }
 
     // Render bullet/number prefix
-    doc.setFont("helvetica", "normal", "normal");
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(fontSize);
     doc.setTextColor(...STYLES.textColor);
     doc.text(prefix, STYLES.marginLeft, y);
@@ -229,14 +229,14 @@ function renderTable(
     y = (lastTable?.finalY ?? y + 20) + STYLES.blockSpacing;
   } else {
     // Fallback: render as plain text if autoTable not loaded
-    doc.setFont("helvetica", "normal", "bold");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(STYLES.bodySize);
     doc.setTextColor(...STYLES.textColor);
     const headerText = block.headers.join(" | ");
     doc.text(headerText, STYLES.marginLeft, y);
     y += STYLES.bodySize * PT_TO_MM * STYLES.lineHeight;
 
-    doc.setFont("helvetica", "normal", "normal");
+    doc.setFont("helvetica", "normal");
     for (const row of block.rows) {
       const rowText = row.join(" | ");
       doc.text(rowText, STYLES.marginLeft, y);
@@ -258,7 +258,7 @@ function renderCodeBlock(
   const padding = STYLES.codeBlockPadding;
 
   // Set courier font BEFORE splitTextToSize (pitfall #2)
-  doc.setFont("courier", "normal", "normal");
+  doc.setFont("courier", "normal");
   doc.setFontSize(fontSize);
 
   const codeLines = block.code.split("\n");
@@ -301,7 +301,7 @@ function renderCodeBlock(
   );
 
   // Render code lines
-  doc.setFont("courier", "normal", "normal");
+  doc.setFont("courier", "normal");
   doc.setFontSize(fontSize);
   doc.setTextColor(...STYLES.textColor);
 
@@ -346,7 +346,7 @@ function renderBlockquote(
   const lineHeightMm = fontSize * PT_TO_MM * STYLES.lineHeight;
   const quoteWidth = STYLES.contentWidth - STYLES.quoteIndent;
 
-  doc.setFont("helvetica", "normal", "italic");
+  doc.setFont("helvetica", "italic");
   doc.setFontSize(fontSize);
   doc.setTextColor(...STYLES.mutedColor);
 
@@ -464,7 +464,7 @@ function applyChunkFont(
   chunk: RenderChunk,
   fontSize: number,
 ): void {
-  doc.setFont(chunk.fontFamily, "normal", chunk.fontStyle);
+  doc.setFont(chunk.fontFamily, chunk.fontStyle);
   doc.setFontSize(fontSize);
   doc.setTextColor(...(chunk.color ?? STYLES.textColor));
 }
@@ -522,7 +522,7 @@ function estimateBlockHeight(doc: jsPDF, block: PDFBlock): number {
     case "heading": {
       const sizeMap = { 1: STYLES.h1Size, 2: STYLES.h2Size, 3: STYLES.h3Size };
       const fontSize = sizeMap[block.level];
-      doc.setFont("helvetica", "normal", "bold");
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(fontSize);
       const lines = doc.splitTextToSize(block.text, STYLES.contentWidth);
       return (
@@ -534,7 +534,7 @@ function estimateBlockHeight(doc: jsPDF, block: PDFBlock): number {
     case "paragraph": {
       // Rough estimate: treat all text as body size
       const fullText = block.segments.map((s) => s.text).join("");
-      doc.setFont("helvetica", "normal", "normal");
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(STYLES.bodySize);
       const lines = doc.splitTextToSize(fullText, STYLES.contentWidth);
       return (
@@ -560,7 +560,8 @@ function estimateBlockHeight(doc: jsPDF, block: PDFBlock): number {
       );
     }
     case "blockquote": {
-      doc.setFont("helvetica", "normal", "italic");
+      doc.setFont("helvetica", "italic");
+
       doc.setFontSize(STYLES.bodySize);
       const lines = doc.splitTextToSize(
         block.text,
