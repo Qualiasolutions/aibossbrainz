@@ -75,11 +75,11 @@ Plans:
   3. Social icons link to aleccimedia.com website and Facebook; X/Twitter icon is removed
   4. Sales & Marketing Checkup section is styled in red with items ordered lowest to highest value
   5. Sharing a link to the site shows "AI Boss Brainz" as title and "Your Sales and Marketing Secret Weapon" as description; contact page tagline reads "Sales and Marketing Strategy 24/7"
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 14-01: Homepage layout updates (bios, checkup, social icons)
-- [ ] 14-02: Hero CMS and SEO meta-data
+- [ ] 14-01-PLAN.md -- Homepage layout updates: executive bios as text, checkup section, social icons (LAND-01, LAND-03, LAND-04)
+- [ ] 14-02-PLAN.md -- Hero media CMS swap + SEO meta-data + contact tagline (LAND-02, SEO-01, SEO-02)
 
 ### Phase 15: Billing, Knowledge Base & Platform
 **Goal**: Platform has upgraded billing options, external knowledge ingestion, user segmentation, and richer message interactions
