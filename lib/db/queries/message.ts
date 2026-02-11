@@ -217,23 +217,18 @@ export async function addMessageReaction({
   try {
     const supabase = await createClient();
 
-    // Remove existing reaction of same type from same user
-    await supabase
-      .from("MessageReaction")
-      .delete()
-      .eq("messageId", messageId)
-      .eq("userId", userId)
-      .eq("reactionType", reactionType);
-
-    // Add new reaction
+    // Insert directly -- unique constraint (messageId, userId, reactionType) prevents duplicates
     const { error } = await supabase.from("MessageReaction").insert({
       messageId,
       userId,
       reactionType,
     });
 
+    // Silently handle unique constraint violations (reaction already exists)
+    if (error && error.code === "23505") return;
     if (error) throw error;
   } catch (_error) {
+    if (_error instanceof ChatSDKError) throw _error;
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to add message reaction",
@@ -244,17 +239,27 @@ export async function addMessageReaction({
 export async function removeMessageReaction({
   messageId,
   userId,
+  reactionType,
 }: {
   messageId: string;
   userId: string;
+  reactionType?: ReactionType;
 }) {
   try {
     const supabase = await createClient();
-    await supabase
+    let query = supabase
       .from("MessageReaction")
       .delete()
       .eq("messageId", messageId)
       .eq("userId", userId);
+
+    // When reactionType is provided, only remove that specific reaction
+    // When omitted, remove all reactions for this user on this message
+    if (reactionType) {
+      query = query.eq("reactionType", reactionType);
+    }
+
+    await query;
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
@@ -327,18 +332,17 @@ export async function getUserReactionForMessage({
 }: {
   messageId: string;
   userId: string;
-}): Promise<MessageReaction | null> {
+}): Promise<MessageReaction[]> {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("MessageReaction")
       .select("*")
       .eq("messageId", messageId)
-      .eq("userId", userId)
-      .limit(1);
+      .eq("userId", userId);
 
     if (error) throw error;
-    return data?.[0] || null;
+    return data || [];
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",

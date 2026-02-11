@@ -51,7 +51,9 @@ const REACTION_CONFIG: Record<
 
 interface MessageReactionsProps {
   messageId: string;
+  /** @deprecated Use userReactions instead */
   userReaction?: ReactionType | null;
+  userReactions?: ReactionType[];
   reactionCounts?: Record<ReactionType, number>;
   className?: string;
 }
@@ -59,6 +61,7 @@ interface MessageReactionsProps {
 export function MessageReactions({
   messageId,
   userReaction,
+  userReactions,
   reactionCounts = {} as Record<ReactionType, number>,
   className,
 }: MessageReactionsProps) {
@@ -66,19 +69,21 @@ export function MessageReactions({
   const { csrfFetch } = useCsrf();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentReaction, setCurrentReaction] = useState<ReactionType | null>(
-    userReaction ?? null,
+  // Support both legacy single-select prop and new multi-select prop
+  const [currentReactions, setCurrentReactions] = useState<ReactionType[]>(
+    userReactions ?? (userReaction ? [userReaction] : []),
   );
 
   const handleReaction = async (reactionType: ReactionType) => {
     if (isLoading) return;
 
     setIsLoading(true);
-    const isRemoving = currentReaction === reactionType;
+    const isRemoving = currentReactions.includes(reactionType);
 
     try {
+      // Always POST -- server handles toggle semantics
       const response = await csrfFetch("/api/reactions", {
-        method: isRemoving ? "DELETE" : "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messageId, reactionType }),
       });
@@ -87,17 +92,15 @@ export function MessageReactions({
         throw new Error("Failed to update reaction");
       }
 
-      // Optimistically update local state
-      setCurrentReaction(isRemoving ? null : reactionType);
+      // Optimistically toggle the reaction in/out of the array
+      setCurrentReactions((prev) =>
+        isRemoving
+          ? prev.filter((r) => r !== reactionType)
+          : [...prev, reactionType],
+      );
 
       // Revalidate reactions data
       mutate(`/api/reactions?messageId=${messageId}`);
-
-      toast.success(
-        isRemoving
-          ? "Reaction removed"
-          : `Marked as ${REACTION_CONFIG[reactionType].label}`,
-      );
     } catch {
       toast.error("Failed to update reaction");
     } finally {
@@ -117,7 +120,7 @@ export function MessageReactions({
       {activeReactions.map(([type, count]) => {
         const config = REACTION_CONFIG[type as ReactionType];
         const Icon = config.icon;
-        const isUserReaction = currentReaction === type;
+        const isUserReaction = currentReactions.includes(type as ReactionType);
 
         return (
           <button
@@ -153,7 +156,7 @@ export function MessageReactions({
           <div className="flex flex-col gap-1">
             {Object.entries(REACTION_CONFIG).map(([type, config]) => {
               const Icon = config.icon;
-              const isActive = currentReaction === type;
+              const isActive = currentReactions.includes(type as ReactionType);
 
               return (
                 <button

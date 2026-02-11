@@ -55,7 +55,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const [userReaction, reactionCounts] = await Promise.all([
+    const [userReactions, reactionCounts] = await Promise.all([
       getUserReactionForMessage({
         messageId,
         userId: user.id,
@@ -64,7 +64,10 @@ export async function GET(request: Request) {
     ]);
 
     return Response.json({
-      userReaction: userReaction?.reactionType ?? null,
+      // Return array of active reaction types for multi-select support
+      userReactions: userReactions.map((r) => r.reactionType),
+      // Keep legacy field for backward compatibility
+      userReaction: userReactions[0]?.reactionType ?? null,
       reactionCounts,
     });
   } catch (error) {
@@ -110,20 +113,33 @@ export const POST = withCsrf(async (request: Request) => {
       ).toResponse();
     }
 
-    // Remove existing reaction first (if any)
-    await removeMessageReaction({
+    // Toggle logic: check if user already has this specific reaction type
+    const existingReactions = await getUserReactionForMessage({
       messageId,
       userId: user.id,
     });
+    const alreadyHasReaction = existingReactions.some(
+      (r) => r.reactionType === reactionType,
+    );
 
-    // Add new reaction
+    if (alreadyHasReaction) {
+      // Toggle OFF: remove only this specific reaction type
+      await removeMessageReaction({
+        messageId,
+        userId: user.id,
+        reactionType: reactionType as ReactionType,
+      });
+      return Response.json({ success: true, action: "removed" });
+    }
+
+    // Toggle ON: add the reaction (other reactions remain)
     await addMessageReaction({
       messageId,
       userId: user.id,
       reactionType: reactionType as ReactionType,
     });
 
-    return Response.json({ success: true });
+    return Response.json({ success: true, action: "added" });
   } catch (error) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
@@ -147,7 +163,10 @@ export const DELETE = withCsrf(async (request: Request) => {
   }
 
   try {
-    const { messageId } = await safeParseJson<{ messageId: string }>(request);
+    const { messageId, reactionType } = await safeParseJson<{
+      messageId: string;
+      reactionType?: string;
+    }>(request);
 
     if (!messageId) {
       return new ChatSDKError(
@@ -159,6 +178,7 @@ export const DELETE = withCsrf(async (request: Request) => {
     await removeMessageReaction({
       messageId,
       userId: user.id,
+      reactionType: reactionType as ReactionType | undefined,
     });
 
     return Response.json({ success: true });
