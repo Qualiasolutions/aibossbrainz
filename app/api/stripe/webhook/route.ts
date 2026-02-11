@@ -10,7 +10,7 @@ import {
   renewSubscription,
   startTrial,
 } from "@/lib/stripe/actions";
-import { getStripe, PLAN_DETAILS } from "@/lib/stripe/config";
+import { getStripe, PLAN_DETAILS, STRIPE_PRICES } from "@/lib/stripe/config";
 import { createServiceClient } from "@/lib/supabase/server";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -380,6 +380,41 @@ export async function POST(request: Request) {
             console.error(
               `[Stripe Webhook] Failed to retrieve subscription ${subscriptionId}:`,
               retrieveError,
+            );
+          }
+        }
+        break;
+      }
+
+      // Handle plan changes (upgrade/downgrade via billing portal)
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const userId = subscription.metadata?.userId;
+
+        if (userId) {
+          // Map the new price ID back to a subscription type
+          const newPriceId = subscription.items.data[0]?.price?.id;
+          let newSubscriptionType: ValidSubscriptionType | null = null;
+
+          for (const [plan, priceId] of Object.entries(STRIPE_PRICES)) {
+            if (priceId === newPriceId) {
+              newSubscriptionType = plan as ValidSubscriptionType;
+              break;
+            }
+          }
+
+          if (newSubscriptionType) {
+            await activateSubscription({
+              userId,
+              subscriptionType: newSubscriptionType,
+              stripeSubscriptionId: subscription.id,
+            });
+            console.log(
+              `[Stripe Webhook] Plan changed to ${newSubscriptionType} for user ${userId}`,
+            );
+          } else {
+            console.warn(
+              `[Stripe Webhook] customer.subscription.updated: Unknown price ID ${newPriceId} for user ${userId}`,
             );
           }
         }

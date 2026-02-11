@@ -145,19 +145,19 @@ export async function createPortalSession({
     ? user.stripeCustomerId
     : await getOrCreateStripeCustomer(userId, user.email);
 
-  // Get the user's active subscription to show upgrade options in portal
-  const { data: profile } = await supabase
-    .from("User")
-    .select("stripeSubscriptionId")
-    .eq("id", userId)
-    .single();
-
-  const session = await getStripe().billingPortal.sessions.create({
+  // Build portal session params -- optionally include a portal configuration
+  // that enables subscription switching (upgrade/downgrade) in the portal UI
+  const portalParams: Stripe.BillingPortal.SessionCreateParams = {
     customer: customerId,
     return_url: returnUrl,
-    // If user has a subscription, they can update it in the portal
-    // The portal automatically shows upgrade options for existing subscriptions
-  });
+  };
+
+  const portalConfigId = process.env.STRIPE_PORTAL_CONFIG_ID;
+  if (portalConfigId) {
+    portalParams.configuration = portalConfigId;
+  }
+
+  const session = await getStripe().billingPortal.sessions.create(portalParams);
 
   return session.url;
 }
