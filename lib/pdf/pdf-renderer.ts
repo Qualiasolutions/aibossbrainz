@@ -5,7 +5,6 @@
  * Handles page breaks, font switching, and consistent Y-position tracking.
  */
 import type jsPDF from "jspdf";
-import type autoTable from "jspdf-autotable";
 
 import type { InlineSegment, ListItem, PDFBlock } from "./markdown-parser";
 import { STYLES } from "./pdf-styles";
@@ -195,13 +194,14 @@ function renderList(
 }
 
 function renderTable(
-  doc: jsPDF & { autoTable?: typeof autoTable },
+  doc: jsPDF,
   block: Extract<PDFBlock, { type: "table" }>,
   y: number,
 ): number {
-  // Use jspdf-autotable for table rendering
-  if (typeof doc.autoTable === "function") {
-    doc.autoTable({
+  // Use jspdf-autotable for table rendering (v5 adds autoTable to prototype via side-effect import)
+  const docWithPlugin = doc as jsPDF & Record<string, unknown>;
+  if (typeof docWithPlugin.autoTable === "function") {
+    (docWithPlugin.autoTable as (opts: Record<string, unknown>) => void)({
       head: [block.headers],
       body: block.rows,
       startY: y,
@@ -223,7 +223,7 @@ function renderTable(
     });
 
     // Read the final Y position from autoTable
-    const lastTable = (doc as Record<string, unknown>).lastAutoTable as
+    const lastTable = docWithPlugin.lastAutoTable as
       | { finalY: number }
       | undefined;
     y = (lastTable?.finalY ?? y + 20) + STYLES.blockSpacing;
