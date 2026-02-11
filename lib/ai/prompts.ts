@@ -127,6 +127,20 @@ About the origin of user's request:
 - country: ${requestHints.country}
 `;
 
+/**
+ * Detects if a message is a simple greeting or very short interaction.
+ * Used to dramatically reduce system prompt size and model verbosity for trivial messages.
+ */
+function isSimpleMessage(text: string, messageCount: number): boolean {
+  const trimmed = text.trim().toLowerCase();
+  // First message under 30 chars is almost certainly a greeting
+  if (messageCount <= 1 && trimmed.length < 30) return true;
+  // Explicit greeting patterns
+  const greetingPatterns =
+    /^(hi|hey|hello|hiu|yo|sup|hola|howdy|morning|evening|afternoon|what'?s? up|whats up|hiya|heya|greetings|good (morning|afternoon|evening))[\s!?.]*$/i;
+  return greetingPatterns.test(trimmed);
+}
+
 export const systemPrompt = async ({
   selectedChatModel,
   requestHints,
@@ -150,6 +164,7 @@ export const systemPrompt = async ({
   /** Total messages in conversation - used for lightweight context detection */
   messageCount?: number;
 }): Promise<string> => {
+  const simple = isSimpleMessage(messageText, messageCount);
   const requestPrompt = getRequestPromptFromHints(requestHints);
   let botSystemPrompt = getSystemPrompt(botType, focusMode);
 
@@ -158,10 +173,14 @@ export const systemPrompt = async ({
     botSystemPrompt += `\n\nSMART CONTEXT DETECTION: If the user specifically addresses one executive (e.g., "Kim, what do you think?" or "@alexandria your take?" or "Alexandria alone"), respond ONLY as that executive. Look for natural cues like names, "you" directed at one person, or explicit requests. When responding as one executive, start with their name and don't include the other's perspective.`;
   }
 
-  // PERFORMANCE OPTIMIZATION: Skip expensive personalization for simple messages
-  // Only load full personalization context for:
-  // - Messages longer than 100 chars (substantive questions)
-  // - Conversations beyond the first 2 messages (established context)
+  // PERFORMANCE: For simple greetings, add explicit brevity instruction and skip all heavy context
+  if (simple) {
+    botSystemPrompt += `\n\n## BREVITY MODE (ACTIVE)\nThe user sent a simple greeting. Respond in 1-2 SHORT sentences max. Be warm but extremely concise. Do NOT give a full executive briefing, do NOT list your capabilities, do NOT structure with headers. Just a friendly, brief hello and ask what they need help with.`;
+    // Skip knowledge base, personalization, artifacts, web search, suggestions for greetings
+    return `${botSystemPrompt}\n\n${requestPrompt}`;
+  }
+
+  // PERFORMANCE: Skip expensive personalization for short messages (< 100 chars, first 2 messages)
   const shouldLoadPersonalization =
     userId && (messageText.length > 100 || messageCount > 2);
 

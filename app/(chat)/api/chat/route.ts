@@ -152,14 +152,12 @@ export const POST = async (request: Request) => {
       return new ChatSDKError("unauthorized:chat").toResponse();
     }
 
-    // Ensure User record exists in our custom User table (syncs with Supabase Auth)
-    await ensureUserExists({
-      id: user.id,
-      email: user.email || "",
-    });
+    // PERF: Run user existence check and subscription check in parallel
+    const [, subscriptionStatus] = await Promise.all([
+      ensureUserExists({ id: user.id, email: user.email || "" }),
+      checkUserSubscription(user.id),
+    ]);
 
-    // Check subscription status
-    const subscriptionStatus = await checkUserSubscription(user.id);
     if (!subscriptionStatus.isActive) {
       return new ChatSDKError("subscription_expired:chat").toResponse();
     }
@@ -258,11 +256,24 @@ export const POST = async (request: Request) => {
       country,
     };
 
+    // Extract message text early for simple message detection
+    const messageText = message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => (part as { type: "text"; text: string }).text)
+      .join(" ");
+
+    // PERF: Detect simple messages to skip heavy context loading
+    const isSimple =
+      messagesFromDb.length <= 1 && messageText.trim().length < 30;
+
     // Run knowledge base loading, canvas fetch, message save, and stream ID creation in parallel
+    // PERF: Skip knowledge base and canvas loading for simple greetings
     const streamId = generateUUID();
     const [knowledgeBaseContent, userCanvases] = await Promise.all([
-      getKnowledgeBaseContent(selectedBotType),
-      getAllUserCanvases({ userId: user.id }),
+      isSimple ? Promise.resolve("") : getKnowledgeBaseContent(selectedBotType),
+      isSimple
+        ? Promise.resolve([])
+        : getAllUserCanvases({ userId: user.id }),
       saveMessages({
         messages: [
           {
@@ -291,12 +302,6 @@ export const POST = async (request: Request) => {
       })),
     );
 
-    // Extract message text for performance optimization
-    const messageText = message.parts
-      .filter((part) => part.type === "text")
-      .map((part) => (part as { type: "text"; text: string }).text)
-      .join(" ");
-
     // Build system prompt with personalization (now async)
     // PERF: Pass messageText and messageCount so we can skip expensive
     // personalization queries for simple messages like "hi"
@@ -320,7 +325,7 @@ export const POST = async (request: Request) => {
           model: myProvider.languageModel(selectedChatModel),
           system: systemPromptText,
           messages: convertToModelMessages(uiMessages),
-          maxOutputTokens: 4096, // Prevent long responses from timing out
+          maxOutputTokens: isSimple ? 500 : 4096, // PERF: Limit output for greetings
           stopWhen: stepCountIs(3), // Reduced from 5 to 3 - prevents deep recursion latency
           // Temporarily disabled tools and transforms for OpenRouter compatibility
           // experimental_activeTools: [

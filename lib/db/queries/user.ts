@@ -215,6 +215,25 @@ export async function ensureUserExists({
   }
 }
 
+// ============================================
+// PERFORMANCE: Subscription status cache
+// ============================================
+// Caches active subscription status for 60s to avoid DB queries on every message.
+// Only caches ACTIVE subscriptions. Expired/inactive always re-checks.
+const subscriptionCache = new Map<
+  string,
+  {
+    result: {
+      isActive: boolean;
+      subscriptionType: string | null;
+      daysRemaining: number | null;
+      isAdmin: boolean;
+    };
+    timestamp: number;
+  }
+>();
+const SUBSCRIPTION_CACHE_TTL = 60_000; // 60 seconds
+
 /**
  * Checks if a user's subscription is active.
  * Returns subscription status info for access control.
@@ -225,6 +244,12 @@ export async function checkUserSubscription(userId: string): Promise<{
   daysRemaining: number | null;
   isAdmin: boolean;
 }> {
+  // PERF: Return cached result if still fresh
+  const cached = subscriptionCache.get(userId);
+  if (cached && Date.now() - cached.timestamp < SUBSCRIPTION_CACHE_TTL) {
+    return cached.result;
+  }
+
   try {
     const supabase = createServiceClient();
 
@@ -248,12 +273,14 @@ export async function checkUserSubscription(userId: string): Promise<{
 
     // Admins always have access
     if (user.isAdmin) {
-      return {
+      const result = {
         isActive: true,
         subscriptionType: user.subscriptionType,
         daysRemaining: null,
         isAdmin: true,
       };
+      subscriptionCache.set(userId, { result, timestamp: Date.now() });
+      return result;
     }
 
     // Check if subscription is active (including trialing)
@@ -292,20 +319,24 @@ export async function checkUserSubscription(userId: string): Promise<{
         };
       }
 
-      return {
+      const result = {
         isActive: true,
         subscriptionType: user.subscriptionType,
         daysRemaining,
         isAdmin: false,
       };
+      subscriptionCache.set(userId, { result, timestamp: Date.now() });
+      return result;
     }
 
-    return {
+    const result = {
       isActive: true,
       subscriptionType: user.subscriptionType,
       daysRemaining: null,
       isAdmin: false,
     };
+    subscriptionCache.set(userId, { result, timestamp: Date.now() });
+    return result;
   } catch (error) {
     console.error("checkUserSubscription error:", error);
     // SECURITY: Fail closed - deny access if subscription check fails
