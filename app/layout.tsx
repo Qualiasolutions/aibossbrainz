@@ -7,7 +7,6 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
-import "streamdown/styles.css";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
