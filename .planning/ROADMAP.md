@@ -30,11 +30,11 @@ v1.2 addresses 24 items from Alexandria's team feedback spreadsheet. The milesto
   3. User can create a new chat thread even when another thread has a generation error
   4. Returning to a previous chat loads the full conversation content (no blank screen)
   5. Password fields show a toggle to reveal/hide text, and minimum length is enforced at 8 characters
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 11-01: Auth rate limiting fix and password UX
-- [ ] 11-02: Chat error handling and conversation loading
+- [ ] 11-01-PLAN.md -- Auth rate limiting fix, password min length (8), password show/hide toggle (BUG-01, AUTH-01, AUTH-02)
+- [ ] 11-02-PLAN.md -- Chat error recovery with clearError, improved error messages, safe auto-resume (BUG-02, BUG-03, BUG-04)
 
 ### Phase 12: Export & Copy Quality
 **Goal**: Users get clean, professional output when exporting or copying chat content
@@ -105,7 +105,7 @@ Phase 11 first (critical fixes), then 12-15. Phases 12, 13, 14 can run in parall
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 11. Critical Fixes & Auth | v1.2 | 0/2 | Not started | - |
+| 11. Critical Fixes & Auth | v1.2 | 0/2 | Planned | - |
 | 12. Export & Copy Quality | v1.2 | 0/2 | Not started | - |
 | 13. AI Content & Voice | v1.2 | 0/2 | Not started | - |
 | 14. Homepage & SEO | v1.2 | 0/2 | Not started | - |
