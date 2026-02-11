@@ -33,7 +33,7 @@ v1.2 addresses 24 items from Alexandria's team feedback spreadsheet. The milesto
 **Plans:** 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md -- Auth rate limiting fix, password min length (8), password show/hide toggle (BUG-01, AUTH-01, AUTH-02)
+- [x] 11-01-PLAN.md -- Auth rate limiting fix, password min length (8), password show/hide toggle (BUG-01, AUTH-01, AUTH-02)
 - [ ] 11-02-PLAN.md -- Chat error recovery with clearError, improved error messages, safe auto-resume (BUG-02, BUG-03, BUG-04)
 
 ### Phase 12: Export & Copy Quality
@@ -105,7 +105,7 @@ Phase 11 first (critical fixes), then 12-15. Phases 12, 13, 14 can run in parall
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 11. Critical Fixes & Auth | v1.2 | 0/2 | Planned | - |
+| 11. Critical Fixes & Auth | v1.2 | 1/2 | In progress | - |
 | 12. Export & Copy Quality | v1.2 | 0/2 | Not started | - |
 | 13. AI Content & Voice | v1.2 | 0/2 | Not started | - |
 | 14. Homepage & SEO | v1.2 | 0/2 | Not started | - |
