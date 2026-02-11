@@ -45,11 +45,11 @@ Plans:
   2. User can export an entire chat thread as one PDF document
   3. Exported PDFs are noticeably smaller in file size than current output
   4. Selecting and copying chat text produces clean text without HTML markup in clipboard
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 12-01: PDF rendering cleanup and thread export
-- [ ] 12-02: Copy/paste sanitization and file size optimization
+- [ ] 12-01-PLAN.md -- Native text PDF engine + rewrite single-message and thread exports (EXPORT-01, EXPORT-02, EXPORT-03)
+- [ ] 12-02-PLAN.md -- Clipboard copy markdown stripping for clean paste output (EXPORT-04)
 
 ### Phase 13: AI Content & Voice
 **Goal**: AI executives produce actionable deliverables (not just strategy) and voice features work seamlessly with chat
