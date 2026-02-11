@@ -1,0 +1,14 @@
+Starting Knowledge Base conversion...
+Skipping Content_Alexandria, markdown already exists.
+Skipping Content_Alexandria, markdown already exists.
+Skipping Copy of Copy of FB Beating Google in Referral Traffic.pdf: PDF conversion temporarily disabled due to library issues.
+Skipping Copy of Copy of Fake News on Social Media Debate.pdf: PDF conversion temporarily disabled due to library issues.
+Skipping Copy of Copy of HubSpot Collab_The_Future_of_Facebook_Advertising_2016.pdf: PDF conversion temporarily disabled due to library issues.
+Skipping Copy of Copy of LEGO Social Media Best Practices_2015.pdf: PDF conversion temporarily disabled due to library issues.
+Skipping Copy of Copy of McDonald_s KSA Customer Success_2018.pdf: PDF conversion temporarily disabled due to library issues.
+Skipping Copy of Copy of Most Important Trends to Remember in 2019.pdf: PDF conversion temporarily disabled due to library issues.
+Skipping Copy of Copy of National Geographic_ Masters of Visual Storytelling.pdf: PDF conversion temporarily disabled due to library issues.
+Skipping Kim-video-caption, markdown already exists.
+Skipping NEW Sales & Marketing Message Makeover - Alecci Media (US Letter) (1) (2).pdf: PDF conversion temporarily disabled due to library issues.
+Skipping THE SALES & MARKETING CHECKUP (1).pdf: PDF conversion temporarily disabled due to library issues.
+Conversion complete.

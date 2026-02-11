@@ -1,0 +1,121 @@
+import type { UIMessageStreamWriter } from "ai";
+
+import { codeDocumentHandler } from "@/artifacts/code/server";
+import { sheetDocumentHandler } from "@/artifacts/sheet/server";
+import { textDocumentHandler } from "@/artifacts/text/server";
+import type { ArtifactKind } from "@/components/artifact";
+import { saveDocument } from "../db/queries";
+import type { Document } from "@/lib/supabase/types";
+import type { ChatMessage } from "../types";
+import type { User } from "@supabase/supabase-js";
+
+export type Session = {
+	user: User | null;
+};
+
+export type SaveDocumentProps = {
+	id: string;
+	title: string;
+	kind: ArtifactKind;
+	content: string;
+	userId: string;
+};
+
+export type CreateDocumentCallbackProps = {
+	id: string;
+	title: string;
+	dataStream: UIMessageStreamWriter<ChatMessage>;
+	session: Session;
+};
+
+export type UpdateDocumentCallbackProps = {
+	document: Document;
+	description: string;
+	dataStream: UIMessageStreamWriter<ChatMessage>;
+	session: Session;
+};
+
+export type DocumentHandler<T = ArtifactKind> = {
+	kind: T;
+	onCreateDocument: (args: CreateDocumentCallbackProps) => Promise<void>;
+	onUpdateDocument: (args: UpdateDocumentCallbackProps) => Promise<void>;
+};
+
+export function createDocumentHandler<T extends ArtifactKind>(config: {
+	kind: T;
+	onCreateDocument: (params: CreateDocumentCallbackProps) => Promise<string>;
+	onUpdateDocument: (params: UpdateDocumentCallbackProps) => Promise<string>;
+}): DocumentHandler<T> {
+	return {
+		kind: config.kind,
+		onCreateDocument: async (args: CreateDocumentCallbackProps) => {
+			const draftContent = await config.onCreateDocument({
+				id: args.id,
+				title: args.title,
+				dataStream: args.dataStream,
+				session: args.session,
+			});
+
+			// Validate content before saving
+			if (!draftContent || draftContent.trim() === "") {
+				console.error(`[DocumentHandler] Empty content for document "${args.title}" (${args.id})`);
+			}
+
+			if (args.session?.user?.id) {
+				try {
+					await saveDocument({
+						id: args.id,
+						title: args.title,
+						content: draftContent,
+						kind: config.kind,
+						userId: args.session.user.id,
+					});
+					console.log(`[DocumentHandler] Saved document "${args.title}" with ${draftContent.length} chars`);
+				} catch (error) {
+					console.error(`[DocumentHandler] Failed to save document "${args.title}":`, error);
+					throw error; // Re-throw to ensure the error propagates
+				}
+			}
+
+			return;
+		},
+		onUpdateDocument: async (args: UpdateDocumentCallbackProps) => {
+			const draftContent = await config.onUpdateDocument({
+				document: args.document,
+				description: args.description,
+				dataStream: args.dataStream,
+				session: args.session,
+			});
+
+			if (args.session?.user?.id) {
+				try {
+					await saveDocument({
+						id: args.document.id,
+						title: args.document.title,
+						content: draftContent,
+						kind: config.kind,
+						userId: args.session.user.id,
+					});
+					console.log(`[DocumentHandler] Updated document "${args.document.title}" with ${draftContent.length} chars`);
+				} catch (error) {
+					console.error(`[DocumentHandler] Failed to update document "${args.document.title}":`, error);
+					throw error;
+				}
+			}
+
+			return;
+		},
+	};
+}
+
+/*
+ * Use this array to define the document handlers for each artifact kind.
+ */
+// Note: strategy-canvas removed - canvas saves directly to /strategy-canvas page
+export const documentHandlersByArtifactKind: DocumentHandler[] = [
+	textDocumentHandler,
+	codeDocumentHandler,
+	sheetDocumentHandler,
+];
+
+export const artifactKinds = ["text", "code", "sheet"] as const;

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Boss Brainz v1.1 — Milestone Report</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a26;
+    --border: #2a2a3a;
+    --text: #e4e4ef;
+    --text-dim: #8888a0;
+    --accent: #a78bfa;
+    --accent-dim: #7c5cbf;
+    --green: #34d399;
+    --green-dim: rgba(52,211,153,.12);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,.12);
+    --rose: #fb7185;
+    --rose-dim: rgba(251,113,133,.12);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251,191,36,.12);
+    --cyan: #22d3ee;
+    --cyan-dim: rgba(34,211,238,.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+  .header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: .5rem;
+  }
+  .header .subtitle {
+    color: var(--text-dim);
+    font-size: 1rem;
+  }
+  .header .badge {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: .35rem 1rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid rgba(52,211,153,.25);
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .stat .num {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat .label {
+    font-size: .75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-top: .25rem;
+  }
+
+  /* Phase card */
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  .phase-header {
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .phase-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .phase-6 .phase-num { background: var(--rose-dim); color: var(--rose); }
+  .phase-7 .phase-num { background: var(--amber-dim); color: var(--amber); }
+  .phase-8 .phase-num { background: var(--blue-dim); color: var(--blue); }
+  .phase-9 .phase-num { background: var(--cyan-dim); color: var(--cyan); }
+  .phase-header h2 { font-size: 1.2rem; font-weight: 600; }
+  .phase-header .goal {
+    color: var(--text-dim);
+    font-size: .85rem;
+    margin-left: auto;
+    text-align: right;
+    max-width: 400px;
+  }
+  .phase-body { padding: 1.5rem 2rem; }
+
+  /* Requirements */
+  .reqs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+  }
+  .req {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .3rem .75rem;
+    border-radius: 8px;
+    font-size: .8rem;
+    font-weight: 500;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .req .check {
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  /* Files grid */
+  .files-section h3,
+  .commits-section h3,
+  .decisions-section h3,
+  .journey-section h3 {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-dim);
+    margin-bottom: .75rem;
+  }
+  .files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+  }
+  .file {
+    padding: .6rem .9rem;
+    border-radius: 8px;
+    background: var(--surface-2);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: .75rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .file .tag {
+    font-family: 'Inter', sans-serif;
+    font-size: .65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: .15rem .4rem;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .tag-new { background: var(--green-dim); color: var(--green); }
+  .tag-mod { background: var(--blue-dim); color: var(--blue); }
+
+  /* Commits */
+  .commits-list {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    margin-bottom: 1.5rem;
+  }
+  .commit {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: .8rem;
+  }
+  .commit .hash {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    color: var(--accent);
+    background: rgba(167,139,250,.08);
+    padding: .2rem .5rem;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .commit .msg { color: var(--text-dim); }
+
+  /* Decisions */
+  .decisions-list {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+  .decision {
+    padding: .6rem .9rem;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent-dim);
+    font-size: .82rem;
+  }
+  .decision strong { color: var(--text); }
+  .decision span { color: var(--text-dim); }
+
+  /* Mailchimp Journey Visual */
+  .journey-section { margin-top: 2.5rem; }
+  .journey {
+    position: relative;
+    padding: 1.5rem 0;
+  }
+  .journey-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 1.5rem;
+  }
+  .journey-row:last-child { margin-bottom: 0; }
+
+  .journey-step {
+    flex: 1;
+    position: relative;
+    padding: 1.2rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .journey-step .step-icon {
+    font-size: 1.5rem;
+    margin-bottom: .4rem;
+  }
+  .journey-step .step-title {
+    font-weight: 600;
+    font-size: .85rem;
+    margin-bottom: .25rem;
+  }
+  .journey-step .step-detail {
+    font-size: .72rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+  .journey-step .step-tag {
+    display: inline-block;
+    margin-top: .5rem;
+    padding: .2rem .6rem;
+    border-radius: 6px;
+    font-size: .68rem;
+    font-weight: 600;
+  }
+  .tag-trial { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(34,211,238,.2); }
+  .tag-paid { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,.2); }
+  .tag-error { background: var(--rose-dim); color: var(--rose); border: 1px solid rgba(251,113,133,.2); }
+
+  .journey-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    flex-shrink: 0;
+    color: var(--text-dim);
+    font-size: 1.2rem;
+  }
+
+  .journey-label {
+    text-align: center;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-dim);
+    margin-bottom: .75rem;
+    font-weight: 600;
+  }
+
+  .journey-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 1.5rem 0;
+  }
+
+  /* Flow connector */
+  .flow-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .flow-section h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: .5rem;
+  }
+  .flow-section .flow-subtitle {
+    color: var(--text-dim);
+    font-size: .85rem;
+    margin-bottom: 2rem;
+  }
+
+  .flow-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr 60px 1fr;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 1.5rem;
+  }
+  .flow-box {
+    padding: 1.2rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+  }
+  .flow-box .fb-icon { font-size: 1.8rem; margin-bottom: .5rem; }
+  .flow-box .fb-title { font-weight: 600; font-size: .9rem; margin-bottom: .25rem; }
+  .flow-box .fb-detail { font-size: .75rem; color: var(--text-dim); }
+  .flow-box .fb-code {
+    display: inline-block;
+    margin-top: .5rem;
+    padding: .2rem .5rem;
+    background: rgba(167,139,250,.08);
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: .7rem;
+    color: var(--accent);
+  }
+  .flow-arrow {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 1.4rem;
+  }
+
+  .retry-box {
+    margin-top: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--rose-dim);
+    border: 1px solid rgba(251,113,133,.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .retry-box .rb-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .retry-box .rb-text { font-size: .82rem; }
+  .retry-box .rb-text strong { color: var(--rose); }
+  .retry-box .rb-text span { color: var(--text-dim); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+    color: var(--text-dim);
+    font-size: .8rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    body { padding: 1rem; }
+    .phase-header { flex-direction: column; align-items: flex-start; }
+    .phase-header .goal { margin-left: 0; text-align: left; }
+    .files-grid { grid-template-columns: 1fr; }
+    .flow-grid { grid-template-columns: 1fr; gap: .5rem; }
+    .flow-arrow { transform: rotate(90deg); }
+    .journey-row { flex-direction: column; }
+    .journey-arrow { width: auto; height: 40px; transform: rotate(90deg); }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>AI Boss Brainz v1.1</h1>
+  <div class="subtitle">Alexandria's Requests — Milestone Report</div>
+  <div class="badge">Shipped 2026-02-02</div>
+</div>
+
+<!-- Stats bar -->
+<div class="stats-bar">
+  <div class="stat">
+    <div class="num">4</div>
+    <div class="label">Phases</div>
+  </div>
+  <div class="stat">
+    <div class="num">6</div>
+    <div class="label">Plans</div>
+  </div>
+  <div class="stat">
+    <div class="num">14</div>
+    <div class="label">Requirements</div>
+  </div>
+  <div class="stat">
+    <div class="num">20</div>
+    <div class="label">Commits</div>
+  </div>
+  <div class="stat">
+    <div class="num">100%</div>
+    <div class="label">Verified</div>
+  </div>
+</div>
+
+<!-- Phase 6 -->
+<div class="phase phase-6">
+  <div class="phase-header">
+    <div class="phase-num">6</div>
+    <h2>Bug Fixes &amp; UX</h2>
+    <div class="goal">Fix critical bugs blocking user experience</div>
+  </div>
+  <div class="phase-body">
+    <div class="reqs">
+      <div class="req"><span class="check">&#10003;</span> BUG-01 Admin panel 404</div>
+      <div class="req"><span class="check">&#10003;</span> BUG-02 Unpin not working</div>
+      <div class="req"><span class="check">&#10003;</span> UX-01 Email redirect flow</div>
+    </div>
+    <div class="files-section">
+      <h3>Files</h3>
+      <div class="files-grid">
+        <div class="file"><span class="tag tag-new">new</span> app/(admin)/admin/users/[id]/page.tsx</div>
+        <div class="file"><span class="tag tag-mod">mod</span> components/sidebar-history-item.tsx</div>
+        <div class="file"><span class="tag tag-mod">mod</span> components/sidebar-history.tsx</div>
+        <div class="file"><span class="tag tag-mod">mod</span> app/auth/callback/route.ts</div>
+      </div>
+    </div>
+    <div class="decisions-section">
+      <h3>Key Decisions</h3>
+      <div class="decisions-list">
+        <div class="decision"><strong>Admin user detail page:</strong> <span>Created full dynamic route matching existing conversation detail pattern</span></div>
+        <div class="decision"><strong>Unpin root cause:</strong> <span>Stale local state — fixed by using chat.isPinned directly from props (SWR source of truth)</span></div>
+        <div class="decision"><strong>Email redirect:</strong> <span>New users redirect to /subscribe?welcome=true for better onboarding</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 7 -->
+<div class="phase phase-7">
+  <div class="phase-header">
+    <div class="phase-num">7</div>
+    <h2>Branding Updates</h2>
+    <div class="goal">Update all content per Alexandria's requests</div>
+  </div>
+  <div class="phase-body">
+    <div class="reqs">
+      <div class="req"><span class="check">&#10003;</span> BRAND-01 Location &rarr; Phoenix, AZ</div>
+      <div class="req"><span class="check">&#10003;</span> BRAND-02 Footer tagline</div>
+      <div class="req"><span class="check">&#10003;</span> BRAND-03 ToS email</div>
+      <div class="req"><span class="check">&#10003;</span> BRAND-04 Privacy email</div>
+      <div class="req"><span class="check">&#10003;</span> BRAND-05 Social links</div>
+    </div>
+    <div class="files-section">
+      <h3>Files</h3>
+      <div class="files-grid">
+        <div class="file"><span class="tag tag-mod">mod</span> app/(marketing)/contact/page.tsx</div>
+        <div class="file"><span class="tag tag-mod">mod</span> app/(marketing)/terms/page.tsx</div>
+        <div class="file"><span class="tag tag-mod">mod</span> app/(marketing)/privacy/page.tsx</div>
+        <div class="file"><span class="tag tag-mod">mod</span> lib/cms/landing-page-types.ts</div>
+        <div class="file"><span class="tag tag-mod">mod</span> app/(marketing)/marketing-layout-client.tsx</div>
+      </div>
+    </div>
+    <div class="decisions-section">
+      <h3>Key Decisions</h3>
+      <div class="decisions-list">
+        <div class="decision"><strong>X branding:</strong> <span>Used x.com/aleccimedia (modern branding, not twitter.com)</span></div>
+        <div class="decision"><strong>Email updates:</strong> <span>Updated all 5 instances across Terms &amp; Privacy to ai.bossbrainz@aleccimedia.com</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 8 -->
+<div class="phase phase-8">
+  <div class="phase-header">
+    <div class="phase-num">8</div>
+    <h2>Billing Documentation</h2>
+    <div class="goal">Document billing system &amp; resolve double-billing risk</div>
+  </div>
+  <div class="phase-body">
+    <div class="reqs">
+      <div class="req"><span class="check">&#10003;</span> BILL-01 Document platform vs legacy Stripe</div>
+      <div class="req"><span class="check">&#10003;</span> BILL-02 Resolve Dagmar risk</div>
+      <div class="req"><span class="check">&#10003;</span> BILL-03 Resolve Becky risk</div>
+    </div>
+    <div class="files-section">
+      <h3>Files</h3>
+      <div class="files-grid">
+        <div class="file"><span class="tag tag-new">new</span> docs/billing/BILLING-SYSTEM-OVERVIEW.md</div>
+        <div class="file"><span class="tag tag-new">new</span> docs/billing/USER-RESOLUTION-PLAN.md</div>
+      </div>
+    </div>
+    <div class="decisions-section">
+      <h3>Key Decisions</h3>
+      <div class="decisions-list">
+        <div class="decision"><strong>Documentation-only approach:</strong> <span>Admin panel behavior is by design (database-only, no Stripe charges) — no code changes needed</span></div>
+        <div class="decision"><strong>Two resolution options:</strong> <span>Cancel legacy Stripe or keep it — Alexandria chooses per user</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 9 -->
+<div class="phase phase-9">
+  <div class="phase-header">
+    <div class="phase-num">9</div>
+    <h2>Mailchimp Integration</h2>
+    <div class="goal">Connect platform to Mailchimp for trial email automation</div>
+  </div>
+  <div class="phase-body">
+    <div class="reqs">
+      <div class="req"><span class="check">&#10003;</span> MAIL-01 Trial tag on signup</div>
+      <div class="req"><span class="check">&#10003;</span> MAIL-02 Paid tag on conversion</div>
+      <div class="req"><span class="check">&#10003;</span> MAIL-03 Upgrade link &rarr; /pricing</div>
+    </div>
+    <div class="files-section">
+      <h3>Files</h3>
+      <div class="files-grid">
+        <div class="file"><span class="tag tag-new">new</span> lib/mailchimp/client.ts</div>
+        <div class="file"><span class="tag tag-new">new</span> lib/mailchimp/tags.ts</div>
+        <div class="file"><span class="tag tag-new">new</span> lib/email/admin-notifications.ts</div>
+        <div class="file"><span class="tag tag-new">new</span> app/api/admin/mailchimp/backfill/route.ts</div>
+        <div class="file"><span class="tag tag-mod">mod</span> app/api/stripe/webhook/route.ts</div>
+        <div class="file"><span class="tag tag-mod">mod</span> package.json</div>
+        <div class="file"><span class="tag tag-mod">mod</span> .env.example</div>
+      </div>
+    </div>
+    <div class="commits-section">
+      <h3>Commits</h3>
+      <div class="commits-list">
+        <div class="commit"><span class="hash">b912cfc</span> <span class="msg">chore(09-01): install Mailchimp SDK and TypeScript types</span></div>
+        <div class="commit"><span class="hash">486d1c5</span> <span class="msg">feat(09-01): create Mailchimp client module with tag functions</span></div>
+        <div class="commit"><span class="hash">0356252</span> <span class="msg">feat(09-01): add admin notification helper and Mailchimp env docs</span></div>
+        <div class="commit"><span class="hash">d8f1747</span> <span class="msg">feat(09-02): add Mailchimp trial tagging to subscription.created webhook</span></div>
+        <div class="commit"><span class="hash">2141921</span> <span class="msg">feat(09-02): add Mailchimp paid tagging to invoice.paid webhook</span></div>
+        <div class="commit"><span class="hash">e9d6271</span> <span class="msg">feat(09-03): admin backfill endpoint for Mailchimp trial tags</span></div>
+      </div>
+    </div>
+    <div class="decisions-section">
+      <h3>Key Decisions</h3>
+      <div class="decisions-list">
+        <div class="decision"><strong>Graceful degradation:</strong> <span>Build succeeds without Mailchimp env vars — logs warning, returns success</span></div>
+        <div class="decision"><strong>3 retries with exponential backoff:</strong> <span>500ms, 1s, 2s before blocking the webhook</span></div>
+        <div class="decision"><strong>Strict consistency:</strong> <span>Webhook returns 500 on Mailchimp failure — Stripe retries automatically</span></div>
+        <div class="decision"><strong>Keep trial tag on upgrade:</strong> <span>Trial tag stays for journey tracking, paid tag is added alongside</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mailchimp Journey Visual -->
+<div class="flow-section">
+  <h2>Mailchimp Integration — Data Flow</h2>
+  <div class="flow-subtitle">How trial signups and paid conversions flow through the system</div>
+
+  <!-- Trial Flow -->
+  <div class="journey-label">Trial Signup Flow</div>
+  <div class="flow-grid">
+    <div class="flow-box">
+      <div class="fb-icon">&#128100;</div>
+      <div class="fb-title">User Signs Up</div>
+      <div class="fb-detail">Completes Stripe Checkout<br>for 7-day free trial</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-color: var(--accent-dim);">
+      <div class="fb-icon">&#9889;</div>
+      <div class="fb-title">Stripe Webhook</div>
+      <div class="fb-detail">customer.subscription.created<br>status = "trialing"</div>
+      <div class="fb-code">app/api/stripe/webhook/route.ts</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-color: rgba(34,211,238,.3);">
+      <div class="fb-icon">&#128233;</div>
+      <div class="fb-title">Mailchimp Tagged</div>
+      <div class="fb-detail">Contact upserted + tagged</div>
+      <div style="margin-top: .5rem;"><span class="step-tag tag-trial">7-Day Free Trial: AI Boss Brainz</span></div>
+    </div>
+  </div>
+
+  <hr class="journey-divider">
+
+  <!-- Paid Flow -->
+  <div class="journey-label">Paid Conversion Flow</div>
+  <div class="flow-grid">
+    <div class="flow-box">
+      <div class="fb-icon">&#128179;</div>
+      <div class="fb-title">User Upgrades</div>
+      <div class="fb-detail">Selects plan on /pricing<br>completes Stripe checkout</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-color: var(--accent-dim);">
+      <div class="fb-icon">&#9889;</div>
+      <div class="fb-title">Stripe Webhook</div>
+      <div class="fb-detail">invoice.paid<br>activateSubscription()</div>
+      <div class="fb-code">app/api/stripe/webhook/route.ts</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-color: rgba(52,211,153,.3);">
+      <div class="fb-icon">&#128233;</div>
+      <div class="fb-title">Mailchimp Tagged</div>
+      <div class="fb-detail">Plan-specific tag applied<br>(trial tag kept for tracking)</div>
+      <div style="margin-top: .5rem; display: flex; gap: .4rem; justify-content: center; flex-wrap: wrap;">
+        <span class="step-tag tag-paid">AI Boss Brainz Monthly</span>
+        <span style="color: var(--text-dim); font-size: .7rem; align-self: center;">or</span>
+        <span class="step-tag tag-paid">AI Boss Brainz Full</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="journey-divider">
+
+  <!-- Error / Retry Flow -->
+  <div class="journey-label">Error Handling &amp; Retry</div>
+  <div class="journey-row">
+    <div class="journey-step" style="border-color: rgba(251,113,133,.2);">
+      <div class="step-icon">&#128680;</div>
+      <div class="step-title">Mailchimp API Fails</div>
+      <div class="step-detail">Network error, rate limit, or server issue</div>
+    </div>
+    <div class="journey-arrow">&rarr;</div>
+    <div class="journey-step" style="border-color: rgba(251,191,36,.2);">
+      <div class="step-icon">&#128260;</div>
+      <div class="step-title">Retry x3</div>
+      <div class="step-detail">Exponential backoff<br>500ms &rarr; 1s &rarr; 2s</div>
+    </div>
+    <div class="journey-arrow">&rarr;</div>
+    <div class="journey-step" style="border-color: rgba(251,113,133,.2);">
+      <div class="step-icon">&#128276;</div>
+      <div class="step-title">Admin Notified</div>
+      <div class="step-detail">Email to info@qualiasolutions.net<br>via Resend</div>
+      <span class="step-tag tag-error">Webhook returns 500</span>
+    </div>
+    <div class="journey-arrow">&rarr;</div>
+    <div class="journey-step" style="border-color: rgba(167,139,250,.2);">
+      <div class="step-icon">&#128257;</div>
+      <div class="step-title">Stripe Retries</div>
+      <div class="step-detail">Automatic webhook retry<br>with exponential backoff</div>
+    </div>
+  </div>
+
+  <hr class="journey-divider">
+
+  <!-- Backfill -->
+  <div class="journey-label">Admin Backfill (One-Time)</div>
+  <div class="flow-grid">
+    <div class="flow-box">
+      <div class="fb-icon">&#128119;</div>
+      <div class="fb-title">Admin Triggers</div>
+      <div class="fb-detail">POST request to backfill<br>endpoint (admin-only)</div>
+      <div class="fb-code">POST /api/admin/mailchimp/backfill</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-color: var(--accent-dim);">
+      <div class="fb-icon">&#128450;</div>
+      <div class="fb-title">Query Trial Users</div>
+      <div class="fb-detail">subscriptionStatus = "trialing"<br>with verified email</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-color: rgba(34,211,238,.3);">
+      <div class="fb-icon">&#127937;</div>
+      <div class="fb-title">Batch Tag</div>
+      <div class="fb-detail">Apply trial tag per user<br>100ms delay between calls</div>
+      <div class="fb-code">{ total, success, failed }</div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  AI Boss Brainz v1.1 &mdash; Built by Qualia Solutions &mdash; Shipped 2026-02-02
+</div>
+
+</body>
+</html>

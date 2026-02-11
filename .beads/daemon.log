@@ -1,0 +1,484 @@
+[2025-12-26 21:03:00] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-26 21:03:00] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-26 21:03:00] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-26 21:03:00] Upgrading .beads/.gitignore...
+[2025-12-26 21:03:00] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-26 21:03:00] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-26 21:41:12] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-26 21:41:12] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-26 21:41:12] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-26 21:41:12] Upgrading .beads/.gitignore...
+[2025-12-26 21:41:12] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-26 21:41:12] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-26 22:41:51] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-26 22:41:51] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-26 22:41:51] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-26 22:41:51] Upgrading .beads/.gitignore...
+[2025-12-26 22:41:51] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-26 22:41:51] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-26 22:58:49] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-26 22:58:49] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-26 22:58:49] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-26 22:58:49] Upgrading .beads/.gitignore...
+[2025-12-26 22:58:49] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-26 22:58:49] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-26 23:15:53] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-26 23:15:53] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-26 23:15:53] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-26 23:15:53] Upgrading .beads/.gitignore...
+[2025-12-26 23:15:53] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-26 23:15:53] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-26 23:52:45] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-26 23:52:45] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-26 23:52:45] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-26 23:52:45] Upgrading .beads/.gitignore...
+[2025-12-26 23:52:45] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-26 23:52:45] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-27 01:45:54] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-27 01:45:54] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-27 01:45:54] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-27 01:45:54] Upgrading .beads/.gitignore...
+[2025-12-27 01:45:54] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-27 01:45:54] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-27 01:53:25] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-27 01:53:25] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-27 01:53:25] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-27 01:53:25] Upgrading .beads/.gitignore...
+[2025-12-27 01:53:25] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-27 01:53:25] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-27 02:03:37] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-27 02:03:37] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-27 02:03:37] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-27 02:03:37] Upgrading .beads/.gitignore...
+[2025-12-27 02:03:37] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-27 02:03:37] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-27 02:19:43] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-27 02:19:43] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-27 02:19:43] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-27 02:19:43] Upgrading .beads/.gitignore...
+[2025-12-27 02:19:43] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-27 02:19:43] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-27 02:29:51] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-27 02:29:51] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-27 02:29:51] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-27 02:29:51] Upgrading .beads/.gitignore...
+[2025-12-27 02:29:51] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-27 02:29:51] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-27 04:50:10] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-27 04:50:10] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-27 04:50:10] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-27 04:50:10] Upgrading .beads/.gitignore...
+[2025-12-27 04:50:10] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-27 04:50:10] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-27 05:51:09] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-27 05:51:09] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-27 05:51:09] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-27 05:51:09] Upgrading .beads/.gitignore...
+[2025-12-27 05:51:09] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-27 05:51:09] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-27 06:02:29] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-27 06:02:29] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-27 06:02:29] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-27 06:02:29] Upgrading .beads/.gitignore...
+[2025-12-27 06:02:29] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-27 06:02:29] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-27 11:15:02] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-27 11:15:02] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-27 11:15:02] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-27 11:15:02] Upgrading .beads/.gitignore...
+[2025-12-27 11:15:02] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-27 11:15:02] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-29 18:20:59] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-29 18:20:59] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-29 18:20:59] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-29 18:20:59] Upgrading .beads/.gitignore...
+[2025-12-29 18:20:59] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-29 18:20:59] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-29 18:37:26] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-29 18:37:26] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-29 18:37:26] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-29 18:37:26] Upgrading .beads/.gitignore...
+[2025-12-29 18:37:26] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-29 18:37:26] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-29 18:38:11] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-29 18:38:11] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-29 18:38:11] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-29 18:38:11] Upgrading .beads/.gitignore...
+[2025-12-29 18:38:11] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-29 18:38:11] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-29 18:41:35] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-29 18:41:35] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-29 18:41:35] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-29 18:41:35] Upgrading .beads/.gitignore...
+[2025-12-29 18:41:35] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-29 18:41:35] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-29 18:44:20] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-29 18:44:20] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-29 18:44:20] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-29 18:44:20] Upgrading .beads/.gitignore...
+[2025-12-29 18:44:20] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-29 18:44:20] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-29 18:46:51] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-29 18:46:51] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-29 18:46:51] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-29 18:46:51] Upgrading .beads/.gitignore...
+[2025-12-29 18:46:51] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-29 18:46:51] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+
+[2025-12-29 18:49:26] Daemon started (interval: 5s, auto-commit: false, auto-push: false)
+[2025-12-29 18:49:26] Using database: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db
+[2025-12-29 18:49:26] Database opened: /home/qualiasolutions/Desktop/Projects/aiagents/Glluztech/aleccimedia/.beads/beads.db (freshness checking enabled)
+[2025-12-29 18:49:26] Upgrading .beads/.gitignore...
+[2025-12-29 18:49:26] Warning: failed to upgrade .gitignore: open .beads/.gitignore: no such file or directory
+[2025-12-29 18:49:26] Error: 
+LEGACY DATABASE DETECTED!
+
+This database was created before version 0.17.5 and lacks a repository fingerprint.
+To continue using this database, you must explicitly set its repository ID:
+
+  bd migrate --update-repo-id
+
+This ensures the database is bound to this repository and prevents accidental
+database sharing between different repositories.
+
+If this is a fresh clone, run:
+  rm -rf .beads && bd init
+
+Note: Auto-claiming legacy databases is intentionally disabled to prevent
+silent corruption when databases are copied between repositories.
+

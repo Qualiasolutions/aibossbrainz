@@ -1,0 +1,24 @@
+# Ignore large video files only (PDFs, DOCX, XLSX are needed for knowledge base)
+knowledge-base/**/*.mp4
+knowledge-base/**/*.mov
+knowledge-base/**/*.avi
+
+# Ignore dev/test files
+node_modules
+.next
+.git
+.DS_Store
+*.log
+build_log.txt
+deploy_log.txt
+conversion_log.txt
+output.txt
+script_output*.txt
+test_output*.txt
+temp_read.txt
+pdf_parse_*.txt
+pdf_parse_*.cjs
+pdf_parse_*.json
+test.ts
+test_pdf_parse.ts
+scripts/

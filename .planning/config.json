@@ -1,0 +1,6 @@
+{
+  "mode": "yolo",
+  "depth": "standard",
+  "model_profile": "quality",
+  "commit_docs": true
+}

@@ -1,0 +1,71 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/expire-subscriptions",
+      "schedule": "0 0 * * *"
+    }
+  ],
+  "functions": {
+    "app/(chat)/api/files/upload/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel-scripts.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://openrouter.ai https://api.elevenlabs.io https://api.tavily.com https://api.serper.dev https://vercel.live https://*.vercel-insights.com https://*.sentry.io https://cdn.jsdelivr.net; frame-src 'self' https://vercel.live; frame-ancestors 'self' https://*.squarespace.com https://*.sqsp.com https://aleccimedia.com https://*.aleccimedia.com; media-src 'self' data: blob: https://api.elevenlabs.io; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains; preload"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(self), geolocation=(), interest-cohort=()"
+        }
+      ]
+    },
+    {
+      "source": "/embed/:path*",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self' https://*.squarespace.com https://*.sqsp.com https://aleccimedia.com https://*.aleccimedia.com"
+        }
+      ]
+    },
+    {
+      "source": "/(favicon.ico|icon-.*\\.png|apple-icon.png|opengraph-image.png|twitter-image.png)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/images/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}
