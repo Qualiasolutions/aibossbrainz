@@ -340,9 +340,13 @@ export default function AccountPage() {
   const handleUpgrade = async (planId: string) => {
     setUpgradeLoading(planId);
     try {
+      const csrfToken = getCsrfToken() || "";
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
         body: JSON.stringify({ planId }),
       });
 
