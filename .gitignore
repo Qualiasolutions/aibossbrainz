@@ -42,3 +42,12 @@ yarn-error.log*
 /playwright-report/
 /blob-report/
 /playwright/*
+
+# MCP config (may contain account IDs)
+.mcp.json
+
+# Supabase temp files
+supabase/.temp/
+
+# Vercel check files
+.env.vercel-check
