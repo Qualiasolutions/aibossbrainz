@@ -89,10 +89,17 @@ async function applyTagWithRetry(
 				const fullError = `Failed to apply ${operation} tag to ${email} after ${maxRetries} attempts. Last error: ${errorMessage}`;
 				console.error(`[Mailchimp] ${fullError}`);
 
-				await sendAdminNotification({
-					subject: `Mailchimp Tag Failure: ${operation}`,
-					message: `Email: ${email}\nOperation: ${operation}\nTag: ${tagName}\nError: ${errorMessage}\n\nThis user may not receive the expected email sequence.`,
-				});
+				try {
+					await sendAdminNotification({
+						subject: `Mailchimp Tag Failure: ${operation}`,
+						message: `Email: ${email}\nOperation: ${operation}\nTag: ${tagName}\nError: ${errorMessage}\n\nThis user may not receive the expected email sequence.`,
+					});
+				} catch (notifyErr) {
+					console.error(
+						`[Mailchimp] Failed to send admin failure notification:`,
+						notifyErr,
+					);
+				}
 
 				return { success: false, error: fullError };
 			}

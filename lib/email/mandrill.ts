@@ -64,15 +64,21 @@ export async function sendViaMandrill({
 			status: string;
 			reject_reason: string | null;
 		}>;
+
+		if (!Array.isArray(data) || data.length === 0) {
+			console.error("[Mandrill] API returned empty response");
+			return { success: false, error: "Empty response from Mandrill" };
+		}
+
 		const first = data[0];
 
-		if (first?.status === "rejected") {
+		if (first.status === "rejected" || first.status === "invalid") {
 			console.error(`[Mandrill] Email rejected: ${first.reject_reason}`);
 			return { success: false, error: `Rejected: ${first.reject_reason}` };
 		}
 
-		console.log(`[Mandrill] Email sent: ${first?._id} (${first?.status})`);
-		return { success: true, id: first?._id };
+		console.log(`[Mandrill] Email sent: ${first._id} (${first.status})`);
+		return { success: true, id: first._id };
 	} catch (error) {
 		const msg = error instanceof Error ? error.message : String(error);
 		console.error(`[Mandrill] Error: ${msg}`);
