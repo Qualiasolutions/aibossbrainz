@@ -243,9 +243,7 @@ export function Chat({
 	const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
 
 	const sendMessageRef = useRef(sendMessage);
-	useEffect(() => {
-		sendMessageRef.current = sendMessage;
-	}, [sendMessage]);
+	sendMessageRef.current = sendMessage;
 
 	useEffect(() => {
 		if (query && !hasAppendedQuery) {

@@ -37,7 +37,8 @@
 				"noExplicitAny": "off",
 				"noUnknownAtRules": "off",
 				"noConsole": "off",
-				"noBitwiseOperators": "off"
+				"noBitwiseOperators": "off",
+				"noArrayIndexKey": "warn"
 			},
 			"style": {
 				"noMagicNumbers": "off",
