@@ -71,6 +71,13 @@ async function applyTagWithRetry(
 			console.log(
 				`[Mailchimp] Successfully applied ${operation} tag to ${email}`,
 			);
+
+			await sendAdminNotification({
+				subject: `Mailchimp Tag Applied: ${operation}`,
+				message: `Email: ${email}\nOperation: ${operation}\nTag: ${tagName}\nAudience: ${MAILCHIMP_AUDIENCE_ID}\n\nTag was applied successfully.`,
+				type: "success",
+			});
+
 			return { success: true };
 		} catch (error) {
 			const errorMessage =
@@ -125,12 +132,14 @@ export async function applyPaidTag(
 	email: string,
 	subscriptionType: "monthly" | "annual" | "lifetime",
 ): Promise<TagResult> {
-	// Map subscription type to the correct tag
-	const tagName =
-		subscriptionType === "monthly"
-			? MAILCHIMP_TAGS.PAID_MONTHLY
-			: MAILCHIMP_TAGS.PAID_ANNUAL_OR_LIFETIME;
+	// Map each subscription type to its own tag
+	const tagMap: Record<typeof subscriptionType, string> = {
+		monthly: MAILCHIMP_TAGS.PAID_MONTHLY,
+		annual: MAILCHIMP_TAGS.PAID_ANNUAL,
+		lifetime: MAILCHIMP_TAGS.PAID_LIFETIME,
+	};
 
+	const tagName = tagMap[subscriptionType];
 	const operation = `paid ${subscriptionType}`;
 
 	return applyTagWithRetry(email, tagName, operation);

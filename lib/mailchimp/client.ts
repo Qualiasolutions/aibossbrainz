@@ -44,8 +44,10 @@ export const MAILCHIMP_TAGS = {
 	TRIAL: "14-Day Free Trial: AI Boss Brainz",
 	/** Applied when user purchases monthly subscription */
 	PAID_MONTHLY: "AI Boss Brainz Monthly",
-	/** Applied when user purchases annual or lifetime subscription */
-	PAID_ANNUAL_OR_LIFETIME: "AI Boss Brainz Full",
+	/** Applied when user purchases annual (Best Value) subscription */
+	PAID_ANNUAL: "AI Boss Brainz Best Value",
+	/** Applied when user purchases lifetime subscription */
+	PAID_LIFETIME: "AI Boss Brainz Full",
 } as const;
 
 /**

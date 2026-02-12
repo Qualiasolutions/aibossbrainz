@@ -1,15 +1,5 @@
-import { Resend } from "resend";
-
-// Lazy-initialize Resend client
-function getResendClient(): Resend | null {
-	if (!process.env.RESEND_API_KEY) {
-		return null;
-	}
-	return new Resend(process.env.RESEND_API_KEY);
-}
-
-const FROM_EMAIL =
-	process.env.RESEND_FROM_EMAIL || "Alecci Media AI <noreply@resend.dev>";
+import "server-only";
+import { sendViaMandrill } from "./mandrill";
 
 const APP_URL =
 	process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
@@ -24,22 +14,12 @@ export async function sendWelcomeEmail({
 	email: string;
 	displayName?: string | null;
 }): Promise<{ success: boolean; error?: unknown }> {
-	const resend = getResendClient();
-	if (!resend) {
-		console.warn(
-			"[Email] RESEND_API_KEY not configured, skipping welcome email",
-		);
-		return { success: false, error: "API key not configured" };
-	}
+	const name = displayName || email.split("@")[0];
 
-	try {
-		const name = displayName || email.split("@")[0];
-
-		const { data, error } = await resend.emails.send({
-			from: FROM_EMAIL,
-			to: [email],
-			subject: "Welcome to Boss Brainz - Your AI Executive Team Awaits!",
-			html: `
+	return sendViaMandrill({
+		to: email,
+		subject: "Welcome to Boss Brainz - Your AI Executive Team Awaits!",
+		html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(to right, #f43f5e, #dc2626); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
             <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Boss Brainz!</h1>
@@ -72,19 +52,7 @@ export async function sendWelcomeEmail({
           </div>
         </div>
       `,
-		});
-
-		if (error) {
-			console.error("[Email] Failed to send welcome email:", error);
-			return { success: false, error };
-		}
-
-		console.log("[Email] Welcome email sent:", data?.id);
-		return { success: true };
-	} catch (error) {
-		console.error("[Email] Error sending welcome email:", error);
-		return { success: false, error };
-	}
+	});
 }
 
 /**
@@ -99,29 +67,19 @@ export async function sendCancellationEmail({
 	displayName?: string | null;
 	subscriptionEndDate: string | null;
 }): Promise<{ success: boolean; error?: unknown }> {
-	const resend = getResendClient();
-	if (!resend) {
-		console.warn(
-			"[Email] RESEND_API_KEY not configured, skipping cancellation email",
-		);
-		return { success: false, error: "API key not configured" };
-	}
+	const name = displayName || email.split("@")[0];
+	const endDate = subscriptionEndDate
+		? new Date(subscriptionEndDate).toLocaleDateString("en-US", {
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+			})
+		: "the end of your billing period";
 
-	try {
-		const name = displayName || email.split("@")[0];
-		const endDate = subscriptionEndDate
-			? new Date(subscriptionEndDate).toLocaleDateString("en-US", {
-					year: "numeric",
-					month: "long",
-					day: "numeric",
-				})
-			: "the end of your billing period";
-
-		const { data, error } = await resend.emails.send({
-			from: FROM_EMAIL,
-			to: [email],
-			subject: "Your Boss Brainz Subscription Has Been Cancelled",
-			html: `
+	return sendViaMandrill({
+		to: email,
+		subject: "Your Boss Brainz Subscription Has Been Cancelled",
+		html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(to right, #6b7280, #374151); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
             <h1 style="color: white; margin: 0; font-size: 24px;">Subscription Cancelled</h1>
@@ -154,19 +112,7 @@ export async function sendCancellationEmail({
           </div>
         </div>
       `,
-		});
-
-		if (error) {
-			console.error("[Email] Failed to send cancellation email:", error);
-			return { success: false, error };
-		}
-
-		console.log("[Email] Cancellation email sent:", data?.id);
-		return { success: true };
-	} catch (error) {
-		console.error("[Email] Error sending cancellation email:", error);
-		return { success: false, error };
-	}
+	});
 }
 
 /**
@@ -183,25 +129,17 @@ export async function sendTrialStartedEmail({
 	trialEndDate: Date;
 	planName: string;
 }): Promise<{ success: boolean; error?: unknown }> {
-	const resend = getResendClient();
-	if (!resend) {
-		console.warn("[Email] RESEND_API_KEY not configured, skipping trial email");
-		return { success: false, error: "API key not configured" };
-	}
+	const name = displayName || email.split("@")[0];
+	const endDateFormatted = trialEndDate.toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
 
-	try {
-		const name = displayName || email.split("@")[0];
-		const endDateFormatted = trialEndDate.toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-
-		const { data, error } = await resend.emails.send({
-			from: FROM_EMAIL,
-			to: [email],
-			subject: "Your 14-Day Free Trial Has Started!",
-			html: `
+	return sendViaMandrill({
+		to: email,
+		subject: "Your 14-Day Free Trial Has Started!",
+		html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(to right, #10b981, #059669); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
             <h1 style="color: white; margin: 0; font-size: 28px;">Your Trial Has Started!</h1>
@@ -241,17 +179,5 @@ export async function sendTrialStartedEmail({
           </div>
         </div>
       `,
-		});
-
-		if (error) {
-			console.error("[Email] Failed to send trial email:", error);
-			return { success: false, error };
-		}
-
-		console.log("[Email] Trial started email sent:", data?.id);
-		return { success: true };
-	} catch (error) {
-		console.error("[Email] Error sending trial email:", error);
-		return { success: false, error };
-	}
+	});
 }
