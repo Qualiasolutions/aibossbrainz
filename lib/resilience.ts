@@ -182,6 +182,56 @@ export function isCircuitOpen(name: string): boolean {
 }
 
 /**
+ * Record a success for a named circuit breaker.
+ * Use this for streaming APIs where withCircuitBreaker can't wrap the full lifecycle.
+ */
+export function recordCircuitSuccess(
+  name: string,
+  options: Partial<CircuitBreakerOptions> = {},
+): void {
+  const opts = { ...DEFAULT_CIRCUIT_OPTIONS, ...options };
+  const circuit = getCircuitState(name);
+
+  if (circuit.state === "half-open") {
+    circuit.successes++;
+    if (circuit.successes >= opts.successThreshold) {
+      circuit.state = "closed";
+      circuit.failures = 0;
+      circuit.successes = 0;
+    }
+  } else if (circuit.state === "closed") {
+    circuit.failures = 0;
+  }
+}
+
+/**
+ * Record a failure for a named circuit breaker.
+ * Use this for streaming APIs where withCircuitBreaker can't wrap the full lifecycle.
+ */
+export function recordCircuitFailure(
+  name: string,
+  options: Partial<CircuitBreakerOptions> = {},
+): void {
+  const opts = { ...DEFAULT_CIRCUIT_OPTIONS, ...options };
+  const circuit = getCircuitState(name);
+  const now = Date.now();
+
+  circuit.failures++;
+  circuit.lastFailure = now;
+
+  if (circuit.state === "half-open") {
+    circuit.state = "open";
+    circuit.nextAttempt = now + opts.timeout;
+  } else if (circuit.failures >= opts.failureThreshold) {
+    circuit.state = "open";
+    circuit.nextAttempt = now + opts.timeout;
+    console.error(
+      `[CircuitBreaker] Circuit opened for ${name} after ${circuit.failures} failures`,
+    );
+  }
+}
+
+/**
  * Reset a circuit breaker (for testing or manual recovery)
  */
 export function resetCircuit(name: string): void {

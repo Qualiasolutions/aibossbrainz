@@ -53,6 +53,12 @@ import {
 import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import {
+  CircuitBreakerError,
+  isCircuitOpen,
+  recordCircuitFailure,
+  recordCircuitSuccess,
+} from "@/lib/resilience";
+import {
   checkRateLimit,
   getRateLimitHeaders,
 } from "@/lib/security/rate-limiter";
@@ -108,7 +114,7 @@ export function getStreamContext() {
   return globalStreamContext;
 }
 
-export const POST = async (request: Request) => {
+export const POST = withCsrf(async (request: Request) => {
   // Create request-scoped logger
   const apiLog = apiRequestLogger("/api/chat");
   apiLog.start();
@@ -315,6 +321,11 @@ export const POST = async (request: Request) => {
       messageCount: messagesFromDb.length,
     });
 
+    // Circuit breaker: fail fast if OpenRouter is down
+    if (isCircuitOpen("ai-gateway")) {
+      return new ChatSDKError("offline:chat").toResponse();
+    }
+
     let finalMergedUsage: AppUsage | undefined;
 
     const stream = createUIMessageStream({
@@ -392,6 +403,9 @@ export const POST = async (request: Request) => {
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
+        // Record success for AI gateway circuit breaker
+        recordCircuitSuccess("ai-gateway");
+
         apiLog.success({
           phase: "streaming_complete",
           messageCount: messages.length,
@@ -474,6 +488,8 @@ export const POST = async (request: Request) => {
         });
       },
       onError: () => {
+        // Record failure for AI gateway circuit breaker
+        recordCircuitFailure("ai-gateway");
         apiLog.warn("Stream onError callback triggered");
         return "Something went wrong generating a response. Please try again.";
       },
@@ -501,7 +517,7 @@ export const POST = async (request: Request) => {
     });
     return new ChatSDKError("offline:chat").toResponse();
   }
-};
+});
 
 export const DELETE = withCsrf(async (request: Request) => {
   const { searchParams } = new URL(request.url);

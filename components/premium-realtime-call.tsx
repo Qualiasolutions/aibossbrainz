@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
-import { cn } from "@/lib/utils";
+import { cn, getCsrfToken } from "@/lib/utils";
 import { Button } from "./ui/button";
 
 interface PremiumRealtimeCallProps {
@@ -88,9 +88,14 @@ export function PremiumRealtimeCall({
 
         abortControllerRef.current = new AbortController();
 
+        const csrfHeaders: Record<string, string> = {};
+        const csrf = getCsrfToken();
+        if (csrf) csrfHeaders["x-csrf-token"] = csrf;
+
         const response = await fetch("/api/realtime/stream", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...csrfHeaders },
+          credentials: "include",
           body: JSON.stringify({
             message: text,
             botType,

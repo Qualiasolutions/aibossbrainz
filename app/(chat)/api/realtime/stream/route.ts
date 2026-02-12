@@ -10,11 +10,16 @@ import {
 import type { BotType } from "@/lib/bot-personalities";
 import { saveMessages } from "@/lib/db/queries/message";
 import { ChatSDKError } from "@/lib/errors";
-import { withElevenLabsResilience } from "@/lib/resilience";
+import {
+  CircuitBreakerError,
+  withAIGatewayResilience,
+  withElevenLabsResilience,
+} from "@/lib/resilience";
 import {
   checkRateLimit,
   getRateLimitHeaders,
 } from "@/lib/security/rate-limiter";
+import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 import type { DBMessage } from "@/lib/supabase/types";
 import {
@@ -69,7 +74,7 @@ async function generateAudioForSegment(
   return response.arrayBuffer();
 }
 
-export async function POST(request: Request) {
+export const POST = withCsrf(async (request: Request) => {
   try {
     const supabase = await createClient();
     const {
@@ -145,18 +150,20 @@ You are in a real-time voice call. Keep responses:
 
 Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 
-    // Generate AI response (optimized for voice)
-    const result = await generateText({
-      model: myProvider.languageModel("chat-model"),
-      system: realtimePrompt,
-      messages: [
-        {
-          role: "user",
-          content: message,
-        },
-      ],
-      maxOutputTokens: 400, // Shorter for voice
-    });
+    // Generate AI response (optimized for voice, with circuit breaker + retry)
+    const result = await withAIGatewayResilience(() =>
+      generateText({
+        model: myProvider.languageModel("chat-model"),
+        system: realtimePrompt,
+        messages: [
+          {
+            role: "user",
+            content: message,
+          },
+        ],
+        maxOutputTokens: 400, // Shorter for voice
+      }),
+    );
 
     const responseText = result.text;
 
@@ -293,10 +300,14 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
   } catch (error) {
     console.error("Realtime stream API error:", error);
 
+    if (error instanceof CircuitBreakerError) {
+      return new ChatSDKError("offline:chat").toResponse();
+    }
+
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
 
     return new ChatSDKError("offline:chat").toResponse();
   }
-}
+});

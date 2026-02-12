@@ -10,6 +10,11 @@ import { myProvider } from "@/lib/ai/providers";
 import type { BotType } from "@/lib/bot-personalities";
 import { getSystemPrompt } from "@/lib/bot-personalities";
 import { isProductionEnvironment } from "@/lib/constants";
+import {
+  isCircuitOpen,
+  recordCircuitFailure,
+  recordCircuitSuccess,
+} from "@/lib/resilience";
 import { generateUUID } from "@/lib/utils";
 import { checkDemoRateLimit } from "./rate-limit";
 
@@ -104,6 +109,14 @@ export async function POST(request: Request) {
     // Build system prompt
     const systemPromptText = getDemoSystemPrompt(botType);
 
+    // Circuit breaker: fail fast if OpenRouter is down
+    if (isCircuitOpen("ai-gateway")) {
+      return Response.json(
+        { error: "Service temporarily unavailable. Please try again shortly." },
+        { status: 503 },
+      );
+    }
+
     // Stream response
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
@@ -126,7 +139,13 @@ export async function POST(request: Request) {
         );
       },
       generateId: generateUUID,
-      onError: () => "Oops, something went wrong! Please try again.",
+      onFinish: () => {
+        recordCircuitSuccess("ai-gateway");
+      },
+      onError: () => {
+        recordCircuitFailure("ai-gateway");
+        return "Oops, something went wrong! Please try again.";
+      },
     });
 
     return new Response(stream.pipeThrough(new JsonToSseTransformStream()), {

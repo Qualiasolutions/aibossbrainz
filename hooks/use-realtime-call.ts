@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { getCsrfToken } from "@/lib/utils";
 
 export type CallStatus = "idle" | "connecting" | "active" | "ended";
 
@@ -86,9 +87,14 @@ export function useRealtimeCall({
 
         abortControllerRef.current = new AbortController();
 
+        const csrfHeaders: Record<string, string> = {};
+        const csrf = getCsrfToken();
+        if (csrf) csrfHeaders["x-csrf-token"] = csrf;
+
         const response = await fetch("/api/realtime", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...csrfHeaders },
+          credentials: "include",
           body: JSON.stringify({
             message: text,
             chatId,

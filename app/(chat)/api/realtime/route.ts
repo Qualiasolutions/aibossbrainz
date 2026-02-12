@@ -4,12 +4,17 @@ import { systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { getVoiceForBot } from "@/lib/ai/voice-config";
 import { ChatSDKError } from "@/lib/errors";
-import { withElevenLabsResilience } from "@/lib/resilience";
+import {
+  CircuitBreakerError,
+  withAIGatewayResilience,
+  withElevenLabsResilience,
+} from "@/lib/resilience";
+import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 30;
 
-export async function POST(request: Request) {
+export const POST = withCsrf(async (request: Request) => {
   try {
     const supabase = await createClient();
     const {
@@ -42,18 +47,20 @@ export async function POST(request: Request) {
       knowledgeBaseContent,
     });
 
-    // Generate AI response
-    const result = await generateText({
-      model: myProvider.languageModel("chat-model"),
-      system: systemPromptText,
-      messages: [
-        {
-          role: "user",
-          content: message,
-        },
-      ],
-      maxOutputTokens: 500, // Keep responses concise for voice
-    });
+    // Generate AI response (with circuit breaker + retry)
+    const result = await withAIGatewayResilience(() =>
+      generateText({
+        model: myProvider.languageModel("chat-model"),
+        system: systemPromptText,
+        messages: [
+          {
+            role: "user",
+            content: message,
+          },
+        ],
+        maxOutputTokens: 500, // Keep responses concise for voice
+      }),
+    );
 
     const responseText = result.text;
 
@@ -125,10 +132,14 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Realtime API error:", error);
 
+    if (error instanceof CircuitBreakerError) {
+      return new ChatSDKError("offline:chat").toResponse();
+    }
+
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
 
     return new ChatSDKError("offline:chat").toResponse();
   }
-}
+});
