@@ -72,12 +72,6 @@ async function applyTagWithRetry(
 				`[Mailchimp] Successfully applied ${operation} tag to ${email}`,
 			);
 
-			await sendAdminNotification({
-				subject: `Mailchimp Tag Applied: ${operation}`,
-				message: `Email: ${email}\nOperation: ${operation}\nTag: ${tagName}\nAudience: ${MAILCHIMP_AUDIENCE_ID}\n\nTag was applied successfully.`,
-				type: "success",
-			});
-
 			return { success: true };
 		} catch (error) {
 			const errorMessage =

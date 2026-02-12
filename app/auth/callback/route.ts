@@ -11,6 +11,9 @@ import { activateSubscription, startTrial } from "@/lib/stripe/actions";
 import { getStripe } from "@/lib/stripe/config";
 import { createClient } from "@/lib/supabase/server";
 
+/** Allowed redirect paths for the `next` query parameter. */
+const ALLOWED_REDIRECT_PATHS = ["/reset-password", "/new", "/account"];
+
 /**
  * If user has a Stripe customer but DB shows "pending", sync from Stripe.
  * This handles the case where webhook failed/delayed but user already paid.
@@ -160,7 +163,7 @@ export async function GET(request: Request) {
 
 		if (!error && data.user) {
 			// Recovery flow: redirect to next page (e.g. /reset-password) with session established
-			if (next?.startsWith("/") && !next.startsWith("//")) {
+			if (next && ALLOWED_REDIRECT_PATHS.includes(next)) {
 				return NextResponse.redirect(`${origin}${next}`);
 			}
 			return handleAuthenticatedUser(data.user, origin, plan);
@@ -181,7 +184,7 @@ export async function GET(request: Request) {
 
 		if (!error && data.user) {
 			// Recovery flow: redirect to next page with session established
-			if (next?.startsWith("/") && !next.startsWith("//")) {
+			if (next && ALLOWED_REDIRECT_PATHS.includes(next)) {
 				return NextResponse.redirect(`${origin}${next}`);
 			}
 			return handleAuthenticatedUser(data.user, origin, plan);

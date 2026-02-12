@@ -4,6 +4,16 @@ import { sendViaMandrill } from "./mandrill";
 const APP_URL =
 	process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
 
+/** Escape user-supplied strings before interpolating into HTML emails. */
+function escapeHtml(str: string): string {
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+}
+
 /**
  * Send welcome email after signup confirmation
  */
@@ -14,7 +24,7 @@ export async function sendWelcomeEmail({
 	email: string;
 	displayName?: string | null;
 }): Promise<{ success: boolean; error?: unknown }> {
-	const name = displayName || email.split("@")[0];
+	const name = escapeHtml(displayName || email.split("@")[0]);
 
 	return sendViaMandrill({
 		to: email,
@@ -67,7 +77,7 @@ export async function sendCancellationEmail({
 	displayName?: string | null;
 	subscriptionEndDate: string | null;
 }): Promise<{ success: boolean; error?: unknown }> {
-	const name = displayName || email.split("@")[0];
+	const name = escapeHtml(displayName || email.split("@")[0]);
 	const endDate = subscriptionEndDate
 		? new Date(subscriptionEndDate).toLocaleDateString("en-US", {
 				year: "numeric",
@@ -129,7 +139,8 @@ export async function sendTrialStartedEmail({
 	trialEndDate: Date;
 	planName: string;
 }): Promise<{ success: boolean; error?: unknown }> {
-	const name = displayName || email.split("@")[0];
+	const name = escapeHtml(displayName || email.split("@")[0]);
+	const safePlanName = escapeHtml(planName);
 	const endDateFormatted = trialEndDate.toLocaleDateString("en-US", {
 		year: "numeric",
 		month: "long",
@@ -148,7 +159,7 @@ export async function sendTrialStartedEmail({
           <div style="background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
             <p style="margin: 0 0 20px; font-size: 16px; color: #374151;">Hi ${name},</p>
             <p style="margin: 0 0 20px; color: #374151;">
-              Great news! Your 14-day free trial of the <strong>${planName}</strong> plan is now active.
+              Great news! Your 14-day free trial of the <strong>${safePlanName}</strong> plan is now active.
             </p>
             <div style="background: #d1fae5; border: 1px solid #10b981; padding: 16px; border-radius: 8px; margin: 20px 0;">
               <p style="margin: 0; color: #065f46; font-weight: 500;">

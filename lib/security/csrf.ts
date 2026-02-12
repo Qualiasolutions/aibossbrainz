@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 const CSRF_COOKIE_NAME = "__csrf";
@@ -58,17 +58,11 @@ export function validateCsrfToken(token: string): boolean {
 		.update(`${random}${getCsrfSecret()}`)
 		.digest("hex");
 
-	// Timing-safe comparison
 	if (providedHash.length !== expectedHash.length) {
 		return false;
 	}
 
-	let result = 0;
-	for (let i = 0; i < providedHash.length; i++) {
-		result |= providedHash.charCodeAt(i) ^ expectedHash.charCodeAt(i);
-	}
-
-	return result === 0;
+	return timingSafeEqual(Buffer.from(providedHash), Buffer.from(expectedHash));
 }
 
 /**
@@ -114,7 +108,13 @@ export async function validateCsrfRequest(
 		return { valid: false, error: "No CSRF token in request headers" };
 	}
 
-	if (headerToken !== cookieToken) {
+	// Timing-safe comparison of header and cookie tokens
+	if (headerToken.length !== cookieToken.length) {
+		return { valid: false, error: "CSRF token mismatch" };
+	}
+	const headerBuf = Buffer.from(headerToken);
+	const cookieBuf = Buffer.from(cookieToken);
+	if (!timingSafeEqual(headerBuf, cookieBuf)) {
 		return { valid: false, error: "CSRF token mismatch" };
 	}
 

@@ -12,6 +12,13 @@ const AUTH_RATE_LIMIT_WINDOW = 15 * 60; // 15 minutes
 const REDIS_RETRY_DELAY_MS = 30_000; // 30 seconds between retry attempts
 const REDIS_MAX_RETRIES = 3; // Max retries before longer backoff
 
+// In-memory auth rate limit fallback when Redis is unavailable.
+// Map<key, { count, expiresAt }>
+const authRateLimitMemory = new Map<
+	string,
+	{ count: number; expiresAt: number }
+>();
+
 // Singleton Redis client
 let redisClient: ReturnType<typeof createClient> | null = null;
 let redisFailedAt: number | null = null;
@@ -244,8 +251,53 @@ function getAuthRateLimitKey(
 }
 
 /**
+ * In-memory auth rate limit check. Used as fallback when Redis is unavailable.
+ * Provides basic per-process protection (not distributed, but better than nothing).
+ */
+function checkAuthRateLimitMemory(
+	ip: string,
+	action: "login" | "signup" | "reset",
+	maxAttempts: number,
+): { allowed: boolean; remaining: number; current: number; reset: Date } {
+	const key = `${action}:${ip}`;
+	const now = Date.now();
+	const entry = authRateLimitMemory.get(key);
+
+	// Clean up expired entry
+	if (entry && entry.expiresAt <= now) {
+		authRateLimitMemory.delete(key);
+	}
+
+	const existing = authRateLimitMemory.get(key);
+	if (existing) {
+		existing.count++;
+		const allowed = existing.count <= maxAttempts;
+		return {
+			allowed,
+			remaining: Math.max(0, maxAttempts - existing.count),
+			current: existing.count,
+			reset: new Date(existing.expiresAt),
+		};
+	}
+
+	// First request in this window
+	authRateLimitMemory.set(key, {
+		count: 1,
+		expiresAt: now + AUTH_RATE_LIMIT_WINDOW * 1000,
+	});
+
+	return {
+		allowed: true,
+		remaining: maxAttempts - 1,
+		current: 1,
+		reset: new Date(now + AUTH_RATE_LIMIT_WINDOW * 1000),
+	};
+}
+
+/**
  * Checks IP-based rate limit for auth endpoints (login, signup, password reset).
  * Uses a shorter window (15 minutes) to prevent brute force attacks.
+ * Falls back to in-memory rate limiting when Redis is unavailable.
  *
  * @param ip - Client IP address
  * @param action - Type of auth action
@@ -264,14 +316,9 @@ export async function checkAuthRateLimit(
 }> {
 	const redis = await getRedisClient();
 
-	// Default to allowing if Redis unavailable (fail-open for auth to prevent DoS)
+	// Fall back to in-memory rate limiting when Redis is unavailable
 	if (!redis) {
-		return {
-			allowed: true,
-			remaining: maxAttempts,
-			current: 0,
-			reset: new Date(Date.now() + AUTH_RATE_LIMIT_WINDOW * 1000),
-		};
+		return checkAuthRateLimitMemory(ip, action, maxAttempts);
 	}
 
 	const key = getAuthRateLimitKey(ip, action);
@@ -295,13 +342,8 @@ export async function checkAuthRateLimit(
 			reset: new Date(Date.now() + AUTH_RATE_LIMIT_WINDOW * 1000),
 		};
 	} catch {
-		// Redis error, fail-open to prevent auth DoS
-		return {
-			allowed: true,
-			remaining: maxAttempts,
-			current: 0,
-			reset: new Date(Date.now() + AUTH_RATE_LIMIT_WINDOW * 1000),
-		};
+		// Redis error, fall back to in-memory rate limiting
+		return checkAuthRateLimitMemory(ip, action, maxAttempts);
 	}
 }
 

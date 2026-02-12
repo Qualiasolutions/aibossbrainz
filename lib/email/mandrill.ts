@@ -23,9 +23,7 @@ export async function sendViaMandrill({
 }): Promise<MandrillResult> {
 	const apiKey = process.env.MANDRILL_API_KEY;
 	if (!apiKey) {
-		console.warn(
-			"[Mandrill] MANDRILL_API_KEY not configured, skipping email",
-		);
+		console.warn("[Mandrill] MANDRILL_API_KEY not configured, skipping email");
 		return { success: false, error: "API key not configured" };
 	}
 
@@ -34,9 +32,13 @@ export async function sendViaMandrill({
 		fromEmail || process.env.MANDRILL_FROM_EMAIL || "noreply@aleccimedia.com";
 
 	try {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 10_000);
+
 		const response = await fetch(MANDRILL_API_URL, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
+			signal: controller.signal,
 			body: JSON.stringify({
 				key: apiKey,
 				message: {
@@ -48,6 +50,8 @@ export async function sendViaMandrill({
 				},
 			}),
 		});
+
+		clearTimeout(timeout);
 
 		if (!response.ok) {
 			const text = await response.text();
@@ -63,9 +67,7 @@ export async function sendViaMandrill({
 		const first = data[0];
 
 		if (first?.status === "rejected") {
-			console.error(
-				`[Mandrill] Email rejected: ${first.reject_reason}`,
-			);
+			console.error(`[Mandrill] Email rejected: ${first.reject_reason}`);
 			return { success: false, error: `Rejected: ${first.reject_reason}` };
 		}
 
