@@ -6,24 +6,24 @@
 type AudioSource = "manual" | "auto-speak" | "greeting";
 
 interface AudioState {
-  audio: HTMLAudioElement | null;
-  abortController: AbortController | null;
-  audioUrl: string | null;
-  source: AudioSource | null;
-  isPaused: boolean;
+	audio: HTMLAudioElement | null;
+	abortController: AbortController | null;
+	audioUrl: string | null;
+	source: AudioSource | null;
+	isPaused: boolean;
 }
 
 const state: AudioState = {
-  audio: null,
-  abortController: null,
-  audioUrl: null,
-  source: null,
-  isPaused: false,
+	audio: null,
+	abortController: null,
+	audioUrl: null,
+	source: null,
+	isPaused: false,
 };
 
 type StateChangeCallback = (
-  isPlaying: boolean,
-  source: AudioSource | null,
+	isPlaying: boolean,
+	source: AudioSource | null,
 ) => void;
 const subscribers = new Set<StateChangeCallback>();
 
@@ -31,70 +31,70 @@ const subscribers = new Set<StateChangeCallback>();
 const MAX_SUBSCRIBERS = 50;
 
 const notifySubscribers = (isPlaying: boolean) => {
-  for (const callback of subscribers) {
-    callback(isPlaying, state.source);
-  }
+	for (const callback of subscribers) {
+		callback(isPlaying, state.source);
+	}
 };
 
 /**
  * Stop all audio playback globally (resets to beginning)
  */
 export const stopAllAudio = () => {
-  if (state.audio) {
-    state.audio.pause();
-    state.audio.currentTime = 0;
-    state.audio = null;
-  }
-  if (state.abortController) {
-    state.abortController.abort();
-    state.abortController = null;
-  }
-  if (state.audioUrl) {
-    URL.revokeObjectURL(state.audioUrl);
-    state.audioUrl = null;
-  }
-  state.source = null;
-  state.isPaused = false;
-  notifySubscribers(false);
+	if (state.audio) {
+		state.audio.pause();
+		state.audio.currentTime = 0;
+		state.audio = null;
+	}
+	if (state.abortController) {
+		state.abortController.abort();
+		state.abortController = null;
+	}
+	if (state.audioUrl) {
+		URL.revokeObjectURL(state.audioUrl);
+		state.audioUrl = null;
+	}
+	state.source = null;
+	state.isPaused = false;
+	notifySubscribers(false);
 };
 
 /**
  * Pause audio playback (preserves position)
  */
 export const pauseAudio = () => {
-  if (state.audio && !state.isPaused) {
-    state.audio.pause();
-    state.isPaused = true;
-    notifySubscribers(false);
-  }
+	if (state.audio && !state.isPaused) {
+		state.audio.pause();
+		state.isPaused = true;
+		notifySubscribers(false);
+	}
 };
 
 /**
  * Resume audio playback from paused position
  */
 export const resumeAudio = async () => {
-  if (state.audio && state.isPaused) {
-    try {
-      await state.audio.play();
-      state.isPaused = false;
-      notifySubscribers(true);
-    } catch {
-      // If resume fails, reset state
-      state.isPaused = false;
-      notifySubscribers(false);
-    }
-  }
+	if (state.audio && state.isPaused) {
+		try {
+			await state.audio.play();
+			state.isPaused = false;
+			notifySubscribers(true);
+		} catch {
+			// If resume fails, reset state
+			state.isPaused = false;
+			notifySubscribers(false);
+		}
+	}
 };
 
 /**
  * Toggle between pause and resume
  */
 export const togglePauseResume = async () => {
-  if (state.isPaused) {
-    await resumeAudio();
-  } else if (state.audio) {
-    pauseAudio();
-  }
+	if (state.isPaused) {
+		await resumeAudio();
+	} else if (state.audio) {
+		pauseAudio();
+	}
 };
 
 /**
@@ -106,46 +106,46 @@ export const isAudioPaused = () => state.isPaused;
  * Set the current audio element
  */
 export const setCurrentAudio = (
-  audio: HTMLAudioElement,
-  audioUrl: string,
-  source: AudioSource,
+	audio: HTMLAudioElement,
+	audioUrl: string,
+	source: AudioSource,
 ) => {
-  // Stop any existing audio first
-  stopAllAudio();
+	// Stop any existing audio first
+	stopAllAudio();
 
-  state.audio = audio;
-  state.audioUrl = audioUrl;
-  state.source = source;
-  notifySubscribers(true);
+	state.audio = audio;
+	state.audioUrl = audioUrl;
+	state.source = source;
+	notifySubscribers(true);
 };
 
 /**
  * Set the current abort controller for fetch requests
  */
 export const setAbortController = (controller: AbortController) => {
-  if (state.abortController) {
-    state.abortController.abort();
-  }
-  state.abortController = controller;
+	if (state.abortController) {
+		state.abortController.abort();
+	}
+	state.abortController = controller;
 };
 
 /**
  * Clear the audio URL reference (for cleanup after audio ends)
  */
 export const clearAudioUrl = (url: string) => {
-  if (state.audioUrl === url) {
-    URL.revokeObjectURL(url);
-    state.audioUrl = null;
-  }
+	if (state.audioUrl === url) {
+		URL.revokeObjectURL(url);
+		state.audioUrl = null;
+	}
 };
 
 /**
  * Mark audio as finished playing
  */
 export const markAudioEnded = () => {
-  state.audio = null;
-  state.source = null;
-  notifySubscribers(false);
+	state.audio = null;
+	state.source = null;
+	notifySubscribers(false);
 };
 
 /**
@@ -162,18 +162,18 @@ export const getCurrentSource = () => state.source;
  * Update playback rate of currently playing audio
  */
 export const updatePlaybackRate = (rate: number) => {
-  if (state.audio) {
-    state.audio.playbackRate = Math.max(0.5, Math.min(3, rate));
-  }
+	if (state.audio) {
+		state.audio.playbackRate = Math.max(0.5, Math.min(3, rate));
+	}
 };
 
 /**
  * Update volume of currently playing audio
  */
 export const updateVolume = (volume: number) => {
-  if (state.audio) {
-    state.audio.volume = Math.max(0, Math.min(1, volume));
-  }
+	if (state.audio) {
+		state.audio.volume = Math.max(0, Math.min(1, volume));
+	}
 };
 
 /**
@@ -186,16 +186,16 @@ export const getCurrentAudio = () => state.audio;
  * Includes safety limit to prevent memory leaks
  */
 export const subscribeToAudioChanges = (callback: StateChangeCallback) => {
-  // Safety check: if we've hit max subscribers, clear all and warn
-  // This prevents memory leaks from improper cleanup
-  if (subscribers.size >= MAX_SUBSCRIBERS) {
-    console.warn(
-      "[AudioManager] Max subscribers reached, clearing old subscriptions",
-    );
-    subscribers.clear();
-  }
-  subscribers.add(callback);
-  return () => {
-    subscribers.delete(callback);
-  };
+	// Safety check: if we've hit max subscribers, clear all and warn
+	// This prevents memory leaks from improper cleanup
+	if (subscribers.size >= MAX_SUBSCRIBERS) {
+		console.warn(
+			"[AudioManager] Max subscribers reached, clearing old subscriptions",
+		);
+		subscribers.clear();
+	}
+	subscribers.add(callback);
+	return () => {
+		subscribers.delete(callback);
+	};
 };

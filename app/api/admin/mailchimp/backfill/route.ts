@@ -15,86 +15,86 @@ export const dynamic = "force-dynamic";
  * Safe to run multiple times - Mailchimp tags are idempotent.
  */
 export const POST = withCsrf(async () => {
-  // Check authenticated user
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+	// Check authenticated user
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+	if (!user) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 
-  // Check admin status
-  const isAdmin = await isUserAdmin(user.id);
-  if (!isAdmin) {
-    return NextResponse.json(
-      { error: "Forbidden - Admin only" },
-      { status: 403 },
-    );
-  }
+	// Check admin status
+	const isAdmin = await isUserAdmin(user.id);
+	if (!isAdmin) {
+		return NextResponse.json(
+			{ error: "Forbidden - Admin only" },
+			{ status: 403 },
+		);
+	}
 
-  // Use service client to bypass RLS for querying all users
-  const serviceClient = createServiceClient();
+	// Use service client to bypass RLS for querying all users
+	const serviceClient = createServiceClient();
 
-  // Query all trial users with verified emails
-  const { data: trialUsers, error: queryError } = await serviceClient
-    .from("User")
-    .select("id, email")
-    .eq("subscriptionStatus", "trialing")
-    .not("email", "is", null)
-    .is("deletedAt", null);
+	// Query all trial users with verified emails
+	const { data: trialUsers, error: queryError } = await serviceClient
+		.from("User")
+		.select("id, email")
+		.eq("subscriptionStatus", "trialing")
+		.not("email", "is", null)
+		.is("deletedAt", null);
 
-  if (queryError) {
-    console.error(
-      "[Mailchimp Backfill] Failed to query trial users:",
-      queryError,
-    );
-    return NextResponse.json(
-      { error: "Failed to query users" },
-      { status: 500 },
-    );
-  }
+	if (queryError) {
+		console.error(
+			"[Mailchimp Backfill] Failed to query trial users:",
+			queryError,
+		);
+		return NextResponse.json(
+			{ error: "Failed to query users" },
+			{ status: 500 },
+		);
+	}
 
-  if (!trialUsers || trialUsers.length === 0) {
-    return NextResponse.json({
-      total: 0,
-      success: 0,
-      failed: 0,
-      message: "No trial users to backfill",
-    });
-  }
+	if (!trialUsers || trialUsers.length === 0) {
+		return NextResponse.json({
+			total: 0,
+			success: 0,
+			failed: 0,
+			message: "No trial users to backfill",
+		});
+	}
 
-  // Process each user with small delay to respect Mailchimp rate limits
-  const results = {
-    total: trialUsers.length,
-    success: 0,
-    failed: 0,
-    errors: [] as { email: string; error: string }[],
-  };
+	// Process each user with small delay to respect Mailchimp rate limits
+	const results = {
+		total: trialUsers.length,
+		success: 0,
+		failed: 0,
+		errors: [] as { email: string; error: string }[],
+	};
 
-  for (const trialUser of trialUsers) {
-    if (!trialUser.email) continue;
+	for (const trialUser of trialUsers) {
+		if (!trialUser.email) continue;
 
-    const result = await applyTrialTag(trialUser.email);
+		const result = await applyTrialTag(trialUser.email);
 
-    if (result.success) {
-      results.success++;
-    } else {
-      results.failed++;
-      results.errors.push({
-        email: trialUser.email,
-        error: result.error || "Unknown error",
-      });
-    }
+		if (result.success) {
+			results.success++;
+		} else {
+			results.failed++;
+			results.errors.push({
+				email: trialUser.email,
+				error: result.error || "Unknown error",
+			});
+		}
 
-    // Small delay to respect Mailchimp rate limits (10 requests/second max)
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
+		// Small delay to respect Mailchimp rate limits (10 requests/second max)
+		await new Promise((resolve) => setTimeout(resolve, 100));
+	}
 
-  console.log(
-    `[Mailchimp Backfill] Completed: ${results.success}/${results.total} users tagged`,
-  );
+	console.log(
+		`[Mailchimp Backfill] Completed: ${results.success}/${results.total} users tagged`,
+	);
 
-  return NextResponse.json(results);
+	return NextResponse.json(results);
 });

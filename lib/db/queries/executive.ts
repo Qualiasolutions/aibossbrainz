@@ -1,10 +1,10 @@
 import "server-only";
 
 import {
-  type BotType,
-  ChatSDKError,
-  createClient,
-  type ExecutiveMemory,
+	type BotType,
+	ChatSDKError,
+	createClient,
+	type ExecutiveMemory,
 } from "./shared";
 
 // ============================================
@@ -12,136 +12,136 @@ import {
 // ============================================
 
 export async function getExecutiveMemory({
-  userId,
+	userId,
 }: {
-  userId: string;
+	userId: string;
 }): Promise<ExecutiveMemory[]> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("ExecutiveMemory")
-      .select("*")
-      .eq("userId", userId)
-      .order("preferenceScore", { ascending: false });
+	try {
+		const supabase = await createClient();
+		const { data, error } = await supabase
+			.from("ExecutiveMemory")
+			.select("*")
+			.eq("userId", userId)
+			.order("preferenceScore", { ascending: false });
 
-    if (error) throw error;
-    return data || [];
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get executive memory",
-    );
-  }
+		if (error) throw error;
+		return data || [];
+	} catch (_error) {
+		throw new ChatSDKError(
+			"bad_request:database",
+			"Failed to get executive memory",
+		);
+	}
 }
 
 export async function updateExecutiveMemory({
-  userId,
-  executive,
-  topic,
+	userId,
+	executive,
+	topic,
 }: {
-  userId: string;
-  executive: BotType;
-  topic?: string;
+	userId: string;
+	executive: BotType;
+	topic?: string;
 }) {
-  try {
-    const supabase = await createClient();
+	try {
+		const supabase = await createClient();
 
-    // Try RPC function first for atomic operation (avoids race conditions)
-    // Cast to any to bypass type checking until types are regenerated
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- RPC function types not generated yet
-    const { error: rpcError } = await (supabase as any).rpc(
-      "upsert_executive_memory",
-      {
-        p_user_id: userId,
-        p_executive: executive,
-        p_topic: topic ?? null,
-      },
-    );
+		// Try RPC function first for atomic operation (avoids race conditions)
+		// Cast to any to bypass type checking until types are regenerated
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- RPC function types not generated yet
+		const { error: rpcError } = await (supabase as any).rpc(
+			"upsert_executive_memory",
+			{
+				p_user_id: userId,
+				p_executive: executive,
+				p_topic: topic ?? null,
+			},
+		);
 
-    // If RPC succeeds, we're done
-    if (!rpcError) return;
+		// If RPC succeeds, we're done
+		if (!rpcError) return;
 
-    // Fallback to direct query if RPC doesn't exist (42883) or fails
-    if (rpcError.code !== "42883") {
-      console.warn("[ExecutiveMemory] RPC failed, using fallback:", rpcError);
-    }
+		// Fallback to direct query if RPC doesn't exist (42883) or fails
+		if (rpcError.code !== "42883") {
+			console.warn("[ExecutiveMemory] RPC failed, using fallback:", rpcError);
+		}
 
-    // Optimized fallback: select only needed fields
-    const { data: existing } = await supabase
-      .from("ExecutiveMemory")
-      .select("id, messageCount, topTopics")
-      .eq("userId", userId)
-      .eq("executive", executive)
-      .limit(1)
-      .single();
+		// Optimized fallback: select only needed fields
+		const { data: existing } = await supabase
+			.from("ExecutiveMemory")
+			.select("id, messageCount, topTopics")
+			.eq("userId", userId)
+			.eq("executive", executive)
+			.limit(1)
+			.single();
 
-    if (existing) {
-      const currentCount = (existing.messageCount as number) || 0;
-      const currentTopics = (existing.topTopics as string[]) || [];
-      const newTopics = topic
-        ? [...new Set([...currentTopics, topic])].slice(-10)
-        : currentTopics;
+		if (existing) {
+			const currentCount = (existing.messageCount as number) || 0;
+			const currentTopics = (existing.topTopics as string[]) || [];
+			const newTopics = topic
+				? [...new Set([...currentTopics, topic])].slice(-10)
+				: currentTopics;
 
-      await supabase
-        .from("ExecutiveMemory")
-        .update({
-          messageCount: currentCount + 1,
-          topTopics: newTopics,
-          lastUsed: new Date().toISOString(),
-          preferenceScore: currentCount + 1,
-          updatedAt: new Date().toISOString(),
-        })
-        .eq("id", existing.id);
-    } else {
-      await supabase.from("ExecutiveMemory").insert({
-        userId,
-        executive,
-        messageCount: 1,
-        topTopics: topic ? [topic] : [],
-        lastUsed: new Date().toISOString(),
-        preferenceScore: 1,
-      });
-    }
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to update executive memory",
-    );
-  }
+			await supabase
+				.from("ExecutiveMemory")
+				.update({
+					messageCount: currentCount + 1,
+					topTopics: newTopics,
+					lastUsed: new Date().toISOString(),
+					preferenceScore: currentCount + 1,
+					updatedAt: new Date().toISOString(),
+				})
+				.eq("id", existing.id);
+		} else {
+			await supabase.from("ExecutiveMemory").insert({
+				userId,
+				executive,
+				messageCount: 1,
+				topTopics: topic ? [topic] : [],
+				lastUsed: new Date().toISOString(),
+				preferenceScore: 1,
+			});
+		}
+	} catch (_error) {
+		throw new ChatSDKError(
+			"bad_request:database",
+			"Failed to update executive memory",
+		);
+	}
 }
 
 export async function getExecutiveStats({
-  userId,
+	userId,
 }: {
-  userId: string;
+	userId: string;
 }): Promise<{
-  total: number;
-  breakdown: { executive: string; count: number; percentage: number }[];
-  preferred: string | null;
+	total: number;
+	breakdown: { executive: string; count: number; percentage: number }[];
+	preferred: string | null;
 }> {
-  try {
-    const memories = await getExecutiveMemory({ userId });
-    const total = memories.reduce(
-      (sum, m) => sum + ((m.messageCount as number) || 0),
-      0,
-    );
+	try {
+		const memories = await getExecutiveMemory({ userId });
+		const total = memories.reduce(
+			(sum, m) => sum + ((m.messageCount as number) || 0),
+			0,
+		);
 
-    const breakdown = memories.map((m) => ({
-      executive: m.executive,
-      count: (m.messageCount as number) || 0,
-      percentage:
-        total > 0
-          ? Math.round((((m.messageCount as number) || 0) / total) * 100)
-          : 0,
-    }));
+		const breakdown = memories.map((m) => ({
+			executive: m.executive,
+			count: (m.messageCount as number) || 0,
+			percentage:
+				total > 0
+					? Math.round((((m.messageCount as number) || 0) / total) * 100)
+					: 0,
+		}));
 
-    const preferred = memories.length > 0 ? memories[0].executive : null;
+		const preferred = memories.length > 0 ? memories[0].executive : null;
 
-    return { total, breakdown, preferred };
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get executive stats",
-    );
-  }
+		return { total, breakdown, preferred };
+	} catch (_error) {
+		throw new ChatSDKError(
+			"bad_request:database",
+			"Failed to get executive stats",
+		);
+	}
 }

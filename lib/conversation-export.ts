@@ -9,207 +9,210 @@ import { STYLES } from "./pdf/pdf-styles";
  * Produces small, searchable, text-based PDFs instead of rasterized screenshots.
  */
 export async function exportConversationToPDF(
-  messages: ChatMessage[],
-  chatTitle: string,
-  botType: BotType,
+	messages: ChatMessage[],
+	chatTitle: string,
+	botType: BotType,
 ): Promise<void> {
-  // Dynamic imports to reduce bundle size
-  const { default: jsPDF } = await import("jspdf");
-  // Side-effect import: adds autoTable method to jsPDF prototype
-  await import("jspdf-autotable");
+	// Dynamic imports to reduce bundle size
+	const { default: jsPDF } = await import("jspdf");
+	// Side-effect import: adds autoTable method to jsPDF prototype
+	await import("jspdf-autotable");
 
-  const personality = BOT_PERSONALITIES[botType];
-  const date = new Date().toLocaleDateString();
-  const doc = new jsPDF("p", "mm", "a4");
-  let y: number = STYLES.marginTop;
+	const personality = BOT_PERSONALITIES[botType];
+	const date = new Date().toLocaleDateString();
+	const doc = new jsPDF("p", "mm", "a4");
+	let y: number = STYLES.marginTop;
 
-  // Title header
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.setTextColor(...STYLES.headingColor);
-  const titleLines = doc.splitTextToSize(chatTitle, STYLES.contentWidth);
-  doc.text(titleLines, STYLES.marginLeft, y);
-  y += titleLines.length * 20 * 0.3528 * STYLES.lineHeight + 3;
+	// Title header
+	doc.setFont("helvetica", "bold");
+	doc.setFontSize(20);
+	doc.setTextColor(...STYLES.headingColor);
+	const titleLines = doc.splitTextToSize(chatTitle, STYLES.contentWidth);
+	doc.text(titleLines, STYLES.marginLeft, y);
+	y += titleLines.length * 20 * 0.3528 * STYLES.lineHeight + 3;
 
-  // Subtitle: conversation with executive + date
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.setTextColor(...STYLES.mutedColor);
-  doc.text(
-    `Conversation with ${personality.name} | ${date}`,
-    STYLES.marginLeft,
-    y,
-  );
-  y += 8;
+	// Subtitle: conversation with executive + date
+	doc.setFont("helvetica", "normal");
+	doc.setFontSize(11);
+	doc.setTextColor(...STYLES.mutedColor);
+	doc.text(
+		`Conversation with ${personality.name} | ${date}`,
+		STYLES.marginLeft,
+		y,
+	);
+	y += 8;
 
-  // Divider
-  doc.setDrawColor(...STYLES.dividerColor);
-  doc.setLineWidth(0.5);
-  doc.line(STYLES.marginLeft, y, STYLES.pageWidth - STYLES.marginRight, y);
-  y += 10;
+	// Divider
+	doc.setDrawColor(...STYLES.dividerColor);
+	doc.setLineWidth(0.5);
+	doc.line(STYLES.marginLeft, y, STYLES.pageWidth - STYLES.marginRight, y);
+	y += 10;
 
-  // Render each message
-  for (const message of messages) {
-    const textContent = message.parts
-      ?.filter((part) => part.type === "text")
-      .map((part) => part.text)
-      .join("\n")
-      .trim();
+	// Render each message
+	for (const message of messages) {
+		const textContent = message.parts
+			?.filter((part) => part.type === "text")
+			.map((part) => part.text)
+			.join("\n")
+			.trim();
 
-    if (!textContent) continue;
+		if (!textContent) continue;
 
-    const isUser = message.role === "user";
-    const msgBotType = (message.metadata?.botType as BotType) || botType;
-    const msgPersonality = BOT_PERSONALITIES[msgBotType];
+		const isUser = message.role === "user";
+		const msgBotType = (message.metadata?.botType as BotType) || botType;
+		const msgPersonality = BOT_PERSONALITIES[msgBotType];
 
-    // Page break check for speaker header + some content (30mm minimum)
-    if (y + 30 > STYLES.pageHeight - STYLES.marginBottom) {
-      doc.addPage();
-      y = STYLES.marginTop;
-    }
+		// Page break check for speaker header + some content (30mm minimum)
+		if (y + 30 > STYLES.pageHeight - STYLES.marginBottom) {
+			doc.addPage();
+			y = STYLES.marginTop;
+		}
 
-    // Speaker name (colored: user=#333, bot=#b91c1c)
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    if (isUser) {
-      doc.setTextColor(51, 51, 51);
-    } else {
-      doc.setTextColor(185, 28, 28);
-    }
-    doc.text(isUser ? "You" : msgPersonality.name, STYLES.marginLeft, y);
-    y += 6;
+		// Speaker name (colored: user=#333, bot=#b91c1c)
+		doc.setFont("helvetica", "bold");
+		doc.setFontSize(11);
+		if (isUser) {
+			doc.setTextColor(51, 51, 51);
+		} else {
+			doc.setTextColor(185, 28, 28);
+		}
+		doc.text(isUser ? "You" : msgPersonality.name, STYLES.marginLeft, y);
+		y += 6;
 
-    // Message content
-    doc.setTextColor(...STYLES.textColor);
-    const blocks = parseMarkdown(textContent);
-    y = renderBlocksToPDF(doc, blocks, y);
+		// Message content
+		doc.setTextColor(...STYLES.textColor);
+		const blocks = parseMarkdown(textContent);
+		y = renderBlocksToPDF(doc, blocks, y);
 
-    // Extra spacing between messages
-    y += STYLES.blockSpacing * 2;
-  }
+		// Extra spacing between messages
+		y += STYLES.blockSpacing * 2;
+	}
 
-  // Footer on last page
-  const footerY = STYLES.pageHeight - 15;
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(STYLES.footerSize);
-  doc.setTextColor(...STYLES.mutedColor);
-  doc.text(
-    `Generated by AI Bossy Brainz | ${date}`,
-    STYLES.marginLeft,
-    footerY,
-  );
+	// Footer on last page
+	const footerY = STYLES.pageHeight - 15;
+	doc.setFont("helvetica", "italic");
+	doc.setFontSize(STYLES.footerSize);
+	doc.setTextColor(...STYLES.mutedColor);
+	doc.text(
+		`Generated by AI Bossy Brainz | ${date}`,
+		STYLES.marginLeft,
+		footerY,
+	);
 
-  const safeTitle = chatTitle
-    .replace(/[^a-zA-Z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .slice(0, 60);
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const filename = `${safeTitle}-${timestamp}.pdf`;
-  doc.save(filename);
+	const safeTitle = chatTitle
+		.replace(/[^a-zA-Z0-9\s-]/g, "")
+		.replace(/\s+/g, "-")
+		.slice(0, 60);
+	const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+	const filename = `${safeTitle}-${timestamp}.pdf`;
+	doc.save(filename);
 }
 
 /**
  * Export entire conversation to Excel
  */
 export async function exportConversationToExcel(
-  messages: ChatMessage[],
-  chatTitle: string,
-  botType: BotType,
+	messages: ChatMessage[],
+	chatTitle: string,
+	botType: BotType,
 ): Promise<void> {
-  // Dynamic import to avoid SSR issues
-  const ExcelJS = await import("exceljs");
-  const personality = BOT_PERSONALITIES[botType];
-  const date = new Date().toLocaleDateString();
+	// Dynamic import to avoid SSR issues
+	const ExcelJS = await import("exceljs");
+	const personality = BOT_PERSONALITIES[botType];
+	const date = new Date().toLocaleDateString();
 
-  // Create workbook and worksheet
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Conversation");
+	// Create workbook and worksheet
+	const workbook = new ExcelJS.Workbook();
+	const worksheet = workbook.addWorksheet("Conversation");
 
-  // Add header information
-  worksheet.addRow(["Conversation Export"]);
-  worksheet.addRow([`Title: ${chatTitle}`]);
-  worksheet.addRow([`Executive: ${personality.name}`]);
-  worksheet.addRow([`Date: ${date}`]);
-  worksheet.addRow([]); // Empty row
+	// Add header information
+	worksheet.addRow(["Conversation Export"]);
+	worksheet.addRow([`Title: ${chatTitle}`]);
+	worksheet.addRow([`Executive: ${personality.name}`]);
+	worksheet.addRow([`Date: ${date}`]);
+	worksheet.addRow([]); // Empty row
 
-  // Add column headers
-  worksheet.addRow(["Role", "Speaker", "Message", "Timestamp"]);
+	// Add column headers
+	worksheet.addRow(["Role", "Speaker", "Message", "Timestamp"]);
 
-  // Style header row
-  const headerRowNum = 6;
-  const headerRow = worksheet.getRow(headerRowNum);
-  headerRow.font = { bold: true };
-  headerRow.fill = {
-    type: "pattern",
-    pattern: "solid",
-    fgColor: { argb: "FFE0E0E0" },
-  };
+	// Style header row
+	const headerRowNum = 6;
+	const headerRow = worksheet.getRow(headerRowNum);
+	headerRow.font = { bold: true };
+	headerRow.fill = {
+		type: "pattern",
+		pattern: "solid",
+		fgColor: { argb: "FFE0E0E0" },
+	};
 
-  // Set column widths
-  worksheet.columns = [
-    { key: "role", width: 12 },
-    { key: "speaker", width: 20 },
-    { key: "message", width: 80 },
-    { key: "timestamp", width: 24 },
-  ];
+	// Set column widths
+	worksheet.columns = [
+		{ key: "role", width: 12 },
+		{ key: "speaker", width: 20 },
+		{ key: "message", width: 80 },
+		{ key: "timestamp", width: 24 },
+	];
 
-  // Add message data
-  for (const message of messages) {
-    const textContent = message.parts
-      ?.filter((part) => part.type === "text")
-      .map((part) => part.text)
-      .join("\n")
-      .trim();
+	// Add message data
+	for (const message of messages) {
+		const textContent = message.parts
+			?.filter((part) => part.type === "text")
+			.map((part) => part.text)
+			.join("\n")
+			.trim();
 
-    if (!textContent) continue;
+		if (!textContent) continue;
 
-    const isUser = message.role === "user";
-    const msgBotType = (message.metadata?.botType as BotType) || botType;
-    const msgPersonality = BOT_PERSONALITIES[msgBotType];
+		const isUser = message.role === "user";
+		const msgBotType = (message.metadata?.botType as BotType) || botType;
+		const msgPersonality = BOT_PERSONALITIES[msgBotType];
 
-    // Use message metadata createdAt if available, fallback to current time
-    const timestamp = message.metadata?.createdAt || new Date().toISOString();
+		// Use message metadata createdAt if available, fallback to current time
+		const timestamp = message.metadata?.createdAt || new Date().toISOString();
 
-    worksheet.addRow([
-      message.role,
-      isUser ? "You" : msgPersonality.name,
-      textContent,
-      timestamp,
-    ]);
-  }
+		worksheet.addRow([
+			message.role,
+			isUser ? "You" : msgPersonality.name,
+			textContent,
+			timestamp,
+		]);
+	}
 
-  // Enable text wrapping for message column
-  worksheet.getColumn(3).alignment = { wrapText: true, vertical: "top" };
+	// Enable text wrapping for message column
+	worksheet.getColumn(3).alignment = { wrapText: true, vertical: "top" };
 
-  // Generate buffer and trigger download
-  const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
-  const url = URL.createObjectURL(blob);
+	// Generate buffer and trigger download
+	const buffer = await workbook.xlsx.writeBuffer();
+	const blob = new Blob([buffer], {
+		type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	});
+	const url = URL.createObjectURL(blob);
 
-  const safeExcelTitle = chatTitle
-    .replace(/[^a-zA-Z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .slice(0, 60);
-  const excelTimestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const filename = `${safeExcelTitle}-${excelTimestamp}.xlsx`;
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+	const safeExcelTitle = chatTitle
+		.replace(/[^a-zA-Z0-9\s-]/g, "")
+		.replace(/\s+/g, "-")
+		.slice(0, 60);
+	const excelTimestamp = new Date()
+		.toISOString()
+		.replace(/[:.]/g, "-")
+		.slice(0, 19);
+	const filename = `${safeExcelTitle}-${excelTimestamp}.xlsx`;
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = filename;
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+	URL.revokeObjectURL(url);
 }
 
 export function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+	return text
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
 }
 
 /**
@@ -217,220 +220,220 @@ export function escapeHtml(text: string): string {
  * Handles tables, bold, italic, inline code, strikethrough, links, and headers.
  */
 export function markdownToHtml(text: string): string {
-  // Process tables BEFORE escaping HTML (tables use | characters)
-  let result = processMarkdownTables(text);
+	// Process tables BEFORE escaping HTML (tables use | characters)
+	let result = processMarkdownTables(text);
 
-  // Escape HTML entities for non-table content
-  result = escapeHtmlPreservingTables(result);
+	// Escape HTML entities for non-table content
+	result = escapeHtmlPreservingTables(result);
 
-  // Convert markdown to HTML (order matters - process more specific patterns first)
+	// Convert markdown to HTML (order matters - process more specific patterns first)
 
-  // Headers (h1-h3) - must be at start of line
-  result = result.replace(
-    /^### (.+)$/gm,
-    '<h3 style="font-size: 16px; font-weight: 600; margin: 12px 0 8px 0;">$1</h3>',
-  );
-  result = result.replace(
-    /^## (.+)$/gm,
-    '<h2 style="font-size: 18px; font-weight: 600; margin: 16px 0 8px 0;">$1</h2>',
-  );
-  result = result.replace(
-    /^# (.+)$/gm,
-    '<h1 style="font-size: 20px; font-weight: 700; margin: 20px 0 10px 0;">$1</h1>',
-  );
+	// Headers (h1-h3) - must be at start of line
+	result = result.replace(
+		/^### (.+)$/gm,
+		'<h3 style="font-size: 16px; font-weight: 600; margin: 12px 0 8px 0;">$1</h3>',
+	);
+	result = result.replace(
+		/^## (.+)$/gm,
+		'<h2 style="font-size: 18px; font-weight: 600; margin: 16px 0 8px 0;">$1</h2>',
+	);
+	result = result.replace(
+		/^# (.+)$/gm,
+		'<h1 style="font-size: 20px; font-weight: 700; margin: 20px 0 10px 0;">$1</h1>',
+	);
 
-  // Bold + Italic (***text*** or ___text___)
-  result = result.replace(
-    /\*\*\*([^*]+)\*\*\*/g,
-    "<strong><em>$1</em></strong>",
-  );
-  result = result.replace(/___([^_]+)___/g, "<strong><em>$1</em></strong>");
+	// Bold + Italic (***text*** or ___text___)
+	result = result.replace(
+		/\*\*\*([^*]+)\*\*\*/g,
+		"<strong><em>$1</em></strong>",
+	);
+	result = result.replace(/___([^_]+)___/g, "<strong><em>$1</em></strong>");
 
-  // Bold (**text** or __text__)
-  result = result.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  result = result.replace(/__([^_]+)__/g, "<strong>$1</strong>");
+	// Bold (**text** or __text__)
+	result = result.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+	result = result.replace(/__([^_]+)__/g, "<strong>$1</strong>");
 
-  // Italic (*text* or _text_) - be careful not to match underscores in words
-  result = result.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
-  result = result.replace(
-    /(?<![a-zA-Z0-9])_([^_\n]+)_(?![a-zA-Z0-9])/g,
-    "<em>$1</em>",
-  );
+	// Italic (*text* or _text_) - be careful not to match underscores in words
+	result = result.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+	result = result.replace(
+		/(?<![a-zA-Z0-9])_([^_\n]+)_(?![a-zA-Z0-9])/g,
+		"<em>$1</em>",
+	);
 
-  // Strikethrough (~~text~~)
-  result = result.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+	// Strikethrough (~~text~~)
+	result = result.replace(/~~([^~]+)~~/g, "<del>$1</del>");
 
-  // Inline code (`code`) - use escaped backticks since we already escaped HTML
-  result = result.replace(
-    /`([^`]+)`/g,
-    '<code style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 13px;">$1</code>',
-  );
+	// Inline code (`code`) - use escaped backticks since we already escaped HTML
+	result = result.replace(
+		/`([^`]+)`/g,
+		'<code style="background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 13px;">$1</code>',
+	);
 
-  // Links [text](url) - URL is already HTML-escaped
-  result = result.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" style="color: #2563eb; text-decoration: underline;">$1</a>',
-  );
+	// Links [text](url) - URL is already HTML-escaped
+	result = result.replace(
+		/\[([^\]]+)\]\(([^)]+)\)/g,
+		'<a href="$2" style="color: #2563eb; text-decoration: underline;">$1</a>',
+	);
 
-  // Bullet lists (- item or * item) - only match if not part of a table separator
-  result = result.replace(
-    /^[-*] (.+)$/gm,
-    '<li style="margin-left: 20px;">$1</li>',
-  );
+	// Bullet lists (- item or * item) - only match if not part of a table separator
+	result = result.replace(
+		/^[-*] (.+)$/gm,
+		'<li style="margin-left: 20px;">$1</li>',
+	);
 
-  // Numbered lists (1. item)
-  result = result.replace(
-    /^\d+\. (.+)$/gm,
-    '<li style="margin-left: 20px;">$1</li>',
-  );
+	// Numbered lists (1. item)
+	result = result.replace(
+		/^\d+\. (.+)$/gm,
+		'<li style="margin-left: 20px;">$1</li>',
+	);
 
-  // Blockquotes (> text)
-  result = result.replace(
-    /^&gt; (.+)$/gm,
-    '<blockquote style="border-left: 3px solid #d1d5db; padding-left: 12px; color: #6b7280; margin: 8px 0;">$1</blockquote>',
-  );
+	// Blockquotes (> text)
+	result = result.replace(
+		/^&gt; (.+)$/gm,
+		'<blockquote style="border-left: 3px solid #d1d5db; padding-left: 12px; color: #6b7280; margin: 8px 0;">$1</blockquote>',
+	);
 
-  // Horizontal rules (--- or ***) - only standalone lines with just dashes/asterisks
-  // This regex ensures we don't match table separators or content with dashes
-  result = result.replace(
-    /^-{3,}$/gm,
-    '<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;">',
-  );
-  result = result.replace(
-    /^\*{3,}$/gm,
-    '<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;">',
-  );
+	// Horizontal rules (--- or ***) - only standalone lines with just dashes/asterisks
+	// This regex ensures we don't match table separators or content with dashes
+	result = result.replace(
+		/^-{3,}$/gm,
+		'<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;">',
+	);
+	result = result.replace(
+		/^\*{3,}$/gm,
+		'<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;">',
+	);
 
-  return result;
+	return result;
 }
 
 /**
  * Process markdown tables into HTML tables with styling
  */
 function processMarkdownTables(text: string): string {
-  const lines = text.split("\n");
-  const result: string[] = [];
-  let i = 0;
+	const lines = text.split("\n");
+	const result: string[] = [];
+	let i = 0;
 
-  while (i < lines.length) {
-    const line = lines[i];
+	while (i < lines.length) {
+		const line = lines[i];
 
-    // Check if this could be a table header row (contains |)
-    if (line.includes("|") && i + 1 < lines.length) {
-      const nextLine = lines[i + 1];
+		// Check if this could be a table header row (contains |)
+		if (line.includes("|") && i + 1 < lines.length) {
+			const nextLine = lines[i + 1];
 
-      // Check if next line is a separator row (contains | and -)
-      if (
-        nextLine &&
-        /^\|?[\s\-:|]+\|?$/.test(nextLine) &&
-        nextLine.includes("-")
-      ) {
-        // This is likely a table, collect all table rows
-        const tableLines: string[] = [line];
-        let j = i + 1;
+			// Check if next line is a separator row (contains | and -)
+			if (
+				nextLine &&
+				/^\|?[\s\-:|]+\|?$/.test(nextLine) &&
+				nextLine.includes("-")
+			) {
+				// This is likely a table, collect all table rows
+				const tableLines: string[] = [line];
+				let j = i + 1;
 
-        // Skip separator line
-        j++;
+				// Skip separator line
+				j++;
 
-        // Collect data rows
-        while (j < lines.length && lines[j].includes("|")) {
-          tableLines.push(lines[j]);
-          j++;
-        }
+				// Collect data rows
+				while (j < lines.length && lines[j].includes("|")) {
+					tableLines.push(lines[j]);
+					j++;
+				}
 
-        // Convert to HTML table
-        const tableHtml = convertTableToHtml(tableLines);
-        result.push(tableHtml);
-        i = j;
-        continue;
-      }
-    }
+				// Convert to HTML table
+				const tableHtml = convertTableToHtml(tableLines);
+				result.push(tableHtml);
+				i = j;
+				continue;
+			}
+		}
 
-    result.push(line);
-    i++;
-  }
+		result.push(line);
+		i++;
+	}
 
-  return result.join("\n");
+	return result.join("\n");
 }
 
 /**
  * Convert table lines to HTML table
  */
 function convertTableToHtml(lines: string[]): string {
-  if (lines.length === 0) return "";
+	if (lines.length === 0) return "";
 
-  const tableStyle = `
+	const tableStyle = `
     border-collapse: collapse;
     width: 100%;
     margin: 16px 0;
     font-size: 14px;
   `
-    .replace(/\s+/g, " ")
-    .trim();
+		.replace(/\s+/g, " ")
+		.trim();
 
-  const headerCellStyle = `
+	const headerCellStyle = `
     border: 1px solid #d1d5db;
     padding: 10px 12px;
     background: #f3f4f6;
     font-weight: 600;
     text-align: left;
   `
-    .replace(/\s+/g, " ")
-    .trim();
+		.replace(/\s+/g, " ")
+		.trim();
 
-  const cellStyle = `
+	const cellStyle = `
     border: 1px solid #d1d5db;
     padding: 10px 12px;
     text-align: left;
   `
-    .replace(/\s+/g, " ")
-    .trim();
+		.replace(/\s+/g, " ")
+		.trim();
 
-  // Parse header row
-  const headerCells = parseTableRow(lines[0]);
-  const headerHtml = headerCells
-    .map((cell) => `<th style="${headerCellStyle}">${escapeHtml(cell)}</th>`)
-    .join("");
+	// Parse header row
+	const headerCells = parseTableRow(lines[0]);
+	const headerHtml = headerCells
+		.map((cell) => `<th style="${headerCellStyle}">${escapeHtml(cell)}</th>`)
+		.join("");
 
-  // Parse data rows (skip the first row which is header)
-  const dataRows = lines.slice(1);
-  const bodyHtml = dataRows
-    .map((row) => {
-      const cells = parseTableRow(row);
-      const cellsHtml = cells
-        .map((cell) => `<td style="${cellStyle}">${escapeHtml(cell)}</td>`)
-        .join("");
-      return `<tr>${cellsHtml}</tr>`;
-    })
-    .join("");
+	// Parse data rows (skip the first row which is header)
+	const dataRows = lines.slice(1);
+	const bodyHtml = dataRows
+		.map((row) => {
+			const cells = parseTableRow(row);
+			const cellsHtml = cells
+				.map((cell) => `<td style="${cellStyle}">${escapeHtml(cell)}</td>`)
+				.join("");
+			return `<tr>${cellsHtml}</tr>`;
+		})
+		.join("");
 
-  return `<table style="${tableStyle}"><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table>`;
+	return `<table style="${tableStyle}"><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table>`;
 }
 
 /**
  * Parse a markdown table row into cells
  */
 function parseTableRow(row: string): string[] {
-  // Remove leading/trailing pipes and split by |
-  return row
-    .replace(/^\|/, "")
-    .replace(/\|$/, "")
-    .split("|")
-    .map((cell) => cell.trim());
+	// Remove leading/trailing pipes and split by |
+	return row
+		.replace(/^\|/, "")
+		.replace(/\|$/, "")
+		.split("|")
+		.map((cell) => cell.trim());
 }
 
 /**
  * Escape HTML but preserve already-processed table HTML
  */
 function escapeHtmlPreservingTables(text: string): string {
-  // Split by table tags, escape non-table parts, rejoin
-  const parts = text.split(/(<table[\s\S]*?<\/table>)/g);
-  return parts
-    .map((part) => {
-      if (part.startsWith("<table")) {
-        return part; // Already processed table HTML
-      }
-      return escapeHtml(part);
-    })
-    .join("");
+	// Split by table tags, escape non-table parts, rejoin
+	const parts = text.split(/(<table[\s\S]*?<\/table>)/g);
+	return parts
+		.map((part) => {
+			if (part.startsWith("<table")) {
+				return part; // Already processed table HTML
+			}
+			return escapeHtml(part);
+		})
+		.join("");
 }

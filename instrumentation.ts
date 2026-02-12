@@ -3,89 +3,89 @@ import { registerOTel } from "@vercel/otel";
 import { env } from "@/lib/env";
 
 export async function register() {
-  // Register OpenTelemetry
-  registerOTel({ serviceName: "ai-chatbot" });
+	// Register OpenTelemetry
+	registerOTel({ serviceName: "ai-chatbot" });
 
-  // PERFORMANCE: Preload knowledge base on server startup
-  // This eliminates cold start latency for the first chat request
-  if (process.env.NEXT_RUNTIME === "nodejs") {
-    import("@/lib/ai/knowledge-base")
-      .then(({ preloadKnowledgeBase }) => {
-        preloadKnowledgeBase().catch((err) => {
-          console.warn("[Instrumentation] Knowledge base preload failed:", err);
-        });
-      })
-      .catch(() => {
-        // Silently ignore import failures in non-Node environments
-      });
-  }
+	// PERFORMANCE: Preload knowledge base on server startup
+	// This eliminates cold start latency for the first chat request
+	if (process.env.NEXT_RUNTIME === "nodejs") {
+		import("@/lib/ai/knowledge-base")
+			.then(({ preloadKnowledgeBase }) => {
+				preloadKnowledgeBase().catch((err) => {
+					console.warn("[Instrumentation] Knowledge base preload failed:", err);
+				});
+			})
+			.catch(() => {
+				// Silently ignore import failures in non-Node environments
+			});
+	}
 
-  // Initialize Sentry for server-side
-  if (process.env.NODE_ENV === "production" && env.SENTRY_DSN) {
-    Sentry.init({
-      dsn: env.SENTRY_DSN,
+	// Initialize Sentry for server-side
+	if (process.env.NODE_ENV === "production" && env.SENTRY_DSN) {
+		Sentry.init({
+			dsn: env.SENTRY_DSN,
 
-      // Enable structured logging
-      enableLogs: true,
+			// Enable structured logging
+			enableLogs: true,
 
-      // Performance monitoring
-      tracesSampleRate: 0.1, // 10% of transactions
+			// Performance monitoring
+			tracesSampleRate: 0.1, // 10% of transactions
 
-      // Filter out noisy errors
-      ignoreErrors: [
-        // Network timeouts
-        "ETIMEDOUT",
-        "ECONNRESET",
-        "ECONNREFUSED",
-        // Rate limiting (expected behavior)
-        "rate_limit:",
-        // User auth issues (not bugs)
-        "unauthorized:",
-      ],
+			// Filter out noisy errors
+			ignoreErrors: [
+				// Network timeouts
+				"ETIMEDOUT",
+				"ECONNRESET",
+				"ECONNREFUSED",
+				// Rate limiting (expected behavior)
+				"rate_limit:",
+				// User auth issues (not bugs)
+				"unauthorized:",
+			],
 
-      // Before sending error, filter sensitive data
-      beforeSend(event) {
-        // Remove sensitive headers
-        if (event.request?.headers) {
-          const headers = event.request.headers;
-          const sensitiveHeaders = [
-            "authorization",
-            "cookie",
-            "x-auth-token",
-            "x-csrf-token",
-          ];
-          for (const header of sensitiveHeaders) {
-            if (headers[header]) {
-              headers[header] = "[REDACTED]";
-            }
-          }
-        }
+			// Before sending error, filter sensitive data
+			beforeSend(event) {
+				// Remove sensitive headers
+				if (event.request?.headers) {
+					const headers = event.request.headers;
+					const sensitiveHeaders = [
+						"authorization",
+						"cookie",
+						"x-auth-token",
+						"x-csrf-token",
+					];
+					for (const header of sensitiveHeaders) {
+						if (headers[header]) {
+							headers[header] = "[REDACTED]";
+						}
+					}
+				}
 
-        // Remove sensitive data from extras
-        if (event.extra) {
-          const sensitiveKeys = [
-            "password",
-            "token",
-            "secret",
-            "apiKey",
-            "key",
-          ];
-          for (const key of Object.keys(event.extra)) {
-            if (sensitiveKeys.some((s) => key.toLowerCase().includes(s))) {
-              event.extra[key] = "[REDACTED]";
-            }
-          }
-        }
+				// Remove sensitive data from extras
+				if (event.extra) {
+					const sensitiveKeys = [
+						"password",
+						"token",
+						"secret",
+						"apiKey",
+						"key",
+					];
+					for (const key of Object.keys(event.extra)) {
+						if (sensitiveKeys.some((s) => key.toLowerCase().includes(s))) {
+							event.extra[key] = "[REDACTED]";
+						}
+					}
+				}
 
-        return event;
-      },
+				return event;
+			},
 
-      integrations: [
-        // Capture console.error as Sentry logs on server
-        Sentry.consoleLoggingIntegration({ levels: ["error"] }),
-      ],
-    });
-  }
+			integrations: [
+				// Capture console.error as Sentry logs on server
+				Sentry.consoleLoggingIntegration({ levels: ["error"] }),
+			],
+		});
+	}
 }
 
 // Capture request errors from nested React Server Components

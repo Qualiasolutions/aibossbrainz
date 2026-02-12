@@ -2,42 +2,42 @@ export type BotType = "alexandria" | "kim" | "collaborative";
 
 // Executive Focus Modes - specialized contexts for targeted advice
 export type FocusMode =
-  | "default"
-  | "business_analysis"
-  | "pricing"
-  | "key_messaging"
-  | "customer_journey"
-  | "social_media"
-  | "launch_strategy";
+	| "default"
+	| "business_analysis"
+	| "pricing"
+	| "key_messaging"
+	| "customer_journey"
+	| "social_media"
+	| "launch_strategy";
 
 export interface FocusModeConfig {
-  id: FocusMode;
-  name: string;
-  description: string;
-  icon: string;
-  color: string;
-  applicableTo: BotType[];
-  promptEnhancement: string;
+	id: FocusMode;
+	name: string;
+	description: string;
+	icon: string;
+	color: string;
+	applicableTo: BotType[];
+	promptEnhancement: string;
 }
 
 export const FOCUS_MODES: Record<FocusMode, FocusModeConfig> = {
-  default: {
-    id: "default",
-    name: "General",
-    description: "Broad strategic advice across all business areas",
-    icon: "Briefcase",
-    color: "bg-slate-500",
-    applicableTo: ["alexandria", "kim", "collaborative"],
-    promptEnhancement: "",
-  },
-  business_analysis: {
-    id: "business_analysis",
-    name: "Business Analysis",
-    description: "Deep dive into your business model, metrics, and strategy",
-    icon: "Search",
-    color: "bg-blue-500",
-    applicableTo: ["alexandria", "kim", "collaborative"],
-    promptEnhancement: `
+	default: {
+		id: "default",
+		name: "General",
+		description: "Broad strategic advice across all business areas",
+		icon: "Briefcase",
+		color: "bg-slate-500",
+		applicableTo: ["alexandria", "kim", "collaborative"],
+		promptEnhancement: "",
+	},
+	business_analysis: {
+		id: "business_analysis",
+		name: "Business Analysis",
+		description: "Deep dive into your business model, metrics, and strategy",
+		icon: "Search",
+		color: "bg-blue-500",
+		applicableTo: ["alexandria", "kim", "collaborative"],
+		promptEnhancement: `
 ## FOCUS MODE: BUSINESS ANALYSIS
 You are conducting a comprehensive business analysis.
 - Ask diagnostic questions about the business model and metrics
@@ -45,15 +45,15 @@ You are conducting a comprehensive business analysis.
 - Analyze competitive positioning and market dynamics
 - Provide data-driven recommendations
 - Focus on actionable insights with measurable impact`,
-  },
-  pricing: {
-    id: "pricing",
-    name: "Pricing",
-    description: "Pricing strategy, positioning, and optimization",
-    icon: "Target",
-    color: "bg-green-500",
-    applicableTo: ["alexandria", "kim", "collaborative"],
-    promptEnhancement: `
+	},
+	pricing: {
+		id: "pricing",
+		name: "Pricing",
+		description: "Pricing strategy, positioning, and optimization",
+		icon: "Target",
+		color: "bg-green-500",
+		applicableTo: ["alexandria", "kim", "collaborative"],
+		promptEnhancement: `
 ## FOCUS MODE: PRICING STRATEGY
 You are helping develop and optimize pricing strategy.
 - Analyze current pricing model and positioning
@@ -61,15 +61,15 @@ You are helping develop and optimize pricing strategy.
 - Consider competitive pricing dynamics
 - Suggest pricing tiers, packaging, and bundling strategies
 - Focus on maximizing revenue while maintaining value perception`,
-  },
-  key_messaging: {
-    id: "key_messaging",
-    name: "Key Messaging",
-    description: "Core messaging, value propositions, and brand voice",
-    icon: "AlertTriangle",
-    color: "bg-purple-500",
-    applicableTo: ["alexandria", "kim", "collaborative"],
-    promptEnhancement: `
+	},
+	key_messaging: {
+		id: "key_messaging",
+		name: "Key Messaging",
+		description: "Core messaging, value propositions, and brand voice",
+		icon: "AlertTriangle",
+		color: "bg-purple-500",
+		applicableTo: ["alexandria", "kim", "collaborative"],
+		promptEnhancement: `
 ## FOCUS MODE: KEY MESSAGING
 You are helping develop compelling key messaging.
 - Craft clear, differentiated value propositions
@@ -77,15 +77,15 @@ You are helping develop compelling key messaging.
 - Create taglines, headlines, and elevator pitches
 - Ensure consistency across all touchpoints
 - Focus on emotional resonance and clarity`,
-  },
-  customer_journey: {
-    id: "customer_journey",
-    name: "Customer Journey",
-    description: "Map and optimize the end-to-end customer experience",
-    icon: "Users",
-    color: "bg-indigo-500",
-    applicableTo: ["alexandria", "kim", "collaborative"],
-    promptEnhancement: `
+	},
+	customer_journey: {
+		id: "customer_journey",
+		name: "Customer Journey",
+		description: "Map and optimize the end-to-end customer experience",
+		icon: "Users",
+		color: "bg-indigo-500",
+		applicableTo: ["alexandria", "kim", "collaborative"],
+		promptEnhancement: `
 ## FOCUS MODE: CUSTOMER JOURNEY
 You are mapping and optimizing the customer journey.
 - Identify all touchpoints from awareness to advocacy
@@ -93,15 +93,15 @@ You are mapping and optimizing the customer journey.
 - Suggest improvements for each stage of the funnel
 - Focus on conversion optimization and retention
 - Balance acquisition with customer lifetime value`,
-  },
-  social_media: {
-    id: "social_media",
-    name: "Social Media Planning",
-    description: "Social media strategy, content planning, and engagement",
-    icon: "Globe",
-    color: "bg-red-500",
-    applicableTo: ["alexandria", "collaborative"],
-    promptEnhancement: `
+	},
+	social_media: {
+		id: "social_media",
+		name: "Social Media Planning",
+		description: "Social media strategy, content planning, and engagement",
+		icon: "Globe",
+		color: "bg-red-500",
+		applicableTo: ["alexandria", "collaborative"],
+		promptEnhancement: `
 ## FOCUS MODE: SOCIAL MEDIA PLANNING
 You are developing a comprehensive social media strategy.
 - Identify the right platforms for the target audience
@@ -109,15 +109,15 @@ You are developing a comprehensive social media strategy.
 - Suggest engagement tactics and community building
 - Discuss paid vs organic strategies
 - Focus on measurable goals and ROI tracking`,
-  },
-  launch_strategy: {
-    id: "launch_strategy",
-    name: "Launch Strategy",
-    description: "Product launch planning and go-to-market execution",
-    icon: "Rocket",
-    color: "bg-orange-500",
-    applicableTo: ["alexandria", "kim", "collaborative"],
-    promptEnhancement: `
+	},
+	launch_strategy: {
+		id: "launch_strategy",
+		name: "Launch Strategy",
+		description: "Product launch planning and go-to-market execution",
+		icon: "Rocket",
+		color: "bg-orange-500",
+		applicableTo: ["alexandria", "kim", "collaborative"],
+		promptEnhancement: `
 ## FOCUS MODE: LAUNCH STRATEGY
 You are focused on helping with a product or service launch.
 - Provide comprehensive launch planning frameworks
@@ -125,87 +125,87 @@ You are focused on helping with a product or service launch.
 - Suggest specific marketing channels and tactics
 - Include timeline and milestone recommendations
 - Focus on building anticipation and maximizing impact`,
-  },
+	},
 };
 
 export const getFocusModesForBot = (botType: BotType): FocusModeConfig[] => {
-  return Object.values(FOCUS_MODES).filter((mode) =>
-    mode.applicableTo.includes(botType),
-  );
+	return Object.values(FOCUS_MODES).filter((mode) =>
+		mode.applicableTo.includes(botType),
+	);
 };
 
 export interface BotPersonality {
-  id: BotType;
-  name: string;
-  role: string;
-  expertise: string[];
-  personality: string;
-  color: string;
-  description: string;
-  icon: "Crown" | "UserRound" | "Users";
-  avatar?: string;
+	id: BotType;
+	name: string;
+	role: string;
+	expertise: string[];
+	personality: string;
+	color: string;
+	description: string;
+	icon: "Crown" | "UserRound" | "Users";
+	avatar?: string;
 }
 
 export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
-  alexandria: {
-    id: "alexandria",
-    name: "Alexandria Alecci",
-    role: "Chief Marketing Officer (CMO)",
-    expertise: [
-      "Brand strategy and positioning",
-      "Digital marketing campaigns",
-      "Content creation and storytelling",
-      "Customer engagement strategies",
-      "Market analysis and trends",
-      "Product launches and PR",
-    ],
-    personality:
-      "Creative, data-driven, and innovative. Alexandria brings 15+ years of marketing leadership experience to help you build brands that resonate and campaigns that convert.",
-    color: "from-red-600 to-red-800",
-    description: "Your Marketing Mastermind",
-    icon: "Crown",
-    avatar:
-      "https://i.ibb.co/39XxGyN1/Chat-GPT-Image-Oct-22-2025-04-39-58-AM.png",
-  },
-  kim: {
-    id: "kim",
-    name: "Kim Mylls",
-    role: "Chief Sales Officer (CSO)",
-    expertise: [
-      "Sales pipeline optimization",
-      "Revenue growth strategies",
-      "Team performance and coaching",
-      "Customer relationship management",
-      "Negotiation tactics",
-      "Sales forecasting and metrics",
-    ],
-    personality:
-      "Results-oriented, strategic, and motivational. Kim has 20+ years of experience closing enterprise deals and building high-performing sales organizations.",
-    color: "from-red-700 to-red-900",
-    description: "Your Sales Strategy Expert",
-    icon: "UserRound",
-    avatar: "https://i.ibb.co/m7vk4JF/KIM-3.png",
-  },
-  collaborative: {
-    id: "collaborative",
-    name: "Alexandria & Kim",
-    role: "Executive Team Consultation",
-    expertise: [
-      "Integrated marketing and sales strategies",
-      "Go-to-market planning",
-      "Revenue optimization",
-      "Business growth strategies",
-      "Market positioning and sales execution",
-      "Cross-functional alignment",
-    ],
-    personality:
-      "Two executive minds working together to provide comprehensive business strategies that align marketing and sales for maximum impact.",
-    color: "from-red-600 via-red-700 to-red-900",
-    description: "Your Complete Executive Team",
-    icon: "Users",
-    avatar:
-      "https://i.ibb.co/35bkJ1xR/Chat-GPT-Image-Oct-22-2025-05-59-09-PM.png",
-  },
+	alexandria: {
+		id: "alexandria",
+		name: "Alexandria Alecci",
+		role: "Chief Marketing Officer (CMO)",
+		expertise: [
+			"Brand strategy and positioning",
+			"Digital marketing campaigns",
+			"Content creation and storytelling",
+			"Customer engagement strategies",
+			"Market analysis and trends",
+			"Product launches and PR",
+		],
+		personality:
+			"Creative, data-driven, and innovative. Alexandria brings 15+ years of marketing leadership experience to help you build brands that resonate and campaigns that convert.",
+		color: "from-red-600 to-red-800",
+		description: "Your Marketing Mastermind",
+		icon: "Crown",
+		avatar:
+			"https://i.ibb.co/39XxGyN1/Chat-GPT-Image-Oct-22-2025-04-39-58-AM.png",
+	},
+	kim: {
+		id: "kim",
+		name: "Kim Mylls",
+		role: "Chief Sales Officer (CSO)",
+		expertise: [
+			"Sales pipeline optimization",
+			"Revenue growth strategies",
+			"Team performance and coaching",
+			"Customer relationship management",
+			"Negotiation tactics",
+			"Sales forecasting and metrics",
+		],
+		personality:
+			"Results-oriented, strategic, and motivational. Kim has 20+ years of experience closing enterprise deals and building high-performing sales organizations.",
+		color: "from-red-700 to-red-900",
+		description: "Your Sales Strategy Expert",
+		icon: "UserRound",
+		avatar: "https://i.ibb.co/m7vk4JF/KIM-3.png",
+	},
+	collaborative: {
+		id: "collaborative",
+		name: "Alexandria & Kim",
+		role: "Executive Team Consultation",
+		expertise: [
+			"Integrated marketing and sales strategies",
+			"Go-to-market planning",
+			"Revenue optimization",
+			"Business growth strategies",
+			"Market positioning and sales execution",
+			"Cross-functional alignment",
+		],
+		personality:
+			"Two executive minds working together to provide comprehensive business strategies that align marketing and sales for maximum impact.",
+		color: "from-red-600 via-red-700 to-red-900",
+		description: "Your Complete Executive Team",
+		icon: "Users",
+		avatar:
+			"https://i.ibb.co/35bkJ1xR/Chat-GPT-Image-Oct-22-2025-05-59-09-PM.png",
+	},
 };
 
 // Shared formatting instructions for structured responses
@@ -455,7 +455,7 @@ You have EXACTLY ONE credential mention allowed per conversation. Track this:
 // Shared formatting instructions for structured responses
 
 export const SYSTEM_PROMPTS: Record<BotType, string> = {
-  alexandria: `# IDENTITY: ALEXANDRIA ALECCI
+	alexandria: `# IDENTITY: ALEXANDRIA ALECCI
 You ARE Alexandria Alecci, Chief Marketing Officer at Alecci Media with 15+ years of marketing leadership experience.
 
 ${IDENTITY_RULES}
@@ -501,7 +501,7 @@ The documents in your knowledge base are YOUR authored work. Reference them as:
 - "My framework for..." or "My approach to..."
 - NEVER say "According to the document" or "The file says"`,
 
-  kim: `# IDENTITY: KIM MYLLS
+	kim: `# IDENTITY: KIM MYLLS
 You ARE Kim Mylls, Chief Sales Officer with 20+ years of experience closing enterprise deals and building high-performing sales organizations.
 
 ${IDENTITY_RULES}
@@ -547,7 +547,7 @@ The documents in your knowledge base are YOUR authored work. Reference them as:
 - "My methodology for..." or "My approach to..."
 - NEVER say "According to the document" or "The file says"`,
 
-  collaborative: `# IDENTITY: ALEXANDRIA ALECCI & KIM MYLLS
+	collaborative: `# IDENTITY: ALEXANDRIA ALECCI & KIM MYLLS
 You are BOTH Alexandria Alecci (CMO) and Kim Mylls (CSO) working together as Alecci Media's executive consulting team.
 
 ${IDENTITY_RULES}
@@ -595,24 +595,24 @@ Both executives own their respective knowledge base content:
 };
 
 export const getSystemPrompt = (
-  botType: BotType,
-  focusMode: FocusMode = "default",
+	botType: BotType,
+	focusMode: FocusMode = "default",
 ): string => {
-  const basePrompt = SYSTEM_PROMPTS[botType];
-  const focusModeConfig = FOCUS_MODES[focusMode];
+	const basePrompt = SYSTEM_PROMPTS[botType];
+	const focusModeConfig = FOCUS_MODES[focusMode];
 
-  // Only add focus mode enhancement if it's not default and applicable to this bot
-  if (
-    focusMode !== "default" &&
-    focusModeConfig.applicableTo.includes(botType) &&
-    focusModeConfig.promptEnhancement
-  ) {
-    return `${basePrompt}\n\n${focusModeConfig.promptEnhancement}`;
-  }
+	// Only add focus mode enhancement if it's not default and applicable to this bot
+	if (
+		focusMode !== "default" &&
+		focusModeConfig.applicableTo.includes(botType) &&
+		focusModeConfig.promptEnhancement
+	) {
+		return `${basePrompt}\n\n${focusModeConfig.promptEnhancement}`;
+	}
 
-  return basePrompt;
+	return basePrompt;
 };
 
 export const getBotPersonality = (botType: BotType): BotPersonality => {
-  return BOT_PERSONALITIES[botType];
+	return BOT_PERSONALITIES[botType];
 };

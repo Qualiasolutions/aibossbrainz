@@ -6,7 +6,7 @@ import { LandingPageClient } from "./landing-page-client";
 export const revalidate = 300;
 
 export default async function LandingPage() {
-  const content = await getLandingPageContent();
+	const content = await getLandingPageContent();
 
-  return <LandingPageClient content={content} />;
+	return <LandingPageClient content={content} />;
 }

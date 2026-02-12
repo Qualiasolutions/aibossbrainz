@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 interface WindowSize {
-  width: number;
-  height: number;
+	width: number;
+	height: number;
 }
 
 /**
@@ -11,26 +11,26 @@ interface WindowSize {
  * then updates to actual values after hydration.
  */
 export function useWindowSize(): WindowSize {
-  // Initialize with 0 for consistent SSR
-  const [windowSize, setWindowSize] = useState<WindowSize>({
-    width: 0,
-    height: 0,
-  });
+	// Initialize with 0 for consistent SSR
+	const [windowSize, setWindowSize] = useState<WindowSize>({
+		width: 0,
+		height: 0,
+	});
 
-  useEffect(() => {
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
+	useEffect(() => {
+		function handleResize() {
+			setWindowSize({
+				width: window.innerWidth,
+				height: window.innerHeight,
+			});
+		}
 
-    // Set actual values on mount
-    handleResize();
+		// Set actual values on mount
+		handleResize();
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
 
-  return windowSize;
+	return windowSize;
 }

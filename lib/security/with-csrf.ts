@@ -4,8 +4,8 @@ import { validateCsrfRequest } from "@/lib/security/csrf";
 type RouteHandlerNoContext = (request: Request) => Promise<Response>;
 
 type RouteHandlerWithContext<TContext> = (
-  request: Request,
-  context: TContext,
+	request: Request,
+	context: TContext,
 ) => Promise<Response>;
 
 /**
@@ -19,22 +19,22 @@ type RouteHandlerWithContext<TContext> = (
  * });
  */
 export function withCsrf<TContext>(
-  handler: RouteHandlerWithContext<TContext>,
+	handler: RouteHandlerWithContext<TContext>,
 ): RouteHandlerWithContext<TContext>;
 export function withCsrf(handler: RouteHandlerNoContext): RouteHandlerNoContext;
 export function withCsrf(
-  handler: RouteHandlerNoContext | RouteHandlerWithContext<unknown>,
+	handler: RouteHandlerNoContext | RouteHandlerWithContext<unknown>,
 ): RouteHandlerNoContext | RouteHandlerWithContext<unknown> {
-  return async (request: Request, context?: unknown): Promise<Response> => {
-    const csrf = await validateCsrfRequest(request);
+	return async (request: Request, context?: unknown): Promise<Response> => {
+		const csrf = await validateCsrfRequest(request);
 
-    if (!csrf.valid) {
-      return new ChatSDKError("forbidden:api", csrf.error).toResponse();
-    }
+		if (!csrf.valid) {
+			return new ChatSDKError("forbidden:api", csrf.error).toResponse();
+		}
 
-    if (context !== undefined) {
-      return (handler as RouteHandlerWithContext<unknown>)(request, context);
-    }
-    return (handler as RouteHandlerNoContext)(request);
-  };
+		if (context !== undefined) {
+			return (handler as RouteHandlerWithContext<unknown>)(request, context);
+		}
+		return (handler as RouteHandlerNoContext)(request);
+	};
 }

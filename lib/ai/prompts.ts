@@ -3,8 +3,8 @@ import type { ArtifactKind } from "@/components/artifact";
 import type { BotType, FocusMode } from "@/lib/bot-personalities";
 import { getSystemPrompt } from "@/lib/bot-personalities";
 import {
-  buildPersonalizationContext,
-  formatPersonalizationPrompt,
+	buildPersonalizationContext,
+	formatPersonalizationPrompt,
 } from "./personalization";
 
 /**
@@ -12,25 +12,25 @@ import {
  * Prevents prompt injection attacks by escaping delimiter patterns.
  */
 function sanitizePromptContent(content: string): string {
-  if (!content) return "";
+	if (!content) return "";
 
-  // Escape patterns that could be used for prompt injection
-  return (
-    content
-      // Escape markdown-like delimiters that could confuse the model
-      .replace(/---+/g, "—") // Convert delimiter patterns to em-dash
-      .replace(/===+/g, "≡") // Convert equals delimiters
-      .replace(/\*\*\*/g, "***") // Keep but escape triple asterisks
-      // Remove potential instruction overrides
-      .replace(/\[INST\]/gi, "[inst]")
-      .replace(/\[\/INST\]/gi, "[/inst]")
-      .replace(/<\|.*?\|>/g, "") // Remove special tokens
-      .replace(/<<SYS>>|<<\/SYS>>/gi, "") // Remove system markers
-      // Limit consecutive newlines to prevent layout attacks
-      .replace(/\n{4,}/g, "\n\n\n")
-      // Truncate extremely long content
-      .slice(0, 50000)
-  );
+	// Escape patterns that could be used for prompt injection
+	return (
+		content
+			// Escape markdown-like delimiters that could confuse the model
+			.replace(/---+/g, "—") // Convert delimiter patterns to em-dash
+			.replace(/===+/g, "≡") // Convert equals delimiters
+			.replace(/\*\*\*/g, "***") // Keep but escape triple asterisks
+			// Remove potential instruction overrides
+			.replace(/\[INST\]/gi, "[inst]")
+			.replace(/\[\/INST\]/gi, "[/inst]")
+			.replace(/<\|.*?\|>/g, "") // Remove special tokens
+			.replace(/<<SYS>>|<<\/SYS>>/gi, "") // Remove system markers
+			// Limit consecutive newlines to prevent layout attacks
+			.replace(/\n{4,}/g, "\n\n\n")
+			// Truncate extremely long content
+			.slice(0, 50000)
+	);
 }
 
 export const webSearchPrompt = `
@@ -64,7 +64,7 @@ Always output all content directly in the chat message. Use proper markdown form
 `;
 
 export const regularPrompt =
-  "You are a friendly assistant! Keep your responses concise and helpful.";
+	"You are a friendly assistant! Keep your responses concise and helpful.";
 
 export const suggestionsPrompt = `
 ## FOLLOW-UP SUGGESTIONS
@@ -91,10 +91,10 @@ Format your suggestions as a JSON block at the END of your response:
 `;
 
 export type RequestHints = {
-  latitude: Geo["latitude"];
-  longitude: Geo["longitude"];
-  city: Geo["city"];
-  country: Geo["country"];
+	latitude: Geo["latitude"];
+	longitude: Geo["longitude"];
+	city: Geo["city"];
+	country: Geo["country"];
 };
 
 export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
@@ -110,77 +110,77 @@ About the origin of user's request:
  * Used to dramatically reduce system prompt size and model verbosity for trivial messages.
  */
 function isSimpleMessage(text: string, messageCount: number): boolean {
-  const trimmed = text.trim().toLowerCase();
-  // First message under 30 chars is almost certainly a greeting
-  if (messageCount <= 1 && trimmed.length < 30) return true;
-  // Explicit greeting patterns
-  const greetingPatterns =
-    /^(hi|hey|hello|hiu|yo|sup|hola|howdy|morning|evening|afternoon|what'?s? up|whats up|hiya|heya|greetings|good (morning|afternoon|evening))[\s!?.]*$/i;
-  return greetingPatterns.test(trimmed);
+	const trimmed = text.trim().toLowerCase();
+	// First message under 30 chars is almost certainly a greeting
+	if (messageCount <= 1 && trimmed.length < 30) return true;
+	// Explicit greeting patterns
+	const greetingPatterns =
+		/^(hi|hey|hello|hiu|yo|sup|hola|howdy|morning|evening|afternoon|what'?s? up|whats up|hiya|heya|greetings|good (morning|afternoon|evening))[\s!?.]*$/i;
+	return greetingPatterns.test(trimmed);
 }
 
 export const systemPrompt = async ({
-  selectedChatModel,
-  requestHints,
-  botType = "collaborative",
-  focusMode = "default",
-  knowledgeBaseContent = "",
-  canvasContext = "",
-  userId,
-  messageText = "",
-  messageCount = 0,
+	selectedChatModel,
+	requestHints,
+	botType = "collaborative",
+	focusMode = "default",
+	knowledgeBaseContent = "",
+	canvasContext = "",
+	userId,
+	messageText = "",
+	messageCount = 0,
 }: {
-  selectedChatModel: string;
-  requestHints: RequestHints;
-  botType?: BotType;
-  focusMode?: FocusMode;
-  knowledgeBaseContent?: string;
-  canvasContext?: string;
-  userId?: string;
-  /** Current message text - used for lightweight context detection */
-  messageText?: string;
-  /** Total messages in conversation - used for lightweight context detection */
-  messageCount?: number;
+	selectedChatModel: string;
+	requestHints: RequestHints;
+	botType?: BotType;
+	focusMode?: FocusMode;
+	knowledgeBaseContent?: string;
+	canvasContext?: string;
+	userId?: string;
+	/** Current message text - used for lightweight context detection */
+	messageText?: string;
+	/** Total messages in conversation - used for lightweight context detection */
+	messageCount?: number;
 }): Promise<string> => {
-  const simple = isSimpleMessage(messageText, messageCount);
-  const requestPrompt = getRequestPromptFromHints(requestHints);
-  let botSystemPrompt = getSystemPrompt(botType, focusMode);
+	const simple = isSimpleMessage(messageText, messageCount);
+	const requestPrompt = getRequestPromptFromHints(requestHints);
+	let botSystemPrompt = getSystemPrompt(botType, focusMode);
 
-  // Add smart context detection for collaborative mode
-  if (botType === "collaborative") {
-    botSystemPrompt += `\n\nSMART CONTEXT DETECTION: If the user specifically addresses one executive (e.g., "Kim, what do you think?" or "@alexandria your take?" or "Alexandria alone"), respond ONLY as that executive. Look for natural cues like names, "you" directed at one person, or explicit requests. When responding as one executive, start with their name and don't include the other's perspective.`;
-  }
+	// Add smart context detection for collaborative mode
+	if (botType === "collaborative") {
+		botSystemPrompt += `\n\nSMART CONTEXT DETECTION: If the user specifically addresses one executive (e.g., "Kim, what do you think?" or "@alexandria your take?" or "Alexandria alone"), respond ONLY as that executive. Look for natural cues like names, "you" directed at one person, or explicit requests. When responding as one executive, start with their name and don't include the other's perspective.`;
+	}
 
-  // PERFORMANCE: For simple greetings, add explicit brevity instruction and skip all heavy context
-  if (simple) {
-    botSystemPrompt += `\n\n## BREVITY MODE (ACTIVE)\nThe user sent a simple greeting. Respond in 1-2 SHORT sentences max. Be warm but extremely concise. Do NOT give a full executive briefing, do NOT list your capabilities, do NOT structure with headers. Just a friendly, brief hello and ask what they need help with.`;
-    // Skip knowledge base, personalization, artifacts, web search, suggestions for greetings
-    return `${botSystemPrompt}\n\n${requestPrompt}`;
-  }
+	// PERFORMANCE: For simple greetings, add explicit brevity instruction and skip all heavy context
+	if (simple) {
+		botSystemPrompt += `\n\n## BREVITY MODE (ACTIVE)\nThe user sent a simple greeting. Respond in 1-2 SHORT sentences max. Be warm but extremely concise. Do NOT give a full executive briefing, do NOT list your capabilities, do NOT structure with headers. Just a friendly, brief hello and ask what they need help with.`;
+		// Skip knowledge base, personalization, artifacts, web search, suggestions for greetings
+		return `${botSystemPrompt}\n\n${requestPrompt}`;
+	}
 
-  // PERFORMANCE: Skip expensive personalization for short messages (< 100 chars, first 2 messages)
-  const shouldLoadPersonalization =
-    userId && (messageText.length > 100 || messageCount > 2);
+	// PERFORMANCE: Skip expensive personalization for short messages (< 100 chars, first 2 messages)
+	const shouldLoadPersonalization =
+		userId && (messageText.length > 100 || messageCount > 2);
 
-  if (shouldLoadPersonalization) {
-    try {
-      const personalizationContext = await buildPersonalizationContext(userId);
-      const personalizationPrompt = formatPersonalizationPrompt(
-        personalizationContext,
-      );
-      if (personalizationPrompt) {
-        botSystemPrompt += personalizationPrompt;
-      }
-    } catch (error) {
-      console.warn("[Prompts] Failed to load personalization:", error);
-    }
-  }
+	if (shouldLoadPersonalization) {
+		try {
+			const personalizationContext = await buildPersonalizationContext(userId);
+			const personalizationPrompt = formatPersonalizationPrompt(
+				personalizationContext,
+			);
+			if (personalizationPrompt) {
+				botSystemPrompt += personalizationPrompt;
+			}
+		} catch (error) {
+			console.warn("[Prompts] Failed to load personalization:", error);
+		}
+	}
 
-  // Append knowledge base content with first-person ownership framing
-  // SECURITY: Sanitize to prevent prompt injection attacks
-  if (knowledgeBaseContent) {
-    const sanitizedKB = sanitizePromptContent(knowledgeBaseContent);
-    botSystemPrompt += `
+	// Append knowledge base content with first-person ownership framing
+	// SECURITY: Sanitize to prevent prompt injection attacks
+	if (knowledgeBaseContent) {
+		const sanitizedKB = sanitizePromptContent(knowledgeBaseContent);
+		botSystemPrompt += `
 
 ## YOUR AUTHORED CONTENT
 The following is content YOU have personally written and published throughout your career. This is YOUR work, YOUR research, YOUR frameworks.
@@ -198,13 +198,13 @@ The following is content YOU have personally written and published throughout yo
 <authored_content>
 ${sanitizedKB}
 </authored_content>`;
-  }
+	}
 
-  // Append strategy canvas context if available
-  // SECURITY: Sanitize to prevent prompt injection attacks
-  if (canvasContext) {
-    const sanitizedCanvas = sanitizePromptContent(canvasContext);
-    botSystemPrompt += `
+	// Append strategy canvas context if available
+	// SECURITY: Sanitize to prevent prompt injection attacks
+	if (canvasContext) {
+		const sanitizedCanvas = sanitizePromptContent(canvasContext);
+		botSystemPrompt += `
 
 ## CLIENT'S STRATEGY CANVAS
 The client is actively developing strategic frameworks using the Strategy Canvas tool. Below is their current work-in-progress. Reference this context when relevant to provide more targeted advice.
@@ -220,13 +220,13 @@ The client is actively developing strategic frameworks using the Strategy Canvas
 <canvas_data>
 ${sanitizedCanvas}
 </canvas_data>`;
-  }
+	}
 
-  if (selectedChatModel === "chat-model-reasoning") {
-    return `${botSystemPrompt}\n\n${requestPrompt}\n\n${webSearchPrompt}\n\n${suggestionsPrompt}`;
-  }
+	if (selectedChatModel === "chat-model-reasoning") {
+		return `${botSystemPrompt}\n\n${requestPrompt}\n\n${webSearchPrompt}\n\n${suggestionsPrompt}`;
+	}
 
-  return `${botSystemPrompt}\n\n${requestPrompt}\n\n${webSearchPrompt}\n\n${artifactsPrompt}\n\n${suggestionsPrompt}`;
+	return `${botSystemPrompt}\n\n${requestPrompt}\n\n${webSearchPrompt}\n\n${artifactsPrompt}\n\n${suggestionsPrompt}`;
 };
 
 export const codePrompt = `
@@ -260,18 +260,18 @@ You are a spreadsheet creation assistant. Create a spreadsheet in csv format bas
 `;
 
 export const updateDocumentPrompt = (
-  currentContent: string | null,
-  type: ArtifactKind,
+	currentContent: string | null,
+	type: ArtifactKind,
 ) => {
-  let mediaType = "document";
+	let mediaType = "document";
 
-  if (type === "code") {
-    mediaType = "code snippet";
-  } else if (type === "sheet") {
-    mediaType = "spreadsheet";
-  }
+	if (type === "code") {
+		mediaType = "code snippet";
+	} else if (type === "sheet") {
+		mediaType = "spreadsheet";
+	}
 
-  return `Improve the following contents of the ${mediaType} based on the given prompt.
+	return `Improve the following contents of the ${mediaType} based on the given prompt.
 
 ${currentContent}`;
 };

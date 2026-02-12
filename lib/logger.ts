@@ -8,35 +8,35 @@ const isDevelopment = process.env.NODE_ENV === "development";
  * - Pretty format in development for readability
  */
 export const logger = pino({
-  level: process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info"),
-  ...(isDevelopment
-    ? {
-        transport: {
-          target: "pino-pretty",
-          options: {
-            colorize: true,
-            translateTime: "HH:MM:ss",
-            ignore: "pid,hostname",
-          },
-        },
-      }
-    : {
-        // Production: JSON format for log aggregation
-        formatters: {
-          level: (label) => ({ level: label }),
-        },
-        timestamp: pino.stdTimeFunctions.isoTime,
-      }),
+	level: process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info"),
+	...(isDevelopment
+		? {
+				transport: {
+					target: "pino-pretty",
+					options: {
+						colorize: true,
+						translateTime: "HH:MM:ss",
+						ignore: "pid,hostname",
+					},
+				},
+			}
+		: {
+				// Production: JSON format for log aggregation
+				formatters: {
+					level: (label) => ({ level: label }),
+				},
+				timestamp: pino.stdTimeFunctions.isoTime,
+			}),
 });
 
 /**
  * Create a child logger with request context
  */
 export function createRequestLogger(requestId: string, userId?: string) {
-  return logger.child({
-    requestId,
-    ...(userId && { userId }),
-  });
+	return logger.child({
+		requestId,
+		...(userId && { userId }),
+	});
 }
 
 /**

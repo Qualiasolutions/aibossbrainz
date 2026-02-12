@@ -4,7 +4,7 @@ import { AboutPageClient } from "./about-client";
 export const revalidate = 300;
 
 export default async function AboutPage() {
-  const content = await getLandingPageContent();
+	const content = await getLandingPageContent();
 
-  return <AboutPageClient content={content} />;
+	return <AboutPageClient content={content} />;
 }

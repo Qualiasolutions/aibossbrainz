@@ -1,35 +1,70 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/next"],
-  "overrides": [
-    {
-      "includes": ["components/ui/**/*", "lib/utils.ts", "hooks/use-mobile.ts"],
-      "linter": { "enabled": false },
-      "formatter": { "enabled": false }
-    }
-  ],
-  "linter": {
-    "rules": {
-      "suspicious": {
-        "noExplicitAny": "off",
-        "noUnknownAtRules": "off",
-        "noConsole": "off",
-        "noBitwiseOperators": "off"
-      },
-      "style": {
-        "noMagicNumbers": "off",
-        "noNestedTernary": "off"
-      },
-      "nursery": {
-        "noUnnecessaryConditions": "off"
-      },
-      "complexity": {
-        "noExcessiveCognitiveComplexity": "off",
-        "useSimplifiedLogicExpression": "off"
-      },
-      "a11y": {
-        "noSvgWithoutTitle": "off"
-      }
-    }
-  }
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"extends": ["ultracite/next"],
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"includes": [
+			"**",
+			"!**/node_modules",
+			"!**/.next",
+			"!**/.vercel",
+			"!**/artifacts",
+			"!**/public",
+			"!**/*.min.js",
+			"!**/*.d.ts",
+			"!**/_bmad",
+			"!**/.bmad-core",
+			"!**/.beads",
+			"!**/knowledge-base",
+			"!pdf_parse_index.cjs",
+			"!app/globals.css"
+		]
+	},
+	"overrides": [
+		{
+			"includes": ["components/ui/**/*", "lib/utils.ts", "hooks/use-mobile.ts"],
+			"linter": { "enabled": false },
+			"formatter": { "enabled": false }
+		}
+	],
+	"linter": {
+		"rules": {
+			"suspicious": {
+				"noExplicitAny": "off",
+				"noUnknownAtRules": "off",
+				"noConsole": "off",
+				"noBitwiseOperators": "off"
+			},
+			"style": {
+				"noMagicNumbers": "off",
+				"noNestedTernary": "off",
+				"noNonNullAssertion": "off"
+			},
+			"nursery": {
+				"noUnnecessaryConditions": "off"
+			},
+			"complexity": {
+				"noExcessiveCognitiveComplexity": "off",
+				"useSimplifiedLogicExpression": "off"
+			},
+			"a11y": {
+				"noSvgWithoutTitle": "off"
+			}
+		}
+	},
+	"css": {
+		"parser": {
+			"cssModules": true
+		},
+		"formatter": {
+			"enabled": false
+		},
+		"linter": {
+			"enabled": false
+		}
+	}
 }
