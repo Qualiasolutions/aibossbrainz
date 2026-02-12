@@ -51,8 +51,6 @@ export async function sendAdminNotification({
 	});
 
 	if (!result.success) {
-		console.error(
-			`[Email] Failed to send admin notification: ${result.error}`,
-		);
+		console.error(`[Email] Failed to send admin notification: ${result.error}`);
 	}
 }
