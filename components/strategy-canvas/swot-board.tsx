@@ -1,5 +1,6 @@
 "use client";
 
+import DOMPurify from "dompurify";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Check,
@@ -145,7 +146,7 @@ export function SwotBoard({ compact = false }: SwotBoardProps) {
           <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1a1a1a;">${quadrant.label}</h3>
           <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">${quadrant.subtitle}</p>
           <ul style="margin: 0; padding-left: 20px;">
-            ${notes.map((note) => `<li style="margin-bottom: 4px; color: #1a1a1a;">${note.content || "(empty)"}</li>`).join("")}
+            ${notes.map((note) => `<li style="margin-bottom: 4px; color: #1a1a1a;">${DOMPurify.sanitize(note.content || "(empty)")}</li>`).join("")}
           </ul>
         </div>
       `;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { apiRequestLogger } from "@/lib/api-logging";
 import {
   createAuditLog,
   ensureUserExists,
@@ -165,6 +166,8 @@ export async function GET() {
 
 // POST - Create Stripe portal session or cancel subscription
 export const POST = withCsrf(async (request: Request) => {
+  const apiLog = apiRequestLogger("/api/subscription");
+
   try {
     const supabase = await createClient();
     const {
@@ -174,6 +177,8 @@ export const POST = withCsrf(async (request: Request) => {
     if (!user || !user.email) {
       return new ChatSDKError("unauthorized:chat").toResponse();
     }
+
+    apiLog.start({ userId: user.id });
 
     await ensureUserExists({ id: user.id, email: user.email });
 
@@ -194,6 +199,7 @@ export const POST = withCsrf(async (request: Request) => {
         userId: user.id,
         returnUrl: `${appUrl}/account`,
       });
+      apiLog.success({ action: "portal" });
       return Response.json({ url });
     }
 
@@ -226,6 +232,7 @@ export const POST = withCsrf(async (request: Request) => {
         subscriptionEndDate: profile?.subscriptionEndDate ?? null,
       });
 
+      apiLog.success({ action: "cancel" });
       return Response.json({ success: true });
     }
 
@@ -235,7 +242,7 @@ export const POST = withCsrf(async (request: Request) => {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
-    console.error("[Subscription API] POST error:", error);
+    apiLog.error(error);
     return new ChatSDKError("bad_request:database").toResponse();
   }
 });

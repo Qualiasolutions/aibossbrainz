@@ -1,8 +1,11 @@
+import { apiRequestLogger } from "@/lib/api-logging";
 import { createAuditLog } from "@/lib/db/queries";
 import { withCsrf } from "@/lib/security/with-csrf";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 export const POST = withCsrf(async () => {
+  const apiLog = apiRequestLogger("/api/delete-account");
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -11,6 +14,8 @@ export const POST = withCsrf(async () => {
   if (!user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
+
+  apiLog.start({ userId: user.id });
 
   try {
     const deletedAt = new Date().toISOString();
@@ -112,15 +117,25 @@ export const POST = withCsrf(async () => {
       details: { email: user.email, deletedAt },
     });
 
-    // 9. Sign out the user
+    // 9. Delete the user from Supabase Auth so they can't log back in
+    const serviceClient = createServiceClient();
+    const { error: authDeleteError } =
+      await serviceClient.auth.admin.deleteUser(userId);
+    if (authDeleteError) {
+      apiLog.warn(`Failed to delete auth user: ${authDeleteError.message}`);
+    }
+
+    // 10. Sign out the user
     await supabase.auth.signOut();
+
+    apiLog.success({ chatsDeleted: userChats?.length ?? 0 });
 
     return Response.json({
       success: true,
       message: "Account deleted successfully",
     });
   } catch (error) {
-    console.error("Failed to delete account:", error);
+    apiLog.error(error);
     return new Response("Failed to delete account", { status: 500 });
   }
 });

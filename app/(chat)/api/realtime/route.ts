@@ -3,6 +3,7 @@ import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import { systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { getVoiceForBot } from "@/lib/ai/voice-config";
+import { apiRequestLogger } from "@/lib/api-logging";
 import { ChatSDKError } from "@/lib/errors";
 import {
   CircuitBreakerError,
@@ -15,6 +16,8 @@ import { createClient } from "@/lib/supabase/server";
 export const maxDuration = 30;
 
 export const POST = withCsrf(async (request: Request) => {
+  const apiLog = apiRequestLogger("/api/realtime");
+
   try {
     const supabase = await createClient();
     const {
@@ -24,6 +27,8 @@ export const POST = withCsrf(async (request: Request) => {
     if (!user) {
       return new ChatSDKError("unauthorized:chat").toResponse();
     }
+
+    apiLog.start({ userId: user.id });
 
     const { message, botType = "collaborative" } = await request.json();
 
@@ -88,32 +93,42 @@ export const POST = withCsrf(async (request: Request) => {
         if (cleanText) {
           // Use resilience wrapper for ElevenLabs TTS (circuit breaker + retry)
           const audioData = await withElevenLabsResilience(async () => {
-            const ttsResponse = await fetch(
-              `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "xi-api-key": elevenLabsApiKey,
-                },
-                body: JSON.stringify({
-                  text: cleanText,
-                  model_id: "eleven_flash_v2_5",
-                  voice_settings: {
-                    stability: 0.5,
-                    similarity_boost: 0.75,
-                    style: 0.0,
-                    use_speaker_boost: true,
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+            try {
+              const ttsResponse = await fetch(
+                `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "xi-api-key": elevenLabsApiKey,
                   },
-                }),
-              },
-            );
+                  body: JSON.stringify({
+                    text: cleanText,
+                    model_id: "eleven_flash_v2_5",
+                    voice_settings: {
+                      stability: 0.5,
+                      similarity_boost: 0.75,
+                      style: 0.0,
+                      use_speaker_boost: true,
+                    },
+                  }),
+                  signal: controller.signal,
+                },
+              );
+              clearTimeout(timeoutId);
 
-            if (!ttsResponse.ok) {
-              throw new Error(`ElevenLabs API error: ${ttsResponse.status}`);
+              if (!ttsResponse.ok) {
+                throw new Error(`ElevenLabs API error: ${ttsResponse.status}`);
+              }
+
+              return ttsResponse.arrayBuffer();
+            } catch (err) {
+              clearTimeout(timeoutId);
+              throw err;
             }
-
-            return ttsResponse.arrayBuffer();
           });
 
           const base64Audio = Buffer.from(audioData).toString("base64");
@@ -125,12 +140,14 @@ export const POST = withCsrf(async (request: Request) => {
       }
     }
 
+    apiLog.success({ botType, hasAudio: !!audioUrl });
+
     return Response.json({
       text: responseText,
       audioUrl,
     });
   } catch (error) {
-    console.error("Realtime API error:", error);
+    apiLog.error(error);
 
     if (error instanceof CircuitBreakerError) {
       return new ChatSDKError("offline:chat").toResponse();

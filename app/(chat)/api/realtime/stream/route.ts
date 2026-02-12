@@ -2,6 +2,7 @@ import { generateText } from "ai";
 import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import { systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
+import { apiRequestLogger } from "@/lib/api-logging";
 import {
   getVoiceConfig,
   MAX_TTS_TEXT_LENGTH,
@@ -38,43 +39,55 @@ async function generateAudioForSegment(
   apiKey: string,
 ): Promise<ArrayBuffer> {
   const response = await withElevenLabsResilience(async () => {
-    const res = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}`,
-      {
-        method: "POST",
-        headers: {
-          "xi-api-key": apiKey,
-          "Content-Type": "application/json",
-          Accept: "audio/mpeg",
-        },
-        body: JSON.stringify({
-          text,
-          model_id: voiceConfig.modelId,
-          voice_settings: {
-            stability: voiceConfig.settings.stability,
-            similarity_boost: voiceConfig.settings.similarityBoost,
-            style: voiceConfig.settings.style ?? 0,
-            use_speaker_boost: voiceConfig.settings.useSpeakerBoost ?? true,
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+    try {
+      const res = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}`,
+        {
+          method: "POST",
+          headers: {
+            "xi-api-key": apiKey,
+            "Content-Type": "application/json",
+            Accept: "audio/mpeg",
           },
-        }),
-      },
-    );
+          body: JSON.stringify({
+            text,
+            model_id: voiceConfig.modelId,
+            voice_settings: {
+              stability: voiceConfig.settings.stability,
+              similarity_boost: voiceConfig.settings.similarityBoost,
+              style: voiceConfig.settings.style ?? 0,
+              use_speaker_boost: voiceConfig.settings.useSpeakerBoost ?? true,
+            },
+          }),
+          signal: controller.signal,
+        },
+      );
+      clearTimeout(timeoutId);
 
-    if (!res.ok) {
-      console.error("ElevenLabs API error:", res.status, res.statusText);
-      if (res.status === 401) {
-        throw new Error("INVALID_API_KEY");
+      if (!res.ok) {
+        console.error("ElevenLabs API error:", res.status, res.statusText);
+        if (res.status === 401) {
+          throw new Error("INVALID_API_KEY");
+        }
+        throw new Error(`ElevenLabs API error: ${res.status}`);
       }
-      throw new Error(`ElevenLabs API error: ${res.status}`);
-    }
 
-    return res;
+      return res;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
   });
 
   return response.arrayBuffer();
 }
 
 export const POST = withCsrf(async (request: Request) => {
+  const apiLog = apiRequestLogger("/api/realtime/stream");
+
   try {
     const supabase = await createClient();
     const {
@@ -84,6 +97,8 @@ export const POST = withCsrf(async (request: Request) => {
     if (!user) {
       return new ChatSDKError("unauthorized:chat").toResponse();
     }
+
+    apiLog.start({ userId: user.id });
 
     // Rate limiting
     const rateLimitResult = await checkRateLimit(
@@ -292,13 +307,15 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
       console.error("Failed to save voice call messages:", saveError);
     }
 
+    apiLog.success({ botType, hasAudio: !!audioUrl, chatId: savedChatId });
+
     return Response.json({
       text: responseText,
       audioUrl,
       chatId: savedChatId, // Return chatId so frontend can redirect
     });
   } catch (error) {
-    console.error("Realtime stream API error:", error);
+    apiLog.error(error);
 
     if (error instanceof CircuitBreakerError) {
       return new ChatSDKError("offline:chat").toResponse();
