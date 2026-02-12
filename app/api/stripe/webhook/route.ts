@@ -123,6 +123,12 @@ export async function POST(request: Request) {
 					session.metadata?.subscriptionType,
 				);
 
+				if (userId && !subscriptionType && session.metadata?.subscriptionType) {
+					console.error(
+						`[SECURITY] Invalid subscriptionType in checkout metadata: "${session.metadata.subscriptionType}" for user ${userId}`,
+					);
+				}
+
 				if (userId && subscriptionType && session.subscription) {
 					const subscriptionId =
 						typeof session.subscription === "string"

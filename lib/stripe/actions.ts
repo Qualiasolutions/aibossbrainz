@@ -65,8 +65,8 @@ export async function createCheckoutSession({
 	const validateUrl = (url: string, name: string): void => {
 		try {
 			const parsed = new URL(url);
-			if (!parsed.protocol.startsWith("http")) {
-				throw new Error(`${name} must use http(s) protocol`);
+			if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+				throw new Error(`${name} must use HTTP or HTTPS`);
 			}
 		} catch (_error) {
 			console.error(`[createCheckoutSession] Invalid ${name}: "${url}"`);
