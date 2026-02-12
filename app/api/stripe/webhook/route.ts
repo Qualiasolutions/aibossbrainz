@@ -20,40 +20,32 @@ type ValidSubscriptionType = (typeof VALID_SUBSCRIPTION_TYPES)[number];
 
 /**
  * Apply Mailchimp tags for a subscription event.
- * Runs inline (not in after()) to ensure it completes before the function exits.
+ * Designed to run in after() so it doesn't block the webhook response.
  */
 async function applyMailchimpTags(
-	userId: string,
+	email: string,
 	type: "trial" | "paid",
 	subscriptionType?: ValidSubscriptionType,
 ): Promise<void> {
 	try {
-		const profile = await getUserFullProfile({ userId });
-		if (!profile?.email) {
-			console.warn(
-				`[Stripe Webhook] No email found for user ${userId}, skipping Mailchimp tagging`,
-			);
-			return;
-		}
-
 		if (type === "trial") {
-			const result = await applyTrialTag(profile.email);
+			const result = await applyTrialTag(email);
 			if (!result.success) {
 				console.error(
-					`[Stripe Webhook] Mailchimp trial tagging failed for ${profile.email}: ${result.error}`,
+					`[Stripe Webhook] Mailchimp trial tagging failed for ${email}: ${result.error}`,
 				);
 			}
 		} else if (type === "paid" && subscriptionType) {
-			const result = await applyPaidTag(profile.email, subscriptionType);
+			const result = await applyPaidTag(email, subscriptionType);
 			if (!result.success) {
 				console.error(
-					`[Stripe Webhook] Mailchimp paid tagging failed for ${profile.email}: ${result.error}`,
+					`[Stripe Webhook] Mailchimp paid tagging failed for ${email}: ${result.error}`,
 				);
 			}
 		}
 	} catch (error) {
 		console.error(
-			`[Stripe Webhook] Mailchimp tagging error for user ${userId}:`,
+			`[Stripe Webhook] Mailchimp tagging error for ${email}:`,
 			error,
 		);
 	}
@@ -173,24 +165,23 @@ export async function POST(request: Request) {
 									`[Stripe Webhook] checkout.session.completed: started trial for user ${userId}`,
 								);
 
-								// Apply Mailchimp trial tag + send email
-								await applyMailchimpTags(userId, "trial");
+								// Apply Mailchimp trial tag + send email (non-blocking)
 								after(async () => {
 									try {
 										const profile = await getUserFullProfile({ userId });
-										if (profile?.email) {
-											const planDetails = PLAN_DETAILS[subscriptionType];
-											await sendTrialStartedEmail({
-												email: profile.email,
-												displayName: profile.displayName,
-												trialEndDate,
-												planName: planDetails?.name || subscriptionType,
-											});
-										}
-									} catch (emailError) {
+										if (!profile?.email) return;
+										await applyMailchimpTags(profile.email, "trial");
+										const planDetails = PLAN_DETAILS[subscriptionType];
+										await sendTrialStartedEmail({
+											email: profile.email,
+											displayName: profile.displayName,
+											trialEndDate,
+											planName: planDetails?.name || subscriptionType,
+										});
+									} catch (err) {
 										console.error(
-											"[Stripe Webhook] Failed to send trial email:",
-											emailError,
+											"[Stripe Webhook] checkout trial after() error:",
+											err,
 										);
 									}
 								});
@@ -205,8 +196,24 @@ export async function POST(request: Request) {
 								`[Stripe Webhook] checkout.session.completed: activated subscription for user ${userId}`,
 							);
 
-							// Apply Mailchimp paid tag
-							await applyMailchimpTags(userId, "paid", subscriptionType);
+							// Apply Mailchimp paid tag (non-blocking)
+							after(async () => {
+								try {
+									const profile = await getUserFullProfile({ userId });
+									if (profile?.email) {
+										await applyMailchimpTags(
+											profile.email,
+											"paid",
+											subscriptionType,
+										);
+									}
+								} catch (err) {
+									console.error(
+										"[Stripe Webhook] checkout paid after() error:",
+										err,
+									);
+								}
+							});
 						}
 					} catch (retrieveError) {
 						console.error(
@@ -260,26 +267,23 @@ export async function POST(request: Request) {
 							`[Stripe Webhook] Started 14-day trial for ${subscriptionType} subscription for user ${userId}`,
 						);
 
-						// Apply Mailchimp trial tag inline (must complete before function exits)
-						await applyMailchimpTags(userId, "trial");
-
-						// Send trial started email (non-blocking, ok in after())
+						// Apply Mailchimp trial tag + send email (non-blocking)
 						after(async () => {
 							try {
 								const profile = await getUserFullProfile({ userId });
-								if (profile?.email) {
-									const planDetails = PLAN_DETAILS[subscriptionType];
-									await sendTrialStartedEmail({
-										email: profile.email,
-										displayName: profile.displayName,
-										trialEndDate,
-										planName: planDetails?.name || subscriptionType,
-									});
-								}
-							} catch (emailError) {
+								if (!profile?.email) return;
+								await applyMailchimpTags(profile.email, "trial");
+								const planDetails = PLAN_DETAILS[subscriptionType];
+								await sendTrialStartedEmail({
+									email: profile.email,
+									displayName: profile.displayName,
+									trialEndDate,
+									planName: planDetails?.name || subscriptionType,
+								});
+							} catch (err) {
 								console.error(
-									"[Stripe Webhook] Failed to send trial email:",
-									emailError,
+									"[Stripe Webhook] subscription.created trial after() error:",
+									err,
 								);
 							}
 						});
@@ -293,8 +297,24 @@ export async function POST(request: Request) {
 							`[Stripe Webhook] Activated ${subscriptionType} subscription for user ${userId}`,
 						);
 
-						// Apply Mailchimp paid tag inline
-						await applyMailchimpTags(userId, "paid", subscriptionType);
+						// Apply Mailchimp paid tag (non-blocking)
+						after(async () => {
+							try {
+								const profile = await getUserFullProfile({ userId });
+								if (profile?.email) {
+									await applyMailchimpTags(
+										profile.email,
+										"paid",
+										subscriptionType,
+									);
+								}
+							} catch (err) {
+								console.error(
+									"[Stripe Webhook] subscription.created paid after() error:",
+									err,
+								);
+							}
+						});
 					}
 				}
 				break;
@@ -339,8 +359,24 @@ export async function POST(request: Request) {
 								`[Stripe Webhook] Payment received, activated ${subscriptionType} subscription for user ${userId}`,
 							);
 
-							// Apply Mailchimp paid tag inline (must complete before function exits)
-							await applyMailchimpTags(userId, "paid", subscriptionType);
+							// Apply Mailchimp paid tag (non-blocking)
+							after(async () => {
+								try {
+									const profile = await getUserFullProfile({ userId });
+									if (profile?.email) {
+										await applyMailchimpTags(
+											profile.email,
+											"paid",
+											subscriptionType,
+										);
+									}
+								} catch (err) {
+									console.error(
+										"[Stripe Webhook] invoice.paid after() error:",
+										err,
+									);
+								}
+							});
 
 							// For annual and lifetime plans, cancel after first payment
 							if (
