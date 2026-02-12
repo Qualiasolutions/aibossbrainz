@@ -58,34 +58,35 @@ export default function AccountPage() {
 	const [yearsInBusiness, setYearsInBusiness] = useState("");
 	const [employeeCount, setEmployeeCount] = useState("");
 
-	useEffect(() => {
-		const loadData = async () => {
-			try {
-				const res = await fetch("/api/profile");
+	const loadData = async () => {
+		try {
+			const res = await fetch("/api/profile");
 
-				if (res.ok) {
-					const data = await res.json();
-					setProfile(data);
-					setDisplayName(data.displayName || "");
-					setCompanyName(data.companyName || "");
-					setIndustry(data.industry || "");
-					setBusinessGoals(data.businessGoals || "");
-					setProductsServices(data.productsServices || "");
-					setWebsiteUrl(data.websiteUrl || "");
-					setTargetMarket(data.targetMarket || "");
-					setCompetitors(data.competitors || "");
-					setAnnualRevenue(data.annualRevenue || "");
-					setYearsInBusiness(data.yearsInBusiness || "");
-					setEmployeeCount(data.employeeCount || "");
-				}
-			} catch (error) {
-				console.error("Failed to load account data:", error);
-				toast.error("Failed to load account data");
-			} finally {
-				setLoading(false);
+			if (res.ok) {
+				const data = await res.json();
+				setProfile(data);
+				setDisplayName(data.displayName || "");
+				setCompanyName(data.companyName || "");
+				setIndustry(data.industry || "");
+				setBusinessGoals(data.businessGoals || "");
+				setProductsServices(data.productsServices || "");
+				setWebsiteUrl(data.websiteUrl || "");
+				setTargetMarket(data.targetMarket || "");
+				setCompetitors(data.competitors || "");
+				setAnnualRevenue(data.annualRevenue || "");
+				setYearsInBusiness(data.yearsInBusiness || "");
+				setEmployeeCount(data.employeeCount || "");
 			}
-		};
+		} catch (error) {
+			console.error("Failed to load account data:", error);
+			toast.error("Failed to load account data");
+		} finally {
+			setLoading(false);
+		}
+	};
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: loadData only uses stable state setters, mount-only effect
+	useEffect(() => {
 		initCsrfToken().then(() => loadData());
 	}, []);
 

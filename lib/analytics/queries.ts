@@ -39,7 +39,9 @@ export async function getAnalyticsSummary(
 		// Use RPC to get chat and message counts in a single query
 		// Cast to avoid type errors - function exists in DB but not in generated types
 		const { data: summaryData } = (await (
-			supabase.rpc as (...args: unknown[]) => Promise<{ data: unknown }>
+			supabase.rpc as unknown as (
+				...args: unknown[]
+			) => Promise<{ data: unknown }>
 		)("get_user_analytics_summary", {
 			p_user_id: userId,
 			p_start_date: startDate.toISOString(),

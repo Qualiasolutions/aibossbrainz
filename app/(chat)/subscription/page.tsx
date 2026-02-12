@@ -145,22 +145,23 @@ export default function SubscriptionPage() {
 	const [portalLoading, setPortalLoading] = useState(false);
 	const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null);
 
-	useEffect(() => {
-		const loadData = async () => {
-			try {
-				const res = await fetch("/api/subscription");
-				if (res.ok) {
-					const data = await res.json();
-					setSubscription(data);
-				}
-			} catch (error) {
-				console.error("Failed to load subscription data:", error);
-				toast.error("Failed to load subscription data");
-			} finally {
-				setLoading(false);
+	const loadData = async () => {
+		try {
+			const res = await fetch("/api/subscription");
+			if (res.ok) {
+				const data = await res.json();
+				setSubscription(data);
 			}
-		};
+		} catch (error) {
+			console.error("Failed to load subscription data:", error);
+			toast.error("Failed to load subscription data");
+		} finally {
+			setLoading(false);
+		}
+	};
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: loadData only uses stable state setters, mount-only effect
+	useEffect(() => {
 		initCsrfToken().then(() => loadData());
 	}, []);
 
