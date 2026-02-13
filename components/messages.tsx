@@ -106,7 +106,7 @@ function PureMessages({
 					{status === "submitted" &&
 						messages.length > 0 &&
 						messages[messages.length - 1]?.role === "user" && (
-							<div className="message-enter w-full">
+							<div className="w-full">
 								{/* biome-ignore lint/a11y/useValidAriaRole: role is a component prop, not an ARIA role */}
 								<EnhancedChatMessage
 									botType={selectedBotType}

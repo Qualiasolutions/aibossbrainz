@@ -83,9 +83,12 @@ const PurePreviewMessage = ({
 		[message.role, textFromParts],
 	);
 
+	// Only animate entrance for user messages — assistant uses typewriter as its entrance
+	const shouldAnimate = message.role === "user";
+
 	return (
 		<div
-			className="group/message message-enter w-full"
+			className={cn("group/message w-full", shouldAnimate && "message-enter")}
 			data-role={message.role}
 			data-testid={`message-${message.role}`}
 		>
