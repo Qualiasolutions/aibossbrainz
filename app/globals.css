@@ -33,11 +33,27 @@
   }
 }
 
-/* Message entrance — snappy fade + slide */
+/* Message entrance — snappy fade + slide + subtle scale */
 @keyframes message-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.message-enter {
+  animation: message-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Assistant message entrance — gentler fade + slide */
+@keyframes assistant-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -45,14 +61,14 @@
   }
 }
 
-.message-enter {
-  animation: message-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+.assistant-enter {
+  animation: assistant-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Streaming cursor — clean blink */
-@keyframes cursor-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+/* Streaming cursor — smooth pulse */
+@keyframes cursor-pulse {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50% { opacity: 0.4; transform: scaleY(0.85); }
 }
 
 .streaming-cursor {
@@ -63,8 +79,54 @@
   border-radius: 1px;
   vertical-align: text-bottom;
   margin-left: 2px;
-  animation: cursor-blink 0.8s step-end infinite;
+  animation: cursor-pulse 1s ease-in-out infinite;
 }
+
+/* Thinking dots — staggered pulse for waiting state */
+@keyframes thinking-dot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.thinking-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.thinking-dots span {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--alecci-red);
+  animation: thinking-dot 1.4s ease-in-out infinite;
+}
+
+.thinking-dots span:nth-child(2) { animation-delay: 0.16s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.32s; }
+
+/* Suggestion chip — staggered fade-in */
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.suggestion-chip {
+  animation: chip-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.suggestion-chip:nth-child(1) { animation-delay: 0.05s; }
+.suggestion-chip:nth-child(2) { animation-delay: 0.1s; }
+.suggestion-chip:nth-child(3) { animation-delay: 0.15s; }
+.suggestion-chip:nth-child(4) { animation-delay: 0.2s; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ALECCI MEDIA — PREMIUM RED/WHITE/BLACK DESIGN SYSTEM

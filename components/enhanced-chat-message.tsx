@@ -123,7 +123,7 @@ export const EnhancedChatMessage = memo(
 			BOT_PERSONALITIES[botType] ?? BOT_PERSONALITIES.alexandria;
 
 		return (
-			<div className="max-w-[85%] sm:max-w-[75%] lg:max-w-[65%]">
+			<div className="assistant-enter max-w-[85%] sm:max-w-[75%] lg:max-w-[65%]">
 				<div className="relative overflow-hidden rounded-xl border border-stone-200/60 bg-white shadow-[0_1px_3px_0_rgb(0,0,0,0.04)]">
 					{/* Accent line */}
 					<div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full bg-[var(--alecci-red)]" />
@@ -158,8 +158,10 @@ export const EnhancedChatMessage = memo(
 									isStreaming={isTyping ?? false}
 								/>
 							) : (
-								<div className="flex items-center py-2">
-									<span className="streaming-cursor" />
+								<div className="thinking-dots" aria-label="Thinking...">
+									<span />
+									<span />
+									<span />
 								</div>
 							)}
 						</div>
