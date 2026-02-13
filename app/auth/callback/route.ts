@@ -9,6 +9,7 @@ import {
 import { sendWelcomeEmail } from "@/lib/email/subscription-emails";
 import { activateSubscription, startTrial } from "@/lib/stripe/actions";
 import { getStripe } from "@/lib/stripe/config";
+import { getValidAppUrl } from "@/lib/stripe/url";
 import { createClient } from "@/lib/supabase/server";
 
 /** Allowed redirect paths for the `next` query parameter. */
@@ -144,7 +145,8 @@ async function handleAuthenticatedUser(
 }
 
 export async function GET(request: Request) {
-	const { searchParams, origin } = new URL(request.url);
+	const { searchParams } = new URL(request.url);
+	const origin = getValidAppUrl(request);
 	const code = searchParams.get("code");
 	const tokenHash = searchParams.get("token_hash");
 	const type = searchParams.get("type") as EmailOtpType | null;

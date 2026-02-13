@@ -41,6 +41,10 @@ const profileUpdateSchema = z.object({
 	websiteUrl: z
 		.string()
 		.url("Invalid URL format")
+		.refine(
+			(url) => /^https?:\/\//i.test(url),
+			"URL must use HTTP or HTTPS protocol",
+		)
 		.or(z.literal(""))
 		.optional()
 		.nullable(),

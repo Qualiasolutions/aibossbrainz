@@ -109,61 +109,29 @@ export async function getDailyAnalytics(
 	try {
 		const supabase = await createClient();
 
-		// Get user's chats
-		const { data: userChats } = await supabase
-			.from("Chat")
-			.select("id, createdAt")
-			.eq("userId", userId)
-			.is("deletedAt", null)
-			.gte("createdAt", startDate.toISOString())
-			.lte("createdAt", endDate.toISOString());
+		// Single RPC call replaces 2 queries + client-side grouping
+		const { data } = (await (
+			supabase.rpc as unknown as (
+				...args: unknown[]
+			) => Promise<{ data: unknown }>
+		)("get_daily_analytics", {
+			p_user_id: userId,
+			p_start_date: startDate.toISOString(),
+			p_end_date: endDate.toISOString(),
+		})) as {
+			data: Array<{
+				day: string;
+				message_count: number;
+				chat_count: number;
+			}> | null;
+		};
 
-		const chatIds = userChats?.map((c) => c.id) || [];
-
-		// Get messages for these chats
-		let messages: { createdAt: string }[] = [];
-		if (chatIds.length > 0) {
-			const { data } = await supabase
-				.from("Message_v2")
-				.select("createdAt")
-				.in("chatId", chatIds)
-				.is("deletedAt", null)
-				.gte("createdAt", startDate.toISOString())
-				.lte("createdAt", endDate.toISOString());
-			messages = data || [];
-		}
-
-		// Group by date
-		const dailyData = new Map<
-			string,
-			{ messageCount: number; chatCount: number }
-		>();
-
-		// Count messages by date
-		for (const msg of messages) {
-			const date = msg.createdAt.split("T")[0];
-			const existing = dailyData.get(date) || { messageCount: 0, chatCount: 0 };
-			existing.messageCount++;
-			dailyData.set(date, existing);
-		}
-
-		// Count chats by date
-		for (const chat of userChats || []) {
-			const date = chat.createdAt.split("T")[0];
-			const existing = dailyData.get(date) || { messageCount: 0, chatCount: 0 };
-			existing.chatCount++;
-			dailyData.set(date, existing);
-		}
-
-		// Convert to array and sort
-		return Array.from(dailyData.entries())
-			.map(([date, data]) => ({
-				date,
-				messageCount: data.messageCount,
-				tokenUsage: 0,
-				chatCount: data.chatCount,
-			}))
-			.sort((a, b) => a.date.localeCompare(b.date));
+		return (data || []).map((row) => ({
+			date: row.day,
+			messageCount: Number(row.message_count) || 0,
+			tokenUsage: 0,
+			chatCount: Number(row.chat_count) || 0,
+		}));
 	} catch (error) {
 		console.error("Failed to get daily analytics:", error);
 		return [];
@@ -234,42 +202,19 @@ export async function recordAnalytics(
 	try {
 		const supabase = await createClient();
 
-		// Check if record exists for today
-		const { data: existing } = await supabase
-			.from("UserAnalytics")
-			.select("*")
-			.eq("userId", userId)
-			.eq("date", todayStr)
-			.limit(1);
-
-		if (existing && existing.length > 0) {
-			const record = existing[0];
-			const updates: Record<string, number> = {};
-
-			if (type === "message") {
-				updates.messageCount = (Number(record.messageCount) || 0) + value;
-			} else if (type === "token") {
-				updates.tokenUsage = (Number(record.tokenUsage) || 0) + value;
-			} else if (type === "voice") {
-				updates.voiceMinutes = (Number(record.voiceMinutes) || 0) + value;
-			} else if (type === "export") {
-				updates.exportCount = (Number(record.exportCount) || 0) + value;
-			}
-
-			await supabase
-				.from("UserAnalytics")
-				.update({ ...updates, updatedAt: new Date().toISOString() })
-				.eq("id", record.id);
-		} else {
-			await supabase.from("UserAnalytics").insert({
-				userId,
-				date: todayStr,
-				messageCount: type === "message" ? value : 0,
-				tokenUsage: type === "token" ? value : 0,
-				voiceMinutes: type === "voice" ? value : 0,
-				exportCount: type === "export" ? value : 0,
-			});
-		}
+		// Atomic upsert via RPC — avoids read-modify-write race condition
+		await (
+			supabase.rpc as unknown as (
+				...args: unknown[]
+			) => Promise<{ error: unknown }>
+		)("record_user_analytics", {
+			p_user_id: userId,
+			p_date: todayStr,
+			p_message_count: type === "message" ? value : 0,
+			p_token_usage: type === "token" ? value : 0,
+			p_voice_minutes: type === "voice" ? value : 0,
+			p_export_count: type === "export" ? value : 0,
+		});
 	} catch (error) {
 		console.error("Failed to record analytics:", error);
 		// Don't throw - analytics recording shouldn't break the main flow

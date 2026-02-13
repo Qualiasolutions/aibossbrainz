@@ -275,10 +275,7 @@ export async function getAllTicketsAdmin({
 	const ticketIds = tickets.map((t) => t.id);
 
 	const [usersResult, messagesResult] = await Promise.all([
-		supabase
-			.from("User")
-			.select("id, email, displayName")
-			.in("id", userIds),
+		supabase.from("User").select("id, email, displayName").in("id", userIds),
 		supabase
 			.from("SupportTicketMessage")
 			.select("ticketId")
@@ -286,9 +283,7 @@ export async function getAllTicketsAdmin({
 			.is("deletedAt", null),
 	]);
 
-	const userMap = new Map(
-		(usersResult.data ?? []).map((u) => [u.id, u]),
-	);
+	const userMap = new Map((usersResult.data ?? []).map((u) => [u.id, u]));
 	const msgCountMap = new Map<string, number>();
 	for (const msg of messagesResult.data ?? []) {
 		msgCountMap.set(msg.ticketId, (msgCountMap.get(msg.ticketId) || 0) + 1);
@@ -328,20 +323,20 @@ export async function getTicketWithMessagesAdmin({
 		return null;
 	}
 
-	// Get user info
-	const { data: user } = await supabase
-		.from("User")
-		.select("id, email, displayName, companyName")
-		.eq("id", ticket.userId)
-		.single();
-
-	// Get all messages (including internal notes for admin)
-	const { data: messages } = await supabase
-		.from("SupportTicketMessage")
-		.select("*")
-		.eq("ticketId", ticketId)
-		.is("deletedAt", null)
-		.order("createdAt", { ascending: true });
+	// Fetch user info and messages in parallel (both only depend on ticket)
+	const [{ data: user }, { data: messages }] = await Promise.all([
+		supabase
+			.from("User")
+			.select("id, email, displayName, companyName")
+			.eq("id", ticket.userId)
+			.single(),
+		supabase
+			.from("SupportTicketMessage")
+			.select("*")
+			.eq("ticketId", ticketId)
+			.is("deletedAt", null)
+			.order("createdAt", { ascending: true }),
+	]);
 
 	return {
 		ticket: ticket as SupportTicket,
