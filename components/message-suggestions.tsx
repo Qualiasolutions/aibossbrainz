@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import {
 	Check,
 	CornerDownLeft,
@@ -97,123 +96,94 @@ export function MessageSuggestions({
 	};
 
 	return (
-		<AnimatePresence mode="wait">
-			<motion.div
-				animate={{ opacity: 1, y: 0 }}
-				className="mt-5"
-				exit={{ opacity: 0, y: -4 }}
-				initial={{ opacity: 0, y: 6 }}
-				transition={{
-					duration: 0.2,
-					ease: [0.16, 1, 0.3, 1],
-				}}
-			>
-				{/* Header */}
-				<div className="mb-2.5 flex items-center gap-2">
-					<div
-						className={cn(
-							"flex size-5 items-center justify-center rounded-md",
-							EXECUTIVE_ICON_BG[botType],
-						)}
-					>
-						<Sparkles
-							className={cn("size-3", EXECUTIVE_ACCENT_STYLES[botType])}
-						/>
-					</div>
-					<span className="font-medium text-xs text-stone-500 dark:text-stone-400">
-						Continue the conversation
-					</span>
+		<div className="mt-5 assistant-enter">
+			{/* Header */}
+			<div className="mb-2.5 flex items-center gap-2">
+				<div
+					className={cn(
+						"flex size-5 items-center justify-center rounded-md",
+						EXECUTIVE_ICON_BG[botType],
+					)}
+				>
+					<Sparkles
+						className={cn("size-3", EXECUTIVE_ACCENT_STYLES[botType])}
+					/>
 				</div>
+				<span className="font-medium text-xs text-stone-500 dark:text-stone-400">
+					Continue the conversation
+				</span>
+			</div>
 
-				{/* Suggestions - responsive flex wrap layout */}
-				<div className="flex flex-wrap gap-2">
-					{suggestions.map((suggestion) => {
-						const Icon = CATEGORY_ICONS[suggestion.category];
-						const isCopied = copiedId === suggestion.id;
+			{/* Suggestions - responsive flex wrap layout */}
+			<div className="flex flex-wrap gap-2">
+				{suggestions.map((suggestion) => {
+					const Icon = CATEGORY_ICONS[suggestion.category];
+					const isCopied = copiedId === suggestion.id;
 
-						return (
-							<button
-								aria-label={`Ask: ${suggestion.text}`}
+					return (
+						<button
+							aria-label={`Ask: ${suggestion.text}`}
+							className={cn(
+								"suggestion-chip",
+								"group relative flex items-start gap-2 rounded-xl border px-3 py-2",
+								"text-sm transition-colors",
+								"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50 focus-visible:ring-offset-2",
+								"shadow-sm",
+								// Responsive width: full on mobile, auto-fit on larger screens
+								"w-full sm:w-auto sm:max-w-[calc(50%-0.25rem)] sm:flex-1 sm:min-w-[200px]",
+								EXECUTIVE_BUTTON_STYLES[botType],
+								isCopied &&
+									"border-emerald-400 bg-emerald-50 dark:border-emerald-600 dark:bg-emerald-950/40",
+							)}
+							key={suggestion.id}
+							onClick={(e) => handleSelect(suggestion, e)}
+							onKeyDown={(e) => handleKeyDown(e, suggestion)}
+							type="button"
+						>
+							{/* Icon */}
+							<span
 								className={cn(
-									"group relative flex items-start gap-2 rounded-xl border px-3 py-2",
-									"text-sm transition-colors",
-									"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50 focus-visible:ring-offset-2",
-									"shadow-sm",
-									// Responsive width: full on mobile, auto-fit on larger screens
-									"w-full sm:w-auto sm:max-w-[calc(50%-0.25rem)] sm:flex-1 sm:min-w-[200px]",
-									EXECUTIVE_BUTTON_STYLES[botType],
-									isCopied &&
-										"border-emerald-400 bg-emerald-50 dark:border-emerald-600 dark:bg-emerald-950/40",
+									"flex size-6 shrink-0 items-center justify-center rounded-lg transition-colors",
+									isCopied
+										? "bg-emerald-100 dark:bg-emerald-900/50"
+										: EXECUTIVE_ICON_BG[botType],
 								)}
-								key={suggestion.id}
-								onClick={(e) => handleSelect(suggestion, e)}
-								onKeyDown={(e) => handleKeyDown(e, suggestion)}
-								type="button"
 							>
-								{/* Icon */}
-								<span
-									className={cn(
-										"flex size-6 shrink-0 items-center justify-center rounded-lg transition-colors",
-										isCopied
-											? "bg-emerald-100 dark:bg-emerald-900/50"
-											: EXECUTIVE_ICON_BG[botType],
+								<span className="flex items-center justify-center">
+									{isCopied ? (
+										<Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+									) : (
+										<Icon
+											className={cn(
+												"size-3.5",
+												EXECUTIVE_ACCENT_STYLES[botType],
+											)}
+										/>
 									)}
-								>
-									<AnimatePresence mode="wait">
-										{isCopied ? (
-											<motion.span
-												key="check"
-												initial={{ scale: 0 }}
-												animate={{ scale: 1 }}
-												exit={{ scale: 0 }}
-												transition={{ duration: 0.15 }}
-											>
-												<Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-											</motion.span>
-										) : (
-											<motion.span
-												key="icon"
-												initial={{ scale: 0 }}
-												animate={{ scale: 1 }}
-												exit={{ scale: 0 }}
-											>
-												<Icon
-													className={cn(
-														"size-3.5",
-														EXECUTIVE_ACCENT_STYLES[botType],
-													)}
-												/>
-											</motion.span>
-										)}
-									</AnimatePresence>
 								</span>
+							</span>
 
-								{/* Text */}
-								<span
-									className={cn(
-										"text-left font-medium text-stone-700 leading-snug dark:text-stone-200",
-										isCopied && "text-emerald-700 dark:text-emerald-300",
-									)}
-								>
-									{suggestion.text}
-								</span>
-
-								{/* Action indicator - only show when copied */}
-								{isCopied && (
-									<motion.span
-										initial={{ opacity: 0, x: -8 }}
-										animate={{ opacity: 1, x: 0 }}
-										className="ml-1 flex items-center gap-1 whitespace-nowrap text-xs text-emerald-600 dark:text-emerald-400"
-									>
-										<CornerDownLeft className="size-3" />
-										<span className="hidden sm:inline">Added to input</span>
-									</motion.span>
+							{/* Text */}
+							<span
+								className={cn(
+									"text-left font-medium text-stone-700 leading-snug dark:text-stone-200",
+									isCopied && "text-emerald-700 dark:text-emerald-300",
 								)}
-							</button>
-						);
-					})}
-				</div>
-			</motion.div>
-		</AnimatePresence>
+							>
+								{suggestion.text}
+							</span>
+
+							{/* Action indicator - only show when copied */}
+							{isCopied && (
+								<span className="chip-in ml-1 flex items-center gap-1 whitespace-nowrap text-xs text-emerald-600 dark:text-emerald-400">
+									<CornerDownLeft className="size-3" />
+									<span className="hidden sm:inline">Added to input</span>
+								</span>
+							)}
+						</button>
+					);
+				})}
+			</div>
+		</div>
 	);
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Volume2, VolumeX } from "lucide-react";
 import { useGreetingSpeech } from "@/hooks/use-greeting-speech";
 import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
@@ -22,12 +21,9 @@ export const Greeting = ({ botType }: GreetingProps) => {
 			className="mx-auto mt-4 flex size-full max-w-3xl flex-col justify-center px-4 md:mt-16 md:px-8"
 			key="overview"
 		>
-			<motion.div
-				animate={{ opacity: 1, y: 0 }}
-				className="flex items-center gap-3 font-semibold text-xl md:text-2xl"
-				exit={{ opacity: 0, y: 10 }}
-				initial={{ opacity: 0, y: 10 }}
-				transition={{ delay: 0.5 }}
+			<div
+				className="flex items-center gap-3 font-semibold text-xl md:text-2xl animate-fade-in-up"
+				style={{ animationDelay: "0.3s" }}
 			>
 				<span>Hello there!</span>
 				{(isPlaying || isLoading) && (
@@ -45,16 +41,13 @@ export const Greeting = ({ botType }: GreetingProps) => {
 						)}
 					</button>
 				)}
-			</motion.div>
-			<motion.div
-				animate={{ opacity: 1, y: 0 }}
-				className="text-xl text-zinc-500 md:text-2xl"
-				exit={{ opacity: 0, y: 10 }}
-				initial={{ opacity: 0, y: 10 }}
-				transition={{ delay: 0.6 }}
+			</div>
+			<div
+				className="text-xl text-zinc-500 md:text-2xl animate-fade-in-up"
+				style={{ animationDelay: "0.45s" }}
 			>
 				I'm {personality.name}. How can I help you today?
-			</motion.div>
+			</div>
 		</div>
 	);
 };
