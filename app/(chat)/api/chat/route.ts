@@ -492,16 +492,6 @@ export const POST = withCsrf(async (request: Request) => {
 			},
 		});
 
-		// const streamContext = getStreamContext();
-
-		// if (streamContext) {
-		//   return new Response(
-		//     await streamContext.resumableStream(streamId, () =>
-		//       stream.pipeThrough(new JsonToSseTransformStream())
-		//     )
-		//   );
-		// }
-
 		return new Response(stream.pipeThrough(new JsonToSseTransformStream()));
 	} catch (error: unknown) {
 		if (error instanceof ChatSDKError) {

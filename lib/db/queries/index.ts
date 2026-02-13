@@ -20,14 +20,15 @@ export {
 	saveConversationSummary,
 	saveStrategyCanvas,
 } from "./canvas";
+export type { ChatStats } from "./chat";
 // Chat queries
 export {
 	createStreamId,
 	deleteAllChatsByUserId,
 	deleteChatById,
 	getChatById,
-	getChatsByUserId,
 	getChatStatsForChats,
+	getChatsByUserId,
 	getMessageCountByUserId,
 	getStreamIdsByChatId,
 	saveChat,
@@ -37,7 +38,6 @@ export {
 	updateChatTopic,
 	updateChatVisiblityById,
 } from "./chat";
-export type { ChatStats } from "./chat";
 // Document queries
 export {
 	deleteDocumentsByIdAfterTimestamp,

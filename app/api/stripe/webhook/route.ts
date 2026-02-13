@@ -136,10 +136,9 @@ export async function POST(request: Request) {
 							: session.subscription.id;
 
 					try {
-						const subscription =
-							(await getStripe().subscriptions.retrieve(
-								subscriptionId,
-							)) as Stripe.Subscription;
+						const subscription = (await getStripe().subscriptions.retrieve(
+							subscriptionId,
+						)) as Stripe.Subscription;
 
 						// Skip if already processed by customer.subscription.created
 						if (
@@ -340,10 +339,9 @@ export async function POST(request: Request) {
 
 				if (subscriptionId) {
 					try {
-						const subscription =
-							(await getStripe().subscriptions.retrieve(
-								subscriptionId,
-							)) as Stripe.Subscription;
+						const subscription = (await getStripe().subscriptions.retrieve(
+							subscriptionId,
+						)) as Stripe.Subscription;
 						const subscriptionType = validateSubscriptionType(
 							subscription.metadata?.subscriptionType,
 						);

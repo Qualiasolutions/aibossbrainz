@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import {
 	getAnalyticsSummary,
 	getDailyAnalytics,
@@ -5,7 +6,6 @@ import {
 	getTopicBreakdown,
 } from "@/lib/analytics/queries";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import AnalyticsClient from "./analytics-client";
 
 export default async function AnalyticsPage({

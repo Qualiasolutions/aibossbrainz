@@ -337,10 +337,7 @@ export async function expireSubscription(
 		.eq("stripeSubscriptionId", stripeSubscriptionId);
 
 	if (error) {
-		console.error(
-			"[Stripe] Failed to expire subscription:",
-			error.message,
-		);
+		console.error("[Stripe] Failed to expire subscription:", error.message);
 		throw new Error(
 			`Failed to expire subscription ${stripeSubscriptionId}: ${error.message}`,
 		);

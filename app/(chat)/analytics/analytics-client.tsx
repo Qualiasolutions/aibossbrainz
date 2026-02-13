@@ -1,13 +1,9 @@
 "use client";
 
-import {
-	BarChart3,
-	Calendar,
-	FileText,
-	MessageSquare,
-} from "lucide-react";
+import { BarChart3, Calendar, FileText, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +49,11 @@ export interface AnalyticsData {
 export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 	const router = useRouter();
 	const range = data.range;
+
+	const totalTopicCount = useMemo(
+		() => data.topics.reduce((sum, t) => sum + t.count, 0),
+		[data.topics],
+	);
 
 	const formatNumber = (num: number) => {
 		if (num >= 1000000) {
@@ -187,11 +188,10 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 							{data.topics.length > 0 ? (
 								<div className="space-y-3">
 									{data.topics.slice(0, 8).map((topic, _idx) => {
-										const totalTopics = data.topics.reduce(
-											(sum, t) => sum + t.count,
-											0,
-										);
-										const percentage = (topic.count / totalTopics) * 100;
+										const percentage =
+											totalTopicCount > 0
+												? (topic.count / totalTopicCount) * 100
+												: 0;
 
 										return (
 											<div key={topic.topic || "uncategorized"}>

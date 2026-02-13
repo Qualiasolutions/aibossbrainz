@@ -10,7 +10,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getChatsByUserId, getChatStatsForChats } from "@/lib/db/queries";
+import { getChatStatsForChats, getChatsByUserId } from "@/lib/db/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HistoryPage() {

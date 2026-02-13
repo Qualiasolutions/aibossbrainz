@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Crown, Sparkles, UserRound, Users } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -147,18 +147,25 @@ export function ExecutiveSwitch({
 		};
 	}, [isOpen]);
 
-	const handleExecutiveSelect = (executive: BotType) => {
-		// Track executive switch for Sentry breadcrumbs
-		if (executive !== selectedExecutive) {
-			chatBreadcrumb.executiveSwitched(selectedExecutive, executive);
-		}
-		onExecutiveChange(executive);
-		setIsOpen(false);
-	};
+	const handleExecutiveSelect = useCallback(
+		(executive: BotType) => {
+			// Track executive switch for Sentry breadcrumbs
+			if (executive !== selectedExecutive) {
+				chatBreadcrumb.executiveSwitched(selectedExecutive, executive);
+			}
+			onExecutiveChange(executive);
+			setIsOpen(false);
+		},
+		[selectedExecutive, onExecutiveChange],
+	);
 
 	const selectedPersonality = BOT_PERSONALITIES[selectedExecutive];
-	const otherExecutives = Object.entries(BOT_PERSONALITIES).filter(
-		([key]) => key !== selectedExecutive,
+	const otherExecutives = useMemo(
+		() =>
+			Object.entries(BOT_PERSONALITIES).filter(
+				([key]) => key !== selectedExecutive,
+			),
+		[selectedExecutive],
 	);
 
 	// Keyboard navigation for executive options
@@ -202,27 +209,25 @@ export function ExecutiveSwitch({
 
 	// Focus trap: keep Tab/Shift+Tab cycling within the modal
 	const modalRef = useRef<HTMLDivElement>(null);
-	const handleModalKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if (e.key === "Tab") {
-				const focusableElements = modalRef.current?.querySelectorAll(
-					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-				);
-				if (!focusableElements?.length) return;
-				const first = focusableElements[0] as HTMLElement;
-				const last =
-					focusableElements[focusableElements.length - 1] as HTMLElement;
-				if (e.shiftKey && document.activeElement === first) {
-					e.preventDefault();
-					last.focus();
-				} else if (!e.shiftKey && document.activeElement === last) {
-					e.preventDefault();
-					first.focus();
-				}
+	const handleModalKeyDown = useCallback((e: React.KeyboardEvent) => {
+		if (e.key === "Tab") {
+			const focusableElements = modalRef.current?.querySelectorAll(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+			);
+			if (!focusableElements?.length) return;
+			const first = focusableElements[0] as HTMLElement;
+			const last = focusableElements[
+				focusableElements.length - 1
+			] as HTMLElement;
+			if (e.shiftKey && document.activeElement === first) {
+				e.preventDefault();
+				last.focus();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
 			}
-		},
-		[],
-	);
+		}
+	}, []);
 
 	return (
 		<div className="relative">

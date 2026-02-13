@@ -312,9 +312,7 @@ const PurePreviewMessage = ({
 					{/* Subtle streaming indicator when text is present but still loading */}
 					{message.role === "assistant" &&
 						isLoading &&
-						message.parts?.some(
-							(p) => p.type === "text" && p.text?.trim(),
-						) && (
+						message.parts?.some((p) => p.type === "text" && p.text?.trim()) && (
 							<div className="flex items-center gap-1.5 pl-1">
 								<span className="inline-block size-1.5 rounded-full bg-rose-400 animate-pulse" />
 								<span className="text-xs text-stone-400">Streaming...</span>
@@ -348,7 +346,6 @@ const PurePreviewMessage = ({
 					)}
 				</div>
 			</div>
-
 		</motion.div>
 	);
 };

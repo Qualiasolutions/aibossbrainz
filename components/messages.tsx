@@ -47,12 +47,9 @@ function PureMessages({
 		botType: BotType;
 	} | null>(null);
 
-	const handleFullscreen = useCallback(
-		(content: string, botType: BotType) => {
-			setFullscreenMessage({ content, botType });
-		},
-		[],
-	);
+	const handleFullscreen = useCallback((content: string, botType: BotType) => {
+		setFullscreenMessage({ content, botType });
+	}, []);
 
 	const {
 		containerRef: messagesContainerRef,
