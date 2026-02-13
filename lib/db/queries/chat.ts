@@ -329,6 +329,62 @@ export async function updateChatTopic({
 }
 
 // ============================================
+// BATCH STATS QUERIES
+// ============================================
+
+export interface ChatStats {
+	messageCount: number;
+	primaryBot: string;
+}
+
+export async function getChatStatsForChats(
+	chatIds: string[],
+): Promise<Map<string, ChatStats>> {
+	const result = new Map<string, ChatStats>();
+	if (chatIds.length === 0) return result;
+
+	try {
+		const supabase = await createClient();
+		const { data, error } = await supabase
+			.from("Message_v2")
+			.select("chatId, botType")
+			.in("chatId", chatIds)
+			.is("deletedAt", null);
+
+		if (error) throw error;
+
+		// Group by chatId and count botTypes
+		const grouped = new Map<string, Record<string, number>>();
+		const counts = new Map<string, number>();
+
+		for (const row of data ?? []) {
+			const chatId = row.chatId;
+			counts.set(chatId, (counts.get(chatId) || 0) + 1);
+
+			if (!grouped.has(chatId)) grouped.set(chatId, {});
+			const botCounts = grouped.get(chatId)!;
+			const bot = row.botType || "collaborative";
+			botCounts[bot] = (botCounts[bot] || 0) + 1;
+		}
+
+		for (const chatId of chatIds) {
+			const botCounts = grouped.get(chatId) || {};
+			const primaryBot =
+				Object.entries(botCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ||
+				"collaborative";
+			result.set(chatId, {
+				messageCount: counts.get(chatId) || 0,
+				primaryBot,
+			});
+		}
+
+		return result;
+	} catch (_error) {
+		return result;
+	}
+}
+
+// ============================================
 // ANALYTICS QUERIES
 // ============================================
 

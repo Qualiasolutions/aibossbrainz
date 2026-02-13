@@ -27,6 +27,7 @@ export {
 	deleteChatById,
 	getChatById,
 	getChatsByUserId,
+	getChatStatsForChats,
 	getMessageCountByUserId,
 	getStreamIdsByChatId,
 	saveChat,
@@ -36,6 +37,7 @@ export {
 	updateChatTopic,
 	updateChatVisiblityById,
 } from "./chat";
+export type { ChatStats } from "./chat";
 // Document queries
 export {
 	deleteDocumentsByIdAfterTimestamp,

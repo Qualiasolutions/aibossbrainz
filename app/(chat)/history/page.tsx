@@ -10,7 +10,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getChatsByUserId, getMessagesByChatId } from "@/lib/db/queries";
+import { getChatsByUserId, getChatStatsForChats } from "@/lib/db/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HistoryPage() {
@@ -74,35 +74,16 @@ export default async function HistoryPage() {
 	// Calculate analytics from messages
 	const totalChats = chats.length;
 
-	// Get message counts per executive by analyzing messages
-	const chatStats = await Promise.all(
-		chats.map(async (chat) => {
-			const msgs = await getMessagesByChatId({ id: chat.id });
-
-			const botCounts = msgs.reduce(
-				(acc, msg) => {
-					const botType = (msg as any).botType || "collaborative";
-					acc[botType] = (acc[botType] || 0) + 1;
-					return acc;
-				},
-				{} as Record<string, number>,
-			);
-
-			const primaryBot = Object.entries(botCounts).reduce(
-				(max, [bot, count]) =>
-					(count as number) > (max.count || 0)
-						? { bot, count: count as number }
-						: max,
-				{ bot: "alexandria" as string, count: 0 },
-			).bot;
-
-			return {
-				...chat,
-				primaryBot,
-				messageCount: msgs.length,
-			};
-		}),
-	);
+	// Batch fetch message stats for all chats (1 query instead of N)
+	const statsMap = await getChatStatsForChats(chats.map((c) => c.id));
+	const chatStats = chats.map((chat) => {
+		const stats = statsMap.get(chat.id);
+		return {
+			...chat,
+			primaryBot: stats?.primaryBot || "collaborative",
+			messageCount: stats?.messageCount || 0,
+		};
+	});
 
 	const botDistribution = chatStats.reduce(
 		(acc, chat) => {

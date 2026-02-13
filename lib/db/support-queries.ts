@@ -270,32 +270,39 @@ export async function getAllTicketsAdmin({
 		return [];
 	}
 
-	// Enrich with user info and message count
-	const enrichedTickets = await Promise.all(
-		tickets.map(async (ticket) => {
-			const [userResult, countResult] = await Promise.all([
-				supabase
-					.from("User")
-					.select("email, displayName")
-					.eq("id", ticket.userId)
-					.single(),
-				supabase
-					.from("SupportTicketMessage")
-					.select("*", { count: "exact", head: true })
-					.eq("ticketId", ticket.id)
-					.is("deletedAt", null),
-			]);
+	// Batch fetch user info and message counts (2 queries instead of 2N)
+	const userIds = [...new Set(tickets.map((t) => t.userId))];
+	const ticketIds = tickets.map((t) => t.id);
 
-			return {
-				...ticket,
-				userEmail: userResult.data?.email || "Unknown",
-				userDisplayName: userResult.data?.displayName || null,
-				messageCount: countResult.count || 0,
-			} as AdminTicketWithUser;
-		}),
+	const [usersResult, messagesResult] = await Promise.all([
+		supabase
+			.from("User")
+			.select("id, email, displayName")
+			.in("id", userIds),
+		supabase
+			.from("SupportTicketMessage")
+			.select("ticketId")
+			.in("ticketId", ticketIds)
+			.is("deletedAt", null),
+	]);
+
+	const userMap = new Map(
+		(usersResult.data ?? []).map((u) => [u.id, u]),
 	);
+	const msgCountMap = new Map<string, number>();
+	for (const msg of messagesResult.data ?? []) {
+		msgCountMap.set(msg.ticketId, (msgCountMap.get(msg.ticketId) || 0) + 1);
+	}
 
-	return enrichedTickets;
+	return tickets.map((ticket) => {
+		const user = userMap.get(ticket.userId);
+		return {
+			...ticket,
+			userEmail: user?.email || "Unknown",
+			userDisplayName: user?.displayName || null,
+			messageCount: msgCountMap.get(ticket.id) || 0,
+		} as AdminTicketWithUser;
+	});
 }
 
 export type AdminTicketDetail = {

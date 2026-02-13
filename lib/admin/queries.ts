@@ -374,22 +374,21 @@ export async function getAdminStats(): Promise<AdminStats> {
 		.is("deletedAt", null)
 		.gte("createdAt", last7d);
 
-	// Executive breakdown
-	const { data: botTypeMessages } = await supabase
-		.from("Message_v2")
-		.select("botType")
-		.is("deletedAt", null)
-		.not("botType", "is", null);
+	// Executive breakdown - count-only queries instead of fetching all rows
+	const botTypes = ["alexandria", "kim", "collaborative"] as const;
+	const botCountResults = await Promise.all(
+		botTypes.map(async (bot) => {
+			const { count } = await supabase
+				.from("Message_v2")
+				.select("*", { count: "exact", head: true })
+				.eq("botType", bot)
+				.is("deletedAt", null);
+			return { executive: bot, count: count || 0 };
+		}),
+	);
 
-	const executiveCounts: Record<string, number> = {};
-	for (const msg of botTypeMessages || []) {
-		if (msg.botType) {
-			executiveCounts[msg.botType] = (executiveCounts[msg.botType] || 0) + 1;
-		}
-	}
-
-	const executiveBreakdown = Object.entries(executiveCounts)
-		.map(([executive, count]) => ({ executive, count }))
+	const executiveBreakdown = botCountResults
+		.filter((b) => b.count > 0)
 		.sort((a, b) => b.count - a.count);
 
 	const topExecutive = executiveBreakdown[0]?.executive || null;
@@ -711,25 +710,21 @@ export async function getRecentSupportTickets(
 		return [];
 	}
 
-	// Enrich with user email
-	const enriched = await Promise.all(
-		(tickets || []).map(async (ticket) => {
-			const { data: user } = await supabase
-				.from("User")
-				.select("email")
-				.eq("id", ticket.userId)
-				.single();
+	// Batch fetch user emails (1 query instead of N)
+	const userIds = [...new Set((tickets || []).map((t) => t.userId))];
+	const { data: users } = await supabase
+		.from("User")
+		.select("id, email")
+		.in("id", userIds);
 
-			return {
-				id: ticket.id,
-				subject: ticket.subject,
-				userEmail: user?.email || "Unknown",
-				status: ticket.status as SupportTicketPreview["status"],
-				priority: ticket.priority as SupportTicketPreview["priority"],
-				createdAt: ticket.createdAt,
-			};
-		}),
-	);
+	const userMap = new Map((users ?? []).map((u) => [u.id, u.email]));
 
-	return enriched;
+	return (tickets || []).map((ticket) => ({
+		id: ticket.id,
+		subject: ticket.subject,
+		userEmail: userMap.get(ticket.userId) || "Unknown",
+		status: ticket.status as SupportTicketPreview["status"],
+		priority: ticket.priority as SupportTicketPreview["priority"],
+		createdAt: ticket.createdAt,
+	}));
 }
