@@ -28,11 +28,17 @@ const loginHighlights = [
 	},
 ];
 
+function isInternalPath(path: string): boolean {
+	return path.startsWith("/") && !path.startsWith("//");
+}
+
 function LoginContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const plan = searchParams.get("plan");
-	const redirect = searchParams.get("redirect");
+	const rawRedirect = searchParams.get("redirect");
+	const redirect =
+		rawRedirect && isInternalPath(rawRedirect) ? rawRedirect : null;
 
 	const [email, setEmail] = useState("");
 	const [isSuccessful, setIsSuccessful] = useState(false);

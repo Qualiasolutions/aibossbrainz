@@ -2,17 +2,31 @@ import { AlertCircle, CheckCircle, Clock, Headphones } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import { StatsCard } from "@/components/admin/stats-card";
 import { SupportTicketsTable } from "@/components/admin/support-tickets-table";
+import { isUserAdmin } from "@/lib/admin/queries";
 import {
 	getAllTicketsAdmin,
 	getSupportTicketStats,
 	updateTicketAdmin,
 } from "@/lib/db/support-queries";
+import { createClient } from "@/lib/supabase/server";
 import type { TicketPriority, TicketStatus } from "@/lib/supabase/types";
+
+async function requireAdmin() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) throw new Error("Unauthorized");
+	const admin = await isUserAdmin(user.id);
+	if (!admin) throw new Error("Forbidden");
+	return user;
+}
 
 export const dynamic = "force-dynamic";
 
 async function updateTicketStatus(ticketId: string, status: TicketStatus) {
 	"use server";
+	await requireAdmin();
 	await updateTicketAdmin({ ticketId, status });
 	revalidatePath("/admin/support-tickets");
 }
@@ -22,6 +36,7 @@ async function updateTicketPriority(
 	priority: TicketPriority,
 ) {
 	"use server";
+	await requireAdmin();
 	await updateTicketAdmin({ ticketId, priority });
 	revalidatePath("/admin/support-tickets");
 }
@@ -31,6 +46,7 @@ async function updateTicketTimeSpent(
 	timeSpentMinutes: number,
 ) {
 	"use server";
+	await requireAdmin();
 	await updateTicketAdmin({ ticketId, timeSpentMinutes });
 	revalidatePath("/admin/support-tickets");
 }

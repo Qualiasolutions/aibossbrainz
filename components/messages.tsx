@@ -2,7 +2,7 @@ import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
 import { motion } from "framer-motion";
 import { ArrowDownIcon } from "lucide-react";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { useMessages } from "@/hooks/use-messages";
 import type { BotType } from "@/lib/bot-personalities";
 import type { Vote } from "@/lib/supabase/types";
@@ -51,6 +51,14 @@ function PureMessages({
 		status,
 	});
 
+	const voteMap = useMemo(() => {
+		const map = new Map<string, Vote>();
+		for (const vote of votes ?? []) {
+			map.set(vote.messageId, vote);
+		}
+		return map;
+	}, [votes]);
+
 	return (
 		<div
 			className={cn(
@@ -80,11 +88,7 @@ function PureMessages({
 							}
 							selectedBotType={selectedBotType}
 							setMessages={setMessages}
-							vote={
-								votes
-									? votes.find((vote) => vote.messageId === message.id)
-									: undefined
-							}
+							vote={voteMap.get(message.id)}
 						/>
 					))}
 

@@ -1,6 +1,14 @@
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
 import { Artifact } from "@/components/create-artifact";
-import { DiffView } from "@/components/diffview";
+
+const DiffView = dynamic(
+  () => import("@/components/diffview").then((mod) => ({ default: mod.DiffView })),
+  {
+    loading: () => <div className="animate-pulse h-40 bg-muted rounded" />,
+    ssr: false,
+  },
+);
 import { DocumentSkeleton } from "@/components/document-skeleton";
 import {
   ClockRewind,

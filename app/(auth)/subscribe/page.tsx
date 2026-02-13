@@ -307,6 +307,10 @@ function WelcomeStep({ onContinue }: { onContinue: () => void }) {
 	);
 }
 
+function isInternalPath(path: string): boolean {
+	return path.startsWith("/") && !path.startsWith("//");
+}
+
 function SubscribeContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -314,7 +318,9 @@ function SubscribeContent() {
 	const reason = searchParams.get("reason");
 	const payment = searchParams.get("payment"); // "success" after Stripe checkout
 	const welcome = searchParams.get("welcome");
-	const redirectPath = searchParams.get("redirect") || "/new";
+	const rawRedirect = searchParams.get("redirect");
+	const redirectPath =
+		rawRedirect && isInternalPath(rawRedirect) ? rawRedirect : "/new";
 	const [isLoading, setIsLoading] = useState(false);
 	const [checkingSubscription, setCheckingSubscription] = useState(true);
 	const [hasActiveSubscription, setHasActiveSubscription] = useState(false);

@@ -37,10 +37,18 @@ export async function getOrCreateStripeCustomer(
 	});
 
 	// Save customer ID to database
-	await supabase
+	const { error } = await supabase
 		.from("User")
 		.update({ stripeCustomerId: customer.id })
 		.eq("id", userId);
+
+	if (error) {
+		console.error(
+			"[Stripe] Failed to save customer ID to database:",
+			error.message,
+		);
+		throw new Error("Failed to save Stripe customer ID");
+	}
 
 	return customer.id;
 }
@@ -260,10 +268,20 @@ export async function cancelSubscription(userId: string): Promise<void> {
 	}
 
 	// Update local status
-	await supabase
+	const { error } = await supabase
 		.from("User")
 		.update({ subscriptionStatus: "cancelled" })
 		.eq("id", userId);
+
+	if (error) {
+		console.error(
+			"[Stripe] Failed to update cancellation status:",
+			error.message,
+		);
+		throw new Error(
+			`Failed to cancel subscription for user ${userId}: ${error.message}`,
+		);
+	}
 }
 
 /**
@@ -310,11 +328,21 @@ export async function expireSubscription(
 ): Promise<void> {
 	const supabase = createServiceClient();
 
-	await supabase
+	const { error } = await supabase
 		.from("User")
 		.update({
 			subscriptionStatus: "expired",
 			stripeSubscriptionId: null,
 		})
 		.eq("stripeSubscriptionId", stripeSubscriptionId);
+
+	if (error) {
+		console.error(
+			"[Stripe] Failed to expire subscription:",
+			error.message,
+		);
+		throw new Error(
+			`Failed to expire subscription ${stripeSubscriptionId}: ${error.message}`,
+		);
+	}
 }

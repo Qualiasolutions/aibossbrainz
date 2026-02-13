@@ -4,7 +4,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { UserTypeSelector } from "@/components/admin/user-type-selector";
 import { Button } from "@/components/ui/button";
-import { getUserById, updateUserByAdmin } from "@/lib/admin/queries";
+import {
+	getUserById,
+	isUserAdmin,
+	updateUserByAdmin,
+} from "@/lib/admin/queries";
+import { createClient } from "@/lib/supabase/server";
+
+async function requireAdmin() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) throw new Error("Unauthorized");
+	const admin = await isUserAdmin(user.id);
+	if (!admin) throw new Error("Forbidden");
+	return user;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +52,7 @@ function formatSubscriptionType(type: string | null | undefined): string {
 
 async function updateUserType(userId: string, userType: string) {
 	"use server";
+	await requireAdmin();
 	await updateUserByAdmin(userId, { userType });
 	revalidatePath(`/admin/users/${userId}`);
 }

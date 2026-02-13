@@ -4,21 +4,36 @@ import {
 	createUserByAdmin,
 	deleteUserByAdmin,
 	getAllUsers,
+	isUserAdmin,
 	updateUserByAdmin,
 	updateUserSubscription,
 } from "@/lib/admin/queries";
+import { createClient } from "@/lib/supabase/server";
 import type { SubscriptionType } from "@/lib/supabase/types";
+
+async function requireAdmin() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) throw new Error("Unauthorized");
+	const admin = await isUserAdmin(user.id);
+	if (!admin) throw new Error("Forbidden");
+	return user;
+}
 
 export const dynamic = "force-dynamic";
 
 async function deleteUser(userId: string) {
 	"use server";
+	await requireAdmin();
 	await deleteUserByAdmin(userId);
 	revalidatePath("/admin/users");
 }
 
 async function toggleAdmin(userId: string, isAdmin: boolean) {
 	"use server";
+	await requireAdmin();
 	await updateUserByAdmin(userId, { isAdmin });
 	revalidatePath("/admin/users");
 }
@@ -31,6 +46,7 @@ async function createUser(data: {
 }): Promise<{ success: boolean; error?: string }> {
 	"use server";
 	try {
+		await requireAdmin();
 		await createUserByAdmin(data);
 		revalidatePath("/admin/users");
 		return { success: true };
@@ -73,6 +89,7 @@ async function changeSubscription(
 	subscriptionType: SubscriptionType,
 ) {
 	"use server";
+	await requireAdmin();
 	await updateUserSubscription(userId, subscriptionType);
 	revalidatePath("/admin/users");
 }

@@ -6,9 +6,11 @@ import type { VisibilityType } from "@/components/visibility-selector";
 import { myProvider } from "@/lib/ai/providers";
 import {
 	deleteMessagesByChatIdAfterTimestamp,
+	getChatById,
 	getMessageById,
 	updateChatVisiblityById,
 } from "@/lib/db/queries";
+import { createClient } from "@/lib/supabase/server";
 
 export async function saveChatModelAsCookie(model: string) {
 	const cookieStore = await cookies();
@@ -34,6 +36,14 @@ export async function generateTitleFromUserMessage({
 }
 
 export async function deleteTrailingMessages({ id }: { id: string }) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) {
+		throw new Error("Unauthorized");
+	}
+
 	const [message] = await getMessageById({ id });
 
 	if (!message) {
@@ -41,6 +51,12 @@ export async function deleteTrailingMessages({ id }: { id: string }) {
 			`Message with id ${id} not found for deletion of trailing messages`,
 		);
 		return;
+	}
+
+	// Verify the chat belongs to the user
+	const chat = await getChatById({ id: message.chatId });
+	if (!chat || chat.userId !== user.id) {
+		throw new Error("Forbidden");
 	}
 
 	await deleteMessagesByChatIdAfterTimestamp({
@@ -56,5 +72,19 @@ export async function updateChatVisibility({
 	chatId: string;
 	visibility: VisibilityType;
 }) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) {
+		throw new Error("Unauthorized");
+	}
+
+	// Verify the chat belongs to the user
+	const chat = await getChatById({ id: chatId });
+	if (!chat || chat.userId !== user.id) {
+		throw new Error("Forbidden");
+	}
+
 	await updateChatVisiblityById({ chatId, visibility });
 }

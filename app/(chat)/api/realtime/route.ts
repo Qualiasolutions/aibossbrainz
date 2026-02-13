@@ -32,6 +32,11 @@ export const POST = withCsrf(async (request: Request) => {
 
 		const { message, botType = "collaborative" } = await request.json();
 
+		const validBotTypes = ["alexandria", "kim", "collaborative"] as const;
+		if (botType && !validBotTypes.includes(botType)) {
+			return new Response("Invalid botType", { status: 400 });
+		}
+
 		if (!message || typeof message !== "string") {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
