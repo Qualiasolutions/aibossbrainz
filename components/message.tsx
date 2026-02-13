@@ -22,7 +22,6 @@ import {
 import { EnhancedChatMessage } from "./enhanced-chat-message";
 import { MessageActions } from "./message-actions";
 import { MessageEditor } from "./message-editor";
-import { MessageFullscreen } from "./message-fullscreen";
 import { MessageReasoning } from "./message-reasoning";
 import { MessageSuggestions } from "./message-suggestions";
 import { PreviewAttachment } from "./preview-attachment";
@@ -39,6 +38,7 @@ const PurePreviewMessage = ({
 	requiresScrollPadding,
 	selectedBotType,
 	onSuggestionSelect,
+	onFullscreen,
 }: {
 	chatId: string;
 	message: ChatMessage;
@@ -50,9 +50,9 @@ const PurePreviewMessage = ({
 	requiresScrollPadding: boolean;
 	selectedBotType: BotType;
 	onSuggestionSelect?: (text: string) => void;
+	onFullscreen?: (content: string, botType: BotType) => void;
 }) => {
 	const [mode, setMode] = useState<"view" | "edit">("view");
-	const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
 
 	// Memoize expensive computations to prevent re-renders
 	const attachmentsFromMessage = useMemo(
@@ -125,7 +125,7 @@ const PurePreviewMessage = ({
 						</div>
 					)}
 
-					{/* Loading state when assistant has no text parts yet */}
+					{/* Loading state for assistant messages */}
 					{message.role === "assistant" &&
 						isLoading &&
 						!message.parts?.some(
@@ -309,6 +309,18 @@ const PurePreviewMessage = ({
 						return null;
 					})}
 
+					{/* Subtle streaming indicator when text is present but still loading */}
+					{message.role === "assistant" &&
+						isLoading &&
+						message.parts?.some(
+							(p) => p.type === "text" && p.text?.trim(),
+						) && (
+							<div className="flex items-center gap-1.5 pl-1">
+								<span className="inline-block size-1.5 rounded-full bg-rose-400 animate-pulse" />
+								<span className="text-xs text-stone-400">Streaming...</span>
+							</div>
+						)}
+
 					{!isReadonly && (
 						<MessageActions
 							botType={messageBotType as BotType}
@@ -317,8 +329,8 @@ const PurePreviewMessage = ({
 							key={`action-${message.id}`}
 							message={message}
 							onExpand={
-								message.role === "assistant" && textFromParts
-									? () => setIsFullscreenOpen(true)
+								message.role === "assistant" && textFromParts && onFullscreen
+									? () => onFullscreen(textFromParts, messageBotType as BotType)
 									: undefined
 							}
 							setMode={setMode}
@@ -337,15 +349,6 @@ const PurePreviewMessage = ({
 				</div>
 			</div>
 
-			{/* Fullscreen message dialog */}
-			{message.role === "assistant" && textFromParts && (
-				<MessageFullscreen
-					botType={messageBotType as BotType}
-					content={textFromParts}
-					onOpenChange={setIsFullscreenOpen}
-					open={isFullscreenOpen}
-				/>
-			)}
 		</motion.div>
 	);
 };
@@ -377,6 +380,9 @@ export const PreviewMessage = memo(
 			return false;
 		}
 		if (prevProps.onSuggestionSelect !== nextProps.onSuggestionSelect) {
+			return false;
+		}
+		if (prevProps.onFullscreen !== nextProps.onFullscreen) {
 			return false;
 		}
 

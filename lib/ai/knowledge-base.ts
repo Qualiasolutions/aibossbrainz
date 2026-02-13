@@ -281,8 +281,7 @@ async function getSupabaseKnowledgeContent(botType: string): Promise<string> {
 			return "";
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const { data, error } = await (supabase as any)
+		const { data, error } = await supabase
 			.from("knowledge_base_content")
 			.select("title, content, source, created_at")
 			.in("bot_type", botTypes)
@@ -299,12 +298,8 @@ async function getSupabaseKnowledgeContent(botType: string): Promise<string> {
 
 		return data
 			.map(
-				(row: {
-					title: string;
-					content: string;
-					source: string;
-					created_at: string;
-				}) => `\n\n--- ${row.title} (from ${row.source}) ---\n${row.content}`,
+				(row) =>
+					`\n\n--- ${row.title} (from ${row.source}) ---\n${row.content}`,
 			)
 			.join("");
 	} catch {

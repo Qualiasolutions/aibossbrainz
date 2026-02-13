@@ -12,6 +12,16 @@ type RequestSuggestionsProps = {
 	dataStream: UIMessageStreamWriter<ChatMessage>;
 };
 
+type SuggestionDraft = Pick<
+	Suggestion,
+	| "id"
+	| "documentId"
+	| "originalText"
+	| "suggestedText"
+	| "description"
+	| "isResolved"
+>;
+
 export const requestSuggestions = ({
 	session,
 	dataStream,
@@ -32,10 +42,7 @@ export const requestSuggestions = ({
 				};
 			}
 
-			const suggestions: Omit<
-				Suggestion,
-				"userId" | "createdAt" | "documentCreatedAt"
-			>[] = [];
+			const suggestions: SuggestionDraft[] = [];
 
 			const { elementStream } = streamObject({
 				model: myProvider.languageModel("artifact-model"),
@@ -51,8 +58,7 @@ export const requestSuggestions = ({
 			});
 
 			for await (const element of elementStream) {
-				// @ts-expect-error todo: fix type
-				const suggestion: Suggestion = {
+				const suggestion: SuggestionDraft = {
 					originalText: element.originalSentence,
 					suggestedText: element.suggestedSentence,
 					description: element.description,
@@ -63,7 +69,8 @@ export const requestSuggestions = ({
 
 				dataStream.write({
 					type: "data-suggestion",
-					data: suggestion,
+					// Cast: client only uses display fields (id, originalText, suggestedText, description)
+					data: suggestion as Suggestion,
 					transient: true,
 				});
 
@@ -79,6 +86,7 @@ export const requestSuggestions = ({
 						userId,
 						createdAt: new Date().toISOString(),
 						documentCreatedAt: document.createdAt,
+						deletedAt: null,
 					})),
 				});
 			}

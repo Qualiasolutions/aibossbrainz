@@ -3,6 +3,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -121,7 +122,7 @@ export default function RootLayout({
 					enableSystem={false}
 				>
 					<Toaster position="top-center" />
-					{children}
+					<Suspense>{children}</Suspense>
 				</ThemeProvider>
 				<Analytics />
 				<SpeedInsights />

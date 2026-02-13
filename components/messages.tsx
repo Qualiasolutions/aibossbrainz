@@ -2,7 +2,7 @@ import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
 import { motion } from "framer-motion";
 import { ArrowDownIcon } from "lucide-react";
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useMessages } from "@/hooks/use-messages";
 import type { BotType } from "@/lib/bot-personalities";
 import type { Vote } from "@/lib/supabase/types";
@@ -12,6 +12,7 @@ import { Conversation, ConversationContent } from "./elements/conversation";
 import { EnhancedChatMessage } from "./enhanced-chat-message";
 import { Greeting } from "./greeting";
 import { PreviewMessage } from "./message";
+import { MessageFullscreen } from "./message-fullscreen";
 
 type MessagesProps = {
 	chatId: string;
@@ -41,6 +42,18 @@ function PureMessages({
 	className,
 	onSuggestionSelect,
 }: MessagesProps) {
+	const [fullscreenMessage, setFullscreenMessage] = useState<{
+		content: string;
+		botType: BotType;
+	} | null>(null);
+
+	const handleFullscreen = useCallback(
+		(content: string, botType: BotType) => {
+			setFullscreenMessage({ content, botType });
+		},
+		[],
+	);
+
 	const {
 		containerRef: messagesContainerRef,
 		endRef: messagesEndRef,
@@ -81,6 +94,7 @@ function PureMessages({
 							isReadonly={isReadonly}
 							key={message.id}
 							message={message}
+							onFullscreen={handleFullscreen}
 							onSuggestionSelect={onSuggestionSelect}
 							regenerate={regenerate}
 							requiresScrollPadding={
@@ -132,6 +146,16 @@ function PureMessages({
 					</button>
 				</div>
 			)}
+
+			{/* Single fullscreen dialog for all messages */}
+			<MessageFullscreen
+				botType={fullscreenMessage?.botType ?? "alexandria"}
+				content={fullscreenMessage?.content ?? ""}
+				onOpenChange={(open) => {
+					if (!open) setFullscreenMessage(null);
+				}}
+				open={fullscreenMessage !== null}
+			/>
 		</div>
 	);
 }

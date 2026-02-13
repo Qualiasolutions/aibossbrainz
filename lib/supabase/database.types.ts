@@ -748,6 +748,42 @@ export type Database = {
 					},
 				];
 			};
+			knowledge_base_content: {
+				Row: {
+					id: string;
+					title: string;
+					source: string;
+					source_id: string | null;
+					bot_type: string;
+					content: string;
+					metadata: Json | null;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					title: string;
+					source: string;
+					source_id?: string | null;
+					bot_type: string;
+					content: string;
+					metadata?: Json | null;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					title?: string;
+					source?: string;
+					source_id?: string | null;
+					bot_type?: string;
+					content?: string;
+					metadata?: Json | null;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
 		};
 		Views: {
 			[_ in never]: never;
@@ -862,6 +898,19 @@ export type Database = {
 			get_user_message_count: {
 				Args: { p_cutoff_time: string; p_user_id: string };
 				Returns: number;
+			};
+			get_bounded_messages: {
+				Args: { p_chat_id: string; p_max_messages: number };
+				Returns: {
+					attachments: Json;
+					botType: string | null;
+					chatId: string;
+					createdAt: string;
+					deletedAt: string | null;
+					id: string;
+					parts: Json;
+					role: string;
+				}[];
 			};
 			is_current_user_admin: { Args: never; Returns: boolean };
 			upsert_executive_memory: {

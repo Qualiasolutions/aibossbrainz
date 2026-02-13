@@ -6,14 +6,17 @@ import type { ArtifactActionContext } from "./create-artifact";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
+// Metadata is generic across artifact types (text, code, sheet, image) and
+// passed from SWR's KeyedMutator which is incompatible with Dispatch<SetStateAction>.
+// Using ArtifactActionContext's default generic (any) to match create-artifact.tsx.
 type ArtifactActionsProps = {
 	artifact: UIArtifact;
 	handleVersionChange: (type: "next" | "prev" | "toggle" | "latest") => void;
 	currentVersionIndex: number;
 	isCurrentVersion: boolean;
 	mode: "edit" | "diff";
-	metadata: any;
-	setMetadata: Dispatch<SetStateAction<any>>;
+	metadata: ArtifactActionContext["metadata"];
+	setMetadata: ArtifactActionContext["setMetadata"];
 };
 
 function PureArtifactActions({

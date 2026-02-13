@@ -67,7 +67,10 @@ export function useArtifact() {
 		[setLocalArtifact],
 	);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Metadata varies by artifact type
+	// Metadata type varies per artifact kind (TextArtifactMetadata, Metadata, etc.)
+	// and is consumed via ArtifactActionContext<M=any>. Using Record<string, unknown>
+	// here causes type incompatibility with SWR's KeyedMutator vs Dispatch<SetStateAction>.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Generic metadata across artifact types
 	const { data: localArtifactMetadata, mutate: setLocalArtifactMetadata } =
 		useSWR<any>(
 			() =>

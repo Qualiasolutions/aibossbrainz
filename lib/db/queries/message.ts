@@ -54,12 +54,12 @@ export async function getMessagesByChatId({
 
 		// Use bounded RPC to avoid fetching all messages for long conversations
 		if (limit) {
-			const { data, error } = await (supabase.rpc as any)(
-				"get_bounded_messages",
-				{ p_chat_id: id, p_max_messages: limit },
-			);
+			const { data, error } = await supabase.rpc("get_bounded_messages", {
+				p_chat_id: id,
+				p_max_messages: limit,
+			});
 			if (error) throw error;
-			return (data as unknown as DBMessage[]) || [];
+			return data || [];
 		}
 
 		const { data, error } = await supabase

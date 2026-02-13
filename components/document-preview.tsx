@@ -54,10 +54,16 @@ const Editor = dynamic(
 	},
 );
 
+interface DocumentToolOutput {
+	id: string;
+	title: string;
+	kind: string;
+}
+
 type DocumentPreviewProps = {
 	isReadonly: boolean;
-	result?: any;
-	args?: any;
+	result?: DocumentToolOutput;
+	args?: { title?: string; kind?: string; [key: string]: unknown };
 };
 
 export function DocumentPreview({
@@ -95,7 +101,11 @@ export function DocumentPreview({
 			return (
 				<DocumentToolResult
 					isReadonly={isReadonly}
-					result={{ id: result.id, title: result.title, kind: result.kind }}
+					result={{
+						id: result.id,
+						title: result.title,
+						kind: result.kind as ArtifactKind,
+					}}
 					type="create"
 				/>
 			);
@@ -104,7 +114,10 @@ export function DocumentPreview({
 		if (args) {
 			return (
 				<DocumentToolCall
-					args={{ title: args.title, kind: args.kind }}
+					args={{
+						title: args.title ?? "",
+						kind: (args.kind ?? "text") as ArtifactKind,
+					}}
 					isReadonly={isReadonly}
 					type="create"
 				/>
@@ -113,7 +126,13 @@ export function DocumentPreview({
 	}
 
 	if (isDocumentsFetching) {
-		return <LoadingSkeleton artifactKind={result.kind ?? args.kind} />;
+		return (
+			<LoadingSkeleton
+				artifactKind={
+					(result?.kind ?? args?.kind ?? artifact.kind) as ArtifactKind
+				}
+			/>
+		);
 	}
 
 	const document: Document | null = previewDocument
@@ -136,11 +155,13 @@ export function DocumentPreview({
 
 	return (
 		<div className="relative w-full cursor-pointer">
-			<HitboxLayer
-				hitboxRef={hitboxRef}
-				result={result}
-				setArtifact={setArtifact}
-			/>
+			{result && (
+				<HitboxLayer
+					hitboxRef={hitboxRef}
+					result={result}
+					setArtifact={setArtifact}
+				/>
+			)}
 			<DocumentHeader
 				isStreaming={artifact.status === "streaming"}
 				kind={document.kind as ArtifactKind}
@@ -182,7 +203,7 @@ const PureHitboxLayer = ({
 	setArtifact,
 }: {
 	hitboxRef: React.RefObject<HTMLDivElement | null>;
-	result: any;
+	result: DocumentToolOutput;
 	setArtifact: (
 		updaterFn: UIArtifact | ((currentArtifact: UIArtifact) => UIArtifact),
 	) => void;
@@ -198,7 +219,7 @@ const PureHitboxLayer = ({
 							...artifact,
 							title: result.title,
 							documentId: result.id,
-							kind: result.kind,
+							kind: result.kind as ArtifactKind,
 							content: "", // Reset content to trigger fresh load
 							status: "idle", // Ensure status is idle so document fetch happens
 							isVisible: true,

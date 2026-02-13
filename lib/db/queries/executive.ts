@@ -47,16 +47,11 @@ export async function updateExecutiveMemory({
 		const supabase = await createClient();
 
 		// Try RPC function first for atomic operation (avoids race conditions)
-		// Cast to any to bypass type checking until types are regenerated
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- RPC function types not generated yet
-		const { error: rpcError } = await (supabase as any).rpc(
-			"upsert_executive_memory",
-			{
-				p_user_id: userId,
-				p_executive: executive,
-				p_topic: topic ?? null,
-			},
-		);
+		const { error: rpcError } = await supabase.rpc("upsert_executive_memory", {
+			p_user_id: userId,
+			p_executive: executive,
+			p_topic: topic,
+		});
 
 		// If RPC succeeds, we're done
 		if (!rpcError) return;

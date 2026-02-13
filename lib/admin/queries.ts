@@ -29,10 +29,7 @@ export async function getAllUsers(): Promise<AdminUser[]> {
 
 	// Use RPC function to get all users with stats in a single query
 	// This eliminates N+1 query pattern (previously 4 queries per user)
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data, error } = await (supabase.rpc as any)(
-		"get_admin_users_with_stats",
-	);
+	const { data, error } = await supabase.rpc("get_admin_users_with_stats");
 
 	if (error) throw error;
 
@@ -43,8 +40,7 @@ export async function getUserById(userId: string): Promise<AdminUser | null> {
 	const supabase = createServiceClient();
 
 	// Use RPC function to get user with stats in a single query
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data, error } = await (supabase.rpc as any)("get_admin_user_by_id", {
+	const { data, error } = await supabase.rpc("get_admin_user_by_id", {
 		p_user_id: userId,
 	});
 
@@ -424,16 +420,11 @@ export async function getAllChats(limit = 50): Promise<AdminChat[]> {
 
 	// Use RPC function to get all chats with stats in a single query
 	// This eliminates N+1 query pattern (previously 2 queries per chat)
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data, error } = await (supabase.rpc as any)(
-		"get_admin_chats_with_stats",
-	);
+	const { data, error } = await supabase.rpc("get_admin_chats_with_stats");
 
 	if (error) throw error;
 
-	return ((data || []) as Record<string, unknown>[])
-		.slice(0, limit)
-		.map(mapRpcRowToAdminChat);
+	return (data || []).slice(0, limit).map(mapRpcRowToAdminChat);
 }
 
 export async function getChatWithMessages(chatId: string): Promise<{
@@ -684,19 +675,13 @@ export async function getRecentConversations(
 
 	// Use RPC function to get recent conversations with stats in a single query
 	// This eliminates N+1 query pattern (previously 2 queries per chat)
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { data, error } = await (supabase.rpc as any)(
-		"get_recent_conversations",
-		{
-			p_limit: limit,
-		},
-	);
+	const { data, error } = await supabase.rpc("get_recent_conversations", {
+		p_limit: limit,
+	});
 
 	if (error) throw error;
 
-	return ((data || []) as Record<string, unknown>[]).map(
-		mapRpcRowToConversationPreview,
-	);
+	return (data || []).map(mapRpcRowToConversationPreview);
 }
 
 export interface SupportTicketPreview {

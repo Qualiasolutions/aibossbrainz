@@ -231,8 +231,7 @@ export const POST = withCsrf(async (request: Request) => {
     sentenceCount: transcript.sentences?.length || 0,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: inserted, error: insertError } = await (serviceClient as any)
+  const { data: inserted, error: insertError } = await serviceClient
     .from("knowledge_base_content")
     .insert({
       title: transcript.title || `Fireflies Transcript ${transcriptId}`,

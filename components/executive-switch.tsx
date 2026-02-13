@@ -200,6 +200,30 @@ export function ExecutiveSwitch({
 		}
 	}, [isOpen]);
 
+	// Focus trap: keep Tab/Shift+Tab cycling within the modal
+	const modalRef = useRef<HTMLDivElement>(null);
+	const handleModalKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === "Tab") {
+				const focusableElements = modalRef.current?.querySelectorAll(
+					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+				);
+				if (!focusableElements?.length) return;
+				const first = focusableElements[0] as HTMLElement;
+				const last =
+					focusableElements[focusableElements.length - 1] as HTMLElement;
+				if (e.shiftKey && document.activeElement === first) {
+					e.preventDefault();
+					last.focus();
+				} else if (!e.shiftKey && document.activeElement === last) {
+					e.preventDefault();
+					first.focus();
+				}
+			}
+		},
+		[],
+	);
+
 	return (
 		<div className="relative">
 			<Button
@@ -266,7 +290,15 @@ export function ExecutiveSwitch({
 				isOpen &&
 				createPortal(
 					<AnimatePresence>
-						<div className="fixed inset-0 z-[99999]">
+						{/* biome-ignore lint/a11y/noNoninteractiveElementToKeyboardEvent: focus trap requires onKeyDown on the modal container */}
+						<div
+							className="fixed inset-0 z-[99999]"
+							onKeyDown={handleModalKeyDown}
+							ref={modalRef}
+							role="dialog"
+							aria-label="Select executive"
+							aria-modal="true"
+						>
 							{/* Modal Backdrop */}
 							<motion.div
 								animate={{ opacity: 1 }}

@@ -136,13 +136,10 @@ export async function POST(request: Request) {
 							: session.subscription.id;
 
 					try {
-						const subscriptionResponse =
-							await getStripe().subscriptions.retrieve(subscriptionId);
-						const subscription = subscriptionResponse as unknown as {
-							id: string;
-							status: string;
-							trial_end: number | null;
-						};
+						const subscription =
+							(await getStripe().subscriptions.retrieve(
+								subscriptionId,
+							)) as Stripe.Subscription;
 
 						// Skip if already processed by customer.subscription.created
 						if (
@@ -330,26 +327,23 @@ export async function POST(request: Request) {
 			case "invoice.paid": {
 				const invoice = event.data.object as Stripe.Invoice;
 
-				// Get subscription ID from invoice - handle various Stripe API versions
-				const invoiceAny = invoice as unknown as Record<string, unknown>;
+				// Get subscription ID from invoice via parent.subscription_details (Stripe v20+)
+				const parentSubscription =
+					invoice.parent?.subscription_details?.subscription;
 				const subscriptionId =
-					typeof invoiceAny.subscription === "string"
-						? invoiceAny.subscription
-						: (invoiceAny.subscription as { id?: string })?.id ||
-							(typeof invoice.parent?.subscription_details?.subscription ===
-							"string"
-								? invoice.parent.subscription_details.subscription
-								: null);
+					typeof parentSubscription === "string"
+						? parentSubscription
+						: typeof parentSubscription === "object" &&
+								parentSubscription !== null
+							? parentSubscription.id
+							: null;
 
 				if (subscriptionId) {
 					try {
-						const subscriptionResponse =
-							await getStripe().subscriptions.retrieve(subscriptionId);
-						const subscription = subscriptionResponse as unknown as {
-							id: string;
-							metadata: Record<string, string>;
-							current_period_end: number;
-						};
+						const subscription =
+							(await getStripe().subscriptions.retrieve(
+								subscriptionId,
+							)) as Stripe.Subscription;
 						const subscriptionType = validateSubscriptionType(
 							subscription.metadata?.subscriptionType,
 						);
@@ -396,13 +390,13 @@ export async function POST(request: Request) {
 									`[Stripe Webhook] Set ${subscriptionType} subscription to cancel at period end`,
 								);
 							}
-						} else if (subscription.current_period_end) {
-							const periodEndMs = subscription.current_period_end * 1000;
+						} else if (invoice.period_end) {
+							const periodEndMs = invoice.period_end * 1000;
 							const periodEndDate = new Date(periodEndMs);
 
 							if (Number.isNaN(periodEndDate.getTime())) {
 								console.error(
-									`[Stripe Webhook] Invalid current_period_end value: ${subscription.current_period_end}`,
+									`[Stripe Webhook] Invalid period_end value: ${invoice.period_end}`,
 								);
 							} else {
 								await renewSubscription({
@@ -415,7 +409,7 @@ export async function POST(request: Request) {
 							}
 						} else {
 							console.warn(
-								`[Stripe Webhook] invoice.paid: No userId/subscriptionType in metadata and no current_period_end. Subscription: ${subscription.id}`,
+								`[Stripe Webhook] invoice.paid: No userId/subscriptionType in metadata and no period_end. Subscription: ${subscription.id}`,
 							);
 						}
 					} catch (retrieveError) {

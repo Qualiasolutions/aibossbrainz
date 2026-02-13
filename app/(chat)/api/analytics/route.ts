@@ -33,15 +33,23 @@ export async function GET(request: Request) {
 			getRecentActivity(user.id, 10),
 		]);
 
-		return Response.json({
-			summary,
-			daily,
-			topics,
-			recentActivity,
-			range: Number.parseInt(range, 10),
-			startDate: startDate.toISOString(),
-			endDate: endDate.toISOString(),
-		});
+		return new Response(
+			JSON.stringify({
+				summary,
+				daily,
+				topics,
+				recentActivity,
+				range: Number.parseInt(range, 10),
+				startDate: startDate.toISOString(),
+				endDate: endDate.toISOString(),
+			}),
+			{
+				headers: {
+					"Content-Type": "application/json",
+					"Cache-Control": "private, max-age=300", // 5 min cache
+				},
+			},
+		);
 	} catch (error) {
 		console.error("Analytics API error:", error);
 

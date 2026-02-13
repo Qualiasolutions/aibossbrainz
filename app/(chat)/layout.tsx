@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { Suspense } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { MobileSidebarProvider } from "@/components/mobile-sidebar-context";
@@ -51,7 +52,17 @@ export default async function Layout({
 						<SidebarProvider defaultOpen={true}>
 							<AppSidebar user={user || undefined} isAdmin={isAdmin} />
 							<SidebarInset>
-								<SubscriptionLayout>{children}</SubscriptionLayout>
+								<SubscriptionLayout>
+									<Suspense
+										fallback={
+											<div className="flex h-dvh w-full items-center justify-center">
+												<div className="size-8 animate-spin rounded-full border-4 border-stone-200 border-t-rose-500" />
+											</div>
+										}
+									>
+										{children}
+									</Suspense>
+								</SubscriptionLayout>
 							</SidebarInset>
 						</SidebarProvider>
 					</MobileSidebarProvider>

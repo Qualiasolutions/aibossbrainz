@@ -71,6 +71,24 @@ export async function updateSession(request: NextRequest) {
 		return NextResponse.redirect(url);
 	}
 
+	// Skip auth check entirely for marketing/static pages that never need auth.
+	// This avoids the supabase.auth.getUser() round-trip on public pages.
+	const marketingPaths = [
+		"/pricing",
+		"/contact",
+		"/terms",
+		"/privacy",
+		"/about",
+	];
+	const reqPathname = request.nextUrl.pathname;
+	if (
+		marketingPaths.some(
+			(p) => reqPathname === p || reqPathname.startsWith(`${p}/`),
+		)
+	) {
+		return supabaseResponse;
+	}
+
 	// IMPORTANT: Avoid writing any logic between createServerClient and
 	// supabase.auth.getUser(). A simple mistake could make it very hard to debug
 	// issues with users being randomly logged out.
