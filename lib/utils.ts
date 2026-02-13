@@ -1,6 +1,4 @@
 import type {
-  CoreAssistantMessage,
-  CoreToolMessage,
   UIMessage,
   UIMessagePart,
 } from "ai";
@@ -19,10 +17,6 @@ export function cn(...inputs: ClassValue[]) {
 const CSRF_HEADER_NAME = "x-csrf-token";
 let csrfToken: string | null = null;
 let csrfInitPromise: Promise<string | null> | null = null;
-
-export function setCsrfToken(token: string): void {
-  csrfToken = token;
-}
 
 export function getCsrfToken(): string | null {
   return csrfToken;
@@ -116,13 +110,6 @@ export async function fetchWithErrorHandlers(
   }
 }
 
-export function getLocalStorage(key: string) {
-  if (typeof window !== "undefined") {
-    return JSON.parse(localStorage.getItem(key) || "[]");
-  }
-  return [];
-}
-
 export function generateUUID(): string {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -130,9 +117,6 @@ export function generateUUID(): string {
     return v.toString(16);
   });
 }
-
-type ResponseMessageWithoutId = CoreToolMessage | CoreAssistantMessage;
-type ResponseMessage = ResponseMessageWithoutId & { id: string };
 
 export function getMostRecentUserMessage(messages: UIMessage[]) {
   const userMessages = messages.filter((message) => message.role === "user");
@@ -151,20 +135,6 @@ export function getDocumentTimestampByIndex(
   }
 
   return documents[index].createdAt;
-}
-
-export function getTrailingMessageId({
-  messages,
-}: {
-  messages: ResponseMessage[];
-}): string | null {
-  const trailingMessage = messages.at(-1);
-
-  if (!trailingMessage) {
-    return null;
-  }
-
-  return trailingMessage.id;
 }
 
 export function sanitizeText(text: string) {

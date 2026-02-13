@@ -100,7 +100,7 @@ function getCircuitState(name: string): CircuitBreakerState {
  * Circuit breaker wrapper for API calls
  * Prevents cascading failures by stopping requests to failing services
  */
-export async function withCircuitBreaker<T>(
+async function withCircuitBreaker<T>(
 	name: string,
 	fn: () => Promise<T>,
 	options: Partial<CircuitBreakerOptions> = {},
@@ -231,13 +231,6 @@ export function recordCircuitFailure(
 	}
 }
 
-/**
- * Reset a circuit breaker (for testing or manual recovery)
- */
-export function resetCircuit(name: string): void {
-	circuitBreakers.delete(name);
-}
-
 // Retry with exponential backoff
 
 interface RetryOptions {
@@ -321,7 +314,7 @@ export async function withRetry<T>(
  * Combined circuit breaker and retry wrapper
  * Best practice: retry inside circuit breaker
  */
-export async function withResilience<T>(
+async function withResilience<T>(
 	serviceName: string,
 	fn: () => Promise<T>,
 	options: {

@@ -56,11 +56,6 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
 				session: args.session,
 			});
 
-			// Validate content before saving
-			if (!draftContent || draftContent.trim() === "") {
-				console.error(`[DocumentHandler] Empty content for document "${args.title}" (${args.id})`);
-			}
-
 			if (args.session?.user?.id) {
 				try {
 					await saveDocument({
@@ -70,9 +65,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
 						kind: config.kind,
 						userId: args.session.user.id,
 					});
-					console.log(`[DocumentHandler] Saved document "${args.title}" with ${draftContent.length} chars`);
 				} catch (error) {
-					console.error(`[DocumentHandler] Failed to save document "${args.title}":`, error);
 					throw error; // Re-throw to ensure the error propagates
 				}
 			}
@@ -96,9 +89,7 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
 						kind: config.kind,
 						userId: args.session.user.id,
 					});
-					console.log(`[DocumentHandler] Updated document "${args.document.title}" with ${draftContent.length} chars`);
 				} catch (error) {
-					console.error(`[DocumentHandler] Failed to update document "${args.document.title}":`, error);
 					throw error;
 				}
 			}

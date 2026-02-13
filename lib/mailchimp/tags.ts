@@ -41,9 +41,6 @@ async function applyTagWithRetry(
 	const client = getMailchimpClient();
 	if (!client) {
 		// Graceful degradation - don't block if Mailchimp not configured
-		console.warn(
-			`[Mailchimp] Skipping ${operation} tag - client not configured`,
-		);
 		return { success: true }; // Return success to not block user flow
 	}
 
@@ -68,37 +65,25 @@ async function applyTagWithRetry(
 				},
 			);
 
-			console.log(
-				`[Mailchimp] Successfully applied ${operation} tag to ${email}`,
-			);
-
 			return { success: true };
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : String(error);
-			console.error(
-				`[Mailchimp] Attempt ${attempt}/${maxRetries} failed for ${operation} tag on ${email}: ${errorMessage}`,
-			);
 
 			if (attempt < maxRetries) {
 				const delay = retryDelays[attempt - 1];
-				console.log(`[Mailchimp] Retrying in ${delay}ms...`);
 				await sleep(delay);
 			} else {
 				// All retries exhausted - notify admin and return failure
 				const fullError = `Failed to apply ${operation} tag to ${email} after ${maxRetries} attempts. Last error: ${errorMessage}`;
-				console.error(`[Mailchimp] ${fullError}`);
 
 				try {
 					await sendAdminNotification({
 						subject: `Mailchimp Tag Failure: ${operation}`,
 						message: `Email: ${email}\nOperation: ${operation}\nTag: ${tagName}\nError: ${errorMessage}\n\nThis user may not receive the expected email sequence.`,
 					});
-				} catch (notifyErr) {
-					console.error(
-						`[Mailchimp] Failed to send admin failure notification:`,
-						notifyErr,
-					);
+				} catch {
+					// Failed to send admin notification
 				}
 
 				return { success: false, error: fullError };

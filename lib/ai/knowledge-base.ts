@@ -32,9 +32,6 @@ async function withTimeout<T>(
 	let timeoutId: NodeJS.Timeout;
 	const timeoutPromise = new Promise<T>((resolve) => {
 		timeoutId = setTimeout(() => {
-			console.warn(
-				`[Knowledge Base] Load timeout after ${timeoutMs}ms, using fallback`,
-			);
 			resolve(fallback);
 		}, timeoutMs);
 	});
@@ -43,9 +40,8 @@ async function withTimeout<T>(
 		const result = await Promise.race([promise, timeoutPromise]);
 		clearTimeout(timeoutId!);
 		return result;
-	} catch (error) {
+	} catch {
 		clearTimeout(timeoutId!);
-		console.warn("[Knowledge Base] Load failed, using fallback:", error);
 		return fallback;
 	}
 }
@@ -154,7 +150,6 @@ async function parseFile(filePath: string, fileName: string): Promise<string> {
 		".ppt",
 	];
 	if (mediaExtensions.includes(ext)) {
-		console.log(`[Knowledge Base] Skipping media file: ${fileName}`);
 		return `[Media file: ${fileName} - content not extracted]`;
 	}
 
@@ -169,9 +164,6 @@ async function parseFile(filePath: string, fileName: string): Promise<string> {
 		}
 
 		if (stats.size > MAX_FILE_SIZE) {
-			console.log(
-				`[Knowledge Base] Skipping large file: ${fileName} (${Math.round(stats.size / 1024 / 1024)}MB)`,
-			);
 			return `[File too large: ${fileName} (${Math.round(stats.size / 1024 / 1024)}MB > ${MAX_FILE_SIZE / 1024 / 1024}MB limit)]`;
 		}
 
@@ -298,10 +290,6 @@ async function getSupabaseKnowledgeContent(botType: string): Promise<string> {
 
 		if (error) {
 			// Table might not exist yet -- degrade gracefully
-			console.warn(
-				"[Knowledge Base] Supabase query failed (table may not exist):",
-				error.message,
-			);
 			return "";
 		}
 
@@ -319,8 +307,7 @@ async function getSupabaseKnowledgeContent(botType: string): Promise<string> {
 				}) => `\n\n--- ${row.title} (from ${row.source}) ---\n${row.content}`,
 			)
 			.join("");
-	} catch (err) {
-		console.warn("[Knowledge Base] Supabase content load failed:", err);
+	} catch {
 		return "";
 	}
 }

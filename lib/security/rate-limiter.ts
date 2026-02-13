@@ -173,48 +173,6 @@ export async function checkRateLimit(
 }
 
 /**
- * Gets current rate limit count without incrementing
- */
-export async function getRateLimitCount(
-	userId: string,
-): Promise<number | null> {
-	const redis = await getRedisClient();
-
-	if (!redis) {
-		return null;
-	}
-
-	const key = getRateLimitKey(userId);
-
-	try {
-		const count = await redis.get(key);
-		return count ? Number.parseInt(count, 10) : 0;
-	} catch {
-		return null;
-	}
-}
-
-/**
- * Resets rate limit for a user (admin use)
- */
-export async function resetRateLimit(userId: string): Promise<boolean> {
-	const redis = await getRedisClient();
-
-	if (!redis) {
-		return false;
-	}
-
-	const key = getRateLimitKey(userId);
-
-	try {
-		await redis.del(key);
-		return true;
-	} catch {
-		return false;
-	}
-}
-
-/**
  * Gets end of current day (UTC)
  */
 function getEndOfDay(): Date {
@@ -344,28 +302,5 @@ export async function checkAuthRateLimit(
 	} catch {
 		// Redis error, fall back to in-memory rate limiting
 		return checkAuthRateLimitMemory(ip, action, maxAttempts);
-	}
-}
-
-/**
- * Resets auth rate limit for an IP (admin use)
- */
-export async function resetAuthRateLimit(
-	ip: string,
-	action: "login" | "signup" | "reset",
-): Promise<boolean> {
-	const redis = await getRedisClient();
-
-	if (!redis) {
-		return false;
-	}
-
-	const key = getAuthRateLimitKey(ip, action);
-
-	try {
-		await redis.del(key);
-		return true;
-	} catch {
-		return false;
 	}
 }

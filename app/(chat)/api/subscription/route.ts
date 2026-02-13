@@ -35,9 +35,6 @@ async function syncFromStripe(
 		});
 
 		if (subscriptions.data.length === 0) {
-			console.log(
-				`[Subscription API] No subscriptions found in Stripe for customer ${stripeCustomerId}`,
-			);
 			return false;
 		}
 
@@ -46,10 +43,6 @@ async function syncFromStripe(
 			subscriptions.data.find(
 				(s) => s.status === "trialing" || s.status === "active",
 			) || subscriptions.data[0];
-
-		console.log(
-			`[Subscription API] Found Stripe subscription ${sub.id} with status "${sub.status}" for user ${userId}`,
-		);
 
 		const subscriptionType =
 			(sub.metadata?.subscriptionType as "monthly" | "annual" | "lifetime") ||
@@ -62,9 +55,6 @@ async function syncFromStripe(
 				stripeSubscriptionId: sub.id,
 				trialEndDate: new Date(sub.trial_end * 1000),
 			});
-			console.log(
-				`[Subscription API] Synced from Stripe: started trial for user ${userId}`,
-			);
 			return true;
 		}
 
@@ -74,18 +64,11 @@ async function syncFromStripe(
 				subscriptionType,
 				stripeSubscriptionId: sub.id,
 			});
-			console.log(
-				`[Subscription API] Synced from Stripe: activated subscription for user ${userId}`,
-			);
 			return true;
 		}
 
-		console.log(
-			`[Subscription API] Stripe subscription ${sub.id} has non-activatable status "${sub.status}"`,
-		);
 		return false;
-	} catch (error) {
-		console.error("[Subscription API] Stripe sync failed:", error);
+	} catch {
 		return false;
 	}
 }
@@ -113,8 +96,7 @@ export async function GET() {
 
 		try {
 			await ensureUserExists({ id: user.id, email: user.email });
-		} catch (ensureError) {
-			console.error("[Subscription API] ensureUserExists error:", ensureError);
+		} catch {
 			// Continue anyway - user might already exist
 		}
 
@@ -129,9 +111,6 @@ export async function GET() {
 		// check Stripe directly and sync. Run for ANY non-active status, not just
 		// "pending", to handle edge cases where status drifted.
 		if (!isActive && profile?.stripeCustomerId) {
-			console.log(
-				`[Subscription API] User ${user.id} has stripeCustomerId but status is "${profile.subscriptionStatus}" — attempting Stripe sync`,
-			);
 			const synced = await syncFromStripe(user.id, profile.stripeCustomerId);
 			if (synced) {
 				// Re-fetch updated profile
@@ -150,8 +129,7 @@ export async function GET() {
 			subscriptionEndDate: profile?.subscriptionEndDate ?? null,
 			hasStripeSubscription: isActive || !!profile?.stripeCustomerId,
 		});
-	} catch (error) {
-		console.error("[Subscription API] GET error:", error);
+	} catch {
 		// Return a graceful fallback instead of error for GET requests
 		return Response.json({
 			isActive: false,

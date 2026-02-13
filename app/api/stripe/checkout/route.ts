@@ -14,7 +14,6 @@ export const POST = withCsrf(async (request: Request) => {
 	try {
 		// Validate Stripe configuration at runtime
 		if (!process.env.STRIPE_SECRET_KEY) {
-			console.error("[Stripe Checkout] STRIPE_SECRET_KEY is not configured");
 			return NextResponse.json(
 				{ error: "Payment system is not configured. Please contact support." },
 				{ status: 503 },
@@ -36,9 +35,6 @@ export const POST = withCsrf(async (request: Request) => {
 		// Check if price ID is configured for this plan
 		const priceId = STRIPE_PRICES[planId as StripePlanId];
 		if (!priceId || priceId.includes("placeholder")) {
-			console.error(
-				`[Stripe Checkout] Price ID not configured for plan: ${planId}. Current value: ${priceId}`,
-			);
 			return NextResponse.json(
 				{ error: "This plan is not yet available. Please contact support." },
 				{ status: 503 },
@@ -46,7 +42,6 @@ export const POST = withCsrf(async (request: Request) => {
 		}
 
 		const appUrl = getValidAppUrl(request);
-		console.log(`[Stripe Checkout] Using app URL: ${appUrl}`);
 
 		// Build URLs with properly encoded query parameters
 		const successUrl = new URL(`${appUrl}/subscribe`);
@@ -66,8 +61,6 @@ export const POST = withCsrf(async (request: Request) => {
 
 		return NextResponse.json({ url: checkoutUrl });
 	} catch (error) {
-		console.error("[Stripe Checkout] Error:", error);
-
 		if (error instanceof z.ZodError) {
 			return NextResponse.json({ error: "Invalid plan ID" }, { status: 400 });
 		}

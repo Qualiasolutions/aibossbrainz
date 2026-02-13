@@ -122,10 +122,6 @@ export async function ensureUserExists({
 				.eq("id", emailUser.id);
 
 			if (archiveError) {
-				console.error(
-					"[ensureUserExists] Failed to archive old user:",
-					archiveError,
-				);
 				throw archiveError;
 			}
 
@@ -154,16 +150,9 @@ export async function ensureUserExists({
 						.single();
 					if (raceUser) return raceUser;
 				}
-				console.error(
-					"[ensureUserExists] Re-signup insert error:",
-					insertError,
-				);
 				throw insertError;
 			}
 
-			console.log(
-				`[ensureUserExists] Archived old user (${emailUser.id}) and created new user (${id}) for re-signup`,
-			);
 			// Cache the new user ID
 			verifiedUserIds.add(id);
 			return newUser ?? { id };
@@ -200,15 +189,13 @@ export async function ensureUserExists({
 					return raceUser;
 				}
 			}
-			console.error("[ensureUserExists] Upsert error:", error);
 			throw error;
 		}
 
 		// Cache the verified user ID
 		verifiedUserIds.add(id);
 		return data ?? { id };
-	} catch (error) {
-		console.error("ensureUserExists error:", error);
+	} catch {
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to ensure user exists",
@@ -264,7 +251,6 @@ export async function checkUserSubscription(userId: string): Promise<{
 			.single();
 
 		if (error || !user) {
-			console.error("[checkUserSubscription] Error:", error);
 			return {
 				isActive: false,
 				subscriptionType: null,
@@ -339,8 +325,7 @@ export async function checkUserSubscription(userId: string): Promise<{
 		};
 		subscriptionCache.set(userId, { result, timestamp: Date.now() });
 		return result;
-	} catch (error) {
-		console.error("checkUserSubscription error:", error);
+	} catch {
 		// SECURITY: Fail closed - deny access if subscription check fails
 		// This prevents attackers from bypassing subscription checks via DB errors
 		return {
@@ -387,11 +372,9 @@ export async function createAuditLog({
 		});
 
 		if (error) {
-			console.error("Failed to create audit log:", error);
 			// Don't throw - audit logs shouldn't break the main operation
 		}
-	} catch (error) {
-		console.error("createAuditLog error:", error);
+	} catch {
 		// Non-critical - audit failure shouldn't break main operation
 	}
 }
@@ -482,7 +465,6 @@ export async function updateUserProfile({
 
 		if (error) throw error;
 	} catch (error) {
-		console.error("[updateUserProfile] Database error:", error);
 		throw new ChatSDKError(
 			"bad_request:database",
 			error instanceof Error ? error.message : "Failed to update user profile",

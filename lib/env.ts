@@ -40,14 +40,11 @@ export const env = createEnv({
 		ELEVENLABS_API_KEY: z.string().optional(),
 		TAVILY_API_KEY: z.string().optional(),
 		SERPER_API_KEY: z.string().optional(),
-		RESEND_API_KEY: z.string().optional(),
 		// Observability
 		SENTRY_DSN: z.string().url().optional(),
 		SENTRY_AUTH_TOKEN: z.string().optional(),
 		// Cron jobs
 		CRON_SECRET: z.string().optional(),
-		// Email notifications
-		RESEND_FROM_EMAIL: z.string().email().optional(),
 		// Logging
 		LOG_LEVEL: z
 			.enum(["fatal", "error", "warn", "info", "debug", "trace"])
@@ -89,11 +86,9 @@ export const env = createEnv({
 		ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
 		TAVILY_API_KEY: process.env.TAVILY_API_KEY,
 		SERPER_API_KEY: process.env.SERPER_API_KEY,
-		RESEND_API_KEY: process.env.RESEND_API_KEY,
 		SENTRY_DSN: process.env.SENTRY_DSN,
 		SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
 		CRON_SECRET: process.env.CRON_SECRET,
-		RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
 		LOG_LEVEL: process.env.LOG_LEVEL,
 		PLAYWRIGHT: process.env.PLAYWRIGHT,
 		CI_PLAYWRIGHT: process.env.CI_PLAYWRIGHT,

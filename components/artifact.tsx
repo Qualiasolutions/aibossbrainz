@@ -107,10 +107,6 @@ function PureArtifact({
 				// Save streamed content as a backup, using CSRF-authenticated fetch.
 				// The server-side handler (createDocumentHandler) saves first,
 				// but this ensures content is persisted even if that save failed.
-				console.log(
-					`[Artifact] Backup save: ${currentArtifact.content.length} chars for "${currentArtifact.title}"`,
-				);
-
 				csrfFetch(`/api/document?id=${currentArtifact.documentId}`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -121,24 +117,16 @@ function PureArtifact({
 					}),
 				})
 					.then((res) => {
-						if (!res.ok) {
-							console.error(`[Artifact] Backup save failed: ${res.status}`);
-						} else {
-							console.log("[Artifact] Backup save succeeded");
+						if (res.ok) {
 							serverSavedRef.current = true;
 						}
 					})
-					.catch((error) => {
-						console.error("[Artifact] Backup save error:", error);
-					})
+					.catch(() => {})
 					.finally(() => {
 						// Allow DB fetch after save attempt completes (whether success or failure)
 						setPostStreamReady(true);
 					});
 			} else {
-				console.warn(
-					`[Artifact] No content to save for "${currentArtifact.title}" (${currentArtifact.content?.length || 0} chars)`,
-				);
 				// Still allow DB fetch even if nothing to save
 				setPostStreamReady(true);
 			}
@@ -200,9 +188,6 @@ function PureArtifact({
 							currentArtifact.content.trim() !== "" &&
 							currentArtifact.content.length > dbContent.length
 						) {
-							console.log(
-								"[Artifact] Keeping streamed content over shorter DB content",
-							);
 							return currentArtifact;
 						}
 						return {
@@ -211,9 +196,7 @@ function PureArtifact({
 						};
 					});
 				} else {
-					console.warn(
-						"[Artifact] DB returned empty content, keeping streamed content",
-					);
+					// DB returned empty content, keeping streamed content
 				}
 			}
 		}
