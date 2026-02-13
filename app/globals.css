@@ -33,6 +33,39 @@
   }
 }
 
+/* Message entrance — snappy fade + slide */
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: message-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Streaming cursor — clean blink */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.streaming-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.15em;
+  background-color: var(--alecci-red);
+  border-radius: 1px;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  animation: cursor-blink 0.8s step-end infinite;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    ALECCI MEDIA — PREMIUM RED/WHITE/BLACK DESIGN SYSTEM
    Minimalist. Bold. Executive.

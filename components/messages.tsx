@@ -1,6 +1,5 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
-import { motion } from "framer-motion";
 import { ArrowDownIcon } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useMessages } from "@/hooks/use-messages";
@@ -107,12 +106,7 @@ function PureMessages({
 					{status === "submitted" &&
 						messages.length > 0 &&
 						messages[messages.length - 1]?.role === "user" && (
-							<motion.div
-								animate={{ opacity: 1 }}
-								className="w-full"
-								initial={{ opacity: 0 }}
-								transition={{ duration: 0.15 }}
-							>
+							<div className="message-enter w-full">
 								{/* biome-ignore lint/a11y/useValidAriaRole: role is a component prop, not an ARIA role */}
 								<EnhancedChatMessage
 									botType={selectedBotType}
@@ -120,7 +114,7 @@ function PureMessages({
 									isTyping={true}
 									role="assistant"
 								/>
-							</motion.div>
+							</div>
 						)}
 
 					<div

@@ -1,7 +1,6 @@
 "use client";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
-import { motion } from "framer-motion";
 import { memo, useMemo, useState } from "react";
 import { parseSuggestions } from "@/lib/ai/parse-suggestions";
 import type { BotType } from "@/lib/bot-personalities";
@@ -85,13 +84,10 @@ const PurePreviewMessage = ({
 	);
 
 	return (
-		<motion.div
-			animate={{ opacity: 1, y: 0 }}
-			className="group/message w-full"
+		<div
+			className="group/message message-enter w-full"
 			data-role={message.role}
 			data-testid={`message-${message.role}`}
-			initial={{ opacity: 0, y: 5 }}
-			transition={{ duration: 0.12, ease: [0.16, 1, 0.3, 1] }}
 		>
 			<div
 				className={cn("flex w-full items-start gap-2 md:gap-3", {
@@ -174,7 +170,7 @@ const PurePreviewMessage = ({
 								return (
 									<div className="flex w-full justify-end" key={key}>
 										<MessageContent
-											className="max-w-[85%] break-words rounded-2xl border border-stone-200 bg-white px-4 py-1.5 text-sm text-stone-800 shadow-sm sm:max-w-[70%] sm:px-5 sm:py-2"
+											className="max-w-[85%] break-words rounded-xl border border-stone-200/60 bg-stone-50/80 px-4 py-2 text-sm text-stone-800 sm:max-w-[70%]"
 											data-testid="message-content"
 										>
 											<Response>{sanitizeText(part.text)}</Response>
@@ -309,16 +305,6 @@ const PurePreviewMessage = ({
 						return null;
 					})}
 
-					{/* Subtle streaming indicator when text is present but still loading */}
-					{message.role === "assistant" &&
-						isLoading &&
-						message.parts?.some((p) => p.type === "text" && p.text?.trim()) && (
-							<div className="flex items-center gap-1.5 pl-1">
-								<span className="inline-block size-1.5 rounded-full bg-rose-400 animate-pulse" />
-								<span className="text-xs text-stone-400">Streaming...</span>
-							</div>
-						)}
-
 					{!isReadonly && (
 						<MessageActions
 							botType={messageBotType as BotType}
@@ -346,7 +332,7 @@ const PurePreviewMessage = ({
 					)}
 				</div>
 			</div>
-		</motion.div>
+		</div>
 	);
 };
 

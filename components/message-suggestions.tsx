@@ -101,10 +101,10 @@ export function MessageSuggestions({
 			<motion.div
 				animate={{ opacity: 1, y: 0 }}
 				className="mt-5"
-				exit={{ opacity: 0, y: -8 }}
-				initial={{ opacity: 0, y: 12 }}
+				exit={{ opacity: 0, y: -4 }}
+				initial={{ opacity: 0, y: 6 }}
 				transition={{
-					duration: 0.3,
+					duration: 0.2,
 					ease: [0.16, 1, 0.3, 1],
 				}}
 			>
@@ -163,14 +163,10 @@ export function MessageSuggestions({
 										{isCopied ? (
 											<motion.span
 												key="check"
-												initial={{ scale: 0, rotate: -180 }}
-												animate={{ scale: 1, rotate: 0 }}
+												initial={{ scale: 0 }}
+												animate={{ scale: 1 }}
 												exit={{ scale: 0 }}
-												transition={{
-													type: "spring",
-													stiffness: 500,
-													damping: 25,
-												}}
+												transition={{ duration: 0.15 }}
 											>
 												<Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
 											</motion.span>
