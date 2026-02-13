@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** v1.2 Client Feedback Sweep - Phase 14 complete, all phases done
+**Current focus:** Quick tasks (post-v1.2 polish)
 
 ## Current Position
 
@@ -64,8 +64,14 @@ Progress: [###########] 100% (11/11 plans)
 - Executive bios: 2-column grid cards with CMS-driven descriptions, not chat-bubble window chrome
 - Checkup section: Placed between ExecutiveCards and BenefitsGrid for natural content flow
 - Footer social icons: Globe (aleccimedia.com) + Facebook + LinkedIn, X/Twitter removed
+- Chat animations: CSS-only with cubic-bezier(0.16, 1, 0.3, 1) easing; separate classes for user (message-enter) and assistant (assistant-enter) messages
+- Thinking indicator: 3 pulsing dots (thinking-dots class) over skeleton/shimmer for assistant waiting state
+- framer-motion removed from greeting.tsx and message-suggestions.tsx; kept only in landing-page-client.tsx
 
 ### Completed
+
+**Quick Tasks:**
+- quick-01: Chat animation revamp -- thinking dots, cursor pulse, staggered suggestions, framer-motion removed from 2 components
 
 **v1.2 (Complete):**
 - 11-01: Auth rate-limit crash fix, 8-char password min, PasswordInput show/hide toggle
@@ -101,6 +107,6 @@ Progress: [###########] 100% (11/11 plans)
 
 ## Session Continuity
 
-Last session: 2026-02-11
-Stopped at: v1.2 complete -- all 11 plans across 5 phases executed
-Resume: v1.2 milestone fully complete. Next milestone planning needed.
+Last session: 2026-02-13
+Stopped at: Quick task 1 complete (chat animations revamp)
+Resume: Quick tasks in progress. v1.2 milestone fully complete.
