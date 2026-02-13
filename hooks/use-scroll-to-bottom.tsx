@@ -34,20 +34,15 @@ export function useScrollToBottom() {
 			});
 		});
 
+		// Watch only direct children, not subtree (avoids firing on every text node change during streaming)
 		const mutationObserver = new MutationObserver(() => {
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => {
-					handleScroll();
-				});
-			});
+			requestAnimationFrame(handleScroll);
 		});
 
 		resizeObserver.observe(container);
 		mutationObserver.observe(container, {
 			childList: true,
-			subtree: true,
-			attributes: true,
-			attributeFilter: ["style", "class", "data-state"],
+			subtree: false,
 		});
 
 		handleScroll();

@@ -170,10 +170,17 @@ export const Messages = memo(PureMessages, (prevProps, nextProps) => {
 	if (prevProps.messages.length !== nextProps.messages.length) {
 		return false;
 	}
-	if (!equal(prevProps.messages, nextProps.messages)) {
+	// Short-circuit: skip deep comparison if references are identical
+	if (
+		prevProps.messages !== nextProps.messages &&
+		!equal(prevProps.messages, nextProps.messages)
+	) {
 		return false;
 	}
-	if (!equal(prevProps.votes, nextProps.votes)) {
+	if (
+		prevProps.votes !== nextProps.votes &&
+		!equal(prevProps.votes, nextProps.votes)
+	) {
 		return false;
 	}
 	if (prevProps.onSuggestionSelect !== nextProps.onSuggestionSelect) {

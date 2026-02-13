@@ -356,7 +356,11 @@ export const PreviewMessage = memo(
 		if (prevProps.requiresScrollPadding !== nextProps.requiresScrollPadding) {
 			return false;
 		}
-		if (!equal(prevProps.message.parts, nextProps.message.parts)) {
+		// Short-circuit: skip deep comparison if references are identical
+		if (
+			prevProps.message.parts !== nextProps.message.parts &&
+			!equal(prevProps.message.parts, nextProps.message.parts)
+		) {
 			return false;
 		}
 		if (!equal(prevProps.vote, nextProps.vote)) {
