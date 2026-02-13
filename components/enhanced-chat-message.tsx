@@ -14,7 +14,7 @@ type EnhancedChatMessageProps = {
 };
 
 /**
- * 60fps typewriter with adaptive character reveal.
+ * Word-by-word typewriter with natural pacing.
  * Instantly renders history-loaded messages. Gracefully finishes after stream ends.
  */
 const TypewriterContent = memo(
@@ -25,6 +25,11 @@ const TypewriterContent = memo(
 		const targetLengthRef = useRef(0);
 		const hasStreamedRef = useRef(false);
 		const mountedWithStreamingRef = useRef(isStreaming);
+		const contentRef = useRef(content);
+		const isStreamingRef = useRef(isStreaming);
+
+		contentRef.current = content;
+		isStreamingRef.current = isStreaming;
 
 		if (isStreaming) {
 			hasStreamedRef.current = true;
@@ -39,19 +44,35 @@ const TypewriterContent = memo(
 
 		const animateTypewriter = useCallback(() => {
 			const now = performance.now();
-			if (now - lastFrameTimeRef.current < 16) {
+			// Word-by-word pacing: ~60ms while streaming, ~20ms for catch-up
+			const interval = isStreamingRef.current ? 60 : 20;
+			if (now - lastFrameTimeRef.current < interval) {
 				animationRef.current = requestAnimationFrame(animateTypewriter);
 				return;
 			}
 			lastFrameTimeRef.current = now;
 
+			const text = contentRef.current;
+			const target = targetLengthRef.current;
+
 			setDisplayedLength((current) => {
-				const target = targetLengthRef.current;
 				if (current >= target) return current;
 
 				const gap = target - current;
-				const charsToAdd = Math.min(12, Math.max(3, Math.ceil(gap * 0.12)));
-				const next = Math.min(current + charsToAdd, target);
+
+				// Find next word boundary: skip to end of next word(s)
+				let pos = current;
+				const wordsPerTick = !isStreamingRef.current && gap > 150 ? 3 : 1;
+
+				for (let w = 0; w < wordsPerTick && pos < target; w++) {
+					// Skip whitespace
+					while (pos < target && /\s/.test(text[pos])) pos++;
+					// Skip word characters
+					while (pos < target && !/\s/.test(text[pos])) pos++;
+				}
+
+				// Fallback: always advance at least 1 char
+				const next = Math.min(pos > current ? pos : current + 1, target);
 
 				if (next < target) {
 					animationRef.current = requestAnimationFrame(animateTypewriter);
