@@ -8,6 +8,7 @@ import {
 } from "./client";
 
 type TagResult = { success: boolean; error?: string };
+type SubscriptionType = "monthly" | "annual" | "lifetime";
 
 /**
  * Generate MD5 hash of lowercase email for Mailchimp subscriber lookup.
@@ -106,6 +107,55 @@ export async function applyTrialTag(email: string): Promise<TagResult> {
 	return applyTagWithRetry(email, MAILCHIMP_TAGS.TRIAL, "trial");
 }
 
+function getTrialPlanTag(subscriptionType: SubscriptionType): string {
+	switch (subscriptionType) {
+		case "monthly":
+			return MAILCHIMP_TAGS.TRIAL_MONTHLY;
+		case "annual":
+			return MAILCHIMP_TAGS.TRIAL_ANNUAL;
+		case "lifetime":
+			return MAILCHIMP_TAGS.TRIAL_LIFETIME;
+	}
+}
+
+/**
+ * Apply a "plan choice" tag during trial so the user is segmented by
+ * the plan they selected at checkout (monthly/annual/lifetime), even
+ * before the first payment posts.
+ *
+ * This is intentionally separate from paid tags to avoid triggering
+ * paid automations during the trial window.
+ */
+export async function applyTrialPlanChoiceTag(
+	email: string,
+	subscriptionType: SubscriptionType,
+): Promise<TagResult> {
+	const tagName = getTrialPlanTag(subscriptionType);
+	const operation = `trial choice ${subscriptionType}`;
+	return applyTagWithRetry(email, tagName, operation);
+}
+
+/**
+ * Apply the trial tag and (optionally) the plan-choice tag.
+ */
+export async function applyTrialTags(
+	email: string,
+	subscriptionType?: SubscriptionType | null,
+): Promise<TagResult> {
+	const base = await applyTrialTag(email);
+	if (!base.success) return base;
+
+	if (!subscriptionType) return base;
+	const plan = await applyTrialPlanChoiceTag(email, subscriptionType);
+	if (!plan.success) {
+		return {
+			success: false,
+			error: plan.error || "Failed to apply trial plan-choice tag",
+		};
+	}
+	return { success: true };
+}
+
 /**
  * Apply the appropriate paid tag based on subscription type.
  * The trial tag is intentionally kept for journey tracking.
@@ -116,7 +166,7 @@ export async function applyTrialTag(email: string): Promise<TagResult> {
  */
 export async function applyPaidTag(
 	email: string,
-	subscriptionType: "monthly" | "annual" | "lifetime",
+	subscriptionType: SubscriptionType,
 ): Promise<TagResult> {
 	// Map each subscription type to its own tag
 	const tagMap: Record<typeof subscriptionType, string> = {

@@ -7,6 +7,7 @@ import {
 } from "@/lib/db/queries";
 import { sendCancellationEmail } from "@/lib/email/subscription-emails";
 import { ChatSDKError } from "@/lib/errors";
+import { applyPaidTag, applyTrialTags } from "@/lib/mailchimp/tags";
 import { withCsrf } from "@/lib/security/with-csrf";
 import {
 	activateSubscription,
@@ -15,6 +16,7 @@ import {
 	startTrial,
 } from "@/lib/stripe/actions";
 import { getStripe } from "@/lib/stripe/config";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -118,6 +120,28 @@ export async function GET() {
 				isActive =
 					profile?.subscriptionStatus === "active" ||
 					profile?.subscriptionStatus === "trialing";
+
+				// Best-effort Mailchimp tagging if the webhook was missed/delayed.
+				const st = profile?.subscriptionType;
+				const isPlan = st === "monthly" || st === "annual" || st === "lifetime";
+				const subscriptionType = isPlan ? st : null;
+				const email = user.email;
+				if (email) {
+					after(async () => {
+						try {
+							if (profile?.subscriptionStatus === "trialing") {
+								await applyTrialTags(email, subscriptionType);
+							} else if (
+								profile?.subscriptionStatus === "active" &&
+								subscriptionType
+							) {
+								await applyPaidTag(email, subscriptionType);
+							}
+						} catch (err) {
+							console.error("[/api/subscription] Mailchimp tagging failed:", err);
+						}
+					});
+				}
 			}
 		}
 

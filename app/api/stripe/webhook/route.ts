@@ -3,7 +3,7 @@ import { after, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getUserFullProfile } from "@/lib/db/queries";
 import { sendTrialStartedEmail } from "@/lib/email/subscription-emails";
-import { applyPaidTag, applyTrialTag } from "@/lib/mailchimp/tags";
+import { applyPaidTag, applyTrialTags } from "@/lib/mailchimp/tags";
 import {
 	activateSubscription,
 	expireSubscription,
@@ -29,7 +29,7 @@ async function applyMailchimpTags(
 ): Promise<void> {
 	try {
 		if (type === "trial") {
-			const result = await applyTrialTag(email);
+			const result = await applyTrialTags(email, subscriptionType ?? null);
 			if (!result.success) {
 				console.error(
 					`[Stripe Webhook] Mailchimp trial tagging failed for ${email}: ${result.error}`,

@@ -1,5 +1,5 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import {
 	checkUserSubscription,
 	ensureUserExists,
@@ -7,6 +7,7 @@ import {
 	getUserProfile,
 } from "@/lib/db/queries";
 import { sendWelcomeEmail } from "@/lib/email/subscription-emails";
+import { applyPaidTag, applyTrialTags } from "@/lib/mailchimp/tags";
 import { activateSubscription, startTrial } from "@/lib/stripe/actions";
 import { getStripe } from "@/lib/stripe/config";
 import { getValidAppUrl } from "@/lib/stripe/url";
@@ -136,6 +137,32 @@ async function handleAuthenticatedUser(
 
 	// If subscription is now active (either was already or just synced), go to app
 	if (subscription.isActive) {
+		// Best-effort Mailchimp tagging in case webhooks were delayed/missed.
+		// This ensures trial users are tagged by the plan they selected.
+		const email = user.email;
+		if (email) {
+			after(async () => {
+				try {
+					const profile = await getUserFullProfile({ userId: user.id });
+					const st = profile?.subscriptionType;
+					const isPlan =
+						st === "monthly" || st === "annual" || st === "lifetime";
+					const subscriptionType = isPlan ? st : null;
+
+					if (profile?.subscriptionStatus === "trialing") {
+						await applyTrialTags(email, subscriptionType);
+					} else if (
+						profile?.subscriptionStatus === "active" &&
+						subscriptionType
+					) {
+						await applyPaidTag(email, subscriptionType);
+					}
+				} catch (err) {
+					console.error("[Auth Callback] Mailchimp tagging failed:", err);
+				}
+			});
+		}
+
 		return NextResponse.redirect(`${origin}/new`);
 	}
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isUserAdmin } from "@/lib/admin/queries";
-import { applyTrialTag } from "@/lib/mailchimp/tags";
+import { applyTrialTags } from "@/lib/mailchimp/tags";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
@@ -40,7 +40,7 @@ export const POST = withCsrf(async () => {
 	// Query all trial users with verified emails
 	const { data: trialUsers, error: queryError } = await serviceClient
 		.from("User")
-		.select("id, email")
+		.select("id, email, subscriptionType")
 		.eq("subscriptionStatus", "trialing")
 		.not("email", "is", null)
 		.is("deletedAt", null);
@@ -76,7 +76,14 @@ export const POST = withCsrf(async () => {
 	for (const trialUser of trialUsers) {
 		if (!trialUser.email) continue;
 
-		const result = await applyTrialTag(trialUser.email);
+		const subscriptionType =
+			trialUser.subscriptionType === "monthly" ||
+			trialUser.subscriptionType === "annual" ||
+			trialUser.subscriptionType === "lifetime"
+				? trialUser.subscriptionType
+				: null;
+
+		const result = await applyTrialTags(trialUser.email, subscriptionType);
 
 		if (result.success) {
 			results.success++;
