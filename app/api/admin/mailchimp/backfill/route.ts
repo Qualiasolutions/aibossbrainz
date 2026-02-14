@@ -95,8 +95,9 @@ export const POST = withCsrf(async () => {
 			});
 		}
 
-		// Small delay to respect Mailchimp rate limits (10 requests/second max)
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		// Each applyTrialTags makes 2-4 API calls (upsert + tag per operation).
+		// Mailchimp limit is 10 req/sec, so 400ms keeps us safely under.
+		await new Promise((resolve) => setTimeout(resolve, 400));
 	}
 
 	console.log(

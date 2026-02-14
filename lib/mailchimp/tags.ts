@@ -39,6 +39,10 @@ async function applyTagWithRetry(
 	tagName: string,
 	operation: string,
 ): Promise<TagResult> {
+	if (!email || !email.includes("@")) {
+		return { success: false, error: `Invalid email format: ${email}` };
+	}
+
 	const client = getMailchimpClient();
 	if (!client) {
 		// Graceful degradation - don't block if Mailchimp not configured
@@ -83,8 +87,11 @@ async function applyTagWithRetry(
 						subject: `Mailchimp Tag Failure: ${operation}`,
 						message: `Email: ${email}\nOperation: ${operation}\nTag: ${tagName}\nError: ${errorMessage}\n\nThis user may not receive the expected email sequence.`,
 					});
-				} catch {
-					// Failed to send admin notification
+				} catch (notifyErr) {
+					console.error(
+						`[Mailchimp] Failed to send admin notification for ${operation}:`,
+						notifyErr instanceof Error ? notifyErr.message : notifyErr,
+					);
 				}
 
 				return { success: false, error: fullError };
@@ -92,7 +99,7 @@ async function applyTagWithRetry(
 		}
 	}
 
-	// This should never be reached due to the return in the loop
+	// Unreachable - satisfies TypeScript control flow analysis
 	return { success: false, error: "Unexpected error in retry logic" };
 }
 

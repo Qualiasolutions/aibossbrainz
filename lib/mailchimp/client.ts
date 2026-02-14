@@ -23,13 +23,13 @@ export function getMailchimpClient(): typeof mailchimp | null {
 		return null;
 	}
 
-	// Only configure once
+	// Only configure once (set flag first to prevent race in concurrent requests)
 	if (!clientInitialized) {
+		clientInitialized = true;
 		mailchimp.setConfig({
 			apiKey: process.env.MAILCHIMP_API_KEY,
 			server: process.env.MAILCHIMP_SERVER_PREFIX,
 		});
-		clientInitialized = true;
 	}
 
 	return mailchimp;
