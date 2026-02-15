@@ -9,7 +9,7 @@ import {
 	setCurrentAudio,
 	stopAllAudio,
 } from "@/lib/audio-manager";
-import type { BotType } from "@/lib/bot-personalities";
+import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
 
 const SESSION_KEY = "alecci-greeted";
 
@@ -91,12 +91,16 @@ export function useGreetingSpeech({
 				// Apply volume and speed settings from localStorage
 				const savedVolume = localStorage.getItem("voice-playback-volume");
 				const savedSpeed = localStorage.getItem("voice-playback-speed");
+				const botVolume =
+					BOT_PERSONALITIES[botType]?.voiceVolume ?? 1.0;
 
 				if (savedVolume) {
 					const volume = Number.parseInt(savedVolume, 10);
 					if (!Number.isNaN(volume) && volume >= 0 && volume <= 100) {
-						audio.volume = volume / 100;
+						audio.volume = (volume / 100) * botVolume;
 					}
+				} else {
+					audio.volume = botVolume;
 				}
 
 				if (savedSpeed) {

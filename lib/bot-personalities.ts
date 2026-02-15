@@ -144,6 +144,8 @@ export interface BotPersonality {
 	description: string;
 	icon: "Crown" | "UserRound" | "Users";
 	avatar?: string;
+	/** Default voice volume multiplier (0-1). Applied on top of user's volume setting. */
+	voiceVolume?: number;
 }
 
 export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
@@ -185,6 +187,7 @@ export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
 		description: "Your Sales Strategy Expert",
 		icon: "UserRound",
 		avatar: "https://i.ibb.co/m7vk4JF/KIM-3.png",
+		voiceVolume: 0.7,
 	},
 	collaborative: {
 		id: "collaborative",

@@ -13,7 +13,7 @@ import {
 	stopAllAudio,
 	subscribeToAudioChanges,
 } from "@/lib/audio-manager";
-import type { BotType } from "@/lib/bot-personalities";
+import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
 
 export type VoicePlayerState =
 	| "idle"
@@ -148,9 +148,10 @@ export const useVoicePlayer = () => {
 				// Register with global audio manager
 				setCurrentAudio(audio, audioUrl, "manual");
 
-				// Apply playback speed and volume
+				// Apply playback speed and volume (with per-bot multiplier)
+				const botVolume = BOT_PERSONALITIES[botType]?.voiceVolume ?? 1.0;
 				audio.playbackRate = speed;
-				audio.volume = Math.max(0, Math.min(1, volume));
+				audio.volume = Math.max(0, Math.min(1, volume * botVolume));
 
 				setState("playing");
 				await audio.play();
