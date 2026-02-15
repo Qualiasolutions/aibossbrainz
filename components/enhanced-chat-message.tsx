@@ -44,8 +44,8 @@ const TypewriterContent = memo(
 
 		const animateTypewriter = useCallback(() => {
 			const now = performance.now();
-			// Word-by-word pacing: ~60ms while streaming, ~20ms for catch-up
-			const interval = isStreamingRef.current ? 60 : 20;
+			// Word-by-word pacing: ~110ms while streaming, ~35ms for catch-up
+			const interval = isStreamingRef.current ? 110 : 35;
 			if (now - lastFrameTimeRef.current < interval) {
 				animationRef.current = requestAnimationFrame(animateTypewriter);
 				return;
@@ -62,7 +62,7 @@ const TypewriterContent = memo(
 
 				// Find next word boundary: skip to end of next word(s)
 				let pos = current;
-				const wordsPerTick = !isStreamingRef.current && gap > 150 ? 3 : 1;
+				const wordsPerTick = !isStreamingRef.current && gap > 300 ? 3 : 1;
 
 				for (let w = 0; w < wordsPerTick && pos < target; w++) {
 					// Skip whitespace
