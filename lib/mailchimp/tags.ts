@@ -70,6 +70,13 @@ async function applyTagWithRetry(
 				},
 			);
 
+			// Notify admin of successful tagging (fire-and-forget)
+			sendAdminNotification({
+				subject: `Mailchimp Tag Applied: ${operation}`,
+				message: `Email: ${email}\nTag: ${tagName}\nOperation: ${operation}`,
+				type: "success",
+			}).catch(() => {});
+
 			return { success: true };
 		} catch (error) {
 			const errorMessage =
