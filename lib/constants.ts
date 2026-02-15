@@ -7,3 +7,6 @@ export const isTestEnvironment =
 	process.env.CI_PLAYWRIGHT === "true";
 
 export const guestRegex = /^guest-\d+$/;
+
+export const PRODUCTION_DOMAIN = "bossbrainz.aleccimedia.com";
+export const PRODUCTION_URL = `https://${PRODUCTION_DOMAIN}`;

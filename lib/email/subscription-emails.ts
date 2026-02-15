@@ -1,8 +1,8 @@
 import "server-only";
+import { PRODUCTION_URL } from "@/lib/constants";
 import { sendViaMandrill } from "./mandrill";
 
-const APP_URL =
-	process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_URL;
 
 /** Escape user-supplied strings before interpolating into HTML emails. */
 function escapeHtml(str: string): string {

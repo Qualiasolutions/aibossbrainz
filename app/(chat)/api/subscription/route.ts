@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { z } from "zod";
 import { apiRequestLogger } from "@/lib/api-logging";
 import {
@@ -16,7 +17,6 @@ import {
 	startTrial,
 } from "@/lib/stripe/actions";
 import { getStripe } from "@/lib/stripe/config";
-import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -138,7 +138,10 @@ export async function GET() {
 								await applyPaidTag(email, subscriptionType);
 							}
 						} catch (err) {
-							console.error("[/api/subscription] Mailchimp tagging failed:", err);
+							console.error(
+								"[/api/subscription] Mailchimp tagging failed:",
+								err,
+							);
 						}
 					});
 				}

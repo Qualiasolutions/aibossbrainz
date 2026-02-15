@@ -167,9 +167,8 @@ export default function AccountPage() {
 			const a = document.createElement("a");
 			a.href = url;
 			a.download =
-				res.headers
-					.get("Content-Disposition")
-					?.match(/filename="(.+)"/)?.[1] || "user-data-export.json";
+				res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ||
+				"user-data-export.json";
 			a.click();
 			URL.revokeObjectURL(url);
 			toast.success("Data exported successfully");

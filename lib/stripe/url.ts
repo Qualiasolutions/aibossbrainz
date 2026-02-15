@@ -1,8 +1,8 @@
 import "server-only";
 
-const PRODUCTION_URL = "https://bossbrainz.aleccimedia.com";
+import { PRODUCTION_DOMAIN, PRODUCTION_URL } from "@/lib/constants";
 
-const ALLOWED_HOSTS = ["bossbrainz.aleccimedia.com", "localhost", "127.0.0.1"];
+const ALLOWED_HOSTS = [PRODUCTION_DOMAIN, "localhost", "127.0.0.1"];
 
 /**
  * Get a validated app URL for Stripe redirects.

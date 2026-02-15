@@ -6,7 +6,10 @@ import { useEffect } from "react";
 export function SentryUser({
 	userId,
 	email,
-}: { userId: string; email?: string }) {
+}: {
+	userId: string;
+	email?: string;
+}) {
 	useEffect(() => {
 		Sentry.setUser({ id: userId, email });
 		return () => {

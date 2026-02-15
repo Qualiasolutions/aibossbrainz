@@ -24,8 +24,7 @@ export const env = createEnv({
 			.min(
 				1,
 				"SUPABASE_SERVICE_ROLE_KEY is required for server-side operations",
-			)
-			.optional(),
+			),
 		STRIPE_SECRET_KEY: z
 			.string()
 			.min(1, "STRIPE_SECRET_KEY is required for payments")

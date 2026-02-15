@@ -10,11 +10,24 @@ import {
 	getStrategyCanvas,
 	getUserProfile,
 } from "@/lib/db/queries";
+import { createClient } from "@/lib/supabase/server";
 
 interface PersonalizationContext {
 	userContext: string;
 	canvasContext: string;
 	memoryContext: string;
+}
+
+/** Max chars for the entire personalization block (~2000 tokens) */
+const MAX_PERSONALIZATION_CHARS = 8000;
+
+/**
+ * Truncate text to a character budget, cutting at the last newline before the limit
+ */
+function truncateToBudget(text: string, budget: number): string {
+	if (text.length <= budget) return text;
+	const cut = text.lastIndexOf("\n", budget);
+	return cut > 0 ? text.slice(0, cut) : text.slice(0, budget);
 }
 
 /**
@@ -136,121 +149,276 @@ function formatBrainstormForContext(notes: StickyNote[]): string {
 	return sections.length ? `Brainstorm Notes:\n${sections.join("\n")}` : "";
 }
 
+interface RpcPersonalizationResult {
+	profile: {
+		displayName: string | null;
+		companyName: string | null;
+		industry: string | null;
+		businessGoals: string | null;
+		productsServices: string | null;
+		websiteUrl: string | null;
+		targetMarket: string | null;
+		competitors: string | null;
+		annualRevenue: string | null;
+		yearsInBusiness: string | null;
+		employeeCount: string | null;
+	} | null;
+	canvases: Record<string, unknown>;
+	memories: Array<{
+		botType: string;
+		topTopics: string[];
+		preferenceScore: number;
+	}>;
+	summaries: Array<{ summary: string; createdAt: string }>;
+}
+
 /**
- * Builds personalization context for system prompt injection
+ * Build personalization context via single RPC call
+ */
+async function buildPersonalizationContextRpc(
+	userId: string,
+): Promise<PersonalizationContext> {
+	const supabase = await createClient();
+
+	const { data, error } = (await (
+		supabase.rpc as unknown as (
+			...args: unknown[]
+		) => Promise<{ data: unknown; error: unknown }>
+	)("get_user_personalization", {
+		p_user_id: userId,
+	})) as {
+		data: RpcPersonalizationResult | null;
+		error: { code?: string } | null;
+	};
+
+	if (error) {
+		// 42883 = function does not exist — fall back to individual queries
+		if (error.code === "42883") throw error;
+		console.warn("[Personalization] RPC error:", error);
+		throw error;
+	}
+
+	if (!data) {
+		return { userContext: "", canvasContext: "", memoryContext: "" };
+	}
+
+	// Build user context from profile
+	let userContext = "";
+	if (data.profile) {
+		const p = data.profile;
+		const parts = [];
+		if (p.displayName) parts.push(`User's name is ${p.displayName}`);
+		if (p.companyName) parts.push(`Company: ${p.companyName}`);
+		if (p.industry) parts.push(`Industry: ${p.industry}`);
+		if (p.businessGoals) parts.push(`Goals: ${p.businessGoals}`);
+		if (p.productsServices)
+			parts.push(`Products/Services: ${p.productsServices}`);
+		if (p.websiteUrl) parts.push(`Website: ${p.websiteUrl}`);
+		if (p.targetMarket) parts.push(`Target Market: ${p.targetMarket}`);
+		if (p.competitors) parts.push(`Competitors: ${p.competitors}`);
+		if (p.annualRevenue) parts.push(`Annual Revenue: ${p.annualRevenue}`);
+		if (p.yearsInBusiness)
+			parts.push(`Years in Business: ${p.yearsInBusiness}`);
+		if (p.employeeCount) parts.push(`Team Size: ${p.employeeCount}`);
+		userContext = parts.length ? `${parts.join(". ")}.` : "";
+	}
+
+	// Build canvas context
+	const canvasSections: string[] = [];
+	const canvases = data.canvases || {};
+	if (canvases.swot)
+		canvasSections.push(
+			formatSwotForContext(canvases.swot as unknown as SwotData),
+		);
+	if (canvases.bmc)
+		canvasSections.push(
+			formatBmcForContext(canvases.bmc as unknown as BusinessModelData),
+		);
+	if (canvases.journey) {
+		const journeyData = canvases.journey as {
+			touchpoints?: JourneyTouchpoint[];
+		};
+		if (journeyData.touchpoints) {
+			canvasSections.push(formatJourneyForContext(journeyData.touchpoints));
+		}
+	}
+	if (canvases.brainstorm) {
+		const brainstormData = canvases.brainstorm as { notes?: StickyNote[] };
+		if (brainstormData.notes) {
+			canvasSections.push(formatBrainstormForContext(brainstormData.notes));
+		}
+	}
+	const canvasContext = canvasSections.filter(Boolean).join("\n\n");
+
+	// Build memory context
+	let memoryContext = "";
+	if (data.summaries.length) {
+		memoryContext =
+			"Recent conversation context:\n" +
+			data.summaries.map((s) => `- ${s.summary}`).join("\n");
+	}
+	if (data.memories.length > 0) {
+		const preferred = data.memories[0];
+		const topTopics = preferred.topTopics || [];
+		if (topTopics.length > 0) {
+			memoryContext += memoryContext ? "\n\n" : "";
+			memoryContext += `User frequently discusses: ${topTopics.slice(0, 5).join(", ")}`;
+		}
+	}
+
+	return { userContext, canvasContext, memoryContext };
+}
+
+/**
+ * Fallback: builds personalization context via individual queries
+ */
+async function buildPersonalizationContextFallback(
+	userId: string,
+): Promise<PersonalizationContext> {
+	const [profile, swot, bmc, journey, brainstorm, memories, recentSummaries] =
+		await Promise.all([
+			getUserProfile({ userId }).catch(() => null),
+			getStrategyCanvas({ userId, canvasType: "swot" }).catch(() => null),
+			getStrategyCanvas({ userId, canvasType: "bmc" }).catch(() => null),
+			getStrategyCanvas({ userId, canvasType: "journey" }).catch(() => null),
+			getStrategyCanvas({ userId, canvasType: "brainstorm" }).catch(() => null),
+			getExecutiveMemory({ userId }).catch(() => []),
+			getRecentConversationSummaries({ userId, limit: 3 }).catch(() => []),
+		]);
+
+	// Build user context
+	let userContext = "";
+	if (profile) {
+		const parts = [];
+		if (profile.displayName)
+			parts.push(`User's name is ${profile.displayName}`);
+		if (profile.companyName) parts.push(`Company: ${profile.companyName}`);
+		if (profile.industry) parts.push(`Industry: ${profile.industry}`);
+		if (profile.businessGoals) parts.push(`Goals: ${profile.businessGoals}`);
+		if (profile.productsServices)
+			parts.push(`Products/Services: ${profile.productsServices}`);
+		if (profile.websiteUrl) parts.push(`Website: ${profile.websiteUrl}`);
+		if (profile.targetMarket)
+			parts.push(`Target Market: ${profile.targetMarket}`);
+		if (profile.competitors) parts.push(`Competitors: ${profile.competitors}`);
+		if (profile.annualRevenue)
+			parts.push(`Annual Revenue: ${profile.annualRevenue}`);
+		if (profile.yearsInBusiness)
+			parts.push(`Years in Business: ${profile.yearsInBusiness}`);
+		if (profile.employeeCount)
+			parts.push(`Team Size: ${profile.employeeCount}`);
+		userContext = parts.length ? `${parts.join(". ")}.` : "";
+	}
+
+	// Build canvas context
+	const canvasSections: string[] = [];
+	if (swot?.data)
+		canvasSections.push(formatSwotForContext(swot.data as unknown as SwotData));
+	if (bmc?.data)
+		canvasSections.push(
+			formatBmcForContext(bmc.data as unknown as BusinessModelData),
+		);
+	if (journey?.data) {
+		const journeyData = journey.data as { touchpoints?: JourneyTouchpoint[] };
+		if (journeyData.touchpoints) {
+			canvasSections.push(formatJourneyForContext(journeyData.touchpoints));
+		}
+	}
+	if (brainstorm?.data) {
+		const brainstormData = brainstorm.data as { notes?: StickyNote[] };
+		if (brainstormData.notes) {
+			canvasSections.push(formatBrainstormForContext(brainstormData.notes));
+		}
+	}
+	const canvasContext = canvasSections.filter(Boolean).join("\n\n");
+
+	// Build memory context from conversation summaries
+	let memoryContext = "";
+	if (recentSummaries.length) {
+		memoryContext =
+			"Recent conversation context:\n" +
+			recentSummaries.map((s) => `- ${s.summary}`).join("\n");
+	}
+
+	// Add executive preference info if available
+	if (memories.length > 0) {
+		const preferred = memories[0];
+		const topTopics = (preferred.topTopics as string[]) || [];
+		if (topTopics.length > 0) {
+			memoryContext += memoryContext ? "\n\n" : "";
+			memoryContext += `User frequently discusses: ${topTopics.slice(0, 5).join(", ")}`;
+		}
+	}
+
+	return { userContext, canvasContext, memoryContext };
+}
+
+/**
+ * Builds personalization context for system prompt injection.
+ * Tries single RPC first, falls back to individual queries.
  */
 export async function buildPersonalizationContext(
 	userId: string,
 ): Promise<PersonalizationContext> {
 	try {
-		// Parallel fetch all personalization data
-		const [profile, swot, bmc, journey, brainstorm, memories, recentSummaries] =
-			await Promise.all([
-				getUserProfile({ userId }).catch(() => null),
-				getStrategyCanvas({ userId, canvasType: "swot" }).catch(() => null),
-				getStrategyCanvas({ userId, canvasType: "bmc" }).catch(() => null),
-				getStrategyCanvas({ userId, canvasType: "journey" }).catch(() => null),
-				getStrategyCanvas({ userId, canvasType: "brainstorm" }).catch(
-					() => null,
-				),
-				getExecutiveMemory({ userId }).catch(() => []),
-				getRecentConversationSummaries({ userId, limit: 3 }).catch(() => []),
-			]);
-
-		// Build user context
-		let userContext = "";
-		if (profile) {
-			const parts = [];
-			if (profile.displayName)
-				parts.push(`User's name is ${profile.displayName}`);
-			if (profile.companyName) parts.push(`Company: ${profile.companyName}`);
-			if (profile.industry) parts.push(`Industry: ${profile.industry}`);
-			if (profile.businessGoals) parts.push(`Goals: ${profile.businessGoals}`);
-			if (profile.productsServices)
-				parts.push(`Products/Services: ${profile.productsServices}`);
-			if (profile.websiteUrl) parts.push(`Website: ${profile.websiteUrl}`);
-			if (profile.targetMarket)
-				parts.push(`Target Market: ${profile.targetMarket}`);
-			if (profile.competitors)
-				parts.push(`Competitors: ${profile.competitors}`);
-			if (profile.annualRevenue)
-				parts.push(`Annual Revenue: ${profile.annualRevenue}`);
-			if (profile.yearsInBusiness)
-				parts.push(`Years in Business: ${profile.yearsInBusiness}`);
-			if (profile.employeeCount)
-				parts.push(`Team Size: ${profile.employeeCount}`);
-			userContext = parts.length ? `${parts.join(". ")}.` : "";
+		return await buildPersonalizationContextRpc(userId);
+	} catch {
+		// Fall back to individual queries
+		try {
+			return await buildPersonalizationContextFallback(userId);
+		} catch (fallbackError) {
+			console.warn("[Personalization] Failed to build context:", fallbackError);
+			return { userContext: "", canvasContext: "", memoryContext: "" };
 		}
-
-		// Build canvas context
-		const canvasSections: string[] = [];
-		if (swot?.data)
-			canvasSections.push(
-				formatSwotForContext(swot.data as unknown as SwotData),
-			);
-		if (bmc?.data)
-			canvasSections.push(
-				formatBmcForContext(bmc.data as unknown as BusinessModelData),
-			);
-		if (journey?.data) {
-			const journeyData = journey.data as { touchpoints?: JourneyTouchpoint[] };
-			if (journeyData.touchpoints) {
-				canvasSections.push(formatJourneyForContext(journeyData.touchpoints));
-			}
-		}
-		if (brainstorm?.data) {
-			const brainstormData = brainstorm.data as { notes?: StickyNote[] };
-			if (brainstormData.notes) {
-				canvasSections.push(formatBrainstormForContext(brainstormData.notes));
-			}
-		}
-		const canvasContext = canvasSections.filter(Boolean).join("\n\n");
-
-		// Build memory context from conversation summaries
-		let memoryContext = "";
-		if (recentSummaries.length) {
-			memoryContext =
-				"Recent conversation context:\n" +
-				recentSummaries.map((s) => `- ${s.summary}`).join("\n");
-		}
-
-		// Add executive preference info if available
-		if (memories.length > 0) {
-			const preferred = memories[0];
-			const topTopics = (preferred.topTopics as string[]) || [];
-			if (topTopics.length > 0) {
-				memoryContext += memoryContext ? "\n\n" : "";
-				memoryContext += `User frequently discusses: ${topTopics.slice(0, 5).join(", ")}`;
-			}
-		}
-
-		return { userContext, canvasContext, memoryContext };
-	} catch (error) {
-		console.warn("[Personalization] Failed to build context:", error);
-		return { userContext: "", canvasContext: "", memoryContext: "" };
 	}
 }
 
 /**
- * Formats full personalization context for system prompt
+ * Formats full personalization context for system prompt with token budget
  */
 export function formatPersonalizationPrompt(
 	context: PersonalizationContext,
 ): string {
 	const sections: string[] = [];
 
+	// Budget allocation: profile 30%, canvas 45%, memory 25%
+	const profileBudget = Math.floor(MAX_PERSONALIZATION_CHARS * 0.3);
+	const canvasBudget = Math.floor(MAX_PERSONALIZATION_CHARS * 0.45);
+	const memoryBudget = Math.floor(MAX_PERSONALIZATION_CHARS * 0.25);
+
+	let unusedBudget = 0;
+
+	// Profile gets priority
 	if (context.userContext) {
-		sections.push(`## USER PROFILE\n${context.userContext}`);
+		const truncated = truncateToBudget(context.userContext, profileBudget);
+		sections.push(`## USER PROFILE\n${truncated}`);
+		unusedBudget += profileBudget - truncated.length;
+	} else {
+		unusedBudget += profileBudget;
 	}
 
+	// Canvas data second — gets unused budget from profile
 	if (context.canvasContext) {
-		sections.push(
-			`## USER'S STRATEGIC CONTEXT\nThe user has created the following strategic analyses. Reference these when relevant to their questions:\n\n${context.canvasContext}`,
+		const truncated = truncateToBudget(
+			context.canvasContext,
+			canvasBudget + unusedBudget,
 		);
+		const used = truncated.length;
+		sections.push(
+			`## USER'S STRATEGIC CONTEXT\nThe user has created the following strategic analyses. Reference these when relevant to their questions:\n\n${truncated}`,
+		);
+		unusedBudget = canvasBudget + unusedBudget - used;
+	} else {
+		unusedBudget += canvasBudget;
 	}
 
+	// Memory/summaries last — gets remaining unused budget
 	if (context.memoryContext) {
-		sections.push(`## PREVIOUS CONVERSATIONS\n${context.memoryContext}`);
+		const truncated = truncateToBudget(
+			context.memoryContext,
+			memoryBudget + unusedBudget,
+		);
+		sections.push(`## PREVIOUS CONVERSATIONS\n${truncated}`);
 	}
 
 	if (!sections.length) return "";

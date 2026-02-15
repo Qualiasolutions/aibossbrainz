@@ -4,13 +4,13 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { MobileSidebarProvider } from "@/components/mobile-sidebar-context";
 import { NetworkStatusBanner } from "@/components/network-status-banner";
+import { SentryUser } from "@/components/sentry-user";
 import {
 	SubscriptionLayout,
 	SubscriptionProvider,
 } from "@/components/subscription";
 import { TosPopup } from "@/components/tos-popup";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { SentryUser } from "@/components/sentry-user";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 // Cache isAdmin check for 5 minutes to reduce DB queries

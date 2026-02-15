@@ -1,4 +1,5 @@
 import "server-only";
+import { PRODUCTION_URL } from "@/lib/constants";
 import { sendViaMandrill } from "./mandrill";
 
 const SUPPORT_EMAIL = "info@qualiasolutions.net";
@@ -14,8 +15,7 @@ export async function sendTicketNotificationEmail({
 	message: string;
 	userEmail: string;
 }): Promise<{ success: boolean; error?: unknown }> {
-	const appUrl =
-		process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
+	const appUrl = process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_URL;
 
 	return sendViaMandrill({
 		to: SUPPORT_EMAIL,
@@ -57,8 +57,7 @@ export async function sendTicketReplyNotification({
 	replyContent: string;
 	userEmail: string;
 }): Promise<{ success: boolean; error?: unknown }> {
-	const appUrl =
-		process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
+	const appUrl = process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_URL;
 
 	return sendViaMandrill({
 		to: userEmail,

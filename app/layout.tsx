@@ -6,11 +6,11 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { PRODUCTION_URL } from "@/lib/constants";
 
 import "./globals.css";
 
-const siteUrl =
-	process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_URL;
 
 export const metadata: Metadata = {
 	metadataBase: new URL(siteUrl),

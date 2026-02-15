@@ -139,7 +139,8 @@ export async function getDailyAnalytics(
 }
 
 /**
- * Get topic breakdown for the user
+ * Get topic breakdown for the user.
+ * Tries RPC first (single GROUP BY query), falls back to client-side grouping.
  */
 export async function getTopicBreakdown(
 	userId: string,
@@ -149,6 +150,33 @@ export async function getTopicBreakdown(
 	try {
 		const supabase = await createClient();
 
+		// Try RPC first
+		const { data: rpcData, error } = (await (
+			supabase.rpc as unknown as (
+				...args: unknown[]
+			) => Promise<{ data: unknown; error: unknown }>
+		)("get_topic_breakdown", {
+			p_user_id: userId,
+			p_start_date: startDate.toISOString(),
+			p_end_date: endDate.toISOString(),
+		})) as {
+			data: Array<{
+				topic: string;
+				color: string | null;
+				count: number;
+			}> | null;
+			error: { code?: string } | null;
+		};
+
+		if (!error && rpcData) {
+			return rpcData.map((row) => ({
+				topic: row.topic === "Uncategorized" ? null : row.topic,
+				count: Number(row.count),
+				color: row.color,
+			}));
+		}
+
+		// Fallback: client-side grouping
 		const { data: chats } = await supabase
 			.from("Chat")
 			.select("topic, topicColor")
@@ -157,7 +185,6 @@ export async function getTopicBreakdown(
 			.gte("createdAt", startDate.toISOString())
 			.lte("createdAt", endDate.toISOString());
 
-		// Group by topic
 		const topicCounts = new Map<
 			string,
 			{ count: number; color: string | null }
@@ -173,7 +200,6 @@ export async function getTopicBreakdown(
 			topicCounts.set(topic, existing);
 		}
 
-		// Convert to array and sort by count
 		return Array.from(topicCounts.entries())
 			.map(([topic, data]) => ({
 				topic: topic === "Uncategorized" ? null : topic,

@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
+import { PRODUCTION_URL } from "@/lib/constants";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-	const baseUrl =
-		process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
+	const baseUrl = process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_URL;
 
 	return [
 		{

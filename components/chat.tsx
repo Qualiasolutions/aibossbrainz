@@ -2,6 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
@@ -27,9 +28,7 @@ import type { Vote } from "@/lib/supabase/types";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
-import { Artifact } from "./artifact";
 import { ChatHeader } from "./chat/chat-header";
-import { VoiceCallDialog } from "./chat/voice-call-dialog";
 import { useDataStream } from "./data-stream-provider";
 import { ExecutiveLanding } from "./executive-landing";
 import { FocusModeChips } from "./focus-mode-chips";
@@ -38,11 +37,35 @@ import { MultimodalInput } from "./multimodal-input";
 import { OnboardingModal } from "./onboarding-modal";
 import { ReactionItemsPopup } from "./reaction-items-popup";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
-import { SupportWidget } from "./support/support-widget";
-import { SwotSlidePanel } from "./swot-slide-panel";
 import { toast } from "./toast";
 import { useSidebar } from "./ui/sidebar";
 import type { VisibilityType } from "./visibility-selector";
+
+const Artifact = dynamic(
+	() => import("./artifact").then((mod) => ({ default: mod.Artifact })),
+	{ ssr: false, loading: () => null },
+);
+const VoiceCallDialog = dynamic(
+	() =>
+		import("./chat/voice-call-dialog").then((mod) => ({
+			default: mod.VoiceCallDialog,
+		})),
+	{ ssr: false, loading: () => null },
+);
+const SwotSlidePanel = dynamic(
+	() =>
+		import("./swot-slide-panel").then((mod) => ({
+			default: mod.SwotSlidePanel,
+		})),
+	{ ssr: false, loading: () => null },
+);
+const SupportWidget = dynamic(
+	() =>
+		import("./support/support-widget").then((mod) => ({
+			default: mod.SupportWidget,
+		})),
+	{ ssr: false, loading: () => null },
+);
 export interface ChatProps {
 	id: string;
 	initialMessages: ChatMessage[];

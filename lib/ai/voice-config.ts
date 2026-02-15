@@ -19,8 +19,7 @@ export type VoiceConfig = {
 // Turbo models support full 0-1 stability range
 export const VOICE_CONFIGS: Record<BotType, VoiceConfig> = {
 	alexandria: {
-		voiceId:
-			env.ELEVENLABS_VOICE_ID_ALEXANDRIA ?? "kfxR5DufiGBogKn26hyv",
+		voiceId: env.ELEVENLABS_VOICE_ID_ALEXANDRIA ?? "kfxR5DufiGBogKn26hyv",
 		modelId: "eleven_turbo_v2_5",
 		settings: {
 			stability: 0.5,
@@ -41,8 +40,7 @@ export const VOICE_CONFIGS: Record<BotType, VoiceConfig> = {
 	},
 	collaborative: {
 		// Use Alexandria's voice for collaborative mode
-		voiceId:
-			env.ELEVENLABS_VOICE_ID_ALEXANDRIA ?? "kfxR5DufiGBogKn26hyv",
+		voiceId: env.ELEVENLABS_VOICE_ID_ALEXANDRIA ?? "kfxR5DufiGBogKn26hyv",
 		modelId: "eleven_turbo_v2_5",
 		settings: {
 			stability: 0.5,

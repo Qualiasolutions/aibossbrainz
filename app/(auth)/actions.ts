@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
+import { PRODUCTION_URL } from "@/lib/constants";
 import { checkAuthRateLimit } from "@/lib/security/rate-limiter";
 import { createClient } from "@/lib/supabase/server";
 
@@ -120,8 +121,7 @@ export const signup = async (
 		}
 
 		const plan = formData.get("plan") as string | null;
-		const baseUrl =
-			process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
+		const baseUrl = process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_URL;
 
 		// Build redirect URL with plan if present
 		const redirectUrl = plan
@@ -190,8 +190,7 @@ export const requestPasswordReset = async (
 		const supabase = await createClient();
 
 		// Get the base URL for the redirect
-		const baseUrl =
-			process.env.NEXT_PUBLIC_APP_URL || "https://bossbrainz.aleccimedia.com";
+		const baseUrl = process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_URL;
 
 		const { error } = await supabase.auth.resetPasswordForEmail(
 			validatedData.email,

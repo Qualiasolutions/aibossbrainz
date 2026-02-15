@@ -23,6 +23,13 @@ const nextConfig: NextConfig = {
 			"prosemirror-model",
 			"prosemirror-example-setup",
 			"@phosphor-icons/react",
+			"@radix-ui/react-dialog",
+			"@radix-ui/react-popover",
+			"@radix-ui/react-select",
+			"@radix-ui/react-slider",
+			"@radix-ui/react-switch",
+			"@radix-ui/react-tabs",
+			"@radix-ui/react-visually-hidden",
 		],
 	},
 	images: {

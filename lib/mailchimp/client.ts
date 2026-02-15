@@ -61,5 +61,4 @@ export const MAILCHIMP_TAGS = {
  * Mailchimp Audience ID for the "Alecci Media" list.
  * Can be overridden via environment variable.
  */
-export const MAILCHIMP_AUDIENCE_ID =
-	env.MAILCHIMP_AUDIENCE_ID || "d5fc73df51";
+export const MAILCHIMP_AUDIENCE_ID = env.MAILCHIMP_AUDIENCE_ID || "d5fc73df51";
