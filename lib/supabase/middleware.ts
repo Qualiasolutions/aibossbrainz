@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
@@ -96,6 +97,13 @@ export async function updateSession(request: NextRequest) {
 	const {
 		data: { user },
 	} = await supabase.auth.getUser();
+
+	// Set Sentry user context for error correlation
+	if (user) {
+		Sentry.setUser({ id: user.id, email: user.email ?? undefined });
+	} else {
+		Sentry.setUser(null);
+	}
 
 	// Define public routes that don't require authentication
 	const publicRoutes = [

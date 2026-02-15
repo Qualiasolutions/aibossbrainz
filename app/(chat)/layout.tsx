@@ -10,6 +10,7 @@ import {
 } from "@/components/subscription";
 import { TosPopup } from "@/components/tos-popup";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SentryUser } from "@/components/sentry-user";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 // Cache isAdmin check for 5 minutes to reduce DB queries
@@ -42,6 +43,7 @@ export default async function Layout({
 
 	return (
 		<>
+			{user && <SentryUser userId={user.id} email={user.email} />}
 			{/* Network status banner for offline detection */}
 			<NetworkStatusBanner />
 			{/* Pyodide removed from layout - load on-demand in code-editor when Python execution is needed */}
