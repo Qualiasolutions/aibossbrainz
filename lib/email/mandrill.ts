@@ -1,4 +1,5 @@
 import "server-only";
+import { env } from "@/lib/env";
 
 const MANDRILL_API_URL = "https://mandrillapp.com/api/1.0/messages/send.json";
 
@@ -21,7 +22,7 @@ export async function sendViaMandrill({
 	fromEmail?: string;
 	fromName?: string;
 }): Promise<MandrillResult> {
-	const apiKey = process.env.MANDRILL_API_KEY;
+	const apiKey = env.MANDRILL_API_KEY;
 	if (!apiKey) {
 		console.warn("[Mandrill] MANDRILL_API_KEY not configured, skipping email");
 		return { success: false, error: "API key not configured" };
@@ -29,7 +30,7 @@ export async function sendViaMandrill({
 
 	const recipients = Array.isArray(to) ? to : [to];
 	const from =
-		fromEmail || process.env.MANDRILL_FROM_EMAIL || "noreply@aleccimedia.com";
+		fromEmail || env.MANDRILL_FROM_EMAIL || "noreply@aleccimedia.com";
 
 	try {
 		const controller = new AbortController();

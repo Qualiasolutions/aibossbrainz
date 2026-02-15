@@ -3,6 +3,10 @@
 		{
 			"path": "/api/cron/expire-subscriptions",
 			"schedule": "0 0 * * *"
+		},
+		{
+			"path": "/api/cron/cleanup-deleted-data",
+			"schedule": "0 2 * * *"
 		}
 	],
 	"functions": {
@@ -29,6 +33,10 @@
 				{
 					"key": "Strict-Transport-Security",
 					"value": "max-age=31536000; includeSubDomains; preload"
+				},
+				{
+					"key": "X-Frame-Options",
+					"value": "SAMEORIGIN"
 				},
 				{
 					"key": "Permissions-Policy",

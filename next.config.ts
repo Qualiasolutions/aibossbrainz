@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
 			"prosemirror-state",
 			"prosemirror-model",
 			"prosemirror-example-setup",
+			"@phosphor-icons/react",
 		],
 	},
 	images: {

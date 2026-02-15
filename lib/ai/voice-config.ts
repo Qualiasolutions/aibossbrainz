@@ -1,4 +1,5 @@
 import type { BotType } from "@/lib/bot-personalities";
+import { env } from "@/lib/env";
 
 export type VoiceConfig = {
 	voiceId: string;
@@ -19,7 +20,7 @@ export type VoiceConfig = {
 export const VOICE_CONFIGS: Record<BotType, VoiceConfig> = {
 	alexandria: {
 		voiceId:
-			process.env.ELEVENLABS_VOICE_ID_ALEXANDRIA ?? "kfxR5DufiGBogKn26hyv",
+			env.ELEVENLABS_VOICE_ID_ALEXANDRIA ?? "kfxR5DufiGBogKn26hyv",
 		modelId: "eleven_turbo_v2_5",
 		settings: {
 			stability: 0.5,
@@ -29,7 +30,7 @@ export const VOICE_CONFIGS: Record<BotType, VoiceConfig> = {
 		},
 	},
 	kim: {
-		voiceId: process.env.ELEVENLABS_VOICE_ID_KIM ?? "wMmwtV1VyRNXQx00eD6W",
+		voiceId: env.ELEVENLABS_VOICE_ID_KIM ?? "wMmwtV1VyRNXQx00eD6W",
 		modelId: "eleven_turbo_v2_5",
 		settings: {
 			stability: 0.7,
@@ -41,7 +42,7 @@ export const VOICE_CONFIGS: Record<BotType, VoiceConfig> = {
 	collaborative: {
 		// Use Alexandria's voice for collaborative mode
 		voiceId:
-			process.env.ELEVENLABS_VOICE_ID_ALEXANDRIA ?? "kfxR5DufiGBogKn26hyv",
+			env.ELEVENLABS_VOICE_ID_ALEXANDRIA ?? "kfxR5DufiGBogKn26hyv",
 		modelId: "eleven_turbo_v2_5",
 		settings: {
 			stability: 0.5,

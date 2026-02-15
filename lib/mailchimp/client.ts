@@ -1,5 +1,6 @@
 import "server-only";
 import mailchimp from "@mailchimp/mailchimp_marketing";
+import { env } from "@/lib/env";
 
 // Lazy initialization to avoid build-time errors when env vars missing
 let clientInitialized = false;
@@ -9,14 +10,14 @@ let clientInitialized = false;
  * Returns null if API key is not configured (graceful degradation).
  */
 export function getMailchimpClient(): typeof mailchimp | null {
-	if (!process.env.MAILCHIMP_API_KEY) {
+	if (!env.MAILCHIMP_API_KEY) {
 		console.warn(
 			"[Mailchimp] API key not configured - Mailchimp integration disabled",
 		);
 		return null;
 	}
 
-	if (!process.env.MAILCHIMP_SERVER_PREFIX) {
+	if (!env.MAILCHIMP_SERVER_PREFIX) {
 		console.warn(
 			"[Mailchimp] Server prefix not configured - Mailchimp integration disabled",
 		);
@@ -27,8 +28,8 @@ export function getMailchimpClient(): typeof mailchimp | null {
 	if (!clientInitialized) {
 		clientInitialized = true;
 		mailchimp.setConfig({
-			apiKey: process.env.MAILCHIMP_API_KEY,
-			server: process.env.MAILCHIMP_SERVER_PREFIX,
+			apiKey: env.MAILCHIMP_API_KEY,
+			server: env.MAILCHIMP_SERVER_PREFIX,
 		});
 	}
 
@@ -61,4 +62,4 @@ export const MAILCHIMP_TAGS = {
  * Can be overridden via environment variable.
  */
 export const MAILCHIMP_AUDIENCE_ID =
-	process.env.MAILCHIMP_AUDIENCE_ID || "d5fc73df51";
+	env.MAILCHIMP_AUDIENCE_ID || "d5fc73df51";

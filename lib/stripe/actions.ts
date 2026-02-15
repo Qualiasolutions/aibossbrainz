@@ -1,5 +1,6 @@
 import "server-only";
 import type Stripe from "stripe";
+import { env } from "@/lib/env";
 import { createServiceClient } from "@/lib/supabase/server";
 import {
 	getStripe,
@@ -160,7 +161,7 @@ export async function createPortalSession({
 		return_url: returnUrl,
 	};
 
-	const portalConfigId = process.env.STRIPE_PORTAL_CONFIG_ID;
+	const portalConfigId = env.STRIPE_PORTAL_CONFIG_ID;
 	if (portalConfigId) {
 		portalParams.configuration = portalConfigId;
 	}

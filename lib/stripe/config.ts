@@ -1,5 +1,6 @@
 import "server-only";
 import Stripe from "stripe";
+import { env } from "@/lib/env";
 
 // Lazy initialization to avoid build-time errors
 let stripeInstance: Stripe | null = null;
@@ -41,11 +42,11 @@ export const stripe = {
 // These should be created in Stripe Dashboard first
 export const STRIPE_PRICES = {
 	// Monthly plan: $297/month
-	monthly: process.env.STRIPE_PRICE_MONTHLY || "price_monthly_placeholder",
+	monthly: env.STRIPE_PRICE_MONTHLY || "price_monthly_placeholder",
 	// Annual plan: $2,500 one-time for 12 months
-	annual: process.env.STRIPE_PRICE_ANNUAL || "price_annual_placeholder",
+	annual: env.STRIPE_PRICE_ANNUAL || "price_annual_placeholder",
 	// Lifetime plan: $3,500 one-time forever
-	lifetime: process.env.STRIPE_PRICE_LIFETIME || "price_lifetime_placeholder",
+	lifetime: env.STRIPE_PRICE_LIFETIME || "price_lifetime_placeholder",
 } as const;
 
 export type StripePlanId = keyof typeof STRIPE_PRICES;

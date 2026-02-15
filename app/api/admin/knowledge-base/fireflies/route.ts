@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isUserAdmin } from "@/lib/admin/queries";
 import { clearKnowledgeBaseCache } from "@/lib/ai/knowledge-base";
+import { env } from "@/lib/env";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
@@ -151,7 +152,7 @@ export const POST = withCsrf(async (request: Request) => {
   }
 
   // Validate Fireflies API key
-  const apiKey = process.env.FIREFLIES_API_KEY;
+  const apiKey = env.FIREFLIES_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
       { error: "FIREFLIES_API_KEY environment variable is not configured" },

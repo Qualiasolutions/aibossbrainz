@@ -49,6 +49,23 @@ export const env = createEnv({
 		LOG_LEVEL: z
 			.enum(["fatal", "error", "warn", "info", "debug", "trace"])
 			.optional(),
+		// Mailchimp
+		MAILCHIMP_API_KEY: z.string().optional(),
+		MAILCHIMP_SERVER_PREFIX: z.string().optional(),
+		MAILCHIMP_AUDIENCE_ID: z.string().optional(),
+		// Mandrill (transactional email)
+		MANDRILL_API_KEY: z.string().optional(),
+		MANDRILL_FROM_EMAIL: z.string().email().optional(),
+		// Stripe price IDs
+		STRIPE_PRICE_MONTHLY: z.string().optional(),
+		STRIPE_PRICE_ANNUAL: z.string().optional(),
+		STRIPE_PRICE_LIFETIME: z.string().optional(),
+		STRIPE_PORTAL_CONFIG_ID: z.string().optional(),
+		// ElevenLabs voice IDs
+		ELEVENLABS_VOICE_ID_ALEXANDRIA: z.string().optional(),
+		ELEVENLABS_VOICE_ID_KIM: z.string().optional(),
+		// Fireflies
+		FIREFLIES_API_KEY: z.string().optional(),
 		// Testing
 		PLAYWRIGHT: z.string().optional(),
 		CI_PLAYWRIGHT: z.string().optional(),
@@ -90,6 +107,18 @@ export const env = createEnv({
 		SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
 		CRON_SECRET: process.env.CRON_SECRET,
 		LOG_LEVEL: process.env.LOG_LEVEL,
+		MAILCHIMP_API_KEY: process.env.MAILCHIMP_API_KEY,
+		MAILCHIMP_SERVER_PREFIX: process.env.MAILCHIMP_SERVER_PREFIX,
+		MAILCHIMP_AUDIENCE_ID: process.env.MAILCHIMP_AUDIENCE_ID,
+		MANDRILL_API_KEY: process.env.MANDRILL_API_KEY,
+		MANDRILL_FROM_EMAIL: process.env.MANDRILL_FROM_EMAIL,
+		STRIPE_PRICE_MONTHLY: process.env.STRIPE_PRICE_MONTHLY,
+		STRIPE_PRICE_ANNUAL: process.env.STRIPE_PRICE_ANNUAL,
+		STRIPE_PRICE_LIFETIME: process.env.STRIPE_PRICE_LIFETIME,
+		STRIPE_PORTAL_CONFIG_ID: process.env.STRIPE_PORTAL_CONFIG_ID,
+		ELEVENLABS_VOICE_ID_ALEXANDRIA: process.env.ELEVENLABS_VOICE_ID_ALEXANDRIA,
+		ELEVENLABS_VOICE_ID_KIM: process.env.ELEVENLABS_VOICE_ID_KIM,
+		FIREFLIES_API_KEY: process.env.FIREFLIES_API_KEY,
 		PLAYWRIGHT: process.env.PLAYWRIGHT,
 		CI_PLAYWRIGHT: process.env.CI_PLAYWRIGHT,
 		PLAYWRIGHT_TEST_BASE_URL: process.env.PLAYWRIGHT_TEST_BASE_URL,
