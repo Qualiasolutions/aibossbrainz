@@ -28,7 +28,7 @@ export default function DemoPage() {
 			<SidebarProvider defaultOpen={true}>
 				<AppSidebar user={mockSession.user as any} />
 				<SidebarInset>
-					<div className="flex h-screen flex-col">
+					<div className="flex h-dvh flex-col">
 						{/* Header with model selector */}
 						<header className="border-b bg-white/80 p-4 backdrop-blur-sm">
 							<div className="flex items-center justify-between">

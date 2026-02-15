@@ -61,7 +61,7 @@ export function SupportWidget({ open, onOpenChange }: SupportWidgetProps) {
 		<AnimatePresence>
 			{open && (
 				<motion.div
-					className="fixed top-16 right-4 z-50 flex h-[520px] w-[380px] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl"
+					className="fixed inset-x-0 top-14 z-50 mx-2 flex h-[calc(100dvh-4.5rem)] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl sm:inset-x-auto sm:top-16 sm:right-4 sm:mx-0 sm:h-[520px] sm:w-[380px]"
 					initial={{ opacity: 0, y: -10, scale: 0.95 }}
 					animate={{ opacity: 1, y: 0, scale: 1 }}
 					exit={{ opacity: 0, y: -10, scale: 0.95 }}

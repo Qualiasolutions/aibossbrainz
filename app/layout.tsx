@@ -72,6 +72,7 @@ export const metadata: Metadata = {
 
 export const viewport = {
 	maximumScale: 1, // Disable auto-zoom on mobile Safari
+	viewportFit: "cover" as const, // Enable safe-area-inset-* env() values on iOS
 };
 
 const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";

@@ -54,15 +54,15 @@ export function ChatHeader({
 }: ChatHeaderProps) {
 	return (
 		<header className="flex-shrink-0 border-b border-border bg-background/95 backdrop-blur-xl">
-			<div className="flex h-14 w-full items-center justify-between gap-4 px-4 sm:h-16 sm:px-6">
+			<div className="flex h-14 w-full items-center justify-between gap-2 px-2 sm:h-16 sm:gap-4 sm:px-6">
 				{/* Left: Navigation */}
-				<div className="flex items-center gap-3 sm:gap-4">
+				<div className="flex shrink-0 items-center gap-1.5 sm:gap-4">
 					<SidebarToggle />
 					<div className="hidden items-center gap-2 sm:flex" />
 					{showNewButton && (
 						<Button
 							aria-label="Start new conversation"
-							className="h-8 gap-2 rounded-lg border-border bg-background px-3 font-medium text-xs text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+							className="h-8 gap-2 rounded-lg border-border bg-background px-2 font-medium text-xs text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:px-3"
 							onClick={onNewChat}
 							variant="outline"
 						>
@@ -73,7 +73,7 @@ export function ChatHeader({
 				</div>
 
 				{/* Center: Executive Selector */}
-				<div className="flex flex-1 items-center justify-center">
+				<div className="flex min-w-0 flex-1 items-center justify-center">
 					<ExecutiveSwitch
 						onExecutiveChange={onBotChange}
 						selectedExecutive={selectedBot}
@@ -81,9 +81,9 @@ export function ChatHeader({
 				</div>
 
 				{/* Right: Strategy Canvas, Menu & Support */}
-				<div className="flex items-center gap-1.5">
+				<div className="flex shrink-0 items-center gap-1">
 					<Button
-						className="h-8 gap-1.5 rounded-lg border-border bg-background px-2.5 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+						className="h-8 gap-1.5 rounded-lg border-border bg-background px-2 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:px-2.5"
 						variant="outline"
 						onClick={onOpenSwotPanel}
 					>
@@ -94,7 +94,7 @@ export function ChatHeader({
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
-								className="h-8 gap-1.5 rounded-lg border-border bg-background px-2.5 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+								className="h-8 gap-1.5 rounded-lg border-border bg-background px-2 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:px-2.5"
 								variant="outline"
 							>
 								<MoreHorizontal className="size-3.5" />
@@ -147,7 +147,7 @@ export function ChatHeader({
 					</DropdownMenu>
 
 					<Button
-						className="h-8 gap-1.5 rounded-lg bg-gradient-to-r from-rose-500 to-red-600 px-2.5 font-medium text-xs text-white shadow-sm transition-all hover:from-rose-600 hover:to-red-700"
+						className="h-8 gap-1.5 rounded-lg bg-gradient-to-r from-rose-500 to-red-600 px-2 font-medium text-xs text-white shadow-sm transition-all hover:from-rose-600 hover:to-red-700 sm:px-2.5"
 						onClick={onOpenSupport}
 						title="Contact Support"
 						type="button"

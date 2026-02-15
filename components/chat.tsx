@@ -346,7 +346,7 @@ export function Chat({
 
 	return (
 		<>
-			<div className="flex h-screen w-full overflow-hidden bg-background">
+			<div className="flex h-dvh w-full overflow-hidden bg-background">
 				{/* Chat Area - compresses when panel opens */}
 				<div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
 					{/* Subtle red accent glow - minimalist */}
@@ -408,7 +408,7 @@ export function Chat({
 
 						{/* Input Area - Clean minimalist */}
 						{!isReadonly && (
-							<div className="flex-shrink-0 border-t border-border bg-background/80 px-4 pt-3 pb-4 backdrop-blur-xl sm:px-6 sm:pt-4 sm:pb-6">
+							<div className="flex-shrink-0 border-t border-border bg-background/80 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl sm:px-6 sm:pt-4 sm:pb-6">
 								<div className="w-full space-y-2">
 									{/* Focus Mode Chips */}
 									<FocusModeChips

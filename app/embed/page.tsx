@@ -46,7 +46,7 @@ export default function EmbedPage() {
 
 	if (error) {
 		return (
-			<div className="flex h-screen w-full items-center justify-center bg-gradient-to-b from-stone-50 to-white">
+			<div className="flex h-dvh w-full items-center justify-center bg-gradient-to-b from-stone-50 to-white">
 				<div className="text-center">
 					<p className="text-red-500">{error}</p>
 					<button
@@ -62,7 +62,7 @@ export default function EmbedPage() {
 	}
 
 	return (
-		<div className="flex h-screen w-full items-center justify-center bg-gradient-to-b from-stone-50 to-white">
+		<div className="flex h-dvh w-full items-center justify-center bg-gradient-to-b from-stone-50 to-white">
 			<div className="flex flex-col items-center gap-4">
 				<div className="size-8 animate-spin rounded-full border-4 border-rose-200 border-t-rose-500" />
 				<p className="text-stone-600">Loading chat...</p>
