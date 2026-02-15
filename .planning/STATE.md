@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 Phase: 15 of 15 (all complete)
 Plan: 2 of 2 in phase 14 (both complete)
 Status: v1.2 milestone complete
-Last activity: 2026-02-13 - Completed quick task 1: Revamp chat animations and loading states for professional polish
+Last activity: 2026-02-15 - Completed quick task 2: Typewriter animation tuning (slower pace, cursor glow)
 
 Progress: [###########] 100% (11/11 plans)
 
@@ -67,11 +67,14 @@ Progress: [###########] 100% (11/11 plans)
 - Chat animations: CSS-only with cubic-bezier(0.16, 1, 0.3, 1) easing; separate classes for user (message-enter) and assistant (assistant-enter) messages
 - Thinking indicator: 3 pulsing dots (thinking-dots class) over skeleton/shimmer for assistant waiting state
 - framer-motion removed from greeting.tsx and message-suggestions.tsx; kept only in landing-page-client.tsx
+- Typewriter pacing: 110ms stream / 35ms catch-up / 300 gap batch threshold (tuned from 60/20/150)
+- Cursor styling: 2.5px width, no scaleY transform, box-shadow glow via color-mix()
 
 ### Completed
 
 **Quick Tasks:**
 - quick-01: Chat animation revamp -- thinking dots, cursor pulse, staggered suggestions, framer-motion removed from 2 components
+- quick-02: Typewriter tuning -- 110ms/word streaming, 35ms catch-up, cursor glow, removed scaleY jitter
 
 **v1.2 (Complete):**
 - 11-01: Auth rate-limit crash fix, 8-char password min, PasswordInput show/hide toggle
@@ -98,6 +101,7 @@ Progress: [###########] 100% (11/11 plans)
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Revamp chat animations and loading states for professional polish | 2026-02-13 | 13e3736 | [1-revamp-chat-animations-and-loading-state](./quick/1-revamp-chat-animations-and-loading-state/) |
+| 2 | Typewriter animation tuning -- slower pace, cursor glow | 2026-02-15 | 929939b | [2-create-typewriter-animation-for-agent-re](./quick/2-create-typewriter-animation-for-agent-re/) |
 
 ### Notes
 
@@ -113,6 +117,6 @@ Progress: [###########] 100% (11/11 plans)
 
 ## Session Continuity
 
-Last session: 2026-02-13
-Stopped at: Quick task 1 complete (chat animations revamp)
+Last session: 2026-02-15
+Stopped at: Quick task 2 complete (typewriter animation tuning)
 Resume: Quick tasks in progress. v1.2 milestone fully complete.
