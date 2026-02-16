@@ -44,6 +44,7 @@ export type CustomUIDataTypes = {
 	clear: null;
 	finish: null;
 	usage: AppUsage;
+	truncated: boolean;
 	// Strategy Canvas types
 	canvasType: string;
 	canvasItem: { section: string; content: string; id: string };

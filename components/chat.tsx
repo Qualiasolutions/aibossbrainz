@@ -122,6 +122,7 @@ export function Chat({
 	>(null);
 	const [isSwotPanelOpen, setIsSwotPanelOpen] = useState(false);
 	const [isSupportOpen, setIsSupportOpen] = useState(false);
+	const [isTruncated, setIsTruncated] = useState(false);
 	// Store last sent message for retry on error
 	const [lastSentMessage, setLastSentMessage] = useState<ChatMessage | null>(
 		null,
@@ -201,6 +202,11 @@ export function Chat({
 				setUsage(dataPart.data);
 			}
 
+			// SAFE-05: Handle truncation detection from server
+			if (dataPart.type === "data-truncated") {
+				setIsTruncated(true);
+			}
+
 			// Stream immediately for smoother typewriter effect
 			setDataStream((ds) => [...(ds || []), dataPart]);
 		},
@@ -208,6 +214,8 @@ export function Chat({
 			// Clear stored message on successful completion
 			setLastSentMessage(null);
 			mutate(unstable_serialize(getChatHistoryPaginationKey));
+			// Note: isTruncated is NOT reset here -- it stays true so the banner
+			// remains visible until the user either clicks Continue or sends a new message
 		},
 		onError: (error) => {
 			// Restore last sent message to input for retry
@@ -240,6 +248,7 @@ export function Chat({
 
 	// Wrap sendMessage to capture the botType at send time and store message for rollback
 	const sendMessage = (message: Parameters<typeof originalSendMessage>[0]) => {
+		setIsTruncated(false);
 		setActiveBotTypeForStreaming(selectedBot);
 		// Store message for potential rollback on error
 		setLastSentMessage(message as ChatMessage);
@@ -402,6 +411,29 @@ export function Chat({
 											votes={votes}
 										/>
 									</div>
+
+									{/* SAFE-05: Truncation notice when AI hits maxOutputTokens */}
+									{isTruncated && status === "ready" && (
+										<div className="mx-auto w-full max-w-3xl px-4 pb-2">
+											<div className="flex items-center gap-2 rounded-lg border border-amber-200/50 bg-amber-50/50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-200">
+												<span>
+													This response was truncated due to length limits.
+												</span>
+												<button
+													type="button"
+													className="ml-auto shrink-0 font-medium underline underline-offset-2 hover:no-underline"
+													onClick={() => {
+														setInput(
+															"Please continue your previous response from where you left off.",
+														);
+														setIsTruncated(false);
+													}}
+												>
+													Continue
+												</button>
+											</div>
+										</div>
+									)}
 								</div>
 							)}
 						</main>

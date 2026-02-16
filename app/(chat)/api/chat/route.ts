@@ -363,7 +363,7 @@ export const POST = withCsrf(async (request: Request) => {
 						isEnabled: isProductionEnvironment,
 						functionId: "stream-text",
 					},
-					onFinish: async ({ usage }) => {
+					onFinish: async ({ usage, finishReason }) => {
 						try {
 							const providers = await getTokenlensCatalog();
 							const modelId =
@@ -393,6 +393,18 @@ export const POST = withCsrf(async (request: Request) => {
 							console.warn("TokenLens enrichment failed", err);
 							finalMergedUsage = usage;
 							dataStream.write({ type: "data-usage", data: finalMergedUsage });
+						}
+
+						// SAFE-05: Detect truncation when AI hits maxOutputTokens
+						if (finishReason === "length") {
+							dataStream.write({ type: "data-truncated", data: true });
+							logger.info(
+								{
+									chatId: id,
+									maxOutputTokens: isSimple ? 500 : 4096,
+								},
+								"AI response truncated due to maxOutputTokens",
+							);
 						}
 					},
 				});
