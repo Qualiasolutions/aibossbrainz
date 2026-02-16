@@ -35,7 +35,7 @@ v1.3 remediates all critical and high-severity findings from the AI Production A
 
 Plans:
 - [ ] 16-01-PLAN.md — Model resilience: stable IDs, fallback chain, title/summary resilience wrappers, streamText timeout
-- [ ] 16-02-PLAN.md — Tool hardening: weather API error handling, requestSuggestions/strategyCanvas auth checks
+- [x] 16-02-PLAN.md — Tool hardening: weather API error handling, requestSuggestions/strategyCanvas auth checks
 
 ### Phase 17: Security Hardening
 **Goal**: Known XSS vectors, auth bypasses, and information leaks in middleware and endpoints are closed
@@ -106,7 +106,7 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 16. Model Resilience & Tool Hardening | v1.3 | 0/2 | Planned | - |
+| 16. Model Resilience & Tool Hardening | v1.3 | 1/2 | In progress | - |
 | 17. Security Hardening | v1.3 | 0/TBD | Not started | - |
 | 18. Safety Rails | v1.3 | 0/TBD | Not started | - |
 | 19. Voice Quality | v1.3 | 0/TBD | Not started | - |
@@ -114,4 +114,4 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 
 ---
 *Roadmap created: 2026-02-16*
-*Last updated: 2026-02-16*
+*Last updated: 2026-02-16 (16-02 complete)*

@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 16 of 20 (Model Resilience & Tool Hardening)
-Plan: — (phase not yet planned)
-Status: Ready to plan
-Last activity: 2026-02-16 — v1.3 roadmap created (5 phases, 31 requirements)
+Plan: 2 of 2 (tool hardening complete; plan 01 model resilience still pending)
+Status: In progress
+Last activity: 2026-02-16 — Completed 16-02-PLAN.md (tool hardening)
 
-Progress: ░░░░░░░░░░░ 0%
+Progress: █░░░░░░░░░░ 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11 (v1.2)
+- Total plans completed: 12 (11 v1.2 + 1 v1.3)
 - Average duration: 4min
-- Total execution time: 41min
+- Total execution time: 43min
 
 **By Phase:**
 
@@ -32,6 +32,7 @@ Progress: ░░░░░░░░░░░ 0%
 | 13 | 2/2 | 6min | 3min |
 | 14 | 2/2 | 8min | 4min |
 | 15 | 3/3 | 13min | 4min |
+| 16 | 1/2 | 2min | 2min |
 
 ## Accumulated Context
 
@@ -42,6 +43,9 @@ Progress: ░░░░░░░░░░░ 0%
 - Phase 16 first: model resilience is foundation -- app breaks without it
 - Phases 17 and 19 can run in parallel after 16 (no cross-dependency)
 - Phase 20 last: logging migration touches files from all prior phases
+- Uniform error message for doc not-found and not-yours to prevent existence leak
+- Separate AbortController timeouts: 5s geocoding, 10s weather fetch
+- ChatSDKError differentiation in strategyCanvas for better log triage
 
 ### Completed
 
@@ -63,5 +67,5 @@ Progress: ░░░░░░░░░░░ 0%
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: v1.3 roadmap created -- 5 phases (16-20), 31 requirements mapped
-Resume: Next step is `/gsd:plan-phase 16`
+Stopped at: Completed 16-02 (tool hardening); 16-01 (model resilience) still pending
+Resume: Execute 16-01-PLAN.md to complete Phase 16
