@@ -155,7 +155,7 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
 			"https://images.squarespace-cdn.com/content/v1/5ea759fa9e5575487ad28cd0/1591228238957-80Y8AGN1M9TTXTYNJ5QK/AM_Logo_Horizontal_4C+%281%29.jpg?format=500w",
 	},
 	footer: {
-		tagline: "AI-powered sales and marketing strategy. Available 24/7.",
+		tagline: "Sales and Marketing Strategy 24/7",
 		email: "ai.bossbrainz@aleccimedia.com",
 		copyright: "AI Boss Brainz. All rights reserved.",
 	},
