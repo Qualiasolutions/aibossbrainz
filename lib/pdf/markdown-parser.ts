@@ -30,10 +30,47 @@ export type InlineSegment =
 	| { type: "link"; text: string; url: string }
 	| { type: "strikethrough"; text: string };
 
+// --- HTML stripping ---
+
+/**
+ * Strip HTML tags from text, converting common elements to their
+ * markdown equivalents where possible, and removing the rest.
+ */
+function stripHtml(text: string): string {
+	let result = text;
+
+	// Convert common HTML elements to markdown equivalents
+	result = result.replace(/<br\s*\/?>/gi, "\n");
+	result = result.replace(/<\/p>/gi, "\n\n");
+	result = result.replace(/<\/div>/gi, "\n");
+	result = result.replace(/<\/li>/gi, "\n");
+	result = result.replace(/<\/h([1-3])>/gi, "\n");
+	result = result.replace(/<h([1-3])[^>]*>/gi, (_, level) => "#".repeat(Number(level)) + " ");
+	result = result.replace(/<strong>(.*?)<\/strong>/gi, "**$1**");
+	result = result.replace(/<b>(.*?)<\/b>/gi, "**$1**");
+	result = result.replace(/<em>(.*?)<\/em>/gi, "*$1*");
+	result = result.replace(/<i>(.*?)<\/i>/gi, "*$1*");
+	result = result.replace(/<code>(.*?)<\/code>/gi, "`$1`");
+	result = result.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, "[$2]($1)");
+
+	// Strip all remaining HTML tags
+	result = result.replace(/<[^>]+>/g, "");
+
+	// Decode common HTML entities
+	result = result.replace(/&amp;/g, "&");
+	result = result.replace(/&lt;/g, "<");
+	result = result.replace(/&gt;/g, ">");
+	result = result.replace(/&quot;/g, '"');
+	result = result.replace(/&#039;/g, "'");
+	result = result.replace(/&nbsp;/g, " ");
+
+	return result;
+}
+
 // --- Main parser ---
 
 export function parseMarkdown(text: string): PDFBlock[] {
-	const lines = text.split("\n");
+	const lines = stripHtml(text).split("\n");
 	const blocks: PDFBlock[] = [];
 	let i = 0;
 
