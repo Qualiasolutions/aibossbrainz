@@ -1,4 +1,5 @@
 import { generateText } from "ai";
+import { z } from "zod";
 import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import { systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
@@ -12,6 +13,16 @@ import {
 } from "@/lib/resilience";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
+
+const realtimeRequestSchema = z.object({
+	message: z
+		.string()
+		.min(1, "Message is required")
+		.max(5000, "Message too long"),
+	botType: z
+		.enum(["alexandria", "kim", "collaborative"])
+		.default("collaborative"),
+});
 
 export const maxDuration = 30;
 
@@ -30,16 +41,17 @@ export const POST = withCsrf(async (request: Request) => {
 
 		apiLog.start({ userId: user.id });
 
-		const { message, botType = "collaborative" } = await request.json();
-
-		const validBotTypes = ["alexandria", "kim", "collaborative"] as const;
-		if (botType && !validBotTypes.includes(botType)) {
-			return new Response("Invalid botType", { status: 400 });
-		}
-
-		if (!message || typeof message !== "string") {
+		let body: unknown;
+		try {
+			body = await request.json();
+		} catch {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
+		const parseResult = realtimeRequestSchema.safeParse(body);
+		if (!parseResult.success) {
+			return new ChatSDKError("bad_request:api").toResponse();
+		}
+		const { message, botType } = parseResult.data;
 
 		// Get knowledge base content for the bot
 		const knowledgeBaseContent = await getKnowledgeBaseContent(botType);
@@ -53,7 +65,7 @@ export const POST = withCsrf(async (request: Request) => {
 				city: undefined,
 				country: undefined,
 			},
-			botType: botType as "alexandria" | "kim" | "collaborative",
+			botType,
 			knowledgeBaseContent,
 		});
 

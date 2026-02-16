@@ -1,4 +1,5 @@
 import { generateText } from "ai";
+import { z } from "zod";
 import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import { systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
@@ -8,7 +9,6 @@ import {
 	type VoiceConfig,
 } from "@/lib/ai/voice-config";
 import { apiRequestLogger } from "@/lib/api-logging";
-import type { BotType } from "@/lib/bot-personalities";
 import { getMessageCountByUserId, saveMessages } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import {
@@ -27,6 +27,17 @@ import {
 	parseCollaborativeSegments,
 	stripMarkdownForTTS,
 } from "@/lib/voice/strip-markdown-tts";
+
+const realtimeStreamSchema = z.object({
+	message: z
+		.string()
+		.min(1, "Message is required")
+		.max(5000, "Message too long"),
+	botType: z
+		.enum(["alexandria", "kim", "collaborative"])
+		.default("collaborative"),
+	chatId: z.string().uuid("Invalid chat ID").optional(),
+});
 
 export const maxDuration = 60;
 
@@ -131,24 +142,20 @@ export const POST = withCsrf(async (request: Request) => {
 			}
 		}
 
-		const {
-			message,
-			botType = "collaborative",
-			chatId: existingChatId,
-		} = await request.json();
-
-		if (!message || typeof message !== "string") {
+		let body: unknown;
+		try {
+			body = await request.json();
+		} catch {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
-
-		if (!["alexandria", "kim", "collaborative"].includes(botType)) {
+		const parseResult = realtimeStreamSchema.safeParse(body);
+		if (!parseResult.success) {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
+		const { message, botType, chatId: existingChatId } = parseResult.data;
 
 		// Get knowledge base content
-		const knowledgeBaseContent = await getKnowledgeBaseContent(
-			botType as BotType,
-		);
+		const knowledgeBaseContent = await getKnowledgeBaseContent(botType);
 
 		// Build system prompt with realtime-specific instructions
 		const systemPromptText = await systemPrompt({
@@ -159,7 +166,7 @@ export const POST = withCsrf(async (request: Request) => {
 				city: undefined,
 				country: undefined,
 			},
-			botType: botType as BotType,
+			botType,
 			knowledgeBaseContent,
 		});
 
@@ -240,7 +247,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 					// Single voice
 					const cleanText = stripMarkdownForTTS(truncatedText);
 					if (cleanText.trim()) {
-						const voiceConfig = getVoiceConfig(botType as BotType);
+						const voiceConfig = getVoiceConfig(botType);
 						const audioData = await generateAudioForSegment(
 							cleanText,
 							voiceConfig,
@@ -307,7 +314,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 						role: "assistant",
 						parts: [{ type: "text", text: responseText }],
 						attachments: null,
-						botType: botType as BotType,
+						botType,
 						deletedAt: null,
 						createdAt: new Date(Date.now() + 1).toISOString(),
 					},
