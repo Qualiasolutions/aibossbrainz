@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 17 -- Security Hardening
+**Current focus:** Phase 18 -- Safety Rails
 
 ## Current Position
 
-Phase: 17 of 20 (Security Hardening)
-Plan: 2 of 2
-Status: Phase complete
-Last activity: 2026-02-16 -- Completed 17-02-PLAN.md (realtime Zod validation + health endpoint two-tier)
+Phase: 18 of 20 (Safety Rails)
+Plan: 1 of 2
+Status: In progress
+Last activity: 2026-02-16 -- Completed 18-01-PLAN.md (PII redaction + canary token + safety middleware)
 
-Progress: ███░░░░░░░░ 30%
+Progress: █████████░░ 83%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15 (11 v1.2 + 4 v1.3)
+- Total plans completed: 16 (11 v1.2 + 5 v1.3)
 - Average duration: 3min
-- Total execution time: 52min
+- Total execution time: 58min
 
 **By Phase:**
 
@@ -34,6 +34,7 @@ Progress: ███░░░░░░░░ 30%
 | 15 | 3/3 | 13min | 4min |
 | 16 | 2/2 | 6min | 3min |
 | 17 | 2/2 | 5min | 2min |
+| 18 | 1/2 | 6min | 6min |
 
 ## Accumulated Context
 
@@ -55,6 +56,10 @@ Progress: ███░░░░░░░░ 30%
 - /api/admin/landing-page kept public (GET serves public content, POST has own isUserAdmin check)
 - Reuse ChatSDKError("bad_request:api") for all realtime validation failures (consistent pattern)
 - Health endpoint auth check falls through silently on failure -- never crashes health endpoint
+- LanguageModelV2Middleware (AI SDK v5 type) for safety middleware -- V3 type does not exist
+- Canary prefix match (ALECCI_CANARY_) for partial leak detection rather than full token match
+- Credit card Luhn + card format check to reduce false positives on long digit sequences
+- Post-hoc streaming scan is detection/logging only -- cannot recall already-streamed content
 
 ### Completed
 
@@ -77,5 +82,5 @@ Progress: ███░░░░░░░░ 30%
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Phase 17 complete (both plans: XSS/middleware + realtime/health hardening)
-Resume: Next step is `/gsd:plan-phase 18` or `/gsd:plan-phase 19` (parallel eligible)
+Stopped at: Phase 18, plan 01 complete (PII redaction + canary + safety middleware)
+Resume: Execute 18-02-PLAN.md next, then plan phases 19-20
