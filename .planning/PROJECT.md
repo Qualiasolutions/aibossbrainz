@@ -8,20 +8,18 @@ AI-powered executive consulting SaaS for sales and marketing strategy. Two AI pe
 
 Founders get instant, actionable sales and marketing strategy from AI executives who remember context and deliver frameworks-based guidance.
 
-## Current Milestone: v1.2 Client Feedback Sweep
+## Current Milestone: v1.3 AI Production Hardening
 
-**Goal:** Address all outstanding product feedback from Alexandria's team — fix bugs, improve exports, enhance UX, update copy, and add missing features.
+**Goal:** Fix all critical and high-severity findings from the AI Production Audit — harden model resilience, add safety rails, secure tools, improve voice quality, and establish proper observability.
 
-**Target features:**
-- Fix auth rate limiting bug (signup/password reset broken)
-- Fix PDF/HTML export issues (HTML in exports, file sizes, naming, thread export)
-- Voice call Q&A history integration
-- AI content generation improvements (emails, social copy — not just strategy)
-- Billing portal upgrade options
-- Meta-data and copy updates (pricing page, contact page, link previews)
-- Password UX improvements (show/hide toggle, min-length consistency)
-- Homepage updates (bios, media embed CMS, social icons)
-- User category system for analytics
+**Target fixes (34 items from audit):**
+- Model resilience: fallback chain, pin versions, resilience wrappers, timeouts
+- Safety rails: output filtering, PII redaction, prompt sanitization, human handoff
+- Tool hardening: weather API validation/timeout, tool auth checks
+- Security: remove dangerouslySetInnerHTML, middleware auth, input validation, health endpoint
+- Voice quality: MP3 concatenation fix, latency optimization, config alignment
+- Observability: structured logging, AI metrics, cost alerting/tracking
+- Cost controls: spend budgets, monthly estimation
 
 ## Previous State (v1.1 Shipped)
 
@@ -68,9 +66,21 @@ Founders get instant, actionable sales and marketing strategy from AI executives
 - Profile dropdown GIF via Remotion (DOC-03)
 - Email confirmation redirect to /subscribe?welcome=true (UX-01)
 
+**v1.2:**
+- Auth rate-limit fix, 8-char password min, PasswordInput component
+- Chat error recovery with clearError, safe auto-resume
+- PDF export rewrite with native jsPDF text rendering
+- Copy/paste quality with stripMarkdownForClipboard
+- AI content generation prompts, TTS preprocessing
+- Voice call TTS fix, per-session realtime chats
+- Stripe billing portal with plan-change sync
+- Fireflies transcript ingestion, Supabase KB loader
+- Admin user categories, filtered revenue, reaction system
+- SEO meta-data updates, homepage executive bios, footer social icons
+
 ### Active
 
-See `.planning/REQUIREMENTS.md` for v1.2 requirements
+See `.planning/REQUIREMENTS.md` for v1.3 requirements
 
 ### Out of Scope
 
@@ -85,7 +95,8 @@ See `.planning/REQUIREMENTS.md` for v1.2 requirements
 
 - **Tech stack:** Next.js 15, Supabase, Vercel, Stripe, Mailchimp
 - **Billing:** Must not break existing Stripe integrations
-- **Phase numbering:** Continues from v1.1 (next phase is 11)
+- **Phase numbering:** Continues from v1.2 (next phase is 16)
+- **No regressions:** Fixes must not break existing chat, voice, billing, or auth flows
 
 ## Key Decisions
 
@@ -96,7 +107,9 @@ See `.planning/REQUIREMENTS.md` for v1.2 requirements
 | Admin panel DB-only changes | No Stripe coupling for manual edits | Good |
 | Strict Mailchimp consistency | Block webhook on failure, Stripe retries | Good |
 | Remotion for GIF creation | Better than screen recording, reproducible | Good |
+| AI Production Audit before v1.3 | Systematic issue discovery vs ad-hoc fixes | Good |
+| Critical+High scope for v1.3 | 34 items is achievable; Medium/Low deferred to v1.4 | — Pending |
 
 ---
 
-*Last updated: 2026-02-11 after v1.2 milestone start*
+*Last updated: 2026-02-16 after v1.3 milestone start*
