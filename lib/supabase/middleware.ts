@@ -124,8 +124,28 @@ export async function updateSession(request: NextRequest) {
 		request.nextUrl.pathname === "/" ||
 		publicRoutes.some((route) => request.nextUrl.pathname.startsWith(route));
 
-	// Allow public routes and API routes
-	if (isPublicRoute || request.nextUrl.pathname.startsWith("/api/")) {
+	// API routes accessible without user authentication.
+	// All other /api/ routes require an authenticated session (defense-in-depth).
+	// NOTE: Some listed routes have their own auth (CRON_SECRET, Stripe signatures).
+	const publicApiRoutes = [
+		"/api/auth", // Supabase auth callbacks
+		"/api/stripe/webhook", // Stripe webhook (has signature verification)
+		"/api/health", // Monitoring probes (returns minimal info after SEC-04)
+		"/api/demo/chat", // Demo chat for unauthenticated visitors
+		"/api/admin/landing-page", // Landing page content (GET is public, POST has isUserAdmin check)
+		"/api/cron/", // Vercel cron jobs (have CRON_SECRET auth)
+	];
+
+	const isPublicApiRoute =
+		request.nextUrl.pathname.startsWith("/api/") &&
+		publicApiRoutes.some(
+			(route) =>
+				request.nextUrl.pathname === route ||
+				request.nextUrl.pathname.startsWith(`${route}/`),
+		);
+
+	// Allow public page routes and explicitly listed public API routes
+	if (isPublicRoute || isPublicApiRoute) {
 		return supabaseResponse;
 	}
 
