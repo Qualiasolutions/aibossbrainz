@@ -62,11 +62,11 @@ Plans:
   3. When the AI cannot adequately help (repeated failures, out-of-domain queries), it suggests contacting human support with a link or email
   4. When a response hits `maxOutputTokens` and is truncated, the user sees a clear "Response was truncated" indicator with an option to continue
   5. AI-generated follow-up suggestions are validated for length limits and do not contain unsafe content
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 18-01: TBD
-- [ ] 18-02: TBD
+- [ ] 18-01-PLAN.md — PII redaction infrastructure, canary leak detection, safety middleware, message storage redaction, document prompt sanitization
+- [ ] 18-02-PLAN.md — Truncation detection with UI indicator, human escalation in system prompt, suggestion content validation
 
 ### Phase 19: Voice Quality
 **Goal**: Voice playback produces clean audio with correct personas, optimized latency, and proper browser compatibility
@@ -109,10 +109,10 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 |-------|-----------|----------------|--------|-----------|
 | 16. Model Resilience & Tool Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 17. Security Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
-| 18. Safety Rails | v1.3 | 0/TBD | Not started | - |
+| 18. Safety Rails | v1.3 | 0/2 | Not started | - |
 | 19. Voice Quality | v1.3 | 0/TBD | Not started | - |
 | 20. Observability & Cost Controls | v1.3 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-16*
-*Last updated: 2026-02-16 (Phase 17 complete)*
+*Last updated: 2026-02-16 (Phase 18 planned)*
