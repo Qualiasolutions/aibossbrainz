@@ -78,11 +78,11 @@ Plans:
   3. Realtime route produces audio with the same voice model and settings as defined in `voice-config.ts` (no config drift)
   4. Greeting audio does not auto-play on page load -- it requires a user gesture (click/tap) to comply with browser autoplay policies
   5. All TTS text preprocessing uses the shared `lib/voice/strip-markdown-tts.ts` utility (no duplicate stripping logic)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 19-01: TBD
-- [ ] 19-02: TBD
+- [ ] 19-01-PLAN.md — Config drift fix, shared markdown stripping, optimize_streaming_latency across all routes
+- [ ] 19-02-PLAN.md — Request stitching for collaborative audio quality, streaming endpoint for collab segments, user gesture gate for greeting
 
 ### Phase 20: Observability & Cost Controls
 **Goal**: Application has structured logging throughout, AI usage is tracked with cost data, and spend alerts prevent bill shock
@@ -110,9 +110,9 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 | 16. Model Resilience & Tool Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 17. Security Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 18. Safety Rails | v1.3 | 2/2 | Complete | 2026-02-16 |
-| 19. Voice Quality | v1.3 | 0/TBD | Not started | - |
+| 19. Voice Quality | v1.3 | 0/2 | Not started | - |
 | 20. Observability & Cost Controls | v1.3 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-16*
-*Last updated: 2026-02-16 (Phase 18 complete)*
+*Last updated: 2026-02-17 (Phase 19 planned)*
