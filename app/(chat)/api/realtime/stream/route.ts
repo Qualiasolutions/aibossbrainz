@@ -72,6 +72,7 @@ async function generateAudioForSegment(
 							style: voiceConfig.settings.style ?? 0,
 							use_speaker_boost: voiceConfig.settings.useSpeakerBoost ?? true,
 						},
+						optimize_streaming_latency: 2,
 					}),
 					signal: controller.signal,
 				},
