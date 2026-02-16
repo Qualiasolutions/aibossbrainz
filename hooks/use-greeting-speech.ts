@@ -91,8 +91,7 @@ export function useGreetingSpeech({
 				// Apply volume and speed settings from localStorage
 				const savedVolume = localStorage.getItem("voice-playback-volume");
 				const savedSpeed = localStorage.getItem("voice-playback-speed");
-				const botVolume =
-					BOT_PERSONALITIES[botType]?.voiceVolume ?? 1.0;
+				const botVolume = BOT_PERSONALITIES[botType]?.voiceVolume ?? 1.0;
 
 				if (savedVolume) {
 					const volume = Number.parseInt(savedVolume, 10);
@@ -149,20 +148,25 @@ export function useGreetingSpeech({
 			}
 		}
 
-		// Mark as greeted
-		hasGreetedRef.current = true;
-		if (typeof window !== "undefined") {
+		// Wait for user gesture before playing greeting (browser autoplay policy)
+		const handleUserGesture = () => {
+			if (hasGreetedRef.current) return;
+			hasGreetedRef.current = true;
 			sessionStorage.setItem(SESSION_KEY, "true");
-		}
 
-		// Small delay to ensure page is ready
-		const timeoutId = setTimeout(() => {
+			document.removeEventListener("click", handleUserGesture);
+			document.removeEventListener("keydown", handleUserGesture);
+
 			const greetingText = GREETINGS[botType];
 			speak(greetingText);
-		}, 500);
+		};
+
+		document.addEventListener("click", handleUserGesture, { once: true });
+		document.addEventListener("keydown", handleUserGesture, { once: true });
 
 		return () => {
-			clearTimeout(timeoutId);
+			document.removeEventListener("click", handleUserGesture);
+			document.removeEventListener("keydown", handleUserGesture);
 		};
 	}, [botType, enabled, speak]);
 
