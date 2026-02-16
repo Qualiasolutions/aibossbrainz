@@ -1,4 +1,5 @@
 import { generateText } from "ai";
+import { withAIGatewayResilience } from "@/lib/resilience";
 import { myProvider } from "./providers";
 
 interface ConversationSummary {
@@ -44,11 +45,13 @@ export async function generateConversationSummary(
 	if (conversationText.length < 100) return null;
 
 	try {
-		const result = await generateText({
-			model: myProvider.languageModel("chat-model"),
-			maxOutputTokens: 300,
-			temperature: 0.3,
-			prompt: `Summarize this conversation in 2-3 sentences focusing on key business insights, decisions, or action items. Also extract 3-5 topic tags relevant to business/marketing/sales.
+		const result = await withAIGatewayResilience(async () => {
+			return await generateText({
+				model: myProvider.languageModel("chat-model"),
+				maxOutputTokens: 300,
+				temperature: 0.3,
+				timeout: { totalMs: 10_000 },
+				prompt: `Summarize this conversation in 2-3 sentences focusing on key business insights, decisions, or action items. Also extract 3-5 topic tags relevant to business/marketing/sales.
 
 Conversation:
 ${conversationText.slice(0, 4000)}
@@ -61,6 +64,7 @@ Respond ONLY in this exact JSON format (no other text):
 }
 
 The importance field should be 1-10 (10 = critical business decision, 1 = casual chat).`,
+			});
 		});
 
 		// Parse JSON response
