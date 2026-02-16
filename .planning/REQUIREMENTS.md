@@ -1,131 +1,128 @@
 # Requirements: AI Boss Brainz
 
-**Defined:** 2026-02-11
-**Core Value:** Founders get instant, actionable sales and marketing strategy from AI executives who remember context and deliver frameworks-based guidance.
-**Source:** Product feedback spreadsheet from Alexandria's team (61 items audited)
+**Defined:** 2026-02-16
+**Core Value:** Founders get instant, actionable sales and marketing strategy from AI executives
+**Source:** AI-PRODUCTION-AUDIT.md (scored 58/100, grade F — 10 critical, 24 high findings)
 
-## v1.2 Requirements
+## v1.3 Requirements
 
-Requirements for the Client Feedback Sweep milestone. Each maps to roadmap phases.
+Requirements for AI Production Hardening. Each maps to audit findings by ID.
 
-### Bug Fixes (BUG)
+### Model Resilience (RESIL)
 
-- [ ] **BUG-01**: Auth rate limiting works for signup and password reset (fix headersList → requestHeaders variable reference in `app/(auth)/actions.ts`)
-- [ ] **BUG-02**: "Failure to generate" errors are caught and show user-friendly retry message (Row 10)
-- [ ] **BUG-03**: User can create new chat threads even when another thread has a generation error (Row 39)
-- [ ] **BUG-04**: Conversation content loads fully when returning to a chat (not blank, shows full history) (Row 41)
+- [ ] **RESIL-01**: AI chat has a fallback model chain — if primary model is unavailable, a secondary model handles requests (C-1)
+- [ ] **RESIL-02**: AI model is pinned to a stable versioned identifier, not a preview/unstable model (C-4)
+- [ ] **RESIL-03**: `generateTitleFromUserMessage` is wrapped in resilience (circuit breaker + retry + AbortController with 10s timeout) (C-6)
+- [ ] **RESIL-04**: Main `streamText` call has explicit AbortController with timeout (H-1)
+- [ ] **RESIL-05**: `generateConversationSummary` is wrapped in resilience (circuit breaker + retry + AbortController) (H-5)
 
-### Export & PDF (EXPORT)
+### Safety Rails (SAFE)
 
-- [x] **EXPORT-01**: PDF exports strip all HTML tags and render clean formatted text (Row 7)
-- [x] **EXPORT-02**: User can export an entire chat thread as a single PDF, not just one message (Row 8)
-- [x] **EXPORT-03**: PDF file sizes are optimized to be smaller (Row 34)
-- [x] **EXPORT-04**: Copy/paste from chat produces clean text without HTML markup (Row 42)
+- [ ] **SAFE-01**: AI responses pass through a streaming output validator that checks for PII patterns and system prompt leaks before delivery (C-2)
+- [ ] **SAFE-02**: User messages are PII-redacted (SSN, credit card, etc.) before storage in Postgres (C-3)
+- [ ] **SAFE-03**: `updateDocumentPrompt` sanitizes document content before injecting into system prompt (H-3)
+- [ ] **SAFE-04**: AI suggests human support escalation when it cannot help (H-6)
+- [ ] **SAFE-05**: When `maxOutputTokens` truncates a response, user sees a clear indicator (H-7)
+- [ ] **SAFE-06**: AI-generated suggestions are validated for content safety and have length limits (H-19)
 
-### AI Content Quality (AI)
+### Tool Hardening (TOOL)
 
-- [ ] **AI-01**: AI generates actual deliverable content (email drafts, social media posts, ad copy) in addition to strategy advice (Row 37)
-- [ ] **AI-02**: Voice playback skips tables and charts rather than reading them row-by-row (Row 52)
+- [ ] **TOOL-01**: Weather API validates `response.ok`, validates response structure, and wraps in try/catch with user-friendly error (C-7)
+- [ ] **TOOL-02**: Weather API fetch has AbortController with 10s timeout (C-10)
+- [ ] **TOOL-03**: `requestSuggestions` tool has explicit authorization check that doesn't leak document ID existence (H-8)
+- [ ] **TOOL-04**: `strategyCanvas` tool has fast-fail auth check before DB write with specific error handling (H-9)
 
-### Voice & Realtime (VOICE)
+### Security Hardening (SEC)
 
-- [ ] **VOICE-01**: Voice call questions and AI answers are saved to chat history (Row 11)
+- [ ] **SEC-01**: Root layout theme script uses `next/script` instead of `dangerouslySetInnerHTML` (C-8)
+- [ ] **SEC-02**: Middleware has allowlist pattern for unauthenticated API routes instead of blanket bypass (H-2)
+- [ ] **SEC-03**: Realtime routes validate user message with Zod (length limit, type check) (H-4)
+- [ ] **SEC-04**: Health endpoint requires authentication or hides internal service names (H-10)
 
-### Auth & Account (AUTH)
+### Voice Quality (VOICE)
 
-- [ ] **AUTH-01**: Password fields have show/hide toggle icon (Row 31)
-- [ ] **AUTH-02**: Password minimum length is consistent — UI says 8 characters, validation enforces 8 (currently 6) (Row 32)
+- [ ] **VOICE-01**: Collaborative multi-voice audio uses proper MP3 frame boundary detection for concatenation (C-9)
+- [ ] **VOICE-02**: ElevenLabs API calls include `optimize_streaming_latency` parameter (H-15)
+- [ ] **VOICE-03**: Collaborative segments use streaming TTS endpoint instead of non-streaming (H-16)
+- [ ] **VOICE-04**: Realtime route uses same TTS model and voice settings as `voice-config.ts` (H-17)
+- [ ] **VOICE-05**: Greeting audio respects browser autoplay policies (user gesture required) (H-18)
+- [ ] **VOICE-06**: Realtime markdown stripping uses shared utility from `lib/voice/strip-markdown-tts.ts` (H-21)
 
-### Billing & Subscription (BILL)
+### Observability (OBS)
 
-- [ ] **BILL-01**: Billing portal shows upgrade/downgrade options between subscription tiers (Row 17)
-- [ ] **BILL-02**: Pricing page shows "Cancel Anytime" instead of "30 Money Back Guarantee" with updated copy (Row 24)
+- [ ] **OBS-01**: Stripe webhook uses structured `logger.*` calls with request IDs and user context instead of `console.log` (H-11)
+- [ ] **OBS-02**: At least 80% of logging calls use structured `logger.*` instead of `console.log/error/warn` (H-12)
+- [ ] **OBS-03**: AI response logging includes `inputTokens`, `outputTokens`, model ID, and cost data (H-13)
+- [ ] **OBS-04**: Stack traces in error paths use `apiRequestLogger.error()` pattern (H-20)
 
-### SEO & Meta (SEO)
+### Cost Controls (COST)
 
-- [ ] **SEO-01**: Link preview meta-data shows Title: "AI Boss Brainz" and Description: "Your Sales and Marketing Secret Weapon" (Row 26)
-- [ ] **SEO-02**: Contact page tagline updated to "Sales and Marketing Strategy 24/7" (Row 27)
+- [ ] **COST-01**: Daily cost check mechanism alerts admin when spend thresholds are breached (C-5)
+- [ ] **COST-02**: Monthly cost estimation tracks token-to-dollar conversion aggregated across users (H-14)
 
-### Homepage & Landing (LAND)
+## v1.4 Requirements (Deferred)
 
-- [ ] **LAND-01**: Executive bios on homepage display as regular text descriptions, not chat-bubble style (Row 19)
-- [ ] **LAND-02**: Homepage hero media section supports swappable photo/video embed via admin CMS (Row 22)
-- [ ] **LAND-03**: Social media icons updated — add website link to aleccimedia.com, add Facebook, remove X/Twitter (Row 23)
-- [ ] **LAND-04**: Sales & Marketing Checkup section styled in red, items ordered lowest to highest value (Row 20)
+Medium and low severity findings deferred from the audit.
 
-### Knowledge Base (KB)
+### Medium (28 items)
 
-- [ ] **KB-01**: Fireflies call transcripts can be ingested into the executive knowledge base (Row 29)
+- **M-1 to M-28**: Prompt sanitization gaps, rate limit metric mismatches, GDPR export fallback, Stripe idempotency improvements, circuit breaker persistence, memory leak fixes, demo route hardening, error detail exposure, focus mode persistence, analytics hardcoded values, stream error logging, speech recognition locale, TTS caching, concurrency limits
 
-### User Management (USER)
+### Low (25 items)
 
-- [ ] **USER-01**: Analytics dashboard distinguishes user categories (team, client) to show only realized revenue (Row 13)
-
-### UX Polish (UX)
-
-- [ ] **UX-01**: Multi-select reactions — user can apply multiple reaction types to a single message (Row 16)
-
-## v2 Requirements
-
-Deferred to future release. Tracked but not in current roadmap.
-
-### Multi-Tenant
-
-- **MT-01**: User can add additional workspaces/businesses to one account ($20/business) (Row 4)
-- **MT-02**: Account owner can add other users with role-based access (admin, limited user) at $5/user (Row 5)
-
-### Advanced Features
-
-- **ADV-01**: Real-time voice call and conversation (full-stack feature) (Row 47)
-- **ADV-02**: Intelligent folder/topic organization for conversations (Row 48)
-- **ADV-03**: Analytics/executive dashboard overhaul (Row 49)
+- **L-1 to L-25**: Sanitizer edge cases, demo CSRF, health endpoint client, webhook maxDuration, dead-letter queue, demo rate limiting, AI provider health check, retryable error classification, circuit breaker error recording, tool/system prompt consistency, subscription-gated tools, env validation bypass, CSP unsafe-inline, env var logging, persona context transition, timeout handling, message detection threshold, brevity mode suggestions, Sentry sample rate, analytics column types, abort signal cleanup, base64 encoding overhead, TTS truncation notification
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Multi-workspace accounts | v2 — requires multi-tenancy architecture |
-| Multi-user accounts with roles | v2 — requires RBAC system |
-| Real-time voice call | v2 — full-stack feature requiring significant architecture |
-| Folder/topic intelligence | v2 — needs discussion on UX approach |
-| Executive dashboard | v2 — needs requirements definition |
-| Mobile app | Web-first approach |
-| Video calls | Text/voice only |
+| RAG/embeddings system | No embeddings in codebase; Agent 7 skipped |
+| Full OWASP audit | Separate engagement; auth/RLS already passing |
+| Performance optimization | Separate milestone focus |
+| New features | v1.3 is hardening only |
+| Informational findings (Agent 12) | Code-splitting and loading states — low impact |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUG-01 | Phase 11 | Pending |
-| BUG-02 | Phase 11 | Pending |
-| BUG-03 | Phase 11 | Pending |
-| BUG-04 | Phase 11 | Pending |
-| AUTH-01 | Phase 11 | Pending |
-| AUTH-02 | Phase 11 | Pending |
-| EXPORT-01 | Phase 12 | Done |
-| EXPORT-02 | Phase 12 | Done |
-| EXPORT-03 | Phase 12 | Done |
-| EXPORT-04 | Phase 12 | Done |
-| AI-01 | Phase 13 | Pending |
-| AI-02 | Phase 13 | Pending |
-| VOICE-01 | Phase 13 | Pending |
-| LAND-01 | Phase 14 | Pending |
-| LAND-02 | Phase 14 | Pending |
-| LAND-03 | Phase 14 | Pending |
-| LAND-04 | Phase 14 | Pending |
-| SEO-01 | Phase 14 | Pending |
-| SEO-02 | Phase 14 | Pending |
-| BILL-01 | Phase 15 | Pending |
-| BILL-02 | Phase 15 | Pending |
-| KB-01 | Phase 15 | Pending |
-| USER-01 | Phase 15 | Pending |
-| UX-01 | Phase 15 | Pending |
+| RESIL-01 | — | Pending |
+| RESIL-02 | — | Pending |
+| RESIL-03 | — | Pending |
+| RESIL-04 | — | Pending |
+| RESIL-05 | — | Pending |
+| SAFE-01 | — | Pending |
+| SAFE-02 | — | Pending |
+| SAFE-03 | — | Pending |
+| SAFE-04 | — | Pending |
+| SAFE-05 | — | Pending |
+| SAFE-06 | — | Pending |
+| TOOL-01 | — | Pending |
+| TOOL-02 | — | Pending |
+| TOOL-03 | — | Pending |
+| TOOL-04 | — | Pending |
+| SEC-01 | — | Pending |
+| SEC-02 | — | Pending |
+| SEC-03 | — | Pending |
+| SEC-04 | — | Pending |
+| VOICE-01 | — | Pending |
+| VOICE-02 | — | Pending |
+| VOICE-03 | — | Pending |
+| VOICE-04 | — | Pending |
+| VOICE-05 | — | Pending |
+| VOICE-06 | — | Pending |
+| OBS-01 | — | Pending |
+| OBS-02 | — | Pending |
+| OBS-03 | — | Pending |
+| OBS-04 | — | Pending |
+| COST-01 | — | Pending |
+| COST-02 | — | Pending |
 
 **Coverage:**
-- v1.2 requirements: 24 total
-- Mapped to phases: 24
-- Unmapped: 0
+- v1.3 requirements: 31 total
+- Mapped to phases: 0
+- Unmapped: 31
 
 ---
-*Requirements defined: 2026-02-11*
-*Last updated: 2026-02-11 after roadmap creation*
+*Requirements defined: 2026-02-16*
+*Last updated: 2026-02-16 after initial definition*
