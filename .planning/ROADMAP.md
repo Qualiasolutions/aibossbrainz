@@ -58,7 +58,7 @@ Plans:
 **Requirements**: SAFE-01, SAFE-02, SAFE-03, SAFE-04, SAFE-05, SAFE-06
 **Success Criteria** (what must be TRUE):
   1. If a user pastes a credit card number or SSN into chat, it is redacted to `[REDACTED]` before being stored in Postgres
-  2. AI responses are checked mid-stream for PII patterns and system prompt canary leaks -- flagged content is stripped before reaching the client
+  2. Non-streaming AI output (titles, summaries) has PII redacted before delivery; streaming responses are scanned post-completion with canary leak and PII detection logged as security events
   3. When the AI cannot adequately help (repeated failures, out-of-domain queries), it suggests contacting human support with a link or email
   4. When a response hits `maxOutputTokens` and is truncated, the user sees a clear "Response was truncated" indicator with an option to continue
   5. AI-generated follow-up suggestions are validated for length limits and do not contain unsafe content
