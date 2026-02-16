@@ -31,11 +31,11 @@ v1.3 remediates all critical and high-severity findings from the AI Production A
   3. Title generation and conversation summary calls cannot hang indefinitely -- they timeout after 10s and surface a graceful fallback
   4. Weather tool errors (network failure, bad response, timeout) show a user-friendly message instead of crashing the chat
   5. Tool calls to `requestSuggestions` and `strategyCanvas` reject unauthorized users without leaking resource existence
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 16-01: TBD
-- [ ] 16-02: TBD
+- [ ] 16-01-PLAN.md — Model resilience: stable IDs, fallback chain, title/summary resilience wrappers, streamText timeout
+- [ ] 16-02-PLAN.md — Tool hardening: weather API error handling, requestSuggestions/strategyCanvas auth checks
 
 ### Phase 17: Security Hardening
 **Goal**: Known XSS vectors, auth bypasses, and information leaks in middleware and endpoints are closed
@@ -106,7 +106,7 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 16. Model Resilience & Tool Hardening | v1.3 | 0/TBD | Not started | - |
+| 16. Model Resilience & Tool Hardening | v1.3 | 0/2 | Planned | - |
 | 17. Security Hardening | v1.3 | 0/TBD | Not started | - |
 | 18. Safety Rails | v1.3 | 0/TBD | Not started | - |
 | 19. Voice Quality | v1.3 | 0/TBD | Not started | - |
