@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isCircuitOpen } from "@/lib/resilience";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 10;
@@ -29,12 +29,29 @@ export async function GET() {
 
 	if (aiGatewayOpen) overall = "degraded";
 
+	const statusCode = overall === "healthy" ? 200 : 503;
+
+	// Authenticated users get full service details for debugging.
+	// Unauthenticated callers (monitoring probes) get only a status string.
+	try {
+		const supabase = await createClient();
+		const {
+			data: { user },
+		} = await supabase.auth.getUser();
+
+		if (user) {
+			return NextResponse.json(
+				{ status: overall, timestamp: new Date().toISOString(), services },
+				{ status: statusCode },
+			);
+		}
+	} catch {
+		// Auth check failed -- fall through to minimal response
+	}
+
+	// Unauthenticated: minimal response (no service names, no timestamp)
 	return NextResponse.json(
-		{
-			status: overall,
-			timestamp: new Date().toISOString(),
-			services,
-		},
-		{ status: overall === "healthy" ? 200 : 503 },
+		{ status: overall === "healthy" ? "ok" : "degraded" },
+		{ status: statusCode },
 	);
 }
