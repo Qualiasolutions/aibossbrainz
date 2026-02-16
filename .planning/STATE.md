@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 18 -- Safety Rails
+**Current focus:** Phase 18 complete -- Ready for Phase 19 or 20
 
 ## Current Position
 
 Phase: 18 of 20 (Safety Rails)
-Plan: 1 of 2
-Status: In progress
-Last activity: 2026-02-16 -- Completed 18-01-PLAN.md (PII redaction + canary token + safety middleware)
+Plan: 2 of 2
+Status: Phase complete
+Last activity: 2026-02-16 -- Completed 18-02-PLAN.md (truncation detection + human escalation + suggestion validation)
 
-Progress: █████████░░ 83%
+Progress: █████████░░ 88%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16 (11 v1.2 + 5 v1.3)
+- Total plans completed: 17 (11 v1.2 + 6 v1.3)
 - Average duration: 3min
-- Total execution time: 58min
+- Total execution time: 62min
 
 **By Phase:**
 
@@ -34,7 +34,7 @@ Progress: █████████░░ 83%
 | 15 | 3/3 | 13min | 4min |
 | 16 | 2/2 | 6min | 3min |
 | 17 | 2/2 | 5min | 2min |
-| 18 | 1/2 | 6min | 6min |
+| 18 | 2/2 | 10min | 5min |
 
 ## Accumulated Context
 
@@ -60,6 +60,9 @@ Progress: █████████░░ 83%
 - Canary prefix match (ALECCI_CANARY_) for partial leak detection rather than full token match
 - Credit card Luhn + card format check to reduce false positives on long digit sequences
 - Post-hoc streaming scan is detection/logging only -- cannot recall already-streamed content
+- Truncation banner placed after Messages component (not inside) to avoid prop drilling into memoized component
+- isTruncated state stays visible until user clicks Continue or sends new message (intentional UX)
+- HUMAN_ESCALATION_INSTRUCTIONS appended after KNOWLEDGE BASE OWNERSHIP in each executive prompt
 
 ### Completed
 
@@ -82,5 +85,5 @@ Progress: █████████░░ 83%
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Phase 18, plan 01 complete (PII redaction + canary + safety middleware)
-Resume: Execute 18-02-PLAN.md next, then plan phases 19-20
+Stopped at: Phase 18 complete (all 2 plans done -- PII/canary/middleware + truncation/escalation/suggestion-validation)
+Resume: Plan phases 19-20 next
