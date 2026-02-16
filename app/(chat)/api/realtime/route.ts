@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import { systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
-import { getVoiceForBot } from "@/lib/ai/voice-config";
+import { getVoiceConfig } from "@/lib/ai/voice-config";
 import { apiRequestLogger } from "@/lib/api-logging";
 import { ChatSDKError } from "@/lib/errors";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/lib/resilience";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
+import { stripMarkdownForTTS } from "@/lib/voice/strip-markdown-tts";
 
 const realtimeRequestSchema = z.object({
 	message: z
@@ -92,20 +93,10 @@ export const POST = withCsrf(async (request: Request) => {
 		const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY;
 		if (elevenLabsApiKey && responseText) {
 			try {
-				const voiceId = getVoiceForBot(botType);
+				const voiceConfig = getVoiceConfig(botType);
 
-				// Clean text for TTS (remove markdown, tables, etc.)
-				const cleanText = responseText
-					.replace(/```[\s\S]*?```/g, " See the code displayed. ")
-					.replace(/\|[\s\S]*?\|/g, " See the table displayed. ")
-					.replace(/#{1,6}\s/g, "")
-					.replace(/\*\*/g, "")
-					.replace(/\*/g, "")
-					.replace(/`/g, "")
-					.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-					.replace(/\n+/g, " ")
-					.trim()
-					.slice(0, 4000); // ElevenLabs limit
+				// Clean text for TTS using shared utility
+				const cleanText = stripMarkdownForTTS(responseText).slice(0, 4000);
 
 				if (cleanText) {
 					// Use resilience wrapper for ElevenLabs TTS (circuit breaker + retry)
@@ -115,22 +106,25 @@ export const POST = withCsrf(async (request: Request) => {
 
 						try {
 							const ttsResponse = await fetch(
-								`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+								`https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}/stream`,
 								{
 									method: "POST",
 									headers: {
 										"Content-Type": "application/json",
 										"xi-api-key": elevenLabsApiKey,
+										Accept: "audio/mpeg",
 									},
 									body: JSON.stringify({
 										text: cleanText,
-										model_id: "eleven_flash_v2_5",
+										model_id: voiceConfig.modelId,
 										voice_settings: {
-											stability: 0.5,
-											similarity_boost: 0.75,
-											style: 0.0,
-											use_speaker_boost: true,
+											stability: voiceConfig.settings.stability,
+											similarity_boost: voiceConfig.settings.similarityBoost,
+											style: voiceConfig.settings.style ?? 0,
+											use_speaker_boost:
+												voiceConfig.settings.useSpeakerBoost ?? true,
 										},
+										optimize_streaming_latency: 2,
 									}),
 									signal: controller.signal,
 								},
