@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 18 complete -- Ready for Phase 19 or 20
+**Current focus:** Phase 19 in progress -- Voice Quality
 
 ## Current Position
 
-Phase: 18 of 20 (Safety Rails)
-Plan: 2 of 2
-Status: Phase complete
-Last activity: 2026-02-16 -- Completed 18-02-PLAN.md (truncation detection + human escalation + suggestion validation)
+Phase: 19 of 20 (Voice Quality)
+Plan: 1 of 2
+Status: In progress
+Last activity: 2026-02-17 -- Completed 19-01-PLAN.md (config drift, streaming latency, shared markdown stripping)
 
-Progress: █████████░░ 88%
+Progress: █████████░░ 91%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17 (11 v1.2 + 6 v1.3)
+- Total plans completed: 18 (11 v1.2 + 7 v1.3)
 - Average duration: 3min
-- Total execution time: 62min
+- Total execution time: 65min
 
 **By Phase:**
 
@@ -35,6 +35,7 @@ Progress: █████████░░ 88%
 | 16 | 2/2 | 6min | 3min |
 | 17 | 2/2 | 5min | 2min |
 | 18 | 2/2 | 10min | 5min |
+| 19 | 1/2 | 3min | 3min |
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@ Progress: █████████░░ 88%
 - Truncation banner placed after Messages component (not inside) to avoid prop drilling into memoized component
 - isTruncated state stays visible until user clicks Continue or sends new message (intentional UX)
 - HUMAN_ESCALATION_INSTRUCTIONS appended after KNOWLEDGE BASE OWNERSHIP in each executive prompt
+- optimize_streaming_latency level 2 (not 3/4) to avoid text normalization issues with numbers/dates/currency
+- Realtime route switched to streaming endpoint for lower TTFB, consistent with voice route
 
 ### Completed
 
@@ -84,6 +87,6 @@ Progress: █████████░░ 88%
 
 ## Session Continuity
 
-Last session: 2026-02-16
-Stopped at: Phase 18 complete (all 2 plans done -- PII/canary/middleware + truncation/escalation/suggestion-validation)
-Resume: Plan phases 19-20 next
+Last session: 2026-02-17
+Stopped at: Phase 19 plan 1 complete (config drift + streaming latency + shared markdown stripping)
+Resume: Execute 19-02-PLAN.md next, then phase 20
