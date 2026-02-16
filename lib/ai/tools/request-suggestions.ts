@@ -2,6 +2,7 @@ import { streamObject, tool, type UIMessageStreamWriter } from "ai";
 import { z } from "zod";
 import type { Session } from "@/lib/artifacts/server";
 import { getDocumentById, saveSuggestions } from "@/lib/db/queries";
+import { redactPII } from "@/lib/safety/pii-redactor";
 import type { Suggestion } from "@/lib/supabase/types";
 import type { ChatMessage } from "@/lib/types";
 import { generateUUID } from "@/lib/utils";
@@ -65,10 +66,21 @@ export const requestSuggestions = ({
 			});
 
 			for await (const element of elementStream) {
+				// SAFE-06: Server-side validation with length limits and PII redaction
+				const originalText = redactPII(
+					(element.originalSentence || "").slice(0, 500),
+				).text;
+				const suggestedText = redactPII(
+					(element.suggestedSentence || "").slice(0, 500),
+				).text;
+				const description = redactPII(
+					(element.description || "").slice(0, 200),
+				).text;
+
 				const suggestion: SuggestionDraft = {
-					originalText: element.originalSentence,
-					suggestedText: element.suggestedSentence,
-					description: element.description,
+					originalText,
+					suggestedText,
+					description,
 					id: generateUUID(),
 					documentId,
 					isResolved: false,
