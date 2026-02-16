@@ -286,8 +286,8 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 				"Worked with top leaders from The Secret",
 			],
 			accentColor: "bg-red-600",
+			checkColor: "text-red-500",
 			ringColor: "ring-red-100",
-			tagBg: "bg-red-50 text-red-700 border-red-100",
 		},
 		{
 			name: content.executives.alex_name,
@@ -302,15 +302,15 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 				"Built content + investor strategy securing $90M in funding and driving a $700M valuation for a NYC FinTech",
 			],
 			accentColor: "bg-stone-900",
+			checkColor: "text-stone-500",
 			ringColor: "ring-stone-200",
-			tagBg: "bg-stone-50 text-stone-700 border-stone-200",
 		},
 	];
 
 	return (
 		<section
 			ref={ref}
-			className="relative bg-gradient-to-b from-stone-50 to-white py-24 sm:py-32 lg:py-40 overflow-hidden"
+			className="relative flex min-h-[90vh] items-center bg-gradient-to-b from-stone-50 to-white py-14 sm:py-16 lg:py-20 overflow-hidden"
 		>
 			{/* Background decoration */}
 			<div className="absolute inset-0 opacity-30">
@@ -318,19 +318,19 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 				<div className="absolute bottom-1/4 right-0 w-96 h-96 bg-stone-200/50 rounded-full blur-[120px]" />
 			</div>
 
-			<div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+			<div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
 				{/* Section Header */}
 				<motion.div
 					initial={{ opacity: 0, y: 30 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
 					transition={{ duration: 0.7 }}
-					className="mb-16 text-center"
+					className="mb-10 text-center"
 				>
 					<motion.span
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={isInView ? { opacity: 1, scale: 1 } : {}}
 						transition={{ delay: 0.1, duration: 0.5 }}
-						className="inline-block px-4 py-1.5 mb-6 text-xs font-bold uppercase tracking-[0.25em] text-red-700 bg-red-50 rounded-full"
+						className="inline-block px-4 py-1.5 mb-4 text-xs font-bold uppercase tracking-[0.25em] text-red-700 bg-red-50 rounded-full"
 					>
 						The Experts Behind Your Growth
 					</motion.span>
@@ -356,7 +356,7 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 							</svg>
 						</span>
 					</h2>
-					<p className="mt-8 max-w-2xl mx-auto text-lg leading-relaxed text-stone-600">
+					<p className="mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-stone-600">
 						{content.executives.section_subtitle}
 					</p>
 				</motion.div>
@@ -373,7 +373,7 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 								duration: 0.6,
 								ease: [0.16, 1, 0.3, 1],
 							}}
-							className="relative rounded-2xl border border-stone-200 bg-white p-7 sm:p-8 shadow-lg shadow-stone-200/50 flex flex-col"
+							className="relative rounded-2xl border border-stone-200 bg-white p-6 sm:p-7 shadow-lg shadow-stone-200/50 flex flex-col"
 						>
 							{/* Accent bar */}
 							<div
@@ -384,23 +384,23 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 							/>
 
 							{/* Avatar + Name */}
-							<div className="flex items-center gap-5 mb-5">
+							<div className="flex items-center gap-4 mb-4">
 								<div
 									className={cn(
-										"size-20 shrink-0 overflow-hidden rounded-full ring-4 shadow-md",
+										"size-16 shrink-0 overflow-hidden rounded-full ring-4 shadow-md",
 										exec.ringColor,
 									)}
 								>
 									<Image
 										src={exec.image}
 										alt={exec.name}
-										width={80}
-										height={80}
+										width={64}
+										height={64}
 										className="size-full object-cover"
 									/>
 								</div>
 								<div>
-									<h3 className="text-xl font-bold tracking-tight text-stone-900">
+									<h3 className="text-lg font-bold tracking-tight text-stone-900">
 										{exec.name}
 									</h3>
 									<p className="text-sm font-medium text-stone-500">
@@ -410,21 +410,24 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 							</div>
 
 							{/* Description */}
-							<p className="text-stone-600 leading-relaxed mb-5">
+							<p className="text-sm text-stone-600 leading-relaxed mb-5 min-h-[3.5rem]">
 								{exec.description}
 							</p>
 
-							{/* Achievement highlights */}
-							<ul className="space-y-2.5 mt-auto">
+							{/* Divider */}
+							<div className="border-t border-stone-100 mb-4" />
+
+							{/* Achievement highlights - aligned with consistent spacing */}
+							<ul className="space-y-3 mt-auto">
 								{exec.achievements.map((item) => (
 									<li
 										key={item}
-										className="flex items-start gap-2.5 text-sm text-stone-600"
+										className="flex items-start gap-3 text-sm text-stone-600"
 									>
 										<svg
 											className={cn(
-												"mt-1 size-4 shrink-0",
-												i === 0 ? "text-red-500" : "text-stone-400",
+												"mt-0.5 size-4 shrink-0",
+												exec.checkColor,
 											)}
 											fill="none"
 											viewBox="0 0 24 24"
@@ -437,7 +440,7 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 												d="M5 13l4 4L19 7"
 											/>
 										</svg>
-										<span>{item}</span>
+										<span className="leading-snug">{item}</span>
 									</li>
 								))}
 							</ul>
@@ -450,7 +453,7 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 					initial={{ opacity: 0, y: 20 }}
 					animate={isInView ? { opacity: 1, y: 0 } : {}}
 					transition={{ delay: 0.6, duration: 0.6 }}
-					className="mt-12 text-center"
+					className="mt-8 text-center"
 				>
 					<Link href="/login">
 						<Button
