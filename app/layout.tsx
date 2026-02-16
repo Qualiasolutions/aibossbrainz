@@ -3,6 +3,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -110,15 +111,10 @@ export default function RootLayout({
 			lang="en"
 			suppressHydrationWarning
 		>
-			<head>
-				<script
-					// biome-ignore lint/security/noDangerouslySetInnerHtml: "Required"
-					dangerouslySetInnerHTML={{
-						__html: THEME_COLOR_SCRIPT,
-					}}
-				/>
-			</head>
 			<body className="min-h-screen bg-background text-foreground antialiased">
+				<Script id="theme-color-init" strategy="beforeInteractive">
+					{THEME_COLOR_SCRIPT}
+				</Script>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="light"
