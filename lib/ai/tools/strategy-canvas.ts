@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import type { Session } from "@/lib/artifacts/server";
 import { getStrategyCanvas, saveStrategyCanvas } from "@/lib/db/queries";
+import { ChatSDKError } from "@/lib/errors";
 import type { CanvasType } from "@/lib/supabase/types";
 
 type StrategyCanvasProps = {
@@ -188,10 +189,18 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 					message: `Added ${items.length} item(s) to ${section} in the ${tabNames[canvasType]} tab. Continue populating other sections, then tell the user to visit /strategy-canvas.`,
 				};
 			} catch (error) {
-				console.error("[Strategy Canvas] Failed to save:", error);
+				if (error instanceof ChatSDKError) {
+					return {
+						success: false,
+						message:
+							"Database error while saving canvas data. Please try again.",
+					};
+				}
+				console.error("[Strategy Canvas] Unexpected error:", error);
 				return {
 					success: false,
-					message: "Failed to save canvas data. Please try again.",
+					message:
+						"An unexpected error occurred while saving canvas data. Please try again.",
 				};
 			}
 		},

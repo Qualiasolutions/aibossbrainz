@@ -34,11 +34,18 @@ export const requestSuggestions = ({
 				.describe("The ID of the document to request edits"),
 		}),
 		execute: async ({ documentId }) => {
+			if (!session.user?.id) {
+				return {
+					error: "You must be logged in to request suggestions.",
+				};
+			}
+
+			const userId = session.user.id;
 			const document = await getDocumentById({ id: documentId });
 
-			if (!document || !document.content) {
+			if (!document || !document.content || document.userId !== userId) {
 				return {
-					error: "Document not found",
+					error: "Document not found or access denied.",
 				};
 			}
 
@@ -77,19 +84,15 @@ export const requestSuggestions = ({
 				suggestions.push(suggestion);
 			}
 
-			if (session.user?.id) {
-				const userId = session.user.id;
-
-				await saveSuggestions({
-					suggestions: suggestions.map((suggestion) => ({
-						...suggestion,
-						userId,
-						createdAt: new Date().toISOString(),
-						documentCreatedAt: document.createdAt,
-						deletedAt: null,
-					})),
-				});
-			}
+			await saveSuggestions({
+				suggestions: suggestions.map((suggestion) => ({
+					...suggestion,
+					userId,
+					createdAt: new Date().toISOString(),
+					documentCreatedAt: document.createdAt,
+					deletedAt: null,
+				})),
+			});
 
 			return {
 				id: documentId,
