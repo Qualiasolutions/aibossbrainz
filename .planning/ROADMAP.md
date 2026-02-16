@@ -13,7 +13,7 @@ v1.3 remediates all critical and high-severity findings from the AI Production A
 
 ## Phases
 
-- [ ] **Phase 16: Model Resilience & Tool Hardening** - Fallback model chain, version pinning, resilience wrappers, weather API fixes
+- [x] **Phase 16: Model Resilience & Tool Hardening** - Fallback model chain, version pinning, resilience wrappers, weather API fixes
 - [ ] **Phase 17: Security Hardening** - XSS removal, middleware auth allowlist, input validation, health endpoint lockdown
 - [ ] **Phase 18: Safety Rails** - Output filtering, PII redaction, prompt sanitization, human escalation, truncation indicators
 - [ ] **Phase 19: Voice Quality** - MP3 frame concatenation, streaming TTS, config alignment, autoplay policies
@@ -34,7 +34,7 @@ v1.3 remediates all critical and high-severity findings from the AI Production A
 **Plans:** 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Model resilience: stable IDs, fallback chain, title/summary resilience wrappers, streamText timeout
+- [x] 16-01-PLAN.md — Model resilience: stable IDs, fallback chain, title/summary resilience wrappers, streamText timeout
 - [x] 16-02-PLAN.md — Tool hardening: weather API error handling, requestSuggestions/strategyCanvas auth checks
 
 ### Phase 17: Security Hardening
@@ -106,7 +106,7 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 16. Model Resilience & Tool Hardening | v1.3 | 1/2 | In progress | - |
+| 16. Model Resilience & Tool Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 17. Security Hardening | v1.3 | 0/TBD | Not started | - |
 | 18. Safety Rails | v1.3 | 0/TBD | Not started | - |
 | 19. Voice Quality | v1.3 | 0/TBD | Not started | - |
@@ -114,4 +114,4 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 
 ---
 *Roadmap created: 2026-02-16*
-*Last updated: 2026-02-16 (16-02 complete)*
+*Last updated: 2026-02-16 (Phase 16 complete)*

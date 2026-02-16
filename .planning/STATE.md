@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 16 of 20 (Model Resilience & Tool Hardening)
-Plan: 2 of 2 (tool hardening complete; plan 01 model resilience still pending)
-Status: In progress
-Last activity: 2026-02-16 — Completed 16-02-PLAN.md (tool hardening)
+Plan: 2 of 2
+Status: Phase complete
+Last activity: 2026-02-16 — Completed 16-01-PLAN.md (model resilience)
 
-Progress: █░░░░░░░░░░ 10%
+Progress: ██░░░░░░░░░ 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12 (11 v1.2 + 1 v1.3)
+- Total plans completed: 13 (11 v1.2 + 2 v1.3)
 - Average duration: 4min
-- Total execution time: 43min
+- Total execution time: 47min
 
 **By Phase:**
 
@@ -32,7 +32,7 @@ Progress: █░░░░░░░░░░ 10%
 | 13 | 2/2 | 6min | 3min |
 | 14 | 2/2 | 8min | 4min |
 | 15 | 3/3 | 13min | 4min |
-| 16 | 1/2 | 2min | 2min |
+| 16 | 2/2 | 6min | 3min |
 
 ## Accumulated Context
 
@@ -46,6 +46,9 @@ Progress: █░░░░░░░░░░ 10%
 - Uniform error message for doc not-found and not-yours to prevent existence leak
 - Separate AbortController timeouts: 5s geocoding, 10s weather fetch
 - ChatSDKError differentiation in strategyCanvas for better log triage
+- Gemini 2.5 Flash (stable GA) over Gemini 3 Flash Preview for production reliability
+- OpenRouter extraBody.models for native fallback (no app-level retry needed for model outages)
+- 10s timeout for background AI (title/summary); 55s for streaming (under Vercel 60s limit)
 
 ### Completed
 
@@ -67,5 +70,5 @@ Progress: █░░░░░░░░░░ 10%
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Completed 16-02 (tool hardening); 16-01 (model resilience) still pending
-Resume: Execute 16-01-PLAN.md to complete Phase 16
+Stopped at: Phase 16 complete (both plans: model resilience + tool hardening)
+Resume: Next step is `/gsd:plan-phase 17` (Security Hardening)
