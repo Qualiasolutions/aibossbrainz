@@ -14,7 +14,7 @@ v1.3 remediates all critical and high-severity findings from the AI Production A
 ## Phases
 
 - [x] **Phase 16: Model Resilience & Tool Hardening** - Fallback model chain, version pinning, resilience wrappers, weather API fixes
-- [ ] **Phase 17: Security Hardening** - XSS removal, middleware auth allowlist, input validation, health endpoint lockdown
+- [x] **Phase 17: Security Hardening** - XSS removal, middleware auth allowlist, input validation, health endpoint lockdown
 - [ ] **Phase 18: Safety Rails** - Output filtering, PII redaction, prompt sanitization, human escalation, truncation indicators
 - [ ] **Phase 19: Voice Quality** - MP3 frame concatenation, streaming TTS, config alignment, autoplay policies
 - [ ] **Phase 20: Observability & Cost Controls** - Structured logging migration, AI metrics, cost alerting and tracking
@@ -50,7 +50,7 @@ Plans:
 
 Plans:
 - [x] 17-01-PLAN.md — XSS removal (next/script) and middleware API route allowlist
-- [ ] 17-02-PLAN.md — Realtime Zod validation and health endpoint two-tier response
+- [x] 17-02-PLAN.md — Realtime Zod validation and health endpoint two-tier response
 
 ### Phase 18: Safety Rails
 **Goal**: AI responses are filtered for safety, user PII is redacted before storage, and edge cases (truncation, inability to help) are handled gracefully
@@ -108,11 +108,11 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 16. Model Resilience & Tool Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
-| 17. Security Hardening | v1.3 | 1/2 | In progress | - |
+| 17. Security Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 18. Safety Rails | v1.3 | 0/TBD | Not started | - |
 | 19. Voice Quality | v1.3 | 0/TBD | Not started | - |
 | 20. Observability & Cost Controls | v1.3 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-16*
-*Last updated: 2026-02-16 (Phase 17 planned)*
+*Last updated: 2026-02-16 (Phase 17 complete)*

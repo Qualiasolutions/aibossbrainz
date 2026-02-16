@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 17 of 20 (Security Hardening)
-Plan: 1 of 2
-Status: In progress
-Last activity: 2026-02-16 -- Completed 17-01-PLAN.md (XSS removal & middleware allowlist)
+Plan: 2 of 2
+Status: Phase complete
+Last activity: 2026-02-16 -- Completed 17-02-PLAN.md (realtime Zod validation + health endpoint two-tier)
 
 Progress: ███░░░░░░░░ 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14 (11 v1.2 + 3 v1.3)
+- Total plans completed: 15 (11 v1.2 + 4 v1.3)
 - Average duration: 3min
-- Total execution time: 49min
+- Total execution time: 52min
 
 **By Phase:**
 
@@ -33,7 +33,7 @@ Progress: ███░░░░░░░░ 30%
 | 14 | 2/2 | 8min | 4min |
 | 15 | 3/3 | 13min | 4min |
 | 16 | 2/2 | 6min | 3min |
-| 17 | 1/2 | 2min | 2min |
+| 17 | 2/2 | 5min | 2min |
 
 ## Accumulated Context
 
@@ -53,6 +53,8 @@ Progress: ███░░░░░░░░ 30%
 - beforeInteractive strategy for theme-color script to prevent chrome color flash
 - Allowlist approach for API routes -- new routes default to requiring auth (defense-in-depth)
 - /api/admin/landing-page kept public (GET serves public content, POST has own isUserAdmin check)
+- Reuse ChatSDKError("bad_request:api") for all realtime validation failures (consistent pattern)
+- Health endpoint auth check falls through silently on failure -- never crashes health endpoint
 
 ### Completed
 
@@ -75,5 +77,5 @@ Progress: ███░░░░░░░░ 30%
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Phase 17, plan 01 complete (XSS removal + middleware allowlist)
-Resume: Next step is execute 17-02-PLAN.md (realtime Zod validation + health endpoint two-tier)
+Stopped at: Phase 17 complete (both plans: XSS/middleware + realtime/health hardening)
+Resume: Next step is `/gsd:plan-phase 18` or `/gsd:plan-phase 19` (parallel eligible)
