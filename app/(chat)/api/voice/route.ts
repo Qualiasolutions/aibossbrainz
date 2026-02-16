@@ -123,24 +123,25 @@ export const POST = withCsrf(async (request: Request) => {
 					return new ChatSDKError("bad_request:api").toResponse();
 				}
 
-				// Use AbortController to cancel remaining requests if one fails
-				const controller = new AbortController();
-				const audioBuffers = await Promise.all(
-					validSegments.map(async (segment) => {
-						const voiceConfig = getVoiceConfig(segment.speaker);
-						return generateAudioForSegment(
-							segment.text,
-							voiceConfig,
-							apiKey,
-							controller.signal,
-						);
-					}),
-				).catch((err) => {
-					controller.abort();
-					throw err;
-				});
+				// Generate segments sequentially with request stitching for prosody-aligned audio
+				const audioBuffers: ArrayBuffer[] = [];
+				const previousRequestIds: string[] = [];
 
-				// Concatenate all audio buffers
+				for (const segment of validSegments) {
+					const voiceConfig = getVoiceConfig(segment.speaker);
+					const result = await generateAudioForSegment(
+						segment.text,
+						voiceConfig,
+						apiKey,
+						previousRequestIds,
+					);
+					audioBuffers.push(result.buffer);
+					if (result.requestId) {
+						previousRequestIds.push(result.requestId);
+					}
+				}
+
+				// Concatenate all audio buffers (now prosody-aligned via request stitching)
 				const totalLength = audioBuffers.reduce(
 					(sum, buf) => sum + buf.byteLength,
 					0,
@@ -271,7 +272,8 @@ export const POST = withCsrf(async (request: Request) => {
 });
 
 /**
- * Generate audio for a single segment using ElevenLabs API.
+ * Generate audio for a single segment using ElevenLabs API with request stitching.
+ * Uses the streaming endpoint and previous_request_ids for prosody-aligned audio.
  */
 async function generateAudioForSegment(
 	text: string,
@@ -286,21 +288,15 @@ async function generateAudioForSegment(
 		};
 	},
 	apiKey: string,
-	externalSignal?: AbortSignal,
-): Promise<ArrayBuffer> {
+	previousRequestIds: string[] = [],
+): Promise<{ buffer: ArrayBuffer; requestId: string | null }> {
 	const response = await withElevenLabsResilience(async () => {
-		// Combine external signal with timeout
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
 
-		// Handle external abort signal if provided
-		if (externalSignal) {
-			externalSignal.addEventListener("abort", () => controller.abort());
-		}
-
 		try {
 			const res = await fetch(
-				`https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}`,
+				`https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}/stream`,
 				{
 					method: "POST",
 					headers: {
@@ -318,6 +314,7 @@ async function generateAudioForSegment(
 							use_speaker_boost: voiceConfig.settings.useSpeakerBoost ?? true,
 						},
 						optimize_streaming_latency: 2,
+						previous_request_ids: previousRequestIds.slice(-3),
 					}),
 					signal: controller.signal,
 				},
@@ -340,5 +337,7 @@ async function generateAudioForSegment(
 		}
 	});
 
-	return response.arrayBuffer();
+	const requestId = response.headers.get("request-id");
+	const buffer = await response.arrayBuffer();
+	return { buffer, requestId };
 }

@@ -44,18 +44,23 @@ export const maxDuration = 60;
 // Rate limits for realtime API
 const MAX_REALTIME_REQUESTS_PER_DAY = 200;
 
+/**
+ * Generate audio for a single segment using ElevenLabs API with request stitching.
+ * Uses the streaming endpoint and previous_request_ids for prosody-aligned audio.
+ */
 async function generateAudioForSegment(
 	text: string,
 	voiceConfig: VoiceConfig,
 	apiKey: string,
-): Promise<ArrayBuffer> {
+	previousRequestIds: string[] = [],
+): Promise<{ buffer: ArrayBuffer; requestId: string | null }> {
 	const response = await withElevenLabsResilience(async () => {
 		const controller = new AbortController();
 		const timeoutId = setTimeout(() => controller.abort(), 45000);
 
 		try {
 			const res = await fetch(
-				`https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}`,
+				`https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}/stream`,
 				{
 					method: "POST",
 					headers: {
@@ -73,6 +78,7 @@ async function generateAudioForSegment(
 							use_speaker_boost: voiceConfig.settings.useSpeakerBoost ?? true,
 						},
 						optimize_streaming_latency: 2,
+						previous_request_ids: previousRequestIds.slice(-3),
 					}),
 					signal: controller.signal,
 				},
@@ -94,7 +100,9 @@ async function generateAudioForSegment(
 		}
 	});
 
-	return response.arrayBuffer();
+	const requestId = response.headers.get("request-id");
+	const buffer = await response.arrayBuffer();
+	return { buffer, requestId };
 }
 
 export const POST = withCsrf(async (request: Request) => {
@@ -218,18 +226,25 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 						.filter((s) => s.text.trim());
 
 					if (validSegments.length > 0) {
-						const audioBuffers = await Promise.all(
-							validSegments.map(async (segment) => {
-								const voiceConfig = getVoiceConfig(segment.speaker);
-								return generateAudioForSegment(
-									segment.text,
-									voiceConfig,
-									apiKey,
-								);
-							}),
-						);
+						// Generate segments sequentially with request stitching for prosody-aligned audio
+						const audioBuffers: ArrayBuffer[] = [];
+						const previousRequestIds: string[] = [];
 
-						// Concatenate audio
+						for (const segment of validSegments) {
+							const voiceConfig = getVoiceConfig(segment.speaker);
+							const result = await generateAudioForSegment(
+								segment.text,
+								voiceConfig,
+								apiKey,
+								previousRequestIds,
+							);
+							audioBuffers.push(result.buffer);
+							if (result.requestId) {
+								previousRequestIds.push(result.requestId);
+							}
+						}
+
+						// Concatenate audio (now prosody-aligned via request stitching)
 						const totalLength = audioBuffers.reduce(
 							(sum, buf) => sum + buf.byteLength,
 							0,
@@ -249,7 +264,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 					const cleanText = stripMarkdownForTTS(truncatedText);
 					if (cleanText.trim()) {
 						const voiceConfig = getVoiceConfig(botType);
-						const audioData = await generateAudioForSegment(
+						const { buffer: audioData } = await generateAudioForSegment(
 							cleanText,
 							voiceConfig,
 							apiKey,
