@@ -274,7 +274,7 @@ function Footer({ content }: { content: LandingPageCMSContent }) {
 					</p>
 					<div className="flex gap-4">
 						<a
-							href="https://aleccimedia.com"
+							href="https://www.aleccimedia.com"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="flex size-9 items-center justify-center rounded-lg text-stone-400 transition-all hover:bg-stone-100 hover:text-stone-900"
@@ -283,7 +283,7 @@ function Footer({ content }: { content: LandingPageCMSContent }) {
 							<Globe className="size-4" />
 						</a>
 						<a
-							href="https://facebook.com/aleccimedia"
+							href="https://www.facebook.com/aleccimedia"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="flex size-9 items-center justify-center rounded-lg text-stone-400 transition-all hover:bg-stone-100 hover:text-stone-900"
@@ -294,7 +294,7 @@ function Footer({ content }: { content: LandingPageCMSContent }) {
 							</svg>
 						</a>
 						<a
-							href="https://linkedin.com/company/alecci-media"
+							href="https://www.linkedin.com/company/alecci-media"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="flex size-9 items-center justify-center rounded-lg text-stone-400 transition-all hover:bg-stone-100 hover:text-stone-900"
