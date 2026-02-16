@@ -46,10 +46,11 @@ Plans:
   2. Middleware uses an explicit allowlist of public API routes -- unknown routes require authentication by default
   3. Realtime endpoint rejects messages that fail Zod validation (too long, wrong type) with a 400 response
   4. Health endpoint either requires auth or returns only a status boolean with no internal service names
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 17-01: TBD
+- [ ] 17-01-PLAN.md — XSS removal (next/script) and middleware API route allowlist
+- [ ] 17-02-PLAN.md — Realtime Zod validation and health endpoint two-tier response
 
 ### Phase 18: Safety Rails
 **Goal**: AI responses are filtered for safety, user PII is redacted before storage, and edge cases (truncation, inability to help) are handled gracefully
@@ -107,11 +108,11 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 16. Model Resilience & Tool Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
-| 17. Security Hardening | v1.3 | 0/TBD | Not started | - |
+| 17. Security Hardening | v1.3 | 0/2 | Not started | - |
 | 18. Safety Rails | v1.3 | 0/TBD | Not started | - |
 | 19. Voice Quality | v1.3 | 0/TBD | Not started | - |
 | 20. Observability & Cost Controls | v1.3 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-16*
-*Last updated: 2026-02-16 (Phase 16 complete)*
+*Last updated: 2026-02-16 (Phase 17 planned)*
