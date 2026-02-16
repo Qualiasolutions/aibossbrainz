@@ -10,7 +10,7 @@ if (!process.env.OPENROUTER_API_KEY && !isTestEnvironment) {
 	);
 }
 
-// OpenRouter configuration - using FAST Gemini Flash models
+// OpenRouter configuration - using stable Gemini 2.5 Flash with fallback chain
 const openrouter = createOpenRouter({
 	apiKey: process.env.OPENROUTER_API_KEY || "",
 });
@@ -34,13 +34,29 @@ export const myProvider = isTestEnvironment
 		})()
 	: customProvider({
 			languageModels: {
-				// Gemini 3 Flash Preview - latest fast model
-				"chat-model": openrouter("google/gemini-3-flash-preview"),
-				// Gemini 3 Flash Preview - for reasoning tasks
-				"chat-model-reasoning": openrouter("google/gemini-3-flash-preview"),
-				// Title: Use fast Flash model
-				"title-model": openrouter("google/gemini-3-flash-preview"),
-				// Artifacts: Gemini 3 for quality document generation
-				"artifact-model": openrouter("google/gemini-3-flash-preview"),
+				// Gemini 2.5 Flash (stable) - main chat model with fallback
+				"chat-model": openrouter("google/gemini-2.5-flash", {
+					extraBody: {
+						models: ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"],
+					},
+				}),
+				// Gemini 2.5 Flash (stable) - for reasoning tasks with fallback
+				"chat-model-reasoning": openrouter("google/gemini-2.5-flash", {
+					extraBody: {
+						models: ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"],
+					},
+				}),
+				// Gemini 2.5 Flash (stable) - title generation with fallback
+				"title-model": openrouter("google/gemini-2.5-flash", {
+					extraBody: {
+						models: ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"],
+					},
+				}),
+				// Gemini 2.5 Flash (stable) - document generation with fallback
+				"artifact-model": openrouter("google/gemini-2.5-flash", {
+					extraBody: {
+						models: ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"],
+					},
+				}),
 			},
 		});
