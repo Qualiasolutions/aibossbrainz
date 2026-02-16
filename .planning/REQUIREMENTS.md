@@ -86,43 +86,43 @@ Medium and low severity findings deferred from the audit.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RESIL-01 | — | Pending |
-| RESIL-02 | — | Pending |
-| RESIL-03 | — | Pending |
-| RESIL-04 | — | Pending |
-| RESIL-05 | — | Pending |
-| SAFE-01 | — | Pending |
-| SAFE-02 | — | Pending |
-| SAFE-03 | — | Pending |
-| SAFE-04 | — | Pending |
-| SAFE-05 | — | Pending |
-| SAFE-06 | — | Pending |
-| TOOL-01 | — | Pending |
-| TOOL-02 | — | Pending |
-| TOOL-03 | — | Pending |
-| TOOL-04 | — | Pending |
-| SEC-01 | — | Pending |
-| SEC-02 | — | Pending |
-| SEC-03 | — | Pending |
-| SEC-04 | — | Pending |
-| VOICE-01 | — | Pending |
-| VOICE-02 | — | Pending |
-| VOICE-03 | — | Pending |
-| VOICE-04 | — | Pending |
-| VOICE-05 | — | Pending |
-| VOICE-06 | — | Pending |
-| OBS-01 | — | Pending |
-| OBS-02 | — | Pending |
-| OBS-03 | — | Pending |
-| OBS-04 | — | Pending |
-| COST-01 | — | Pending |
-| COST-02 | — | Pending |
+| RESIL-01 | Phase 16 | Pending |
+| RESIL-02 | Phase 16 | Pending |
+| RESIL-03 | Phase 16 | Pending |
+| RESIL-04 | Phase 16 | Pending |
+| RESIL-05 | Phase 16 | Pending |
+| SAFE-01 | Phase 18 | Pending |
+| SAFE-02 | Phase 18 | Pending |
+| SAFE-03 | Phase 18 | Pending |
+| SAFE-04 | Phase 18 | Pending |
+| SAFE-05 | Phase 18 | Pending |
+| SAFE-06 | Phase 18 | Pending |
+| TOOL-01 | Phase 16 | Pending |
+| TOOL-02 | Phase 16 | Pending |
+| TOOL-03 | Phase 16 | Pending |
+| TOOL-04 | Phase 16 | Pending |
+| SEC-01 | Phase 17 | Pending |
+| SEC-02 | Phase 17 | Pending |
+| SEC-03 | Phase 17 | Pending |
+| SEC-04 | Phase 17 | Pending |
+| VOICE-01 | Phase 19 | Pending |
+| VOICE-02 | Phase 19 | Pending |
+| VOICE-03 | Phase 19 | Pending |
+| VOICE-04 | Phase 19 | Pending |
+| VOICE-05 | Phase 19 | Pending |
+| VOICE-06 | Phase 19 | Pending |
+| OBS-01 | Phase 20 | Pending |
+| OBS-02 | Phase 20 | Pending |
+| OBS-03 | Phase 20 | Pending |
+| OBS-04 | Phase 20 | Pending |
+| COST-01 | Phase 20 | Pending |
+| COST-02 | Phase 20 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 31 total
-- Mapped to phases: 0
-- Unmapped: 31
+- Mapped to phases: 31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-16*
-*Last updated: 2026-02-16 after initial definition*
+*Last updated: 2026-02-16 after roadmap creation*

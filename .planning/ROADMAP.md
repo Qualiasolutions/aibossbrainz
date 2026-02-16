@@ -5,112 +5,113 @@
 - v1.0 MVP - Phases 1-5 (shipped)
 - v1.1 Branding & Billing - Phases 6-10 (shipped 2026-02-02)
 - v1.2 Client Feedback Sweep - Phases 11-15 (shipped 2026-02-11)
+- v1.3 AI Production Hardening - Phases 16-20 (in progress)
 
 ## Overview
 
-v1.2 addresses 24 items from Alexandria's team feedback spreadsheet. The milestone moves from stability fixes (broken auth rate limiting, generation errors) through export quality, AI content improvements, public-facing page updates, and platform enhancements. Each phase delivers an independently verifiable capability improvement.
+v1.3 remediates all critical and high-severity findings from the AI Production Audit (score 58/100, grade F). The milestone hardens model resilience and tool reliability first (the app breaks without these), then locks down security surfaces, adds safety rails for AI output, fixes the voice subsystem, and finishes with observability and cost controls that benefit from all other fixes being in place. 31 requirements across 5 phases.
 
 ## Phases
 
-- [x] **Phase 11: Critical Fixes & Auth Hardening** - Fix production bugs and auth UX issues
-- [x] **Phase 12: Export & Copy Quality** - Clean PDF exports and copy/paste output
-- [x] **Phase 13: AI Content & Voice** - Better AI deliverables and voice integration
-- [x] **Phase 14: Homepage & SEO** - Public-facing page updates and meta-data
-- [x] **Phase 15: Billing, Knowledge Base & Platform** - Billing options, Fireflies ingestion, analytics categories, reaction UX
+- [ ] **Phase 16: Model Resilience & Tool Hardening** - Fallback model chain, version pinning, resilience wrappers, weather API fixes
+- [ ] **Phase 17: Security Hardening** - XSS removal, middleware auth allowlist, input validation, health endpoint lockdown
+- [ ] **Phase 18: Safety Rails** - Output filtering, PII redaction, prompt sanitization, human escalation, truncation indicators
+- [ ] **Phase 19: Voice Quality** - MP3 frame concatenation, streaming TTS, config alignment, autoplay policies
+- [ ] **Phase 20: Observability & Cost Controls** - Structured logging migration, AI metrics, cost alerting and tracking
 
 ## Phase Details
 
-### Phase 11: Critical Fixes & Auth Hardening
-**Goal**: Users can sign up, reset passwords, and chat without hitting bugs that block core workflows
-**Depends on**: Nothing (first phase of v1.2)
-**Requirements**: BUG-01, BUG-02, BUG-03, BUG-04, AUTH-01, AUTH-02
+### Phase 16: Model Resilience & Tool Hardening
+**Goal**: AI chat survives model outages gracefully and all tool invocations fail safely with user-friendly errors
+**Depends on**: Nothing (first phase of v1.3)
+**Requirements**: RESIL-01, RESIL-02, RESIL-03, RESIL-04, RESIL-05, TOOL-01, TOOL-02, TOOL-03, TOOL-04
 **Success Criteria** (what must be TRUE):
-  1. User can sign up and reset password without rate limiting errors (auth rate limiter uses correct variable)
-  2. When AI generation fails, user sees a clear retry message instead of a raw error
-  3. User can create a new chat thread even when another thread has a generation error
-  4. Returning to a previous chat loads the full conversation content (no blank screen)
-  5. Password fields show a toggle to reveal/hide text, and minimum length is enforced at 8 characters
-**Plans:** 2 plans
+  1. When the primary AI model is unavailable, chat automatically falls back to a secondary model and the user gets a response (not an error)
+  2. The AI model identifier in `providers.ts` is a stable versioned ID, not a preview/unstable slug
+  3. Title generation and conversation summary calls cannot hang indefinitely -- they timeout after 10s and surface a graceful fallback
+  4. Weather tool errors (network failure, bad response, timeout) show a user-friendly message instead of crashing the chat
+  5. Tool calls to `requestSuggestions` and `strategyCanvas` reject unauthorized users without leaking resource existence
+**Plans**: TBD
 
 Plans:
-- [x] 11-01-PLAN.md -- Auth rate limiting fix, password min length (8), password show/hide toggle (BUG-01, AUTH-01, AUTH-02)
-- [x] 11-02-PLAN.md -- Chat error recovery with clearError, improved error messages, safe auto-resume (BUG-02, BUG-03, BUG-04)
+- [ ] 16-01: TBD
+- [ ] 16-02: TBD
 
-### Phase 12: Export & Copy Quality
-**Goal**: Users get clean, professional output when exporting or copying chat content
-**Depends on**: Phase 11
-**Requirements**: EXPORT-01, EXPORT-02, EXPORT-03, EXPORT-04
+### Phase 17: Security Hardening
+**Goal**: Known XSS vectors, auth bypasses, and information leaks in middleware and endpoints are closed
+**Depends on**: Phase 16
+**Requirements**: SEC-01, SEC-02, SEC-03, SEC-04
 **Success Criteria** (what must be TRUE):
-  1. Single-message PDF export contains no HTML tags -- only clean formatted text
-  2. User can export an entire chat thread as one PDF document
-  3. Exported PDFs are noticeably smaller in file size than current output
-  4. Selecting and copying chat text produces clean text without HTML markup in clipboard
-**Plans:** 2 plans
+  1. Root layout theme initialization uses `next/script` with no `dangerouslySetInnerHTML` anywhere in layout files
+  2. Middleware uses an explicit allowlist of public API routes -- unknown routes require authentication by default
+  3. Realtime endpoint rejects messages that fail Zod validation (too long, wrong type) with a 400 response
+  4. Health endpoint either requires auth or returns only a status boolean with no internal service names
+**Plans**: TBD
 
 Plans:
-- [x] 12-01-PLAN.md -- Native text PDF engine + rewrite single-message and thread exports (EXPORT-01, EXPORT-02, EXPORT-03)
-- [x] 12-02-PLAN.md -- Clipboard copy markdown stripping for clean paste output (EXPORT-04)
+- [ ] 17-01: TBD
 
-### Phase 13: AI Content & Voice
-**Goal**: AI executives produce actionable deliverables (not just strategy) and voice features work seamlessly with chat
-**Depends on**: Phase 11
-**Requirements**: AI-01, AI-02, VOICE-01
+### Phase 18: Safety Rails
+**Goal**: AI responses are filtered for safety, user PII is redacted before storage, and edge cases (truncation, inability to help) are handled gracefully
+**Depends on**: Phase 16 (model must be resilient before adding output filtering on top)
+**Requirements**: SAFE-01, SAFE-02, SAFE-03, SAFE-04, SAFE-05, SAFE-06
 **Success Criteria** (what must be TRUE):
-  1. When asked, AI generates ready-to-use content (email drafts, social media posts, ad copy) not just strategic advice
-  2. Voice playback intelligently skips tables and charts instead of reading them cell-by-cell
-  3. Questions asked during a voice call and the AI answers appear in the chat history afterward
-**Plans:** 2 plans
+  1. If a user pastes a credit card number or SSN into chat, it is redacted to `[REDACTED]` before being stored in Postgres
+  2. AI responses are checked mid-stream for PII patterns and system prompt canary leaks -- flagged content is stripped before reaching the client
+  3. When the AI cannot adequately help (repeated failures, out-of-domain queries), it suggests contacting human support with a link or email
+  4. When a response hits `maxOutputTokens` and is truncated, the user sees a clear "Response was truncated" indicator with an option to continue
+  5. AI-generated follow-up suggestions are validated for length limits and do not contain unsafe content
+**Plans**: TBD
 
 Plans:
-- [x] 13-01-PLAN.md -- AI content generation prompts + consolidated voice text preprocessing (AI-01, AI-02)
-- [x] 13-02-PLAN.md -- Voice call TTS bug fix + per-session realtime chat persistence (VOICE-01)
+- [ ] 18-01: TBD
+- [ ] 18-02: TBD
 
-### Phase 14: Homepage & SEO
-**Goal**: Public-facing pages reflect current branding, accurate meta-data, and support media management
-**Depends on**: Nothing (independent of chat fixes)
-**Requirements**: LAND-01, LAND-02, LAND-03, LAND-04, SEO-01, SEO-02
+### Phase 19: Voice Quality
+**Goal**: Voice playback produces clean audio with correct personas, optimized latency, and proper browser compatibility
+**Depends on**: Nothing (self-contained voice subsystem, can run after Phase 16)
+**Requirements**: VOICE-01, VOICE-02, VOICE-03, VOICE-04, VOICE-05, VOICE-06
 **Success Criteria** (what must be TRUE):
-  1. Executive bios on homepage render as regular text descriptions, not chat bubbles
-  2. Homepage hero section media (photo/video) is swappable through admin CMS without code changes
-  3. Social icons link to aleccimedia.com website and Facebook; X/Twitter icon is removed
-  4. Sales & Marketing Checkup section is styled in red with items ordered lowest to highest value
-  5. Sharing a link to the site shows "AI Boss Brainz" as title and "Your Sales and Marketing Secret Weapon" as description; contact page tagline reads "Sales and Marketing Strategy 24/7"
-**Plans:** 2 plans
+  1. Collaborative mode multi-voice audio plays without glitches at segment boundaries (proper MP3 frame detection, no pops/clicks)
+  2. ElevenLabs API calls use `optimize_streaming_latency` and collaborative segments use the streaming TTS endpoint for faster first-byte
+  3. Realtime route produces audio with the same voice model and settings as defined in `voice-config.ts` (no config drift)
+  4. Greeting audio does not auto-play on page load -- it requires a user gesture (click/tap) to comply with browser autoplay policies
+  5. All TTS text preprocessing uses the shared `lib/voice/strip-markdown-tts.ts` utility (no duplicate stripping logic)
+**Plans**: TBD
 
 Plans:
-- [x] 14-01-PLAN.md -- Homepage layout updates: executive bios as text, checkup section, social icons (LAND-01, LAND-03, LAND-04)
-- [x] 14-02-PLAN.md -- Hero media CMS swap + SEO meta-data + contact tagline (LAND-02, SEO-01, SEO-02)
+- [ ] 19-01: TBD
+- [ ] 19-02: TBD
 
-### Phase 15: Billing, Knowledge Base & Platform
-**Goal**: Platform has upgraded billing options, external knowledge ingestion, user segmentation, and richer message interactions
-**Depends on**: Phase 11
-**Requirements**: BILL-01, BILL-02, KB-01, USER-01, UX-01
+### Phase 20: Observability & Cost Controls
+**Goal**: Application has structured logging throughout, AI usage is tracked with cost data, and spend alerts prevent bill shock
+**Depends on**: Phases 16-19 (logging migration touches files modified by all prior phases; cost tracking benefits from stable AI layer)
+**Requirements**: OBS-01, OBS-02, OBS-03, OBS-04, COST-01, COST-02
 **Success Criteria** (what must be TRUE):
-  1. Billing portal presents upgrade and downgrade options between subscription tiers
-  2. Pricing page shows "Cancel Anytime" instead of "30 Money Back Guarantee"
-  3. Fireflies call transcripts can be ingested into the executive knowledge base for context-aware responses
-  4. Analytics dashboard distinguishes team vs client users to show only realized revenue
-  5. User can apply multiple reaction types to a single message
-**Plans:** 3 plans
+  1. Stripe webhook handler uses structured `logger.*` calls with request IDs and user context -- no `console.log` remaining
+  2. At least 80% of all logging calls across the codebase use structured `logger.*` instead of `console.log/error/warn`
+  3. Every AI response log entry includes `inputTokens`, `outputTokens`, model ID, and estimated cost in USD
+  4. When daily AI spend crosses a configurable threshold, an admin notification is sent (email or structured log alert)
+  5. A monthly cost dashboard or API endpoint aggregates token-to-dollar conversion across all users
+**Plans**: TBD
 
 Plans:
-- [x] 15-01-PLAN.md -- Billing portal upgrade/downgrade config + pricing copy update (BILL-01, BILL-02)
-- [x] 15-02-PLAN.md -- Fireflies transcript ingestion into knowledge base via Supabase (KB-01)
-- [x] 15-03-PLAN.md -- User categories in analytics + multi-select reactions (USER-01, UX-01)
+- [ ] 20-01: TBD
+- [ ] 20-02: TBD
 
 ## Progress
 
 **Execution Order:**
-Phase 11 first (critical fixes), then 12-15. Phases 12, 13, 14 can run in parallel after 11. Phase 15 after 11.
+Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 have no cross-dependency and could run in parallel after 16.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 11. Critical Fixes & Auth | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 12. Export & Copy Quality | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 13. AI Content & Voice | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 14. Homepage & SEO | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 15. Billing, KB & Platform | v1.2 | 3/3 | Complete | 2026-02-11 |
+| 16. Model Resilience & Tool Hardening | v1.3 | 0/TBD | Not started | - |
+| 17. Security Hardening | v1.3 | 0/TBD | Not started | - |
+| 18. Safety Rails | v1.3 | 0/TBD | Not started | - |
+| 19. Voice Quality | v1.3 | 0/TBD | Not started | - |
+| 20. Observability & Cost Controls | v1.3 | 0/TBD | Not started | - |
 
 ---
-*Roadmap created: 2026-02-11*
-*Last updated: 2026-02-11*
+*Roadmap created: 2026-02-16*
+*Last updated: 2026-02-16*
