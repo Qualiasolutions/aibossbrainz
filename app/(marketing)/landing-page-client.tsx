@@ -267,31 +267,43 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	);
 }
 
-// Executive Cards - Plain Text Description Layout
+// Executive Cards - Separate boxes with achievement highlights
 function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true, margin: "-80px" });
 
 	const executives = [
 		{
-			name: content.executives.alex_name,
-			role: content.executives.alex_role,
-			image: content.executives.alex_image,
-			expertise: content.executives.alex_expertise.split(","),
-			description: content.executives.alex_description,
-			textColor: "text-red-700",
-			borderColor: "border-red-100",
-			ringColor: "ring-red-100",
-		},
-		{
 			name: content.executives.kim_name,
 			role: content.executives.kim_role,
 			image: content.executives.kim_image,
-			expertise: content.executives.kim_expertise.split(","),
-			description: content.executives.kim_description,
-			textColor: "text-stone-700",
-			borderColor: "border-stone-200",
-			ringColor: "ring-stone-100",
+			description:
+				"A sales powerhouse who has generated millions in sales for all types of businesses and has been a serial entrepreneur across brick and mortar, non-profits, and e-commerce businesses.",
+			achievements: [
+				"Launched and scaled 5 businesses",
+				"International bestselling author",
+				"Generated over $15M in online sales",
+				"Worked with top leaders from The Secret",
+			],
+			accentColor: "bg-red-600",
+			ringColor: "ring-red-100",
+			tagBg: "bg-red-50 text-red-700 border-red-100",
+		},
+		{
+			name: content.executives.alex_name,
+			role: content.executives.alex_role,
+			image: content.executives.alex_image,
+			description:
+				"Has architected the content, branding, and go-to-market strategies that have fueled startup growth, raised millions in capital, and driven successful exits.",
+			achievements: [
+				"Worked with Fortune 500s to startups to grow their visibility",
+				"Drove content marketing engine contributing to $100M+ and acquisition",
+				"Launched Alecci Media — a full-scale marketing and branding agency with a global portfolio of clients",
+				"Built content + investor strategy securing $90M in funding and driving a $700M valuation for a NYC FinTech",
+			],
+			accentColor: "bg-stone-900",
+			ringColor: "ring-stone-200",
+			tagBg: "bg-stone-50 text-stone-700 border-stone-200",
 		},
 	];
 
@@ -349,71 +361,89 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 					</p>
 				</motion.div>
 
-				{/* Executive Cards - Single Box */}
-				<motion.div
-					initial={{ opacity: 0, y: 40 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{
-						delay: 0.2,
-						duration: 0.6,
-						ease: [0.16, 1, 0.3, 1],
-					}}
-					className="relative rounded-2xl border border-stone-200 bg-white p-8 shadow-lg shadow-stone-200/50"
-				>
-					<div className="grid gap-8 md:grid-cols-2 md:divide-x md:divide-stone-200">
-						{executives.map((exec) => (
-							<div key={exec.name} className="md:first:pr-8 md:last:pl-8">
-								{/* Avatar + Name */}
-								<div className="flex items-center gap-5 mb-5">
-									<div
-										className={cn(
-											"size-20 shrink-0 overflow-hidden rounded-full ring-4 shadow-md",
-											exec.ringColor,
-										)}
-									>
-										<Image
-											src={exec.image}
-											alt={exec.name}
-											width={80}
-											height={80}
-											className="size-full object-cover"
-										/>
-									</div>
-									<div>
-										<h3
-											className={cn(
-												"text-xl font-bold tracking-tight",
-												exec.textColor,
-											)}
-										>
-											{exec.name}
-										</h3>
-										<p className="text-sm font-medium text-stone-500">
-											{exec.role}
-										</p>
-									</div>
+				{/* Executive Cards - Separate Boxes */}
+				<div className="grid gap-6 md:grid-cols-2">
+					{executives.map((exec, i) => (
+						<motion.div
+							key={exec.name}
+							initial={{ opacity: 0, y: 40 }}
+							animate={isInView ? { opacity: 1, y: 0 } : {}}
+							transition={{
+								delay: 0.2 + i * 0.15,
+								duration: 0.6,
+								ease: [0.16, 1, 0.3, 1],
+							}}
+							className="relative rounded-2xl border border-stone-200 bg-white p-7 sm:p-8 shadow-lg shadow-stone-200/50 flex flex-col"
+						>
+							{/* Accent bar */}
+							<div
+								className={cn(
+									"absolute top-0 left-8 right-8 h-1 rounded-b-full",
+									exec.accentColor,
+								)}
+							/>
+
+							{/* Avatar + Name */}
+							<div className="flex items-center gap-5 mb-5">
+								<div
+									className={cn(
+										"size-20 shrink-0 overflow-hidden rounded-full ring-4 shadow-md",
+										exec.ringColor,
+									)}
+								>
+									<Image
+										src={exec.image}
+										alt={exec.name}
+										width={80}
+										height={80}
+										className="size-full object-cover"
+									/>
 								</div>
-
-								{/* Description */}
-								<p className="text-stone-600 leading-relaxed mb-5">
-									{exec.description}
-								</p>
-
-								{/* Expertise tags */}
-								<div className="flex flex-wrap gap-2">
-									{exec.expertise.map((skill) => (
-										<span
-											key={skill}
-											className="px-3 py-1 text-xs font-medium rounded-md bg-stone-50 border border-stone-200 text-stone-600"
-										>
-											{skill.trim()}
-										</span>
-									))}
+								<div>
+									<h3 className="text-xl font-bold tracking-tight text-stone-900">
+										{exec.name}
+									</h3>
+									<p className="text-sm font-medium text-stone-500">
+										{exec.role}
+									</p>
 								</div>
 							</div>
-						))}
-					</div>
-				</motion.div>
+
+							{/* Description */}
+							<p className="text-stone-600 leading-relaxed mb-5">
+								{exec.description}
+							</p>
+
+							{/* Achievement highlights */}
+							<ul className="space-y-2.5 mt-auto">
+								{exec.achievements.map((item) => (
+									<li
+										key={item}
+										className="flex items-start gap-2.5 text-sm text-stone-600"
+									>
+										<svg
+											className={cn(
+												"mt-1 size-4 shrink-0",
+												i === 0 ? "text-red-500" : "text-stone-400",
+											)}
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+											strokeWidth={2.5}
+										>
+											<path
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												d="M5 13l4 4L19 7"
+											/>
+										</svg>
+										<span>{item}</span>
+									</li>
+								))}
+							</ul>
+						</motion.div>
+					))}
+				</div>
 
 				{/* CTA for both executives */}
 				<motion.div
