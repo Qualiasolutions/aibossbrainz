@@ -57,6 +57,8 @@ import {
 	recordCircuitFailure,
 	recordCircuitSuccess,
 } from "@/lib/resilience";
+import { containsCanary } from "@/lib/safety/canary";
+import { redactPII } from "@/lib/safety/pii-redactor";
 import {
 	checkRateLimit,
 	getRateLimitHeaders,
@@ -438,6 +440,45 @@ export const POST = withCsrf(async (request: Request) => {
 						};
 					}),
 				});
+
+				// SAFE-01: Post-hoc scan of streamed AI responses for PII and canary leaks
+				// This is detection/logging only -- text has already been streamed to client
+				try {
+					const assistantText = messages
+						.filter((m) => m.role === "assistant")
+						.flatMap((m) => m.parts)
+						.filter(
+							(p): p is { type: "text"; text: string } => p.type === "text",
+						)
+						.map((p) => p.text)
+						.join(" ");
+
+					if (assistantText) {
+						const piiResult = redactPII(assistantText);
+						if (piiResult.redactedCount > 0) {
+							logger.error(
+								{
+									chatId: id,
+									redactedCount: piiResult.redactedCount,
+									redactedTypes: piiResult.redactedTypes,
+								},
+								"PII detected in AI response (post-hoc scan)",
+							);
+						}
+
+						if (containsCanary(assistantText)) {
+							logger.error(
+								{ chatId: id },
+								"CANARY LEAK: AI response contains system prompt fragment",
+							);
+						}
+					}
+				} catch (scanErr) {
+					logger.warn(
+						{ err: scanErr },
+						"Post-hoc safety scan failed (non-blocking)",
+					);
+				}
 
 				if (finalMergedUsage) {
 					try {

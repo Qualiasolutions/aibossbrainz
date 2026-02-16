@@ -1,5 +1,8 @@
 import "server-only";
 
+import { logger } from "@/lib/logger";
+import { redactPII } from "@/lib/safety/pii-redactor";
+
 import {
 	ChatSDKError,
 	createClient,
@@ -20,10 +23,38 @@ import {
 
 export async function saveMessages({ messages }: { messages: DBMessage[] }) {
 	try {
+		// PII redaction: scrub user message text parts before Postgres insert (SAFE-02)
+		const redactedMessages = messages.map((msg) => {
+			if (msg.role !== "user") return msg;
+
+			const parts = msg.parts as Array<{ type: string; text?: string }>;
+			if (!Array.isArray(parts)) return msg;
+
+			let anyRedacted = false;
+			const cleanParts = parts.map((part) => {
+				if (part.type !== "text" || !part.text) return part;
+
+				const { text, redactedCount, redactedTypes } = redactPII(part.text);
+				if (redactedCount > 0) {
+					anyRedacted = true;
+					logger.warn(
+						{ redactedCount, redactedTypes, chatId: msg.chatId },
+						"PII redacted from user message before storage",
+					);
+					return { ...part, text };
+				}
+				return part;
+			});
+
+			return anyRedacted
+				? { ...msg, parts: cleanParts as unknown as Json }
+				: msg;
+		});
+
 		const supabase = await createClient();
 		const { data, error } = await supabase
 			.from("Message_v2")
-			.insert(messages)
+			.insert(redactedMessages)
 			.select();
 
 		if (error) throw error;

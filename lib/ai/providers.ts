@@ -1,6 +1,7 @@
 import "server-only";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { customProvider } from "ai";
+import { customProvider, wrapLanguageModel } from "ai";
+import { safetyMiddleware } from "@/lib/safety/output-guard";
 import { isTestEnvironment } from "../constants";
 
 // Validate OpenRouter API key at module load (fail fast)
@@ -35,28 +36,52 @@ export const myProvider = isTestEnvironment
 	: customProvider({
 			languageModels: {
 				// Gemini 2.5 Flash (stable) - main chat model with fallback
-				"chat-model": openrouter("google/gemini-2.5-flash", {
-					extraBody: {
-						models: ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"],
-					},
+				"chat-model": wrapLanguageModel({
+					model: openrouter("google/gemini-2.5-flash", {
+						extraBody: {
+							models: [
+								"google/gemini-2.5-flash",
+								"google/gemini-2.5-flash-lite",
+							],
+						},
+					}),
+					middleware: safetyMiddleware,
 				}),
 				// Gemini 2.5 Flash (stable) - for reasoning tasks with fallback
-				"chat-model-reasoning": openrouter("google/gemini-2.5-flash", {
-					extraBody: {
-						models: ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"],
-					},
+				"chat-model-reasoning": wrapLanguageModel({
+					model: openrouter("google/gemini-2.5-flash", {
+						extraBody: {
+							models: [
+								"google/gemini-2.5-flash",
+								"google/gemini-2.5-flash-lite",
+							],
+						},
+					}),
+					middleware: safetyMiddleware,
 				}),
 				// Gemini 2.5 Flash (stable) - title generation with fallback
-				"title-model": openrouter("google/gemini-2.5-flash", {
-					extraBody: {
-						models: ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"],
-					},
+				"title-model": wrapLanguageModel({
+					model: openrouter("google/gemini-2.5-flash", {
+						extraBody: {
+							models: [
+								"google/gemini-2.5-flash",
+								"google/gemini-2.5-flash-lite",
+							],
+						},
+					}),
+					middleware: safetyMiddleware,
 				}),
 				// Gemini 2.5 Flash (stable) - document generation with fallback
-				"artifact-model": openrouter("google/gemini-2.5-flash", {
-					extraBody: {
-						models: ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"],
-					},
+				"artifact-model": wrapLanguageModel({
+					model: openrouter("google/gemini-2.5-flash", {
+						extraBody: {
+							models: [
+								"google/gemini-2.5-flash",
+								"google/gemini-2.5-flash-lite",
+							],
+						},
+					}),
+					middleware: safetyMiddleware,
 				}),
 			},
 		});
