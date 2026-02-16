@@ -333,6 +333,11 @@ export const POST = withCsrf(async (request: Request) => {
 					messages: convertToModelMessages(uiMessages),
 					maxOutputTokens: isSimple ? 500 : 4096, // PERF: Limit output for greetings
 					stopWhen: stepCountIs(3), // Reduced from 5 to 3 - prevents deep recursion latency
+					timeout: {
+						totalMs: 55_000, // Just under Vercel's 60s limit (maxDuration = 60)
+						chunkMs: 15_000, // Abort if no chunk received for 15s (stalled stream detection)
+					},
+					abortSignal: request.signal, // Propagate client disconnect to abort the stream
 					// Temporarily disabled tools and transforms for OpenRouter compatibility
 					// experimental_activeTools: [
 					//   "getWeather",
