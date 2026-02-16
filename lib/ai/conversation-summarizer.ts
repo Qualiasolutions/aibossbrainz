@@ -50,7 +50,7 @@ export async function generateConversationSummary(
 				model: myProvider.languageModel("chat-model"),
 				maxOutputTokens: 300,
 				temperature: 0.3,
-				timeout: { totalMs: 10_000 },
+				abortSignal: AbortSignal.timeout(10_000),
 				prompt: `Summarize this conversation in 2-3 sentences focusing on key business insights, decisions, or action items. Also extract 3-5 topic tags relevant to business/marketing/sales.
 
 Conversation:
