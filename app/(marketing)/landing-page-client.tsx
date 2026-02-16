@@ -349,73 +349,71 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 					</p>
 				</motion.div>
 
-				{/* Executive Cards Grid */}
-				<div className="grid gap-8 md:grid-cols-2">
-					{executives.map((exec, i) => (
-						<motion.div
-							key={exec.name}
-							initial={{ opacity: 0, y: 40 }}
-							animate={isInView ? { opacity: 1, y: 0 } : {}}
-							transition={{
-								delay: 0.2 + i * 0.15,
-								duration: 0.6,
-								ease: [0.16, 1, 0.3, 1],
-							}}
-							className={cn(
-								"relative rounded-2xl border bg-white p-8 shadow-lg shadow-stone-200/50 transition-shadow hover:shadow-xl",
-								exec.borderColor,
-							)}
-						>
-							{/* Avatar + Name */}
-							<div className="flex items-center gap-5 mb-5">
-								<div
-									className={cn(
-										"size-20 shrink-0 overflow-hidden rounded-full ring-4 shadow-md",
-										exec.ringColor,
-									)}
-								>
-									<Image
-										src={exec.image}
-										alt={exec.name}
-										width={80}
-										height={80}
-										className="size-full object-cover"
-									/>
-								</div>
-								<div>
-									<h3
+				{/* Executive Cards - Single Box */}
+				<motion.div
+					initial={{ opacity: 0, y: 40 }}
+					animate={isInView ? { opacity: 1, y: 0 } : {}}
+					transition={{
+						delay: 0.2,
+						duration: 0.6,
+						ease: [0.16, 1, 0.3, 1],
+					}}
+					className="relative rounded-2xl border border-stone-200 bg-white p-8 shadow-lg shadow-stone-200/50"
+				>
+					<div className="grid gap-8 md:grid-cols-2 md:divide-x md:divide-stone-200">
+						{executives.map((exec) => (
+							<div key={exec.name} className="md:first:pr-8 md:last:pl-8">
+								{/* Avatar + Name */}
+								<div className="flex items-center gap-5 mb-5">
+									<div
 										className={cn(
-											"text-xl font-bold tracking-tight",
-											exec.textColor,
+											"size-20 shrink-0 overflow-hidden rounded-full ring-4 shadow-md",
+											exec.ringColor,
 										)}
 									>
-										{exec.name}
-									</h3>
-									<p className="text-sm font-medium text-stone-500">
-										{exec.role}
-									</p>
+										<Image
+											src={exec.image}
+											alt={exec.name}
+											width={80}
+											height={80}
+											className="size-full object-cover"
+										/>
+									</div>
+									<div>
+										<h3
+											className={cn(
+												"text-xl font-bold tracking-tight",
+												exec.textColor,
+											)}
+										>
+											{exec.name}
+										</h3>
+										<p className="text-sm font-medium text-stone-500">
+											{exec.role}
+										</p>
+									</div>
+								</div>
+
+								{/* Description */}
+								<p className="text-stone-600 leading-relaxed mb-5">
+									{exec.description}
+								</p>
+
+								{/* Expertise tags */}
+								<div className="flex flex-wrap gap-2">
+									{exec.expertise.map((skill) => (
+										<span
+											key={skill}
+											className="px-3 py-1 text-xs font-medium rounded-md bg-stone-50 border border-stone-200 text-stone-600"
+										>
+											{skill.trim()}
+										</span>
+									))}
 								</div>
 							</div>
-
-							{/* Description */}
-							<p className="text-stone-600 leading-relaxed mb-5">
-								{exec.description}
-							</p>
-
-							{/* Expertise tags */}
-							<div className="flex flex-wrap gap-2">
-								{exec.expertise.map((skill) => (
-									<span
-										key={skill}
-										className="px-3 py-1 text-xs font-medium rounded-md bg-stone-50 border border-stone-200 text-stone-600"
-									>
-										{skill.trim()}
-									</span>
-								))}
-							</div>
-						</motion.div>
-					))}
-				</div>
+						))}
+					</div>
+				</motion.div>
 
 				{/* CTA for both executives */}
 				<motion.div
