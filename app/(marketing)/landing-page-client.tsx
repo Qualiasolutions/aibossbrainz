@@ -4,10 +4,9 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Mic, Target, TrendingUp, Users, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { InteractiveChatDemo } from "@/components/landing/interactive-chat-demo";
 import { Button } from "@/components/ui/button";
-import { CloudAnimation } from "@/components/ui/cloud-animation";
 import type { LandingPageCMSContent } from "@/lib/cms/landing-page-types";
 import { cn } from "@/lib/utils";
 
@@ -23,200 +22,191 @@ const IconMap = {
 	TrendingUp,
 } as const;
 
-// Decorative floating elements
-function FloatingParticles() {
-	return (
-		<div className="absolute inset-0 overflow-hidden pointer-events-none">
-			{[...Array(8)].map((_, i) => (
-				<motion.div
-					key={`particle-${i}`}
-					className="absolute w-1 h-1 bg-red-400/30 rounded-full"
-					initial={{
-						x: `${Math.random() * 100}%`,
-						y: `${Math.random() * 100}%`,
-						scale: 0,
-						opacity: 0,
-					}}
-					animate={{
-						y: [null, -100],
-						scale: [0, 1, 0],
-						opacity: [0, 0.6, 0],
-					}}
-					transition={{
-						duration: 4 + Math.random() * 4,
-						repeat: Infinity,
-						delay: Math.random() * 2,
-						ease: "easeInOut",
-					}}
-					style={{
-						left: `${20 + Math.random() * 60}%`,
-						top: `${20 + Math.random() * 60}%`,
-					}}
-				/>
-			))}
-		</div>
-	);
-}
+// Shared animation config
+const revealVariants = {
+	hidden: { opacity: 0, y: 32 },
+	visible: (delay: number) => ({
+		opacity: 1,
+		y: 0,
+		transition: {
+			duration: 0.8,
+			delay,
+			ease: [0.25, 0.46, 0.45, 0.94],
+		},
+	}),
+};
 
-// Hero Section with Cloud Animation - Split Layout
+// ─────────────────────────────────────────────────────────────
+// HERO SECTION — Cinematic video background, dark overlay
+// ─────────────────────────────────────────────────────────────
 function HeroSection({ content }: { content: LandingPageCMSContent }) {
-	const [isVisible, setIsVisible] = useState(false);
+	const ref = useRef(null);
+	const isInView = useInView(ref, { once: true });
 	const { scrollY } = useScroll();
-	const y1 = useTransform(scrollY, [0, 300], [0, 100]);
-	const opacity1 = useTransform(scrollY, [0, 200], [1, 0]);
-
-	useEffect(() => {
-		const timer = setTimeout(() => setIsVisible(true), 400);
-		return () => clearTimeout(timer);
-	}, []);
+	const videoScale = useTransform(scrollY, [0, 600], [1, 1.15]);
+	const contentY = useTransform(scrollY, [0, 400], [0, 60]);
+	const overlayOpacity = useTransform(scrollY, [0, 400], [0.7, 0.9]);
 
 	return (
-		<section className="relative min-h-[100svh] overflow-hidden bg-gradient-to-br from-white via-stone-50/50 to-white">
-			{/* Animated gradient mesh background */}
-			<div className="absolute inset-0 overflow-hidden">
-				<div
-					className="absolute top-0 right-1/4 w-[800px] h-[800px] bg-gradient-to-br from-red-50/40 via-rose-50/20 to-transparent rounded-full blur-[100px] animate-pulse"
-					style={{ animationDuration: "8s" }}
-				/>
-				<div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-stone-100/60 to-transparent rounded-full blur-[80px]" />
-			</div>
+		<section
+			ref={ref}
+			className="relative min-h-[100svh] overflow-hidden bg-black"
+		>
+			{/* Video Background */}
+			<motion.div
+				className="absolute inset-0 z-0"
+				style={{ scale: videoScale }}
+			>
+				<video
+					autoPlay
+					muted
+					loop
+					playsInline
+					className="h-full w-full object-cover"
+					poster=""
+				>
+					<source src="/hero-bg.mp4" type="video/mp4" />
+					<track kind="captions" />
+				</video>
+			</motion.div>
 
-			{/* Cloud Animation Background */}
-			<div className="absolute inset-0 opacity-60">
-				<CloudAnimation
-					className="absolute inset-0 h-full w-full"
-					particleColor="rgba(220, 38, 38, 0.15)"
-					particleCount={120}
-				/>
-			</div>
+			{/* Dark Overlay */}
+			<motion.div
+				className="absolute inset-0 z-[1] bg-gradient-to-b from-black/80 via-black/70 to-black/90"
+				style={{ opacity: overlayOpacity }}
+			/>
 
-			{/* Grid pattern overlay */}
-			<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:64px_64px]" />
+			{/* Subtle grain texture */}
+			<div className="absolute inset-0 z-[2] opacity-[0.03] mix-blend-overlay bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc1Ii8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2EpIi8+PC9zdmc+')]" />
 
-			{/* Floating particles */}
-			<FloatingParticles />
-
-			{/* Content - Split Layout */}
-			<div className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl items-center px-4 pt-20 sm:px-6 lg:px-8">
-				<div className="grid w-full gap-12 lg:grid-cols-2 lg:gap-20">
-					{/* Left - Text Content */}
-					<motion.div
-						initial={{ opacity: 0, x: -40 }}
-						animate={isVisible ? { opacity: 1, x: 0 } : {}}
-						transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-						className="flex flex-col justify-center"
-						style={{ y: y1, opacity: opacity1 }}
-					>
+			{/* Content */}
+			<motion.div
+				className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl items-center px-6 pt-24 pb-16 lg:px-8"
+				style={{ y: contentY }}
+			>
+				<div className="grid w-full gap-16 lg:grid-cols-2 lg:gap-20 items-center">
+					{/* Left — Text */}
+					<div className="flex flex-col justify-center">
 						{/* Badge */}
 						<motion.div
-							initial={{ opacity: 0, scale: 0.9 }}
-							animate={isVisible ? { opacity: 1, scale: 1 } : {}}
-							transition={{ delay: 0.3, duration: 0.5 }}
-							className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-full border border-red-100 w-fit mb-6"
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.2}
+							className="mb-8"
 						>
-							<div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-							<span className="text-xs font-semibold tracking-wide text-red-700 uppercase">
-								AI-Powered Executive Consulting
+							<span className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-sm">
+								<span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+								<span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/70">
+									AI-Powered Executive Consulting
+								</span>
 							</span>
 						</motion.div>
 
-						{/* Main Heading - cleaner styling */}
-						<h1 className="text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl lg:text-6xl leading-tight">
+						{/* Heading */}
+						<motion.h1
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.35}
+							className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-[3.5rem] xl:text-6xl leading-[1.1]"
+						>
 							<span className="block">{content.hero.title_main}</span>
-							<span className="mt-2 block text-red-600">
+							<span className="mt-3 block bg-gradient-to-r from-red-500 to-red-400 bg-clip-text text-transparent">
 								{content.hero.title_highlight}
 							</span>
-						</h1>
+						</motion.h1>
 
-						{/* Subheading */}
+						{/* Subtitle */}
 						<motion.p
-							initial={{ opacity: 0 }}
-							animate={isVisible ? { opacity: 1 } : {}}
-							transition={{ delay: 0.5, duration: 0.6 }}
-							className="mt-8 max-w-lg text-lg leading-relaxed text-stone-600 sm:text-xl font-light"
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.5}
+							className="mt-8 max-w-lg text-base leading-relaxed text-white/50 sm:text-lg font-light"
 						>
 							{content.hero.subtitle}
 						</motion.p>
 
-						{/* CTA Buttons */}
+						{/* CTAs */}
 						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={isVisible ? { opacity: 1, y: 0 } : {}}
-							transition={{ delay: 0.6, duration: 0.5 }}
-							className="mt-8 flex flex-col gap-4 sm:flex-row"
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.65}
+							className="mt-10 flex flex-col gap-4 sm:flex-row"
 						>
 							<Link href={content.hero.cta_primary_link}>
 								<Button
 									size="lg"
-									className="group gap-2 bg-gradient-to-r from-red-600 to-red-700 px-8 py-6 text-base font-semibold text-white shadow-xl shadow-red-600/25 transition-all hover:shadow-2xl hover:shadow-red-600/30 hover:scale-105"
+									className="group gap-2.5 bg-red-600 px-8 py-6 text-sm font-semibold tracking-wide text-white shadow-2xl shadow-red-600/20 transition-all duration-300 hover:bg-red-500 hover:shadow-red-500/30"
 								>
 									{content.hero.cta_primary_text}
-									<ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+									<ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
 								</Button>
 							</Link>
 							<Link href={content.hero.cta_secondary_link}>
 								<Button
 									variant="outline"
 									size="lg"
-									className="border-stone-300 bg-white/80 backdrop-blur-sm px-8 py-6 text-base font-medium text-stone-700 hover:border-stone-400 hover:bg-white hover:text-stone-900 transition-all hover:scale-105"
+									className="border-white/15 bg-white/5 backdrop-blur-sm px-8 py-6 text-sm font-medium text-white/80 hover:border-white/25 hover:bg-white/10 hover:text-white transition-all duration-300"
 								>
 									{content.hero.cta_secondary_text}
 								</Button>
 							</Link>
 						</motion.div>
 
-						{/* Trust indicators */}
+						{/* Trust */}
 						<motion.div
-							initial={{ opacity: 0 }}
-							animate={isVisible ? { opacity: 1 } : {}}
-							transition={{ delay: 0.9, duration: 0.6 }}
-							className="mt-12 flex items-center gap-6 text-sm text-stone-400"
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.8}
+							className="mt-14 flex items-center gap-6 text-xs text-white/30"
 						>
 							<div className="flex items-center gap-2">
-								<div className="flex items-center gap-0.5">
+								<div className="flex gap-0.5">
 									{[...Array(5)].map((_, i) => (
 										<svg
 											key={`star-${i}`}
-											className="w-4 h-4 text-red-500 fill-current"
+											className="w-3.5 h-3.5 text-red-500 fill-current"
 											viewBox="0 0 20 20"
 										>
 											<path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
 										</svg>
 									))}
 								</div>
-								<span>Trusted by founders</span>
+								<span className="text-white/40">Trusted by founders</span>
 							</div>
-							<div className="h-4 w-px bg-stone-200" />
-							<div className="flex items-center gap-2">
-								<Zap className="w-4 h-4" />
+							<div className="h-3 w-px bg-white/10" />
+							<div className="flex items-center gap-1.5">
+								<Zap className="w-3.5 h-3.5 text-white/30" />
 								<span>Instant responses</span>
 							</div>
 						</motion.div>
-					</motion.div>
+					</div>
 
-					{/* Right - Interactive Chat Demo */}
+					{/* Right — Interactive Demo or Media */}
 					<motion.div
-						initial={{ opacity: 0, x: 40, scale: 0.95 }}
-						animate={isVisible ? { opacity: 1, x: 0, scale: 1 } : {}}
-						transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+						variants={revealVariants}
+						initial="hidden"
+						animate={isInView ? "visible" : "hidden"}
+						custom={0.4}
 						className="flex items-center justify-center lg:justify-end"
 					>
 						<div className="w-full max-w-2xl xl:max-w-3xl relative">
-							{/* Decorative elements behind content */}
-							<div className="absolute -inset-4 bg-gradient-to-r from-red-500/10 to-rose-500/10 rounded-3xl blur-2xl" />
-							<div className="absolute -inset-1 bg-gradient-to-r from-stone-100 to-stone-50 rounded-3xl" />
 							{content.hero.media_type === "image" && content.hero.media_url ? (
 								<Image
 									src={content.hero.media_url}
 									alt="AI Boss Brainz"
 									width={800}
 									height={600}
-									className="relative rounded-2xl shadow-2xl"
+									className="relative rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/10"
 									priority
 								/>
 							) : content.hero.media_type === "video" &&
 								content.hero.media_url ? (
-								<div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl">
+								<div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10">
 									{content.hero.media_url.includes("youtube.com") ||
 									content.hero.media_url.includes("youtu.be") ||
 									content.hero.media_url.includes("vimeo.com") ? (
@@ -243,31 +233,33 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						</div>
 					</motion.div>
 				</div>
-			</div>
+			</motion.div>
 
 			{/* Scroll Indicator */}
 			<motion.div
 				initial={{ opacity: 0 }}
-				animate={isVisible ? { opacity: 1 } : {}}
-				transition={{ delay: 1.2, duration: 0.5 }}
-				className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
+				animate={isInView ? { opacity: 1 } : {}}
+				transition={{ delay: 1.5, duration: 0.8 }}
+				className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2"
 			>
 				<motion.div
-					animate={{ y: [0, 8, 0] }}
-					transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-					className="flex flex-col items-center gap-2"
+					animate={{ y: [0, 6, 0] }}
+					transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+					className="flex flex-col items-center gap-3"
 				>
-					<span className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-400">
-						Explore
+					<span className="text-[9px] font-medium tracking-[0.35em] uppercase text-white/25">
+						Scroll
 					</span>
-					<div className="h-12 w-px bg-gradient-to-b from-stone-400 via-stone-300 to-transparent" />
+					<div className="h-10 w-px bg-gradient-to-b from-white/20 to-transparent" />
 				</motion.div>
 			</motion.div>
 		</section>
 	);
 }
 
-// Executive Cards - Separate boxes with achievement highlights
+// ─────────────────────────────────────────────────────────────
+// EXECUTIVE CARDS — Editorial, asymmetric layout
+// ─────────────────────────────────────────────────────────────
 function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true, margin: "-80px" });
@@ -285,9 +277,6 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 				"Generated over $15M in online sales",
 				"Worked with top leaders from The Secret",
 			],
-			accentColor: "bg-red-600",
-			checkColor: "text-red-500",
-			ringColor: "ring-red-100",
 		},
 		{
 			name: content.executives.alex_name,
@@ -301,146 +290,92 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 				"Launched Alecci Media — a full-scale marketing and branding agency with a global portfolio of clients",
 				"Built content + investor strategy securing $90M in funding and driving a $700M valuation for a NYC FinTech",
 			],
-			accentColor: "bg-stone-900",
-			checkColor: "text-stone-500",
-			ringColor: "ring-stone-200",
 		},
 	];
 
 	return (
 		<section
 			ref={ref}
-			className="relative flex min-h-[90vh] items-center bg-gradient-to-b from-stone-50 to-white py-14 sm:py-16 lg:py-20 overflow-hidden"
+			className="relative bg-white py-24 sm:py-32 lg:py-40 overflow-hidden"
 		>
-			{/* Background decoration */}
-			<div className="absolute inset-0 opacity-30">
-				<div className="absolute top-1/4 left-0 w-96 h-96 bg-red-100/50 rounded-full blur-[120px]" />
-				<div className="absolute bottom-1/4 right-0 w-96 h-96 bg-stone-200/50 rounded-full blur-[120px]" />
-			</div>
-
-			<div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
+			<div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-8">
 				{/* Section Header */}
 				<motion.div
-					initial={{ opacity: 0, y: 30 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.7 }}
-					className="mb-10 text-center"
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0}
+					className="mb-16 text-center"
 				>
-					<motion.span
-						initial={{ opacity: 0, scale: 0.9 }}
-						animate={isInView ? { opacity: 1, scale: 1 } : {}}
-						transition={{ delay: 0.1, duration: 0.5 }}
-						className="inline-block px-4 py-1.5 mb-4 text-xs font-bold uppercase tracking-[0.25em] text-red-700 bg-red-50 rounded-full"
-					>
+					{/* Red rule */}
+					<div className="mx-auto mb-8 h-px w-16 bg-red-500" />
+
+					<span className="inline-block mb-5 text-[11px] font-semibold tracking-[0.25em] uppercase text-red-600">
 						The Experts Behind Your Growth
-					</motion.span>
-					<h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-stone-900">
+					</span>
+					<h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-stone-900 leading-tight">
 						{content.executives.section_title}{" "}
-						<span className="relative inline-block">
-							<span className="relative z-10 bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-								{content.executives.section_title_highlight}
-							</span>
-							<svg
-								className="absolute -bottom-2 left-0 w-full"
-								height="8"
-								viewBox="0 0 200 8"
-								fill="none"
-							>
-								<path
-									d="M0 4C50 2 100 6 150 4C175 3 190 5 200 4"
-									stroke="currentColor"
-									strokeWidth="3"
-									strokeLinecap="round"
-									className="text-red-200"
-								/>
-							</svg>
+						<span className="bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">
+							{content.executives.section_title_highlight}
 						</span>
 					</h2>
-					<p className="mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-stone-600">
+					<p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-stone-500 font-light">
 						{content.executives.section_subtitle}
 					</p>
 				</motion.div>
 
-				{/* Executive Cards - Separate Boxes */}
-				<div className="grid gap-6 md:grid-cols-2">
+				{/* Executive Cards */}
+				<div className="grid gap-8 md:grid-cols-2">
 					{executives.map((exec, i) => (
 						<motion.div
 							key={exec.name}
-							initial={{ opacity: 0, y: 40 }}
-							animate={isInView ? { opacity: 1, y: 0 } : {}}
-							transition={{
-								delay: 0.2 + i * 0.15,
-								duration: 0.6,
-								ease: [0.16, 1, 0.3, 1],
-							}}
-							className="relative rounded-2xl border border-stone-200 bg-white p-6 sm:p-7 shadow-lg shadow-stone-200/50 flex flex-col"
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.2 + i * 0.15}
+							className="group relative rounded-2xl border border-stone-100 bg-white p-8 sm:p-10 transition-all duration-500 hover:border-red-100 hover:shadow-xl hover:shadow-red-500/5"
 						>
-							{/* Accent bar */}
-							<div
-								className={cn(
-									"absolute top-0 left-8 right-8 h-1 rounded-b-full",
-									exec.accentColor,
-								)}
-							/>
+							{/* Top accent */}
+							<div className="absolute top-0 left-10 right-10 h-px bg-gradient-to-r from-transparent via-red-500/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-							{/* Avatar + Name */}
-							<div className="flex items-center gap-4 mb-4">
-								<div
-									className={cn(
-										"size-16 shrink-0 overflow-hidden rounded-full ring-4 shadow-md",
-										exec.ringColor,
-									)}
-								>
+							{/* Avatar + Identity */}
+							<div className="flex items-center gap-5 mb-6">
+								<div className="size-20 shrink-0 overflow-hidden rounded-2xl ring-1 ring-stone-100 shadow-lg">
 									<Image
 										src={exec.image}
 										alt={exec.name}
-										width={64}
-										height={64}
+										width={80}
+										height={80}
 										className="size-full object-cover"
 									/>
 								</div>
 								<div>
-									<h3 className="text-lg font-bold tracking-tight text-stone-900">
+									<h3 className="text-xl font-bold tracking-tight text-stone-900">
 										{exec.name}
 									</h3>
-									<p className="text-sm font-medium text-stone-500">
+									<p className="text-sm font-medium text-stone-400 tracking-wide">
 										{exec.role}
 									</p>
 								</div>
 							</div>
 
 							{/* Description */}
-							<p className="text-sm text-stone-600 leading-relaxed mb-5 min-h-[3.5rem]">
+							<p className="text-sm text-stone-500 leading-relaxed mb-8">
 								{exec.description}
 							</p>
 
-							{/* Divider */}
-							<div className="border-t border-stone-100 mb-4" />
+							{/* Thin separator */}
+							<div className="h-px w-full bg-stone-100 mb-6" />
 
-							{/* Achievement highlights - aligned with consistent spacing */}
-							<ul className="space-y-3 mt-auto">
+							{/* Achievements */}
+							<ul className="space-y-3">
 								{exec.achievements.map((item) => (
 									<li
 										key={item}
 										className="flex items-start gap-3 text-sm text-stone-600"
 									>
-										<svg
-											className={cn(
-												"mt-0.5 size-4 shrink-0",
-												exec.checkColor,
-											)}
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-											strokeWidth={2.5}
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												d="M5 13l4 4L19 7"
-											/>
-										</svg>
-										<span className="leading-snug">{item}</span>
+										<span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-red-500" />
+										<span className="leading-relaxed">{item}</span>
 									</li>
 								))}
 							</ul>
@@ -448,17 +383,18 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 					))}
 				</div>
 
-				{/* CTA for both executives */}
+				{/* CTA */}
 				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ delay: 0.6, duration: 0.6 }}
-					className="mt-8 text-center"
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.6}
+					className="mt-14 text-center"
 				>
 					<Link href="/login">
 						<Button
 							size="lg"
-							className="gap-2 bg-stone-900 px-8 py-6 text-base font-semibold text-white shadow-xl hover:bg-stone-800 transition-all hover:scale-105"
+							className="gap-2.5 bg-stone-900 px-8 py-6 text-sm font-semibold text-white shadow-xl shadow-stone-900/10 transition-all duration-300 hover:bg-stone-800 hover:shadow-stone-900/20"
 						>
 							Chat with Both Executives
 							<Users className="size-4" />
@@ -470,7 +406,9 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 	);
 }
 
-// Checkup Section - Red styled, items ordered lowest to highest value
+// ─────────────────────────────────────────────────────────────
+// CHECKUP SECTION — Sophisticated red gradient, inline stats
+// ─────────────────────────────────────────────────────────────
 function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true, margin: "-80px" });
@@ -493,46 +431,40 @@ function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 	return (
 		<section
 			ref={ref}
-			className="relative bg-gradient-to-br from-red-600 to-red-700 py-20 sm:py-28 overflow-hidden"
+			className="relative bg-gradient-to-br from-red-700 via-red-800 to-stone-900 py-24 sm:py-32 overflow-hidden"
 		>
-			{/* Background texture */}
-			<div className="absolute inset-0">
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:48px_48px]" />
-				<div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-500/30 rounded-full blur-[120px]" />
-				<div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-red-800/30 rounded-full blur-[100px]" />
-			</div>
+			{/* Subtle texture */}
+			<div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_1px),linear-gradient(to_bottom,#ffffff04_1px,transparent_1px)] bg-[size:64px_64px]" />
 
-			<div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-				{/* Section title */}
+			<div className="relative z-10 mx-auto max-w-5xl px-6 lg:px-8">
+				{/* Title */}
 				<motion.div
-					initial={{ opacity: 0, y: 30 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.7 }}
-					className="text-center mb-14"
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0}
+					className="text-center mb-16"
 				>
-					<h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+					<h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
 						{content.checkup.section_title}
 					</h2>
 				</motion.div>
 
-				{/* Items grid */}
-				<div className="grid gap-6 sm:grid-cols-3">
+				{/* Stats inline */}
+				<div className="flex flex-col sm:flex-row items-center justify-center divide-y sm:divide-y-0 sm:divide-x divide-white/10">
 					{items.map((item, i) => (
 						<motion.div
 							key={item.title}
-							initial={{ opacity: 0, y: 30 }}
-							animate={isInView ? { opacity: 1, y: 0 } : {}}
-							transition={{
-								delay: 0.15 + i * 0.12,
-								duration: 0.6,
-								ease: [0.16, 1, 0.3, 1],
-							}}
-							className="relative rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-8 text-center transition-all hover:bg-white/15"
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.15 + i * 0.12}
+							className="flex-1 py-8 sm:py-0 sm:px-10 text-center"
 						>
-							<div className="text-4xl sm:text-5xl font-bold text-white mb-3">
+							<div className="text-4xl sm:text-5xl font-bold text-white mb-3 tracking-tight">
 								{item.value}
 							</div>
-							<p className="text-white/90 text-sm sm:text-base leading-relaxed font-medium">
+							<p className="text-white/60 text-sm sm:text-base leading-relaxed font-light">
 								{item.title}
 							</p>
 						</motion.div>
@@ -541,15 +473,16 @@ function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 
 				{/* CTA */}
 				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ delay: 0.6, duration: 0.6 }}
-					className="mt-12 text-center"
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.6}
+					className="mt-16 text-center"
 				>
 					<Link href="/pricing">
 						<Button
 							size="lg"
-							className="gap-2 bg-white px-8 py-6 text-base font-semibold text-red-700 shadow-xl hover:bg-white/90 transition-all hover:scale-105"
+							className="gap-2.5 bg-white px-8 py-6 text-sm font-semibold text-red-700 shadow-2xl shadow-black/20 transition-all duration-300 hover:bg-white/95 hover:shadow-black/30"
 						>
 							See All Plans
 							<ArrowRight className="size-4" />
@@ -561,7 +494,9 @@ function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 	);
 }
 
-// Benefits Grid - Enhanced visual design
+// ─────────────────────────────────────────────────────────────
+// BENEFITS GRID — Refined 2×2 layout, dark section
+// ─────────────────────────────────────────────────────────────
 function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -573,7 +508,6 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 			title: content.benefits.benefit_1_title,
 			desc: content.benefits.benefit_1_desc,
 			num: "01",
-			gradient: "from-amber-500 to-orange-500",
 		},
 		{
 			icon:
@@ -581,7 +515,6 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 			title: content.benefits.benefit_2_title,
 			desc: content.benefits.benefit_2_desc,
 			num: "02",
-			gradient: "from-red-500 to-rose-500",
 		},
 		{
 			icon:
@@ -590,7 +523,6 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 			title: content.benefits.benefit_3_title,
 			desc: content.benefits.benefit_3_desc,
 			num: "03",
-			gradient: "from-violet-500 to-purple-500",
 		},
 		{
 			icon:
@@ -599,7 +531,6 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 			title: content.benefits.benefit_4_title,
 			desc: content.benefits.benefit_4_desc,
 			num: "04",
-			gradient: "from-emerald-500 to-teal-500",
 		},
 	];
 
@@ -608,118 +539,85 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 			ref={ref}
 			className="relative bg-stone-950 py-24 sm:py-32 lg:py-40 overflow-hidden"
 		>
-			{/* Animated background */}
-			<div className="absolute inset-0">
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:64px_64px]" />
-				<div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-red-500/10 rounded-full blur-[120px]" />
-				<div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[100px]" />
-			</div>
+			{/* Subtle ambient glow */}
+			<div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-red-500/5 rounded-full blur-[150px]" />
+			<div className="absolute bottom-0 right-1/3 w-[400px] h-[400px] bg-red-500/3 rounded-full blur-[120px]" />
 
-			<div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-8">
 				{/* Section Header */}
 				<motion.div
-					initial={{ opacity: 0, y: 30 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.7 }}
-					className="mb-16 max-w-3xl"
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0}
+					className="mb-20 max-w-2xl"
 				>
-					<span className="inline-block px-4 py-1.5 mb-6 text-xs font-bold uppercase tracking-[0.25em] text-red-400 bg-red-950/50 rounded-full border border-red-900/50">
+					<div className="mb-8 h-px w-16 bg-red-500/60" />
+					<span className="inline-block mb-5 text-[11px] font-semibold tracking-[0.25em] uppercase text-red-400/70">
 						Why Choose AI Boss Brainz
 					</span>
-					<h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
+					<h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
 						{content.benefits.section_title}
 					</h2>
-					<p className="mt-6 text-lg text-stone-400 leading-relaxed">
+					<p className="mt-6 text-base sm:text-lg text-stone-500 leading-relaxed font-light">
 						{content.benefits.section_subtitle}
 					</p>
 				</motion.div>
 
-				{/* Benefits Grid - Enhanced */}
-				<div className="grid gap-px overflow-hidden rounded-2xl border border-stone-800 bg-stone-800 sm:grid-cols-2 lg:grid-cols-4">
+				{/* Benefits 2×2 Grid */}
+				<div className="grid gap-6 sm:grid-cols-2">
 					{benefits.map((b, i) => (
 						<motion.div
 							key={b.title}
-							initial={{ opacity: 0, y: 40 }}
-							animate={isInView ? { opacity: 1, y: 0 } : {}}
-							transition={{
-								delay: 0.1 + i * 0.12,
-								duration: 0.6,
-								ease: [0.16, 1, 0.3, 1],
-							}}
-							className="group relative flex flex-col bg-stone-900/50 backdrop-blur-sm p-8 transition-all duration-500 hover:bg-stone-900/80"
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.1 + i * 0.12}
+							className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-8 sm:p-10 transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.04]"
 						>
-							{/* Hover glow */}
-							<div
-								className={cn(
-									"absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-b from-transparent via-white/5 to-transparent rounded-xl",
-								)}
-							/>
-
 							{/* Number */}
-							<span className="mb-6 text-xs font-bold tabular-nums text-stone-600 group-hover:text-stone-500 transition-colors">
+							<span className="block mb-6 text-xs font-mono text-stone-700 group-hover:text-stone-600 transition-colors">
 								{b.num}
 							</span>
 
-							{/* Icon with gradient background */}
-							<motion.div
-								whileHover={{ scale: 1.1, rotate: 5 }}
-								transition={{ duration: 0.2 }}
-								className={cn(
-									"mb-6 flex size-14 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg",
-									b.gradient,
-								)}
-							>
-								<b.icon className="size-6 text-white" />
-							</motion.div>
+							{/* Icon */}
+							<div className="mb-6 flex size-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03]">
+								<b.icon className="size-5 text-red-500/80" />
+							</div>
 
 							{/* Content */}
-							<h3 className="text-lg font-bold text-white group-hover:text-white transition-colors">
+							<h3 className="text-lg font-semibold text-white mb-3 tracking-tight">
 								{b.title}
 							</h3>
-							<p className="mt-3 text-sm leading-relaxed text-stone-400 group-hover:text-stone-300 transition-colors">
+							<p className="text-sm leading-relaxed text-stone-500 group-hover:text-stone-400 transition-colors">
 								{b.desc}
 							</p>
-
-							{/* Arrow indicator on hover */}
-							<motion.div
-								initial={{ opacity: 0, x: -10 }}
-								whileHover={{ opacity: 1, x: 0 }}
-								className="mt-6 flex items-center gap-1 text-xs font-semibold text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-							>
-								<span>Learn more</span>
-								<ArrowRight className="size-3 transition-transform group-hover:translate-x-1" />
-							</motion.div>
 						</motion.div>
 					))}
 				</div>
 
 				{/* Stats row */}
 				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ delay: 0.6, duration: 0.6 }}
-					className="mt-16 grid grid-cols-2 gap-8 sm:grid-cols-4 lg:gap-16"
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.6}
+					className="mt-20 flex flex-wrap justify-center gap-12 sm:gap-16 lg:gap-24"
 				>
 					{[
 						{ value: "40+", label: "Years Experience" },
 						{ value: "500+", label: "Brands Helped" },
 						{ value: "24/7", label: "Availability" },
 						{ value: "100%", label: "Focus on Results" },
-					].map((stat, i) => (
-						<motion.div
-							key={stat.label}
-							initial={{ opacity: 0, scale: 0.9 }}
-							animate={isInView ? { opacity: 1, scale: 1 } : {}}
-							transition={{ delay: 0.7 + i * 0.1, duration: 0.5 }}
-							className="text-center"
-						>
-							<div className="text-3xl sm:text-4xl font-bold bg-gradient-to-b from-white to-stone-400 bg-clip-text text-transparent">
+					].map((stat) => (
+						<div key={stat.label} className="text-center">
+							<div className="text-2xl sm:text-3xl font-bold text-white/90 tracking-tight">
 								{stat.value}
 							</div>
-							<div className="mt-2 text-xs font-semibold uppercase tracking-wider text-stone-500">
+							<div className="mt-2 text-[11px] font-medium uppercase tracking-[0.15em] text-stone-600">
 								{stat.label}
 							</div>
-						</motion.div>
+						</div>
 					))}
 				</motion.div>
 			</div>
@@ -727,7 +625,9 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 	);
 }
 
-// CTA Section - Premium dark with dramatic effect
+// ─────────────────────────────────────────────────────────────
+// CTA SECTION — Cinematic closing, dramatic negative space
+// ─────────────────────────────────────────────────────────────
 function CTASection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -735,142 +635,123 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
 	return (
 		<section
 			ref={ref}
-			className="relative bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 py-24 sm:py-32 lg:py-40 overflow-hidden"
+			className="relative bg-stone-950 py-32 sm:py-40 lg:py-48 overflow-hidden"
 		>
-			{/* Animated background elements */}
-			<div className="absolute inset-0 overflow-hidden">
-				{/* Grid pattern */}
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:48px_48px]" />
+			{/* Ambient glow */}
+			<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-500/[0.06] rounded-full blur-[150px]" />
 
-				{/* Floating orbs */}
+			<div className="relative z-10 mx-auto max-w-4xl px-6 lg:px-8 text-center">
+				{/* Red rule */}
 				<motion.div
-					animate={{
-						scale: [1, 1.2, 1],
-						opacity: [0.1, 0.2, 0.1],
-					}}
-					transition={{
-						duration: 8,
-						repeat: Infinity,
-						ease: "easeInOut",
-					}}
-					className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500 rounded-full blur-[150px]"
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0}
+					className="mx-auto mb-12 h-px w-16 bg-red-500/50"
 				/>
-				<motion.div
-					animate={{
-						scale: [1.2, 1, 1.2],
-						opacity: [0.15, 0.1, 0.15],
-					}}
-					transition={{
-						duration: 10,
-						repeat: Infinity,
-						ease: "easeInOut",
-						delay: 1,
-					}}
-					className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-rose-500 rounded-full blur-[120px]"
-				/>
-			</div>
 
-			<div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-				<motion.div
-					initial={{ opacity: 0, y: 40 }}
-					animate={isInView ? { opacity: 1, y: 0 } : {}}
-					transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-					className="relative"
+				{/* Badge */}
+				<motion.span
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.1}
+					className="inline-flex items-center gap-2 px-4 py-2 mb-10 rounded-full border border-white/[0.08] bg-white/[0.03] text-[11px] font-medium tracking-[0.2em] uppercase text-white/40"
 				>
-					{/* Glow effect behind content */}
-					<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-red-500/10 via-rose-500/5 to-red-500/10 rounded-full blur-[100px]" />
+					<span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+					Ready to Scale Your Business?
+				</motion.span>
 
-					<div className="relative text-center">
-						{/* Badge */}
-						<motion.span
-							initial={{ opacity: 0, scale: 0.8 }}
-							animate={isInView ? { opacity: 1, scale: 1 } : {}}
-							transition={{ delay: 0.2, duration: 0.5 }}
-							className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-red-500/30 bg-red-950/50 text-sm font-semibold text-red-400"
+				{/* Heading */}
+				<motion.h2
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.2}
+					className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-bold tracking-tight text-white leading-[1.15]"
+				>
+					{content.cta.title}
+				</motion.h2>
+
+				{/* Subtitle */}
+				<motion.p
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.35}
+					className="mx-auto mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-stone-500 font-light"
+				>
+					{content.cta.subtitle}
+				</motion.p>
+
+				{/* CTA Buttons */}
+				<motion.div
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.5}
+					className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
+				>
+					<Link href={content.cta.cta_primary_link}>
+						<Button
+							size="lg"
+							className="group gap-2.5 bg-red-600 px-10 py-6 text-sm font-semibold tracking-wide text-white shadow-2xl shadow-red-600/20 transition-all duration-300 hover:bg-red-500 hover:shadow-red-500/30"
 						>
-							<div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-							Ready to Scale Your Business?
-						</motion.span>
-
-						<h2 className="mx-auto max-w-4xl text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
-							{content.cta.title}
-						</h2>
-
-						<p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-stone-400">
-							{content.cta.subtitle}
-						</p>
-
-						{/* CTA Buttons with enhanced styling */}
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={isInView ? { opacity: 1, y: 0 } : {}}
-							transition={{ delay: 0.4, duration: 0.6 }}
-							className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
+							<span>{content.cta.cta_primary_text}</span>
+							<ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+						</Button>
+					</Link>
+					<Link href={content.cta.cta_secondary_link}>
+						<Button
+							variant="outline"
+							size="lg"
+							className="border-white/10 bg-white/[0.03] backdrop-blur-sm px-10 py-6 text-sm font-medium text-white/60 hover:border-white/20 hover:bg-white/[0.06] hover:text-white/80 transition-all duration-300"
 						>
-							<Link href={content.cta.cta_primary_link}>
-								<Button
-									size="lg"
-									className="group relative gap-2 overflow-hidden bg-gradient-to-r from-red-600 to-rose-600 px-10 py-6 text-base font-semibold text-white shadow-2xl shadow-red-600/30 transition-all hover:shadow-red-600/50 hover:scale-105"
-								>
-									<span className="relative z-10">
-										{content.cta.cta_primary_text}
-									</span>
-									<ArrowRight className="relative z-10 size-4 transition-transform group-hover:translate-x-1" />
-									<div className="absolute inset-0 bg-gradient-to-r from-red-500 to-rose-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-								</Button>
-							</Link>
-							<Link href={content.cta.cta_secondary_link}>
-								<Button
-									variant="outline"
-									size="lg"
-									className="border-stone-700 bg-stone-900/50 backdrop-blur-sm px-10 py-6 text-base font-medium text-stone-300 hover:border-stone-500 hover:bg-stone-900 hover:text-white transition-all hover:scale-105"
-								>
-									{content.cta.cta_secondary_text}
-								</Button>
-							</Link>
-						</motion.div>
+							{content.cta.cta_secondary_text}
+						</Button>
+					</Link>
+				</motion.div>
 
-						{/* Trust indicators */}
-						<motion.div
-							initial={{ opacity: 0 }}
-							animate={isInView ? { opacity: 1 } : {}}
-							transition={{ delay: 0.6, duration: 0.6 }}
-							className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-stone-500"
+				{/* Trust indicators */}
+				<motion.div
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.65}
+					className="mt-14 flex flex-wrap items-center justify-center gap-6 text-xs text-stone-600"
+				>
+					<div className="flex items-center gap-2">
+						<svg
+							className="w-4 h-4 text-red-500/60"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
 						>
-							<div className="flex items-center gap-2">
-								<svg
-									className="w-5 h-5 text-green-500"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-								>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										strokeWidth={2}
-										d="M5 13l4 4L19 7"
-									/>
-								</svg>
-								<span>Start for free</span>
-							</div>
-							<div className="w-px h-4 bg-stone-700" />
-							<div className="flex items-center gap-2">
-								<svg
-									className="w-5 h-5 text-green-500"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-								>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										strokeWidth={2}
-										d="M5 13l4 4L19 7"
-									/>
-								</svg>
-								<span>Cancel anytime</span>
-							</div>
-						</motion.div>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M5 13l4 4L19 7"
+							/>
+						</svg>
+						<span>Start for free</span>
+					</div>
+					<div className="w-px h-3 bg-white/[0.06]" />
+					<div className="flex items-center gap-2">
+						<svg
+							className="w-4 h-4 text-red-500/60"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M5 13l4 4L19 7"
+							/>
+						</svg>
+						<span>Cancel anytime</span>
 					</div>
 				</motion.div>
 			</div>
