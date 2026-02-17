@@ -1,5 +1,7 @@
 import "server-only";
 
+import { logger } from "@/lib/logger";
+
 import {
 	type AppUsage,
 	ChatSDKError,
@@ -41,7 +43,7 @@ export async function saveChat({
 		if (error) throw error;
 		return data;
 	} catch (error) {
-		console.error("saveChat error:", error);
+		logger.error({ error, id, userId }, "Failed to save chat");
 		throw new ChatSDKError("bad_request:database", "Failed to save chat");
 	}
 }
@@ -61,9 +63,9 @@ export async function updateChatTitle({
 			.eq("id", chatId);
 
 		if (error) throw error;
-	} catch (_error) {
+	} catch (error) {
 		// Non-critical - title update failure shouldn't break the chat
-		console.warn("Failed to update chat title:", chatId);
+		logger.warn({ error, chatId }, "Failed to update chat title");
 	}
 }
 
@@ -90,7 +92,8 @@ export async function deleteChatById({ id }: { id: string }) {
 			if (error) throw error;
 			return data?.[0];
 		}, dbRetryOptions);
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, id }, "Failed to delete chat by id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to delete chat by id",
@@ -134,7 +137,8 @@ export async function deleteAllChatsByUserId({ userId }: { userId: string }) {
 
 			return { deletedCount: deletedChats?.length || 0 };
 		}, dbRetryOptions);
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, userId }, "Failed to delete all chats by user id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to delete all chats by user id",
@@ -208,7 +212,8 @@ export async function getChatsByUserId({
 			chats: hasMore ? chats.slice(0, limit) : chats,
 			hasMore,
 		};
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, id }, "Failed to get chats by user id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get chats by user id",
@@ -229,7 +234,7 @@ export async function getChatById({ id }: { id: string }) {
 		if (error && error.code !== "PGRST116") throw error; // PGRST116 = no rows
 		return data || null;
 	} catch (error) {
-		console.error("getChatById error:", error);
+		logger.error({ error, id }, "Failed to get chat by id");
 		throw new ChatSDKError("bad_request:database", "Failed to get chat by id");
 	}
 }
@@ -253,7 +258,8 @@ export async function updateChatVisiblityById({
 			.eq("id", chatId);
 
 		if (error) throw error;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, chatId }, "Failed to update chat visibility");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to update chat visibility by id",
@@ -276,7 +282,7 @@ export async function updateChatLastContextById({
 			.update({ lastContext: context as unknown as Json })
 			.eq("id", chatId);
 	} catch (error) {
-		console.warn("Failed to update lastContext for chat", chatId, error);
+		logger.warn({ error, chatId }, "Failed to update lastContext for chat");
 	}
 }
 
@@ -295,7 +301,8 @@ export async function updateChatPinStatus({
 			.eq("id", chatId);
 
 		if (error) throw error;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, chatId }, "Failed to update chat pin status");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to update chat pin status",
@@ -320,7 +327,8 @@ export async function updateChatTopic({
 			.eq("id", chatId);
 
 		if (error) throw error;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, chatId }, "Failed to update chat topic");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to update chat topic",
@@ -379,7 +387,11 @@ export async function getChatStatsForChats(
 		}
 
 		return result;
-	} catch (_error) {
+	} catch (error) {
+		logger.warn(
+			{ error, chatIdCount: chatIds.length },
+			"Failed to get chat stats, returning empty",
+		);
 		return result;
 	}
 }
@@ -409,7 +421,8 @@ export async function getMessageCountByUserId({
 
 		if (error) throw error;
 		return data || 0;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, id }, "Failed to get message count by user id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get message count by user id",
@@ -437,7 +450,8 @@ export async function createStreamId({
 		});
 
 		if (error) throw error;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, streamId, chatId }, "Failed to create stream id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to create stream id",
@@ -457,7 +471,8 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
 
 		if (error) throw error;
 		return (data || []).map(({ id }) => id);
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, chatId }, "Failed to get stream ids by chat id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get stream ids by chat id",

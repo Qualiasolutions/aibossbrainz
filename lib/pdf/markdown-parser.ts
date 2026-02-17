@@ -45,13 +45,19 @@ function stripHtml(text: string): string {
 	result = result.replace(/<\/div>/gi, "\n");
 	result = result.replace(/<\/li>/gi, "\n");
 	result = result.replace(/<\/h([1-3])>/gi, "\n");
-	result = result.replace(/<h([1-3])[^>]*>/gi, (_, level) => "#".repeat(Number(level)) + " ");
+	result = result.replace(
+		/<h([1-3])[^>]*>/gi,
+		(_, level) => "#".repeat(Number(level)) + " ",
+	);
 	result = result.replace(/<strong>(.*?)<\/strong>/gi, "**$1**");
 	result = result.replace(/<b>(.*?)<\/b>/gi, "**$1**");
 	result = result.replace(/<em>(.*?)<\/em>/gi, "*$1*");
 	result = result.replace(/<i>(.*?)<\/i>/gi, "*$1*");
 	result = result.replace(/<code>(.*?)<\/code>/gi, "`$1`");
-	result = result.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, "[$2]($1)");
+	result = result.replace(
+		/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi,
+		"[$2]($1)",
+	);
 
 	// Strip all remaining HTML tags
 	result = result.replace(/<[^>]+>/g, "");

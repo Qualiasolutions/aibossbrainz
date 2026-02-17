@@ -1,5 +1,7 @@
 import "server-only";
 
+import { logger } from "@/lib/logger";
+
 import {
 	type CanvasType,
 	ChatSDKError,

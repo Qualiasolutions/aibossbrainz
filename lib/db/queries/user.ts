@@ -1,5 +1,7 @@
 import "server-only";
 
+import { logger } from "@/lib/logger";
+
 import {
 	type BotType,
 	ChatSDKError,
@@ -31,7 +33,8 @@ export async function getUser(email: string): Promise<User[]> {
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, email }, "Failed to get user by email");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get user by email",
@@ -55,7 +58,8 @@ export async function createUser({
 
 		if (error) throw error;
 		return data;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, email }, "Failed to create user");
 		throw new ChatSDKError("bad_request:database", "Failed to create user");
 	}
 }
@@ -195,7 +199,8 @@ export async function ensureUserExists({
 		// Cache the verified user ID
 		verifiedUserIds.add(id);
 		return data ?? { id };
-	} catch {
+	} catch (error) {
+		logger.error({ error, id, email }, "Failed to ensure user exists");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to ensure user exists",
@@ -325,9 +330,13 @@ export async function checkUserSubscription(userId: string): Promise<{
 		};
 		subscriptionCache.set(userId, { result, timestamp: Date.now() });
 		return result;
-	} catch {
+	} catch (error) {
 		// SECURITY: Fail closed - deny access if subscription check fails
 		// This prevents attackers from bypassing subscription checks via DB errors
+		logger.error(
+			{ error, userId },
+			"Subscription check failed, denying access",
+		);
 		return {
 			isActive: false,
 			subscriptionType: null,
@@ -374,8 +383,9 @@ export async function createAuditLog({
 		if (error) {
 			// Don't throw - audit logs shouldn't break the main operation
 		}
-	} catch {
+	} catch (error) {
 		// Non-critical - audit failure shouldn't break main operation
+		logger.warn({ error, action, resource }, "Audit log write failed");
 	}
 }
 
@@ -397,7 +407,8 @@ export async function getUserProfile({ userId }: { userId: string }) {
 
 		if (error && error.code !== "PGRST116") throw error;
 		return data || null;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, userId }, "Failed to get user profile");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get user profile",
@@ -487,7 +498,8 @@ export async function getUserFullProfile({ userId }: { userId: string }) {
 
 		if (error && error.code !== "PGRST116") throw error;
 		return data || null;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ error, userId }, "Failed to get user full profile");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get user full profile",

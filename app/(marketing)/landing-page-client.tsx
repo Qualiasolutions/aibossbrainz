@@ -37,56 +37,64 @@ const revealVariants = {
 };
 
 // ─────────────────────────────────────────────────────────────
-// HERO SECTION — Cinematic video background, dark overlay
+// HERO SECTION — Premium, high-quality, animated gradient background
 // ─────────────────────────────────────────────────────────────
 function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true });
 	const { scrollY } = useScroll();
-	const videoScale = useTransform(scrollY, [0, 600], [1, 1.15]);
 	const contentY = useTransform(scrollY, [0, 400], [0, 60]);
-	const overlayOpacity = useTransform(scrollY, [0, 400], [0.7, 0.9]);
 
 	return (
 		<section
 			ref={ref}
-			className="relative min-h-[100svh] overflow-hidden bg-black"
+			className="relative min-h-[100svh] overflow-hidden bg-[#0a0a0a] flex items-center justify-center"
 		>
-			{/* Video Background */}
-			<motion.div
-				className="absolute inset-0 z-0"
-				style={{ scale: videoScale }}
-			>
-				<video
-					autoPlay
-					muted
-					loop
-					playsInline
-					className="h-full w-full object-cover"
-					poster=""
-				>
-					<source src="/hero-bg.mp4" type="video/mp4" />
-					<track kind="captions" />
-				</video>
-			</motion.div>
+			{/* Premium Animated Background */}
+			<div className="absolute inset-0 z-0 overflow-hidden">
+				{/* Deep base gradient */}
+				<div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950" />
 
-			{/* Dark Overlay */}
-			<motion.div
-				className="absolute inset-0 z-[1] bg-gradient-to-b from-black/80 via-black/70 to-black/90"
-				style={{ opacity: overlayOpacity }}
-			/>
+				{/* Animated Orbs/Glows */}
+				<motion.div
+					animate={{
+						scale: [1, 1.2, 1],
+						opacity: [0.3, 0.5, 0.3],
+					}}
+					transition={{
+						duration: 10,
+						repeat: Infinity,
+						ease: "easeInOut",
+					}}
+					className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] rounded-full bg-red-900/10 blur-[120px]"
+				/>
+				<motion.div
+					animate={{
+						scale: [1, 1.1, 1],
+						opacity: [0.2, 0.4, 0.2],
+					}}
+					transition={{
+						duration: 15,
+						repeat: Infinity,
+						ease: "easeInOut",
+						delay: 2,
+					}}
+					className="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] rounded-full bg-blue-900/5 blur-[120px]"
+				/>
 
-			{/* Subtle grain texture */}
-			<div className="absolute inset-0 z-[2] opacity-[0.03] mix-blend-overlay bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc1Ii8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2EpIi8+PC9zdmc+')]" />
+				{/* Grid Pattern Overlay */}
+				<div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light" />
+				<div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+			</div>
 
 			{/* Content */}
 			<motion.div
-				className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl items-center px-6 pt-24 pb-16 lg:px-8"
+				className="relative z-10 w-full max-w-7xl px-6 pt-32 pb-20 lg:px-8"
 				style={{ y: contentY }}
 			>
-				<div className="grid w-full gap-16 lg:grid-cols-2 lg:gap-20 items-center">
+				<div className="grid w-full gap-16 lg:grid-cols-2 lg:gap-24 items-center">
 					{/* Left — Text */}
-					<div className="flex flex-col justify-center">
+					<div className="flex flex-col justify-center text-left">
 						{/* Badge */}
 						<motion.div
 							variants={revealVariants}
@@ -95,12 +103,15 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							custom={0.2}
 							className="mb-8"
 						>
-							<span className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-sm">
-								<span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-								<span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/70">
+							<div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md transition-colors hover:bg-white/10">
+								<span className="relative flex h-2 w-2">
+									<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+									<span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+								</span>
+								<span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/80">
 									AI-Powered Executive Consulting
 								</span>
-							</span>
+							</div>
 						</motion.div>
 
 						{/* Heading */}
@@ -109,10 +120,10 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
 							custom={0.35}
-							className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-[3.5rem] xl:text-6xl leading-[1.1]"
+							className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl xl:text-[5rem] leading-[1.05]"
 						>
 							<span className="block">{content.hero.title_main}</span>
-							<span className="mt-3 block bg-gradient-to-r from-red-500 to-red-400 bg-clip-text text-transparent">
+							<span className="mt-2 block bg-gradient-to-r from-red-500 via-red-400 to-orange-400 bg-clip-text text-transparent pb-2">
 								{content.hero.title_highlight}
 							</span>
 						</motion.h1>
@@ -123,7 +134,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
 							custom={0.5}
-							className="mt-8 max-w-lg text-base leading-relaxed text-white/50 sm:text-lg font-light"
+							className="mt-8 max-w-xl text-lg leading-relaxed text-white/60 sm:text-xl font-light"
 						>
 							{content.hero.subtitle}
 						</motion.p>
@@ -139,17 +150,17 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							<Link href={content.hero.cta_primary_link}>
 								<Button
 									size="lg"
-									className="group gap-2.5 bg-red-600 px-8 py-6 text-sm font-semibold tracking-wide text-white shadow-2xl shadow-red-600/20 transition-all duration-300 hover:bg-red-500 hover:shadow-red-500/30"
+									className="h-14 px-8 text-base font-semibold text-white bg-red-600 hover:bg-red-500 rounded-full shadow-[0_0_20px_-5px_rgba(220,38,38,0.5)] transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(220,38,38,0.6)] hover:-translate-y-0.5"
 								>
 									{content.hero.cta_primary_text}
-									<ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+									<ArrowRight className="ml-2 h-4 w-4" />
 								</Button>
 							</Link>
 							<Link href={content.hero.cta_secondary_link}>
 								<Button
 									variant="outline"
 									size="lg"
-									className="border-white/15 bg-white/5 backdrop-blur-sm px-8 py-6 text-sm font-medium text-white/80 hover:border-white/25 hover:bg-white/10 hover:text-white transition-all duration-300"
+									className="h-14 px-8 text-base font-medium text-white/90 border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 rounded-full backdrop-blur-sm transition-all duration-300"
 								>
 									{content.hero.cta_secondary_text}
 								</Button>
@@ -162,26 +173,35 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
 							custom={0.8}
-							className="mt-14 flex items-center gap-6 text-xs text-white/30"
+							className="mt-14 flex items-center gap-6 text-xs text-white/40 font-medium"
 						>
+							<div className="flex items-center gap-3">
+								<div className="flex -space-x-2">
+									{[...Array(4)].map((_, i) => (
+										<div
+											key={`avatar-${i}`}
+											className="h-8 w-8 rounded-full border border-neutral-900 bg-neutral-800 flex items-center justify-center overflow-hidden"
+										>
+											<div className="w-full h-full bg-gradient-to-br from-neutral-700 to-neutral-800" />
+										</div>
+									))}
+								</div>
+								<span>Trusted by 500+ founders</span>
+							</div>
+							<div className="h-4 w-px bg-white/10" />
 							<div className="flex items-center gap-2">
-								<div className="flex gap-0.5">
+								<div className="flex text-red-500">
 									{[...Array(5)].map((_, i) => (
 										<svg
 											key={`star-${i}`}
-											className="w-3.5 h-3.5 text-red-500 fill-current"
+											className="w-3.5 h-3.5 fill-current"
 											viewBox="0 0 20 20"
 										>
 											<path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
 										</svg>
 									))}
 								</div>
-								<span className="text-white/40">Trusted by founders</span>
-							</div>
-							<div className="h-3 w-px bg-white/10" />
-							<div className="flex items-center gap-1.5">
-								<Zap className="w-3.5 h-3.5 text-white/30" />
-								<span>Instant responses</span>
+								<span>5.0 Rating</span>
 							</div>
 						</motion.div>
 					</div>
@@ -192,21 +212,24 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						initial="hidden"
 						animate={isInView ? "visible" : "hidden"}
 						custom={0.4}
-						className="flex items-center justify-center lg:justify-end"
+						className="relative flex items-center justify-center lg:justify-end"
 					>
-						<div className="w-full max-w-2xl xl:max-w-3xl relative">
+						{/* Glow behind the interface */}
+						<div className="absolute inset-0 bg-gradient-to-tr from-red-500/10 to-blue-500/10 blur-[80px] rounded-full" />
+
+						<div className="w-full max-w-2xl xl:max-w-3xl relative backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl ring-1 ring-white/10">
 							{content.hero.media_type === "image" && content.hero.media_url ? (
 								<Image
 									src={content.hero.media_url}
 									alt="AI Boss Brainz"
 									width={800}
 									height={600}
-									className="relative rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/10"
+									className="relative rounded-xl shadow-2xl"
 									priority
 								/>
 							) : content.hero.media_type === "video" &&
 								content.hero.media_url ? (
-								<div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10">
+								<div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl">
 									{content.hero.media_url.includes("youtube.com") ||
 									content.hero.media_url.includes("youtu.be") ||
 									content.hero.media_url.includes("vimeo.com") ? (
@@ -247,7 +270,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 					transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
 					className="flex flex-col items-center gap-3"
 				>
-					<span className="text-[9px] font-medium tracking-[0.35em] uppercase text-white/25">
+					<span className="text-[10px] font-medium tracking-[0.3em] uppercase text-white/30">
 						Scroll
 					</span>
 					<div className="h-10 w-px bg-gradient-to-b from-white/20 to-transparent" />

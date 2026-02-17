@@ -10,6 +10,7 @@ import {
 	getStrategyCanvas,
 	getUserProfile,
 } from "@/lib/db/queries";
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 
 interface PersonalizationContext {
@@ -193,8 +194,14 @@ async function buildPersonalizationContextRpc(
 
 	if (error) {
 		// 42883 = function does not exist — fall back to individual queries
-		if (error.code === "42883") throw error;
-		console.warn("[Personalization] RPC error:", error);
+		if (error.code === "42883") {
+			logger.warn(
+				{ code: error.code },
+				"Personalization RPC not found, falling back to individual queries",
+			);
+			throw error;
+		}
+		logger.error({ error }, "Personalization RPC failed");
 		throw error;
 	}
 
@@ -361,13 +368,27 @@ export async function buildPersonalizationContext(
 	userId: string,
 ): Promise<PersonalizationContext> {
 	try {
-		return await buildPersonalizationContextRpc(userId);
-	} catch {
-		// Fall back to individual queries
+		const result = await buildPersonalizationContextRpc(userId);
+		logger.debug({ userId }, "Personalization loaded via RPC");
+		return result;
+	} catch (rpcError) {
+		const rpcCode =
+			rpcError instanceof Object && "code" in rpcError
+				? (rpcError as { code: string }).code
+				: undefined;
+		logger.warn(
+			{ userId, rpcErrorCode: rpcCode },
+			"Personalization RPC failed, falling back to individual queries",
+		);
 		try {
-			return await buildPersonalizationContextFallback(userId);
+			const result = await buildPersonalizationContextFallback(userId);
+			logger.debug({ userId }, "Personalization loaded via fallback queries");
+			return result;
 		} catch (fallbackError) {
-			console.warn("[Personalization] Failed to build context:", fallbackError);
+			logger.error(
+				{ userId, error: fallbackError },
+				"Personalization fallback also failed, returning empty context",
+			);
 			return { userContext: "", canvasContext: "", memoryContext: "" };
 		}
 	}

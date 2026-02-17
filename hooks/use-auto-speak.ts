@@ -158,8 +158,7 @@ export const useAutoSpeak = ({
 				// Apply volume and speed settings from localStorage
 				const savedVolume = localStorage.getItem("voice-playback-volume");
 				const savedSpeed = localStorage.getItem("voice-playback-speed");
-				const botVolume =
-					BOT_PERSONALITIES[messageBotType]?.voiceVolume ?? 1.0;
+				const botVolume = BOT_PERSONALITIES[messageBotType]?.voiceVolume ?? 1.0;
 
 				if (savedVolume) {
 					const volume = Number.parseInt(savedVolume, 10);
