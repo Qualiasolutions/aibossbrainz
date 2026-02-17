@@ -220,11 +220,8 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
 
 	return (
 		<div className="relative w-full">
-			{/* Outer glow effect */}
-			<div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 via-rose-500/20 to-stone-500/20 rounded-3xl blur-xl" />
-
 			{/* Browser Chrome - Enhanced */}
-			<div className="relative overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-2xl shadow-stone-900/10">
+			<div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-2xl shadow-stone-900/10 ring-4 ring-stone-900/5">
 				{/* Window Controls */}
 				<div className="flex items-center justify-between border-b border-stone-100 bg-gradient-to-r from-stone-50 to-stone-100/80 px-4 py-3">
 					<div className="flex items-center gap-3">

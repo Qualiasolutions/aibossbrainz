@@ -37,7 +37,7 @@ const revealVariants = {
 };
 
 // ─────────────────────────────────────────────────────────────
-// HERO SECTION — Premium, high-quality, animated gradient background
+// HERO SECTION — Clean, white background, high-contrast typography
 // ─────────────────────────────────────────────────────────────
 function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
@@ -48,43 +48,12 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	return (
 		<section
 			ref={ref}
-			className="relative min-h-[100svh] overflow-hidden bg-[#0a0a0a] flex items-center justify-center"
+			className="relative min-h-[100svh] overflow-hidden bg-white flex items-center justify-center"
 		>
-			{/* Premium Animated Background */}
+			{/* Background Pattern */}
 			<div className="absolute inset-0 z-0 overflow-hidden">
-				{/* Deep base gradient */}
-				<div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950" />
-
-				{/* Animated Orbs/Glows */}
-				<motion.div
-					animate={{
-						scale: [1, 1.2, 1],
-						opacity: [0.3, 0.5, 0.3],
-					}}
-					transition={{
-						duration: 10,
-						repeat: Infinity,
-						ease: "easeInOut",
-					}}
-					className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] rounded-full bg-red-900/10 blur-[120px]"
-				/>
-				<motion.div
-					animate={{
-						scale: [1, 1.1, 1],
-						opacity: [0.2, 0.4, 0.2],
-					}}
-					transition={{
-						duration: 15,
-						repeat: Infinity,
-						ease: "easeInOut",
-						delay: 2,
-					}}
-					className="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] rounded-full bg-blue-900/5 blur-[120px]"
-				/>
-
-				{/* Grid Pattern Overlay */}
-				<div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light" />
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+				<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+				<div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white" />
 			</div>
 
 			{/* Content */}
@@ -95,35 +64,16 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 				<div className="grid w-full gap-16 lg:grid-cols-2 lg:gap-24 items-center">
 					{/* Left — Text */}
 					<div className="flex flex-col justify-center text-left">
-						{/* Badge */}
-						<motion.div
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.2}
-							className="mb-8"
-						>
-							<div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md transition-colors hover:bg-white/10">
-								<span className="relative flex h-2 w-2">
-									<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-									<span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-								</span>
-								<span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/80">
-									AI-Powered Executive Consulting
-								</span>
-							</div>
-						</motion.div>
-
 						{/* Heading */}
 						<motion.h1
 							variants={revealVariants}
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
-							custom={0.35}
-							className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl xl:text-[5rem] leading-[1.05]"
+							custom={0.2}
+							className="text-5xl font-bold tracking-tight text-stone-900 sm:text-6xl lg:text-7xl xl:text-[5rem] leading-[1.05]"
 						>
 							<span className="block">{content.hero.title_main}</span>
-							<span className="mt-2 block bg-gradient-to-r from-red-500 via-red-400 to-orange-400 bg-clip-text text-transparent pb-2">
+							<span className="mt-2 block bg-gradient-to-r from-red-600 via-red-500 to-orange-500 bg-clip-text text-transparent pb-2">
 								{content.hero.title_highlight}
 							</span>
 						</motion.h1>
@@ -133,8 +83,8 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							variants={revealVariants}
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
-							custom={0.5}
-							className="mt-8 max-w-xl text-lg leading-relaxed text-white/60 sm:text-xl font-light"
+							custom={0.35}
+							className="mt-8 max-w-xl text-lg leading-relaxed text-stone-600 sm:text-xl font-light"
 						>
 							{content.hero.subtitle}
 						</motion.p>
@@ -144,13 +94,13 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							variants={revealVariants}
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
-							custom={0.65}
+							custom={0.5}
 							className="mt-10 flex flex-col gap-4 sm:flex-row"
 						>
 							<Link href={content.hero.cta_primary_link}>
 								<Button
 									size="lg"
-									className="h-14 px-8 text-base font-semibold text-white bg-red-600 hover:bg-red-500 rounded-full shadow-[0_0_20px_-5px_rgba(220,38,38,0.5)] transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(220,38,38,0.6)] hover:-translate-y-0.5"
+									className="h-14 px-8 text-base font-semibold text-white bg-red-600 hover:bg-red-700 rounded-full shadow-xl shadow-red-600/20 transition-all duration-300 hover:shadow-2xl hover:shadow-red-600/30 hover:-translate-y-0.5"
 								>
 									{content.hero.cta_primary_text}
 									<ArrowRight className="ml-2 h-4 w-4" />
@@ -160,7 +110,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 								<Button
 									variant="outline"
 									size="lg"
-									className="h-14 px-8 text-base font-medium text-white/90 border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 rounded-full backdrop-blur-sm transition-all duration-300"
+									className="h-14 px-8 text-base font-medium text-stone-600 border-stone-200 bg-white hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-full transition-all duration-300"
 								>
 									{content.hero.cta_secondary_text}
 								</Button>
@@ -172,25 +122,25 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							variants={revealVariants}
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
-							custom={0.8}
-							className="mt-14 flex items-center gap-6 text-xs text-white/40 font-medium"
+							custom={0.65}
+							className="mt-14 flex items-center gap-6 text-xs text-stone-500 font-medium"
 						>
 							<div className="flex items-center gap-3">
 								<div className="flex -space-x-2">
 									{[...Array(4)].map((_, i) => (
 										<div
 											key={`avatar-${i}`}
-											className="h-8 w-8 rounded-full border border-neutral-900 bg-neutral-800 flex items-center justify-center overflow-hidden"
+											className="h-8 w-8 rounded-full border-2 border-white bg-stone-100 flex items-center justify-center overflow-hidden ring-1 ring-stone-200"
 										>
-											<div className="w-full h-full bg-gradient-to-br from-neutral-700 to-neutral-800" />
+											<div className="w-full h-full bg-gradient-to-br from-stone-200 to-stone-300" />
 										</div>
 									))}
 								</div>
 								<span>Trusted by 500+ founders</span>
 							</div>
-							<div className="h-4 w-px bg-white/10" />
+							<div className="h-4 w-px bg-stone-200" />
 							<div className="flex items-center gap-2">
-								<div className="flex text-red-500">
+								<div className="flex text-amber-400">
 									{[...Array(5)].map((_, i) => (
 										<svg
 											key={`star-${i}`}
@@ -201,7 +151,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 										</svg>
 									))}
 								</div>
-								<span>5.0 Rating</span>
+								<span className="text-stone-600">5.0 Rating</span>
 							</div>
 						</motion.div>
 					</div>
@@ -214,22 +164,22 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						custom={0.4}
 						className="relative flex items-center justify-center lg:justify-end"
 					>
-						{/* Glow behind the interface */}
-						<div className="absolute inset-0 bg-gradient-to-tr from-red-500/10 to-blue-500/10 blur-[80px] rounded-full" />
+						{/* Shadow behind the interface */}
+						<div className="absolute -inset-4 bg-gradient-to-tr from-stone-200/50 to-stone-100/50 blur-2xl rounded-[3rem] -z-10" />
 
-						<div className="w-full max-w-2xl xl:max-w-3xl relative backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl ring-1 ring-white/10">
+						<div className="w-full max-w-2xl xl:max-w-3xl relative">
 							{content.hero.media_type === "image" && content.hero.media_url ? (
 								<Image
 									src={content.hero.media_url}
 									alt="AI Boss Brainz"
 									width={800}
 									height={600}
-									className="relative rounded-xl shadow-2xl"
+									className="relative rounded-2xl shadow-2xl shadow-stone-900/10 ring-1 ring-stone-900/5"
 									priority
 								/>
 							) : content.hero.media_type === "video" &&
 								content.hero.media_url ? (
-								<div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl">
+								<div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-stone-900/10 ring-1 ring-stone-900/5">
 									{content.hero.media_url.includes("youtube.com") ||
 									content.hero.media_url.includes("youtu.be") ||
 									content.hero.media_url.includes("vimeo.com") ? (
@@ -270,10 +220,10 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 					transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
 					className="flex flex-col items-center gap-3"
 				>
-					<span className="text-[10px] font-medium tracking-[0.3em] uppercase text-white/30">
+					<span className="text-[10px] font-medium tracking-[0.3em] uppercase text-stone-400">
 						Scroll
 					</span>
-					<div className="h-10 w-px bg-gradient-to-b from-white/20 to-transparent" />
+					<div className="h-10 w-px bg-gradient-to-b from-stone-300 to-transparent" />
 				</motion.div>
 			</motion.div>
 		</section>
