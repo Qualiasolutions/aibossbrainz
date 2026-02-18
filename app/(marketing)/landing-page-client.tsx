@@ -36,180 +36,208 @@ const revealVariants = {
 };
 
 // ─────────────────────────────────────────────────────────────
-// HERO SECTION — Centered Stage: Editorial, dramatic, premium
+// HERO SECTION — Split layout: text left, demo right, 90vh
 // ─────────────────────────────────────────────────────────────
 function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true });
-	const { scrollY } = useScroll();
-	const textY = useTransform(scrollY, [0, 500], [0, 60]);
-	const demoOpacity = useTransform(scrollY, [0, 600], [1, 0.85]);
 
 	return (
-		<section ref={ref} className="relative min-h-svh overflow-hidden bg-white">
-			{/* Background: clean white */}
+		<section
+			ref={ref}
+			className="relative flex min-h-[90svh] max-h-[90svh] overflow-hidden bg-white"
+		>
+			{/* Background texture */}
 			<div className="absolute inset-0 z-0 pointer-events-none">
 				<div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e5e506_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e506_1px,transparent_1px)] bg-[size:32px_32px]" />
+				{/* Subtle radial glow behind text side */}
+				<div className="absolute -left-40 top-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-500/[0.03] rounded-full blur-[120px]" />
 			</div>
 
-			{/* Text Content — centered, parallax */}
-			<motion.div
-				className="relative z-10 mx-auto max-w-4xl px-6 pt-36 sm:pt-40 lg:pt-44 text-center"
-				style={{ y: textY }}
-			>
-				{/* Pill Badge */}
-				<motion.div
-					variants={revealVariants}
-					initial="hidden"
-					animate={isInView ? "visible" : "hidden"}
-					custom={0.05}
-					className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-stone-200 bg-stone-50/60 px-4 py-1.5 backdrop-blur-sm"
-				>
-					<span className="flex h-1.5 w-1.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50" />
-					<span className="text-[11px] font-semibold tracking-[0.15em] text-stone-600 uppercase">
-						AI Executive Consulting
-					</span>
-				</motion.div>
+			{/* Split container */}
+			<div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col lg:flex-row lg:items-center lg:gap-8 xl:gap-12 px-6 pt-28 pb-8 sm:pt-32 lg:pt-24 lg:px-10 xl:px-16">
+				{/* LEFT — Text content */}
+				<div className="flex flex-col justify-center lg:w-[48%] xl:w-[45%] shrink-0">
+					{/* Pill Badge */}
+					<motion.div
+						variants={revealVariants}
+						initial="hidden"
+						animate={isInView ? "visible" : "hidden"}
+						custom={0.05}
+						className="mb-6 inline-flex w-fit items-center gap-2.5 rounded-full border border-stone-200 bg-stone-50/60 px-4 py-1.5 backdrop-blur-sm"
+					>
+						<span className="relative flex h-1.5 w-1.5">
+							<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+							<span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500" />
+						</span>
+						<span className="text-[11px] font-semibold tracking-[0.15em] text-stone-600 uppercase">
+							AI Executive Consulting
+						</span>
+					</motion.div>
 
-				{/* Headline — dramatic scale */}
-				<motion.h1
-					variants={revealVariants}
-					initial="hidden"
-					animate={isInView ? "visible" : "hidden"}
-					custom={0.15}
-					className="text-[2.75rem] font-bold tracking-[-0.035em] text-stone-950 sm:text-6xl lg:text-7xl leading-[1.05]"
-				>
-					<span className="block">{content.hero.title_main}</span>
-					<span className="block bg-gradient-to-r from-red-600 via-red-500 to-red-600 bg-clip-text text-transparent">
-						{content.hero.title_highlight}
-					</span>
-				</motion.h1>
-
-				{/* Subtitle */}
-				<motion.p
-					variants={revealVariants}
-					initial="hidden"
-					animate={isInView ? "visible" : "hidden"}
-					custom={0.25}
-					className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-stone-700 sm:text-xl/relaxed"
-				>
-					{content.hero.subtitle}
-				</motion.p>
-
-				{/* CTAs */}
-				<motion.div
-					variants={revealVariants}
-					initial="hidden"
-					animate={isInView ? "visible" : "hidden"}
-					custom={0.35}
-					className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center"
-				>
-					<Link href={content.hero.cta_primary_link}>
-						<Button
-							size="lg"
-							className="h-12 px-8 text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-2xl shadow-lg shadow-stone-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-stone-900/15 active:translate-y-0"
+					{/* Headline */}
+					<motion.h1
+						variants={revealVariants}
+						initial="hidden"
+						animate={isInView ? "visible" : "hidden"}
+						custom={0.12}
+						className="text-[2.25rem] font-bold tracking-[-0.035em] text-stone-950 sm:text-5xl lg:text-[3.25rem] xl:text-6xl leading-[1.08]"
+					>
+						<span className="block">{content.hero.title_main}</span>
+						<motion.span
+							className="block bg-gradient-to-r from-red-600 via-red-500 to-red-600 bg-clip-text text-transparent"
+							initial={{ backgroundPosition: "0% 50%" }}
+							animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+							transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+							style={{ backgroundSize: "200% 200%" }}
 						>
-							{content.hero.cta_primary_text}
-							<ArrowRight className="ml-2 h-4 w-4" />
-						</Button>
-					</Link>
-					<Link href={content.hero.cta_secondary_link}>
-						<Button
-							variant="outline"
-							size="lg"
-							className="h-12 px-8 text-sm font-medium text-stone-700 border-stone-200 bg-white hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-2xl transition-all duration-200"
-						>
-							{content.hero.cta_secondary_text}
-						</Button>
-					</Link>
-				</motion.div>
+							{content.hero.title_highlight}
+						</motion.span>
+					</motion.h1>
 
-				{/* Trust Indicators */}
-				<motion.div
-					variants={revealVariants}
-					initial="hidden"
-					animate={isInView ? "visible" : "hidden"}
-					custom={0.45}
-					className="mt-10 flex items-center justify-center gap-4 text-xs font-medium text-stone-600"
-				>
-					<div className="flex -space-x-1.5">
-						{[...Array(4)].map((_, i) => (
-							<div
-								key={`avatar-${i}`}
-								className="h-6 w-6 rounded-full border-2 border-white bg-stone-100 ring-1 ring-stone-100"
+					{/* Subtitle */}
+					<motion.p
+						variants={revealVariants}
+						initial="hidden"
+						animate={isInView ? "visible" : "hidden"}
+						custom={0.22}
+						className="mt-5 max-w-lg text-base leading-relaxed text-stone-600 sm:text-lg/relaxed lg:text-base/relaxed xl:text-lg/relaxed"
+					>
+						{content.hero.subtitle}
+					</motion.p>
+
+					{/* CTAs */}
+					<motion.div
+						variants={revealVariants}
+						initial="hidden"
+						animate={isInView ? "visible" : "hidden"}
+						custom={0.32}
+						className="mt-8 flex flex-col gap-3 sm:flex-row"
+					>
+						<Link href={content.hero.cta_primary_link}>
+							<Button
+								size="lg"
+								className="group h-12 w-full sm:w-auto px-8 text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-2xl shadow-lg shadow-stone-900/10 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-stone-900/15 active:translate-y-0"
 							>
-								<div className="w-full h-full rounded-full bg-gradient-to-br from-stone-200 to-stone-300" />
-							</div>
-						))}
-					</div>
-					<div className="flex items-center gap-1.5">
-						<div className="flex text-amber-500/80">
-							{[...Array(5)].map((_, i) => (
-								<svg
-									key={`star-${i}`}
-									className="w-3 h-3 fill-current"
-									viewBox="0 0 20 20"
+								{content.hero.cta_primary_text}
+								<ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+							</Button>
+						</Link>
+						<Link href={content.hero.cta_secondary_link}>
+							<Button
+								variant="outline"
+								size="lg"
+								className="h-12 w-full sm:w-auto px-8 text-sm font-medium text-stone-700 border-stone-200 bg-white hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-2xl transition-all duration-300"
+							>
+								{content.hero.cta_secondary_text}
+							</Button>
+						</Link>
+					</motion.div>
+
+					{/* Trust Indicators */}
+					<motion.div
+						variants={revealVariants}
+						initial="hidden"
+						animate={isInView ? "visible" : "hidden"}
+						custom={0.42}
+						className="mt-8 flex items-center gap-4 text-xs font-medium text-stone-600"
+					>
+						<div className="flex -space-x-1.5">
+							{[...Array(4)].map((_, i) => (
+								<motion.div
+									key={`avatar-${i}`}
+									initial={{ opacity: 0, scale: 0, x: -10 }}
+									animate={isInView ? { opacity: 1, scale: 1, x: 0 } : {}}
+									transition={{ duration: 0.4, delay: 0.5 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+									className="h-6 w-6 rounded-full border-2 border-white bg-stone-100 ring-1 ring-stone-100"
 								>
-									<path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-								</svg>
+									<div className="w-full h-full rounded-full bg-gradient-to-br from-stone-200 to-stone-300" />
+								</motion.div>
 							))}
 						</div>
-						<span className="text-stone-500">Trusted by 500+ founders</span>
-					</div>
-				</motion.div>
-			</motion.div>
-
-			{/* Demo Stage — full-width showcase */}
-			<motion.div
-				variants={revealVariants}
-				initial="hidden"
-				animate={isInView ? "visible" : "hidden"}
-				custom={0.5}
-				className="relative z-10 mx-auto mt-16 max-w-5xl px-6 pb-12 lg:px-8"
-				style={{ opacity: demoOpacity }}
-			>
-				<motion.div
-					initial={{ y: 20, scale: 0.97 }}
-					animate={isInView ? { y: 0, scale: 1 } : {}}
-					transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-					className="relative rounded-3xl bg-gradient-to-b from-stone-100/80 to-stone-50/40 p-1.5 ring-1 ring-stone-200/60 shadow-2xl shadow-stone-900/10"
-				>
-					{content.hero.media_type === "image" && content.hero.media_url ? (
-						<Image
-							src={content.hero.media_url}
-							alt="AI Boss Brainz"
-							width={1200}
-							height={700}
-							className="relative rounded-2xl shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5"
-							priority
-						/>
-					) : content.hero.media_type === "video" && content.hero.media_url ? (
-						<div className="relative aspect-video rounded-2xl overflow-hidden shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5">
-							{content.hero.media_url.includes("youtube.com") ||
-							content.hero.media_url.includes("youtu.be") ||
-							content.hero.media_url.includes("vimeo.com") ? (
-								<iframe
-									src={content.hero.media_url}
-									className="w-full h-full"
-									allow="autoplay; fullscreen; picture-in-picture"
-									allowFullScreen
-									title="AI Boss Brainz"
-								/>
-							) : (
-								<video
-									src={content.hero.media_url}
-									controls
-									className="w-full h-full object-cover"
-								>
-									<track kind="captions" />
-								</video>
-							)}
+						<div className="flex items-center gap-1.5">
+							<div className="flex text-amber-500/80">
+								{[...Array(5)].map((_, i) => (
+									<motion.svg
+										key={`star-${i}`}
+										className="w-3 h-3 fill-current"
+										viewBox="0 0 20 20"
+										initial={{ opacity: 0, scale: 0 }}
+										animate={isInView ? { opacity: 1, scale: 1 } : {}}
+										transition={{ duration: 0.3, delay: 0.7 + i * 0.06 }}
+									>
+										<path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+									</motion.svg>
+								))}
+							</div>
+							<span className="text-stone-500">Trusted by 500+ founders</span>
 						</div>
-					) : (
-						<InteractiveChatDemo content={content} />
-					)}
+					</motion.div>
+				</div>
+
+				{/* RIGHT — Demo */}
+				<motion.div
+					initial={{ opacity: 0, x: 60, scale: 0.95 }}
+					animate={isInView ? { opacity: 1, x: 0, scale: 1 } : {}}
+					transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+					className="relative mt-8 lg:mt-0 lg:w-[52%] xl:w-[55%] flex items-center"
+				>
+					{/* Glow behind demo */}
+					<div className="absolute -inset-4 bg-gradient-to-br from-red-500/[0.06] via-transparent to-stone-500/[0.04] rounded-[2rem] blur-2xl pointer-events-none" />
+
+					<div className="relative w-full rounded-2xl bg-gradient-to-b from-stone-100/80 to-stone-50/40 p-1 ring-1 ring-stone-200/60 shadow-2xl shadow-stone-900/8">
+						{content.hero.media_type === "image" && content.hero.media_url ? (
+							<Image
+								src={content.hero.media_url}
+								alt="AI Boss Brainz"
+								width={1200}
+								height={700}
+								className="relative rounded-xl shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5"
+								priority
+							/>
+						) : content.hero.media_type === "video" && content.hero.media_url ? (
+							<div className="relative aspect-video rounded-xl overflow-hidden shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5">
+								{content.hero.media_url.includes("youtube.com") ||
+								content.hero.media_url.includes("youtu.be") ||
+								content.hero.media_url.includes("vimeo.com") ? (
+									<iframe
+										src={content.hero.media_url}
+										className="w-full h-full"
+										allow="autoplay; fullscreen; picture-in-picture"
+										allowFullScreen
+										title="AI Boss Brainz"
+									/>
+								) : (
+									<video
+										src={content.hero.media_url}
+										controls
+										className="w-full h-full object-cover"
+									>
+										<track kind="captions" />
+									</video>
+								)}
+							</div>
+						) : (
+							<InteractiveChatDemo content={content} />
+						)}
+					</div>
+
+					{/* Floating accent elements */}
+					<motion.div
+						className="absolute -top-3 -right-3 size-20 rounded-full border border-red-200/40 pointer-events-none"
+						animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
+						transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+					/>
+					<motion.div
+						className="absolute -bottom-2 -left-2 size-12 rounded-full bg-red-500/[0.07] pointer-events-none"
+						animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+						transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+					/>
 				</motion.div>
-			</motion.div>
+			</div>
+
+			{/* Bottom edge fade */}
+			<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
 		</section>
 	);
 }

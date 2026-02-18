@@ -277,7 +277,7 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
 				</div>
 
 				{/* Chat Interface */}
-				<div className="h-[420px] overflow-hidden bg-gradient-to-b from-stone-50/50 to-white sm:h-[440px]">
+				<div className="h-[340px] overflow-hidden bg-gradient-to-b from-stone-50/50 to-white sm:h-[370px] lg:h-[400px]">
 					{/* Header */}
 					<div className="flex items-center justify-between border-b border-stone-100 bg-white/95 px-4 py-3 backdrop-blur-xl">
 						<div className="flex items-center gap-2.5">

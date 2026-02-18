@@ -205,7 +205,7 @@ export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
 		color: "from-red-600 via-red-700 to-red-900",
 		description: "Your Complete Executive Team",
 		icon: "Users",
-		avatar: "/images/alex-avatar.png",
+		avatar: "/images/collaborative-avatar.png",
 	},
 };
 
