@@ -3,6 +3,7 @@ import { z } from "zod";
 import { sheetPrompt, updateDocumentPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { createDocumentHandler } from "@/lib/artifacts/server";
+import { logger } from "@/lib/logger";
 
 const MAX_RETRIES = 3;
 const MIN_CONTENT_LENGTH = 10;
@@ -54,13 +55,13 @@ export const sheetDocumentHandler = createDocumentHandler<"sheet">({
           break;
         }
 
-        console.warn(`[Sheet] Content too short (${draftContent.length} chars), attempt ${attempt}/${MAX_RETRIES}`);
+        logger.warn({ chars: draftContent.length, attempt, maxRetries: MAX_RETRIES }, "Sheet content too short, retrying");
         if (attempt < MAX_RETRIES) {
           dataStream.write({ type: "data-clear", data: null, transient: true });
           await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
         }
       } catch (error) {
-        console.error(`[Sheet] Error generating content (attempt ${attempt}/${MAX_RETRIES}):`, error);
+        logger.error({ err: error, attempt, maxRetries: MAX_RETRIES }, "Error generating sheet content");
         if (attempt >= MAX_RETRIES) {
           draftContent = "Column A,Column B\nData,Data";
           dataStream.write({ type: "data-sheetDelta", data: draftContent, transient: true });
@@ -109,7 +110,7 @@ export const sheetDocumentHandler = createDocumentHandler<"sheet">({
         }
       }
     } catch (error) {
-      console.error("Error updating sheet content:", error);
+      logger.error({ err: error }, "Error updating sheet content");
       draftContent = document.content ?? "";
       dataStream.write({ type: "data-sheetDelta", data: draftContent, transient: true });
     }

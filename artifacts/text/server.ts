@@ -2,6 +2,7 @@ import { smoothStream, streamText } from "ai";
 import { updateDocumentPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { createDocumentHandler } from "@/lib/artifacts/server";
+import { logger } from "@/lib/logger";
 
 const MAX_RETRIES = 3;
 const MIN_CONTENT_LENGTH = 50;
@@ -45,14 +46,14 @@ Guidelines:
         }
 
         // Log successful generation for debugging
-        console.log(`[Document] Generated "${title}" with ${draftContent.length} chars (attempt ${attempt})`);
+        logger.info({ title, chars: draftContent.length, attempt }, "Document generated");
 
         // If we got enough content, break out of retry loop
         if (draftContent.trim().length >= MIN_CONTENT_LENGTH) {
           break;
         }
 
-        console.warn(`[Document] Content too short (${draftContent.length} chars) for "${title}", attempt ${attempt}/${MAX_RETRIES}`);
+        logger.warn({ title, chars: draftContent.length, attempt, maxRetries: MAX_RETRIES }, "Document content too short, retrying");
 
         // On retry, clear previous partial content in the UI
         if (attempt < MAX_RETRIES) {
@@ -65,7 +66,7 @@ Guidelines:
           await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
         }
       } catch (error) {
-        console.error(`[Document] Error generating content (attempt ${attempt}/${MAX_RETRIES}):`, error);
+        logger.error({ err: error, title, attempt, maxRetries: MAX_RETRIES }, "Error generating document content");
 
         if (attempt >= MAX_RETRIES) {
           // Final attempt failed - provide fallback content
@@ -89,7 +90,7 @@ Guidelines:
 
     // Ensure we never return empty content
     if (!draftContent || draftContent.trim() === "") {
-      console.error(`[Document] Empty content for "${title}" after ${MAX_RETRIES} attempts, using fallback`);
+      logger.error({ title, maxRetries: MAX_RETRIES }, "Empty document content after all attempts, using fallback");
       draftContent = `# ${title}\n\n*Content generation completed but produced no output. Please edit this document manually.*`;
     }
 
@@ -130,7 +131,7 @@ Guidelines:
         }
       }
     } catch (error) {
-      console.error("Error updating document content:", error);
+      logger.error({ err: error }, "Error updating document content");
       // Keep original content if update fails
       draftContent = document.content ?? "";
       dataStream.write({

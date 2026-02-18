@@ -1,5 +1,6 @@
 import "server-only";
 
+import { logger } from "../logger";
 import { createServiceClient } from "../supabase/server";
 import type {
 	Chat,
@@ -306,10 +307,7 @@ export async function deleteUserByAdmin(userId: string) {
 	// Delete the user from Supabase Auth so they can't log in
 	const { error: authError } = await supabase.auth.admin.deleteUser(userId);
 	if (authError) {
-		console.error(
-			`[Admin] Failed to delete auth user ${userId}:`,
-			authError.message,
-		);
+		logger.error({ err: authError, userId }, "Failed to delete auth user");
 	}
 }
 
@@ -706,7 +704,7 @@ export async function getRecentSupportTickets(
 
 	if (error) {
 		// Table might not exist yet
-		console.warn("SupportTicket query failed:", error);
+		logger.warn({ err: error }, "SupportTicket query failed");
 		return [];
 	}
 

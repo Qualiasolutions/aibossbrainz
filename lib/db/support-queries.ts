@@ -1,5 +1,6 @@
 import "server-only";
 import { ChatSDKError } from "../errors";
+import { logger } from "../logger";
 import { createClient, createServiceClient } from "../supabase/server";
 import type {
 	SupportTicket,
@@ -28,7 +29,7 @@ export async function getUserTickets({
 		.order("updatedAt", { ascending: false });
 
 	if (error) {
-		console.error("Error getting user tickets:", error);
+		logger.error({ err: error, userId }, "Failed to get user tickets");
 		throw new ChatSDKError("bad_request:database", "Failed to get tickets");
 	}
 
@@ -60,7 +61,7 @@ export async function createSupportTicket({
 		.single();
 
 	if (ticketError || !ticket) {
-		console.error("Error creating ticket:", ticketError);
+		logger.error({ err: ticketError, userId }, "Failed to create support ticket");
 		throw new ChatSDKError("bad_request:database", "Failed to create ticket");
 	}
 
@@ -76,7 +77,7 @@ export async function createSupportTicket({
 		});
 
 	if (msgError) {
-		console.error("Error creating initial message:", msgError);
+		logger.error({ err: msgError, ticketId: ticket.id }, "Failed to create initial ticket message");
 		throw new ChatSDKError("bad_request:database", "Failed to create message");
 	}
 
@@ -124,7 +125,7 @@ export async function getTicketWithMessages({
 		.order("createdAt", { ascending: true });
 
 	if (msgError) {
-		console.error("Error getting messages:", msgError);
+		logger.error({ err: msgError, ticketId }, "Failed to get ticket messages");
 		throw new ChatSDKError("bad_request:database", "Failed to get messages");
 	}
 
@@ -181,7 +182,7 @@ export async function addMessageToTicket({
 		.single();
 
 	if (error || !message) {
-		console.error("Error adding message:", error);
+		logger.error({ err: error, ticketId }, "Failed to add message to ticket");
 		throw new ChatSDKError("bad_request:database", "Failed to add message");
 	}
 
@@ -262,7 +263,7 @@ export async function getAllTicketsAdmin({
 	const { data: tickets, error } = await query;
 
 	if (error) {
-		console.error("Error getting admin tickets:", error);
+		logger.error({ err: error }, "Failed to get admin tickets");
 		throw new ChatSDKError("bad_request:database", "Failed to get tickets");
 	}
 
@@ -382,7 +383,7 @@ export async function updateTicketAdmin({
 		.single();
 
 	if (error || !data) {
-		console.error("Error updating ticket:", error);
+		logger.error({ err: error, ticketId }, "Failed to update ticket");
 		throw new ChatSDKError("bad_request:database", "Failed to update ticket");
 	}
 
@@ -415,7 +416,7 @@ export async function addAdminReply({
 		.single();
 
 	if (error || !message) {
-		console.error("Error adding admin reply:", error);
+		logger.error({ err: error, ticketId }, "Failed to add admin reply");
 		throw new ChatSDKError("bad_request:database", "Failed to add reply");
 	}
 

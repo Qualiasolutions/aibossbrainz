@@ -1,6 +1,7 @@
 import "server-only";
 import mailchimp from "@mailchimp/mailchimp_marketing";
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 
 // Lazy initialization to avoid build-time errors when env vars missing
 let clientInitialized = false;
@@ -11,16 +12,12 @@ let clientInitialized = false;
  */
 export function getMailchimpClient(): typeof mailchimp | null {
 	if (!env.MAILCHIMP_API_KEY) {
-		console.warn(
-			"[Mailchimp] API key not configured - Mailchimp integration disabled",
-		);
+		logger.warn("Mailchimp API key not configured - integration disabled");
 		return null;
 	}
 
 	if (!env.MAILCHIMP_SERVER_PREFIX) {
-		console.warn(
-			"[Mailchimp] Server prefix not configured - Mailchimp integration disabled",
-		);
+		logger.warn("Mailchimp server prefix not configured - integration disabled");
 		return null;
 	}
 

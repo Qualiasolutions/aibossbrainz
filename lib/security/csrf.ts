@@ -1,5 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 const CSRF_COOKIE_NAME = "__csrf";
 const CSRF_HEADER_NAME = "x-csrf-token";
@@ -16,9 +17,7 @@ function getCsrfSecret(): string {
 			);
 		}
 		// In development, warn and use a fallback
-		console.warn(
-			"AUTH_SECRET not set - using development fallback (DO NOT use in production)",
-		);
+		logger.warn("AUTH_SECRET not set - using development CSRF fallback");
 		return "dev-csrf-secret-not-for-production";
 	}
 	return secret;

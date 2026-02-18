@@ -1,5 +1,6 @@
 import "server-only";
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 
 const MANDRILL_API_URL = "https://mandrillapp.com/api/1.0/messages/send.json";
 
@@ -24,7 +25,7 @@ export async function sendViaMandrill({
 }): Promise<MandrillResult> {
 	const apiKey = env.MANDRILL_API_KEY;
 	if (!apiKey) {
-		console.warn("[Mandrill] MANDRILL_API_KEY not configured, skipping email");
+		logger.warn("Mandrill API key not configured, skipping email");
 		return { success: false, error: "API key not configured" };
 	}
 
@@ -56,7 +57,7 @@ export async function sendViaMandrill({
 
 		if (!response.ok) {
 			const text = await response.text();
-			console.error(`[Mandrill] API error ${response.status}: ${text}`);
+			logger.error({ status: response.status, responseBody: text, subject }, "Mandrill API error");
 			return { success: false, error: `API error ${response.status}` };
 		}
 
@@ -67,22 +68,22 @@ export async function sendViaMandrill({
 		}>;
 
 		if (!Array.isArray(data) || data.length === 0) {
-			console.error("[Mandrill] API returned empty response");
+			logger.error({ subject }, "Mandrill API returned empty response");
 			return { success: false, error: "Empty response from Mandrill" };
 		}
 
 		const first = data[0];
 
 		if (first.status === "rejected" || first.status === "invalid") {
-			console.error(`[Mandrill] Email rejected: ${first.reject_reason}`);
+			logger.error({ rejectReason: first.reject_reason, subject }, "Mandrill email rejected");
 			return { success: false, error: `Rejected: ${first.reject_reason}` };
 		}
 
-		console.log(`[Mandrill] Email sent: ${first._id} (${first.status})`);
+		logger.info({ messageId: first._id, status: first.status, subject }, "Mandrill email sent");
 		return { success: true, id: first._id };
 	} catch (error) {
 		const msg = error instanceof Error ? error.message : String(error);
-		console.error(`[Mandrill] Error: ${msg}`);
+		logger.error({ err: error, subject }, "Mandrill send error");
 		return { success: false, error: msg };
 	}
 }

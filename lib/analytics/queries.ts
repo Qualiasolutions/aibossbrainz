@@ -1,5 +1,6 @@
 import "server-only";
 
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 
 export interface AnalyticsSummary {
@@ -86,7 +87,7 @@ export async function getAnalyticsSummary(
 			averageMessagesPerChat: totalChats > 0 ? totalMessages / totalChats : 0,
 		};
 	} catch (error) {
-		console.error("Failed to get analytics summary:", error);
+		logger.error({ err: error, userId }, "Failed to get analytics summary");
 		return {
 			totalChats: 0,
 			totalMessages: 0,
@@ -133,7 +134,7 @@ export async function getDailyAnalytics(
 			chatCount: Number(row.chat_count) || 0,
 		}));
 	} catch (error) {
-		console.error("Failed to get daily analytics:", error);
+		logger.error({ err: error, userId }, "Failed to get daily analytics");
 		return [];
 	}
 }
@@ -208,7 +209,7 @@ export async function getTopicBreakdown(
 			}))
 			.sort((a, b) => b.count - a.count);
 	} catch (error) {
-		console.error("Failed to get topic breakdown:", error);
+		logger.error({ err: error, userId }, "Failed to get topic breakdown");
 		return [];
 	}
 }
@@ -242,7 +243,7 @@ export async function recordAnalytics(
 			p_export_count: type === "export" ? value : 0,
 		});
 	} catch (error) {
-		console.error("Failed to record analytics:", error);
+		logger.error({ err: error, userId, type, value }, "Failed to record analytics");
 		// Don't throw - analytics recording shouldn't break the main flow
 	}
 }
@@ -272,7 +273,7 @@ export async function getRecentActivity(
 			createdAt: new Date(chat.createdAt),
 		}));
 	} catch (error) {
-		console.error("Failed to get recent activity:", error);
+		logger.error({ err: error, userId }, "Failed to get recent activity");
 		return [];
 	}
 }

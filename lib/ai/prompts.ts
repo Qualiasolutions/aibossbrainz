@@ -2,6 +2,7 @@ import type { Geo } from "@vercel/functions";
 import type { ArtifactKind } from "@/components/artifact";
 import type { BotType, FocusMode } from "@/lib/bot-personalities";
 import { getSystemPrompt } from "@/lib/bot-personalities";
+import { logger } from "@/lib/logger";
 import { getCanaryToken } from "@/lib/safety/canary";
 import {
 	buildPersonalizationContext,
@@ -177,7 +178,7 @@ export const systemPrompt = async ({
 				botSystemPrompt += personalizationPrompt;
 			}
 		} catch (error) {
-			console.warn("[Prompts] Failed to load personalization:", error);
+			logger.warn({ err: error, userId }, "Failed to load personalization");
 		}
 	}
 

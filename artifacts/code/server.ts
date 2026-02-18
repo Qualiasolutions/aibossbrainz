@@ -3,6 +3,7 @@ import { z } from "zod";
 import { codePrompt, updateDocumentPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { createDocumentHandler } from "@/lib/artifacts/server";
+import { logger } from "@/lib/logger";
 
 const MAX_RETRIES = 3;
 const MIN_CONTENT_LENGTH = 20;
@@ -48,13 +49,13 @@ export const codeDocumentHandler = createDocumentHandler<"code">({
           break;
         }
 
-        console.warn(`[Code] Content too short (${draftContent.length} chars), attempt ${attempt}/${MAX_RETRIES}`);
+        logger.warn({ chars: draftContent.length, attempt, maxRetries: MAX_RETRIES }, "Code content too short, retrying");
         if (attempt < MAX_RETRIES) {
           dataStream.write({ type: "data-clear", data: null, transient: true });
           await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
         }
       } catch (error) {
-        console.error(`[Code] Error generating content (attempt ${attempt}/${MAX_RETRIES}):`, error);
+        logger.error({ err: error, attempt, maxRetries: MAX_RETRIES }, "Error generating code content");
         if (attempt >= MAX_RETRIES) {
           draftContent = `// Error generating code for: ${title}\n// Please try again or write your code here.`;
           dataStream.write({ type: "data-codeDelta", data: draftContent, transient: true });
@@ -103,7 +104,7 @@ export const codeDocumentHandler = createDocumentHandler<"code">({
         }
       }
     } catch (error) {
-      console.error("Error updating code content:", error);
+      logger.error({ err: error }, "Error updating code content");
       draftContent = document.content ?? "";
       dataStream.write({ type: "data-codeDelta", data: draftContent, transient: true });
     }

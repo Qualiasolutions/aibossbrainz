@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Session } from "@/lib/artifacts/server";
 import { getStrategyCanvas, saveStrategyCanvas } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import type { CanvasType } from "@/lib/supabase/types";
 
 type StrategyCanvasProps = {
@@ -196,7 +197,7 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 							"Database error while saving canvas data. Please try again.",
 					};
 				}
-				console.error("[Strategy Canvas] Unexpected error:", error);
+				logger.error({ err: error, section, canvasType }, "Strategy canvas unexpected error");
 				return {
 					success: false,
 					message:

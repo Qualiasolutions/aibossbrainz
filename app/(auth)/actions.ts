@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { z } from "zod";
 import { PRODUCTION_URL } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 import { checkAuthRateLimit } from "@/lib/security/rate-limiter";
 import { createClient } from "@/lib/supabase/server";
 
@@ -71,7 +72,7 @@ export const login = async (
 		// Check rate limit (5 attempts per 15 minutes per IP)
 		const rateLimit = await checkAuthRateLimit(ip, "login", 5);
 		if (!rateLimit.allowed) {
-			console.warn("[Login] Rate limit exceeded for IP:", ip);
+			logger.warn({ ip, action: "login" }, "Login rate limit exceeded");
 			return { status: "failed" }; // Don't reveal rate limit to user
 		}
 
@@ -82,7 +83,7 @@ export const login = async (
 		});
 
 		if (error) {
-			console.error("Login error:", error);
+			logger.error({ err: error }, "Login failed");
 			return { status: "failed" };
 		}
 
@@ -116,7 +117,7 @@ export const signup = async (
 		// Check rate limit (3 attempts per 15 minutes per IP for signup)
 		const rateLimit = await checkAuthRateLimit(ip, "signup", 3);
 		if (!rateLimit.allowed) {
-			console.warn("[Signup] Rate limit exceeded for IP:", ip);
+			logger.warn({ ip, action: "signup" }, "Signup rate limit exceeded");
 			return { status: "failed" }; // Don't reveal rate limit to user
 		}
 
@@ -138,7 +139,7 @@ export const signup = async (
 		});
 
 		if (error) {
-			console.error("Signup error:", error);
+			logger.error({ err: error }, "Signup failed");
 			if (error.message.includes("already registered")) {
 				return { status: "user_exists" };
 			}
@@ -183,7 +184,7 @@ export const requestPasswordReset = async (
 		// Check rate limit (3 attempts per 15 minutes per IP for password reset)
 		const rateLimit = await checkAuthRateLimit(ip, "reset", 3);
 		if (!rateLimit.allowed) {
-			console.warn("[Password Reset] Rate limit exceeded for IP:", ip);
+			logger.warn({ ip, action: "reset" }, "Password reset rate limit exceeded");
 			return { status: "success" }; // Always return success to prevent email enumeration
 		}
 
@@ -200,7 +201,7 @@ export const requestPasswordReset = async (
 		);
 
 		if (error) {
-			console.error("Password reset error:", error);
+			logger.error({ err: error }, "Password reset request failed");
 			// Don't reveal if email exists or not for security
 			return { status: "success" };
 		}
@@ -236,7 +237,7 @@ export const resetPassword = async (
 		});
 
 		if (error) {
-			console.error("Password update error:", error);
+			logger.error({ err: error }, "Password update failed");
 			return { status: "failed", message: error.message };
 		}
 

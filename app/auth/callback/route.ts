@@ -7,6 +7,7 @@ import {
 	getUserProfile,
 } from "@/lib/db/queries";
 import { sendWelcomeEmail } from "@/lib/email/subscription-emails";
+import { logger } from "@/lib/logger";
 import { applyPaidTag, applyTrialTags } from "@/lib/mailchimp/tags";
 import { activateSubscription, startTrial } from "@/lib/stripe/actions";
 import { getStripe } from "@/lib/stripe/config";
@@ -49,9 +50,7 @@ async function syncStripeSubscription(
 				stripeSubscriptionId: sub.id,
 				trialEndDate: new Date(sub.trial_end * 1000),
 			});
-			console.log(
-				`[Auth Callback] Synced trial from Stripe for user ${userId}`,
-			);
+			logger.info({ userId, subscriptionType, stripeSubscriptionId: sub.id }, "Synced trial from Stripe");
 			return true;
 		}
 
@@ -61,15 +60,13 @@ async function syncStripeSubscription(
 				subscriptionType,
 				stripeSubscriptionId: sub.id,
 			});
-			console.log(
-				`[Auth Callback] Synced active subscription from Stripe for user ${userId}`,
-			);
+			logger.info({ userId, subscriptionType, stripeSubscriptionId: sub.id }, "Synced active subscription from Stripe");
 			return true;
 		}
 
 		return false;
 	} catch (err) {
-		console.error("[Auth Callback] Stripe sync failed:", err);
+		logger.error({ err, userId, stripeCustomerId }, "Stripe sync failed during auth callback");
 		return false;
 	}
 }
@@ -98,11 +95,11 @@ async function handleAuthenticatedUser(
 					email: user.email,
 					displayName: profile?.displayName,
 				}).catch((err) => {
-					console.error("[Auth Callback] Failed to send welcome email:", err);
+					logger.error({ err, userId: user.id }, "Failed to send welcome email");
 				});
 			}
 		} catch (err) {
-			console.error("[Auth Callback] Failed to ensure user exists:", err);
+			logger.error({ err, userId: user.id }, "Failed to ensure user exists");
 		}
 	}
 
@@ -114,9 +111,7 @@ async function handleAuthenticatedUser(
 	if (!subscription.isActive) {
 		const fullProfile = await getUserFullProfile({ userId: user.id });
 		if (fullProfile?.stripeCustomerId) {
-			console.log(
-				`[Auth Callback] User ${user.id} has Stripe customer but inactive subscription — syncing`,
-			);
+			logger.info({ userId: user.id, stripeCustomerId: fullProfile.stripeCustomerId }, "User has Stripe customer but inactive subscription — syncing");
 			const synced = await syncStripeSubscription(
 				user.id,
 				fullProfile.stripeCustomerId,
@@ -158,7 +153,7 @@ async function handleAuthenticatedUser(
 						await applyPaidTag(email, subscriptionType);
 					}
 				} catch (err) {
-					console.error("[Auth Callback] Mailchimp tagging failed:", err);
+					logger.error({ err, userId: user.id }, "Mailchimp tagging failed during auth callback");
 				}
 			});
 		}
@@ -187,7 +182,7 @@ export async function GET(request: Request) {
 		const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
 		if (error) {
-			console.error("[Auth Callback] Code exchange failed:", error.message);
+			logger.error({ err: error }, "Auth callback code exchange failed");
 		}
 
 		if (!error && data.user) {
@@ -208,7 +203,7 @@ export async function GET(request: Request) {
 		});
 
 		if (error) {
-			console.error("[Auth Callback] OTP verification failed:", error.message);
+			logger.error({ err: error }, "Auth callback OTP verification failed");
 		}
 
 		if (!error && data.user) {
@@ -221,12 +216,7 @@ export async function GET(request: Request) {
 	}
 
 	// Log what parameters we received for debugging
-	console.error("[Auth Callback] Failed - params:", {
-		hasCode: !!code,
-		hasTokenHash: !!tokenHash,
-		type,
-		origin,
-	});
+	logger.error({ hasCode: !!code, hasTokenHash: !!tokenHash, type, origin }, "Auth callback failed - no valid auth params");
 
 	// If something went wrong, redirect to login with error
 	return NextResponse.redirect(`${origin}/login?error=auth_callback_error`);

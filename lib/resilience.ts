@@ -4,6 +4,8 @@
  * - Retry with exponential backoff: Handles transient failures
  */
 
+import { logger } from "@/lib/logger";
+
 type CircuitState = "closed" | "open" | "half-open";
 
 interface CircuitBreakerOptions {
@@ -152,9 +154,7 @@ async function withCircuitBreaker<T>(
 			// Open circuit after threshold failures
 			circuit.state = "open";
 			circuit.nextAttempt = now + opts.timeout;
-			console.error(
-				`[CircuitBreaker] Circuit opened for ${name} after ${circuit.failures} failures`,
-			);
+			logger.error({ service: name, failures: circuit.failures }, "Circuit breaker opened");
 		}
 
 		throw error;
@@ -225,9 +225,7 @@ export function recordCircuitFailure(
 	} else if (circuit.failures >= opts.failureThreshold) {
 		circuit.state = "open";
 		circuit.nextAttempt = now + opts.timeout;
-		console.error(
-			`[CircuitBreaker] Circuit opened for ${name} after ${circuit.failures} failures`,
-		);
+		logger.error({ service: name, failures: circuit.failures }, "Circuit breaker opened");
 	}
 }
 

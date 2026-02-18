@@ -1,6 +1,7 @@
 import "server-only";
 
 import { PRODUCTION_DOMAIN, PRODUCTION_URL } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 
 const ALLOWED_HOSTS = [PRODUCTION_DOMAIN, "localhost", "127.0.0.1"];
 
@@ -19,9 +20,7 @@ export function getValidAppUrl(request?: Request): string {
 			const parsed = new URL(envUrl);
 			return `${parsed.protocol}//${parsed.host}`;
 		} catch {
-			console.error(
-				`[getValidAppUrl] Invalid NEXT_PUBLIC_APP_URL: "${envUrl}". Using production fallback.`,
-			);
+			logger.error({ envUrl }, "Invalid NEXT_PUBLIC_APP_URL, using production fallback");
 			return PRODUCTION_URL;
 		}
 	}

@@ -1,4 +1,5 @@
 import "server-only";
+import { logger } from "@/lib/logger";
 import { sendViaMandrill } from "./mandrill";
 
 const ADMIN_EMAIL = "info@qualiasolutions.net";
@@ -51,6 +52,6 @@ export async function sendAdminNotification({
 	});
 
 	if (!result.success) {
-		console.error(`[Email] Failed to send admin notification: ${result.error}`);
+		logger.error({ error: result.error, subject }, "Failed to send admin notification");
 	}
 }

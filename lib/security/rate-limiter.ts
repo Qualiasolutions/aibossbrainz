@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+import { logger } from "@/lib/logger";
 
 const REDIS_URL = process.env.REDIS_URL;
 
@@ -68,7 +69,7 @@ async function getRedisClient(): Promise<ReturnType<
 		redisClient = createClient({ url: REDIS_URL });
 
 		redisClient.on("error", (err) => {
-			console.warn("[Redis] Connection error:", err.message);
+			logger.warn({ err }, "Redis connection error");
 			redisFailedAt = Date.now();
 			redisRetryCount++;
 			// Don't null the client here - let the next getRedisClient call handle reconnection
@@ -82,10 +83,7 @@ async function getRedisClient(): Promise<ReturnType<
 
 		return redisClient;
 	} catch (err) {
-		console.warn(
-			"[Redis] Connection failed, will retry after backoff:",
-			err instanceof Error ? err.message : "Unknown error",
-		);
+		logger.warn({ err }, "Redis connection failed, will retry after backoff");
 		redisFailedAt = Date.now();
 		redisRetryCount++;
 		redisClient = null;

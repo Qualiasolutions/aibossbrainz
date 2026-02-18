@@ -1,14 +1,13 @@
 import "server-only";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { customProvider, wrapLanguageModel } from "ai";
+import { logger } from "@/lib/logger";
 import { safetyMiddleware } from "@/lib/safety/output-guard";
 import { isTestEnvironment } from "../constants";
 
 // Validate OpenRouter API key at module load (fail fast)
 if (!process.env.OPENROUTER_API_KEY && !isTestEnvironment) {
-	console.error(
-		"CRITICAL: OPENROUTER_API_KEY is not set. Chat functionality will fail.",
-	);
+	logger.error("CRITICAL: OPENROUTER_API_KEY is not set. Chat functionality will fail.");
 }
 
 // OpenRouter configuration - using stable Gemini 2.5 Flash with fallback chain

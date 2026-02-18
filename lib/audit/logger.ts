@@ -1,4 +1,5 @@
 import "server-only";
+import { logger } from "@/lib/logger";
 import { createServiceClient } from "@/lib/supabase/server";
 
 /**
@@ -97,16 +98,12 @@ export async function logAudit(input: AuditLogInput): Promise<void> {
 		});
 
 		if (error) {
-			// Log to console but don't throw - audit logging should never break the main operation
-			console.error("[AuditLog] Failed to write audit log:", error.message, {
-				action: input.action,
-				resource: input.resource,
-				resourceId: input.resourceId,
-			});
+			// Log but don't throw - audit logging should never break the main operation
+			logger.error({ err: error, action: input.action, resource: input.resource, resourceId: input.resourceId }, "Failed to write audit log");
 		}
 	} catch (error) {
 		// Fail silently - audit logging should never break the main operation
-		console.error("[AuditLog] Exception during audit logging:", error);
+		logger.error({ err: error, action: input.action, resource: input.resource }, "Exception during audit logging");
 	}
 }
 

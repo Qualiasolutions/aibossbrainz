@@ -1,4 +1,5 @@
 import { generateText } from "ai";
+import { logger } from "@/lib/logger";
 import { withAIGatewayResilience } from "@/lib/resilience";
 import { myProvider } from "./providers";
 
@@ -70,7 +71,7 @@ The importance field should be 1-10 (10 = critical business decision, 1 = casual
 		// Parse JSON response
 		const jsonMatch = result.text.match(/\{[\s\S]*\}/);
 		if (!jsonMatch) {
-			console.warn("[Summarizer] Could not extract JSON from response");
+			logger.warn("Summarizer could not extract JSON from response");
 			return null;
 		}
 
@@ -81,7 +82,7 @@ The importance field should be 1-10 (10 = critical business decision, 1 = casual
 			importance: typeof parsed.importance === "number" ? parsed.importance : 5,
 		};
 	} catch (error) {
-		console.warn("[Summarizer] Failed to generate summary:", error);
+		logger.warn({ err: error }, "Failed to generate conversation summary");
 		return null;
 	}
 }

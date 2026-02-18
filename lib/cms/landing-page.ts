@@ -1,5 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
+import { logger } from "@/lib/logger";
 import { createServiceClient } from "@/lib/supabase/server";
 import {
 	defaultLandingPageContent,
@@ -19,7 +20,7 @@ async function fetchLandingPageContentUncached(): Promise<LandingPageCMSContent>
 			.select("section, key, value");
 
 		if (error || !data) {
-			console.error("[CMS] Error fetching landing page content:", error);
+			logger.error({ err: error }, "Failed to fetch landing page CMS content");
 			return defaultLandingPageContent;
 		}
 
@@ -47,7 +48,7 @@ async function fetchLandingPageContentUncached(): Promise<LandingPageCMSContent>
 			checkup: { ...defaultLandingPageContent.checkup, ...content.checkup },
 		};
 	} catch (err) {
-		console.error("[CMS] Error in fetchLandingPageContent:", err);
+		logger.error({ err }, "Exception in fetchLandingPageContent");
 		return defaultLandingPageContent;
 	}
 }

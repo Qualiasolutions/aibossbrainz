@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { sendAdminNotification } from "../email/admin-notifications";
+import { logger } from "../logger";
 import {
 	getMailchimpClient,
 	MAILCHIMP_AUDIENCE_ID,
@@ -95,10 +96,7 @@ async function applyTagWithRetry(
 						message: `Email: ${email}\nOperation: ${operation}\nTag: ${tagName}\nError: ${errorMessage}\n\nThis user may not receive the expected email sequence.`,
 					});
 				} catch (notifyErr) {
-					console.error(
-						`[Mailchimp] Failed to send admin notification for ${operation}:`,
-						notifyErr instanceof Error ? notifyErr.message : notifyErr,
-					);
+					logger.error({ err: notifyErr, operation, email }, "Failed to send Mailchimp admin notification");
 				}
 
 				return { success: false, error: fullError };
