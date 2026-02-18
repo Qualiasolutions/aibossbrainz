@@ -52,12 +52,6 @@ export async function GET(request: NextRequest) {
 			return error.toResponse();
 		}
 
-		// Better error logging with context
-		const errorDetails = {
-			message: error instanceof Error ? error.message : "Unknown error",
-			stack: error instanceof Error ? error.stack : undefined,
-			timestamp: new Date().toISOString(),
-		};
 		logger.error({ err: error }, "History API GET error");
 
 		return new ChatSDKError(
