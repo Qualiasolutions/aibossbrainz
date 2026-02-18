@@ -310,14 +310,12 @@ const PurePreviewMessage = ({
 							);
 						}
 
-						if (
-							(type as string) === "tool-invocation" &&
-							(part as any).toolName === "strategyCanvas"
-						) {
+						// AI SDK v5: tool parts have type "tool-{toolName}"
+						if ((type as string) === "tool-strategyCanvas") {
 							const { toolCallId, state } = part as any;
-							const output = (part as any).result; // SDK uses 'result' for completed calls in tool-invocation
+							const output = (part as any).output;
 
-							if (state === "result") {
+							if (state === "output-available") {
 								return (
 									<div
 										key={toolCallId}
@@ -341,11 +339,6 @@ const PurePreviewMessage = ({
 									</div>
 								);
 							}
-							return null;
-						}
-
-						// Maintain compatibility if internal types are used
-						if ((type as string) === "tool-strategyCanvas") {
 							return null;
 						}
 

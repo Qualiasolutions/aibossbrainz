@@ -185,8 +185,6 @@ export function Chat({
 		notes: "brainstorm",
 	};
 
-	// Watch for strategyCanvas tool calls to auto-open the panel
-
 	// Handler for bot switching with toast notification
 	const handleBotChange = (newBot: BotType) => {
 		if (newBot !== selectedBot) {
@@ -339,38 +337,37 @@ export function Chat({
 	}, [id, messages, isLoadingOlder, hasMoreMessages, setMessages]);
 
 	// Watch for strategyCanvas tool calls to auto-open the panel
+	// AI SDK v5: tool parts have type "tool-{toolName}" and state "output-available"
 	useEffect(() => {
 		const lastMessage = messages.at(-1);
 		if (!lastMessage || lastMessage.role !== "assistant") return;
 
-		if (lastMessage.toolInvocations) {
-			for (const toolInvocation of lastMessage.toolInvocations) {
-				// Only process finished tool calls that we haven't seen yet
-				if (
-					toolInvocation.toolName === "strategyCanvas" &&
-					toolInvocation.state === "result" &&
-					!processedToolCallIds.current.has(toolInvocation.toolCallId)
-				) {
-					processedToolCallIds.current.add(toolInvocation.toolCallId);
+		for (const part of lastMessage.parts) {
+			const partType = (part as any).type as string;
+			if (
+				partType === "tool-strategyCanvas" &&
+				(part as any).state === "output-available" &&
+				!processedToolCallIds.current.has((part as any).toolCallId)
+			) {
+				processedToolCallIds.current.add((part as any).toolCallId);
 
-					// Parse arguments to find section
-					const args = toolInvocation.args;
-					const sectionRaw = args?.section;
+				// Parse input to find section
+				const input = (part as any).input;
+				const sectionRaw = input?.section;
 
-					// Normalize section to lowercase to handle model variations (e.g. "Strengths" vs "strengths")
-					const section = sectionRaw?.toLowerCase();
+				// Normalize section to lowercase to handle model variations (e.g. "Strengths" vs "strengths")
+				const section = sectionRaw?.toLowerCase();
 
-					if (section && sectionToCanvasType[section]) {
-						const canvasType = sectionToCanvasType[section];
-						setTargetCanvasTab(canvasType);
-						setCanvasRefreshVersion((prev) => prev + 1);
-						setIsSwotPanelOpen(true);
+				if (section && sectionToCanvasType[section]) {
+					const canvasType = sectionToCanvasType[section];
+					setTargetCanvasTab(canvasType);
+					setCanvasRefreshVersion((prev) => prev + 1);
+					setIsSwotPanelOpen(true);
 
-						toast({
-							type: "success",
-							description: `Updated ${canvasType.toUpperCase()} canvas`,
-						});
-					}
+					toast({
+						type: "success",
+						description: `Updated ${canvasType.toUpperCase()} canvas`,
+					});
 				}
 			}
 		}

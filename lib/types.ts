@@ -55,9 +55,7 @@ export type ChatMessage = UIMessage<
 	MessageMetadata,
 	CustomUIDataTypes,
 	ChatTools
-> & {
-	toolInvocations?: any[];
-};
+>;
 
 export type Attachment = {
 	name: string;
