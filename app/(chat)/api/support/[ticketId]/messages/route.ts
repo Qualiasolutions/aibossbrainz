@@ -29,10 +29,8 @@ export const POST = withCsrf(
 			const body = await request.json();
 			const parsed = messageSchema.safeParse(body);
 			if (!parsed.success) {
-				return Response.json(
-					{ error: parsed.error.flatten() },
-					{ status: 400 },
-				);
+				logger.warn({ errors: parsed.error.flatten() }, "Support message validation failed");
+				return new ChatSDKError("bad_request:api").toResponse();
 			}
 
 			const { content } = parsed.data;

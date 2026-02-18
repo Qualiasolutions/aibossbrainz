@@ -197,10 +197,8 @@ export const POST = withCsrf(async (request: Request) => {
 		logger.error({ err: error }, "Demo chat API error");
 
 		if (error instanceof z.ZodError) {
-			return Response.json(
-				{ error: "Invalid request", details: error.errors },
-				{ status: 400 },
-			);
+			logger.warn({ errors: error.flatten() }, "Demo chat validation failed");
+			return Response.json({ error: "Invalid request" }, { status: 400 });
 		}
 
 		return Response.json({ error: "Internal server error" }, { status: 500 });

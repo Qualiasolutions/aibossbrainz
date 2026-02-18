@@ -86,10 +86,8 @@ export const POST = withCsrf(async (request: Request) => {
 
 		const parseResult = canvasPostSchema.safeParse(body);
 		if (!parseResult.success) {
-			return Response.json(
-				{ error: parseResult.error.flatten() },
-				{ status: 400 },
-			);
+			logger.warn({ errors: parseResult.error.flatten() }, "Canvas validation failed");
+			return new ChatSDKError("bad_request:api").toResponse();
 		}
 
 		const { canvasType, name, data, canvasId, isDefault } = parseResult.data;

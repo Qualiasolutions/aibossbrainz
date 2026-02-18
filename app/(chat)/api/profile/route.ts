@@ -146,10 +146,7 @@ export const POST = withCsrf(async (request: Request) => {
 		const parseResult = profileUpdateSchema.safeParse(body);
 		if (!parseResult.success) {
 			apiLog.warn("Validation failed", { errors: parseResult.error.flatten() });
-			return Response.json(
-				{ error: "Invalid input", details: parseResult.error.flatten() },
-				{ status: 400 },
-			);
+			return new ChatSDKError("bad_request:api").toResponse();
 		}
 
 		const d = parseResult.data;

@@ -52,7 +52,8 @@ export const POST = withCsrf(async (request: Request) => {
 		const body = await request.json();
 		const parsed = ticketSchema.safeParse(body);
 		if (!parsed.success) {
-			return Response.json({ error: parsed.error.flatten() }, { status: 400 });
+			logger.warn({ errors: parsed.error.flatten() }, "Support ticket validation failed");
+			return new ChatSDKError("bad_request:api").toResponse();
 		}
 
 		const { subject, message, category } = parsed.data;
