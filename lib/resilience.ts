@@ -154,7 +154,10 @@ async function withCircuitBreaker<T>(
 			// Open circuit after threshold failures
 			circuit.state = "open";
 			circuit.nextAttempt = now + opts.timeout;
-			logger.error({ service: name, failures: circuit.failures }, "Circuit breaker opened");
+			logger.error(
+				{ service: name, failures: circuit.failures },
+				"Circuit breaker opened",
+			);
 		}
 
 		throw error;
@@ -225,8 +228,110 @@ export function recordCircuitFailure(
 	} else if (circuit.failures >= opts.failureThreshold) {
 		circuit.state = "open";
 		circuit.nextAttempt = now + opts.timeout;
-		logger.error({ service: name, failures: circuit.failures }, "Circuit breaker opened");
+		logger.error(
+			{ service: name, failures: circuit.failures },
+			"Circuit breaker opened",
+		);
 	}
+}
+
+/**
+ * Determine if an error is transient (should trip the circuit breaker).
+ * Returns true for 429, 5xx, and network errors.
+ * Returns false for client errors (400, 401, 403, 404) that indicate bad requests, not service issues.
+ */
+export function isTransientError(error: unknown): boolean {
+	if (!(error instanceof Error)) return false;
+
+	const message = error.message.toLowerCase();
+
+	// Check for HTTP status codes on the error object (AI SDK pattern)
+	const status =
+		(error as unknown as Record<string, unknown>).status ??
+		(error as unknown as Record<string, unknown>).statusCode;
+
+	if (typeof status === "number") {
+		// Client errors should NOT trip the circuit
+		if (status >= 400 && status < 500 && status !== 429) return false;
+		// 429 (rate limit) and 5xx are transient
+		if (status === 429 || status >= 500) return true;
+	}
+
+	// Network-level transient errors
+	const transientPatterns = [
+		"network",
+		"timeout",
+		"econnreset",
+		"econnrefused",
+		"fetch failed",
+		"abort",
+	];
+	if (transientPatterns.some((p) => message.includes(p))) return true;
+
+	// Status codes embedded in error messages
+	const transientCodes = ["429", "500", "502", "503", "504"];
+	if (transientCodes.some((code) => message.includes(code))) {
+		// But not if a non-transient code is also present (e.g., "400")
+		const clientCodes = ["400", "401", "403", "404"];
+		if (clientCodes.some((code) => message.includes(code))) return false;
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Extract retry-after timing from an error response.
+ * Checks for Retry-After and x-ratelimit-reset headers from AI SDK error responses.
+ * Returns milliseconds to wait, or null if no retry timing found.
+ * Capped at 120000ms (2 minutes) to prevent absurd waits.
+ */
+export function getRetryAfterMs(error: unknown): number | null {
+	const MAX_RETRY_AFTER = 120_000; // 2 minutes cap
+
+	if (!error || typeof error !== "object") return null;
+
+	// AI SDK attaches responseHeaders to errors
+	const headers: unknown = (error as Record<string, unknown>).responseHeaders;
+	if (!headers || typeof headers !== "object") return null;
+
+	// Support both Headers instance and plain object
+	const getHeader = (name: string): string | null => {
+		if (headers instanceof Headers) return headers.get(name);
+		if (typeof (headers as Record<string, unknown>)[name] === "string") {
+			return (headers as Record<string, string>)[name];
+		}
+		return null;
+	};
+
+	// Try Retry-After header first
+	const retryAfter = getHeader("retry-after");
+	if (retryAfter) {
+		const seconds = Number(retryAfter);
+		if (!Number.isNaN(seconds) && seconds > 0) {
+			return Math.min(seconds * 1000, MAX_RETRY_AFTER);
+		}
+		// Try parsing as HTTP date
+		const date = new Date(retryAfter);
+		if (!Number.isNaN(date.getTime())) {
+			const ms = date.getTime() - Date.now();
+			if (ms > 0) return Math.min(ms, MAX_RETRY_AFTER);
+		}
+	}
+
+	// Fallback: x-ratelimit-reset (epoch seconds or ms)
+	const resetHeader = getHeader("x-ratelimit-reset");
+	if (resetHeader) {
+		const resetValue = Number(resetHeader);
+		if (!Number.isNaN(resetValue) && resetValue > 0) {
+			// If value looks like epoch seconds (< 2e10), convert to ms
+			const resetMs = resetValue < 2e10 ? resetValue * 1000 : resetValue;
+			const ms = resetMs - Date.now();
+			if (ms > 0) return Math.min(ms, MAX_RETRY_AFTER);
+		}
+	}
+
+	return null;
 }
 
 // Retry with exponential backoff
@@ -236,6 +341,7 @@ interface RetryOptions {
 	initialDelay: number; // Initial delay in ms
 	maxDelay: number; // Maximum delay between retries
 	backoffMultiplier: number;
+	respectRetryAfter?: boolean; // Use Retry-After header timing when available (default: true)
 	retryableErrors?: (error: unknown) => boolean;
 	onRetry?: (attempt: number, error: unknown, delay: number) => void;
 }
@@ -290,10 +396,19 @@ export async function withRetry<T>(
 				throw error;
 			}
 
-			// Calculate delay with exponential backoff and jitter
-			const baseDelay = opts.initialDelay * opts.backoffMultiplier ** attempt;
-			const jitter = Math.random() * 0.3 * baseDelay; // Add up to 30% jitter
-			const delay = Math.min(baseDelay + jitter, opts.maxDelay);
+			// Respect Retry-After header when available and enabled
+			const respectRetryAfter = opts.respectRetryAfter !== false; // default true
+			const retryAfterDelay = respectRetryAfter ? getRetryAfterMs(error) : null;
+
+			// Calculate delay: use Retry-After if available, otherwise exponential backoff
+			let delay: number;
+			if (retryAfterDelay !== null) {
+				delay = Math.min(retryAfterDelay, opts.maxDelay);
+			} else {
+				const baseDelay = opts.initialDelay * opts.backoffMultiplier ** attempt;
+				const jitter = Math.random() * 0.3 * baseDelay; // Add up to 30% jitter
+				delay = Math.min(baseDelay + jitter, opts.maxDelay);
+			}
 
 			// Notify about retry
 			if (opts.onRetry) {

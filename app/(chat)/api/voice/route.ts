@@ -1,11 +1,11 @@
 import { after } from "next/server";
 import { z } from "zod";
 import { getVoiceConfig, MAX_TTS_TEXT_LENGTH } from "@/lib/ai/voice-config";
-import { logger } from "@/lib/logger";
 import { recordAnalytics } from "@/lib/analytics/queries";
 import { apiRequestLogger } from "@/lib/api-logging";
 import { checkUserSubscription } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import {
 	CircuitBreakerError,
 	withElevenLabsResilience,
@@ -17,6 +17,7 @@ import {
 import { withCsrf } from "@/lib/security/with-csrf";
 import { voiceBreadcrumb } from "@/lib/sentry";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { buildCacheParams, cacheAudio, getCachedAudio } from "@/lib/tts-cache";
 import {
 	parseCollaborativeSegments,
 	stripMarkdownForTTS,
@@ -140,21 +141,63 @@ export const POST = withCsrf(async (request: Request) => {
 				}
 
 				// Generate segments sequentially with request stitching for prosody-aligned audio
+				// Per-segment error isolation: one failed segment does not kill the entire response
 				const audioBuffers: ArrayBuffer[] = [];
 				const previousRequestIds: string[] = [];
+				const failedSegments: number[] = [];
 
-				for (const segment of validSegments) {
-					const voiceConfig = getVoiceConfig(segment.speaker);
-					const result = await generateAudioForSegment(
-						segment.text,
-						voiceConfig,
-						apiKey,
-						previousRequestIds,
-					);
-					audioBuffers.push(result.buffer);
-					if (result.requestId) {
-						previousRequestIds.push(result.requestId);
+				for (let i = 0; i < validSegments.length; i++) {
+					const segment = validSegments[i];
+					try {
+						const voiceConfig = getVoiceConfig(segment.speaker);
+
+						// Check TTS cache first
+						const cacheParams = buildCacheParams(segment.text, voiceConfig);
+						const cachedUrl = await getCachedAudio(cacheParams);
+
+						if (cachedUrl) {
+							// Cache hit -- fetch audio from CDN
+							const cachedResponse = await fetch(cachedUrl);
+							const cachedBuffer = await cachedResponse.arrayBuffer();
+							audioBuffers.push(cachedBuffer);
+							continue;
+						}
+
+						// Cache miss -- generate with ElevenLabs
+						const result = await generateAudioForSegment(
+							segment.text,
+							voiceConfig,
+							apiKey,
+							previousRequestIds,
+						);
+						audioBuffers.push(result.buffer);
+						if (result.requestId) {
+							previousRequestIds.push(result.requestId);
+						}
+
+						// Cache the generated audio (fire-and-forget)
+						cacheAudio(cacheParams, result.buffer).catch(() => {});
+					} catch (err) {
+						logger.warn(
+							{ err, segmentIndex: i, speaker: segment.speaker },
+							"Collaborative segment TTS failed, skipping",
+						);
+						failedSegments.push(i);
 					}
+				}
+
+				if (audioBuffers.length === 0) {
+					return Response.json(
+						{ error: "Voice generation failed for all segments" },
+						{ status: 503 },
+					);
+				}
+
+				if (failedSegments.length > 0) {
+					logger.warn(
+						{ failedSegments, total: validSegments.length },
+						"Collaborative TTS completed with partial failures",
+					);
 				}
 
 				// Concatenate all audio buffers (now prosody-aligned via request stitching)
@@ -196,7 +239,25 @@ export const POST = withCsrf(async (request: Request) => {
 		// Single voice path (non-collaborative or single speaker)
 		const voiceConfig = getVoiceConfig(botType);
 
-		// Use resilience wrapper for ElevenLabs API calls
+		// Check TTS cache before calling ElevenLabs
+		const cacheParams = buildCacheParams(cleanText, voiceConfig);
+		const cachedUrl = await getCachedAudio(cacheParams);
+
+		if (cachedUrl) {
+			apiLog.success({ botType, textLength: cleanText.length, cached: true });
+			const estimatedMinutes = Math.max(1, Math.ceil(cleanText.length / 750));
+			after(() => recordAnalytics(user.id, "voice", estimatedMinutes));
+
+			const cachedResponse = await fetch(cachedUrl);
+			return new Response(cachedResponse.body, {
+				headers: {
+					"Content-Type": "audio/mpeg",
+					"Cache-Control": "no-cache",
+				},
+			});
+		}
+
+		// Cache miss -- use resilience wrapper for ElevenLabs API calls
 		const response = await withElevenLabsResilience(async () => {
 			const controller = new AbortController();
 			const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
@@ -228,7 +289,10 @@ export const POST = withCsrf(async (request: Request) => {
 				clearTimeout(timeoutId);
 
 				if (!res.ok) {
-					logger.error({ status: res.status, statusText: res.statusText }, "ElevenLabs API error");
+					logger.error(
+						{ status: res.status, statusText: res.statusText },
+						"ElevenLabs API error",
+					);
 					if (res.status === 401) {
 						throw new Error("INVALID_API_KEY");
 					}
@@ -242,7 +306,12 @@ export const POST = withCsrf(async (request: Request) => {
 			}
 		});
 
-		// Stream the audio response
+		// Consume response body to cache it, then return the buffer
+		const audioBuffer = await response.arrayBuffer();
+
+		// Cache the generated audio (fire-and-forget)
+		cacheAudio(cacheParams, audioBuffer).catch(() => {});
+
 		apiLog.success({ botType, textLength: cleanText.length });
 
 		// Record voice analytics (estimate minutes from text length)
@@ -250,11 +319,10 @@ export const POST = withCsrf(async (request: Request) => {
 		const estimatedMinutes = Math.max(1, Math.ceil(cleanText.length / 750));
 		after(() => recordAnalytics(user.id, "voice", estimatedMinutes));
 
-		return new Response(response.body, {
+		return new Response(audioBuffer, {
 			headers: {
 				"Content-Type": "audio/mpeg",
 				"Cache-Control": "no-cache",
-				"Transfer-Encoding": "chunked",
 			},
 		});
 	} catch (error) {
@@ -339,7 +407,10 @@ async function generateAudioForSegment(
 			clearTimeout(timeoutId);
 
 			if (!res.ok) {
-				logger.error({ status: res.status, statusText: res.statusText }, "ElevenLabs API error");
+				logger.error(
+					{ status: res.status, statusText: res.statusText },
+					"ElevenLabs API error",
+				);
 				if (res.status === 401) {
 					throw new Error("INVALID_API_KEY");
 				}
