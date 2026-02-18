@@ -114,7 +114,10 @@ export async function POST(request: Request) {
 		logger.warn({ clientIp }, "Webhook rate limit exceeded");
 		return NextResponse.json(
 			{ error: "Rate limit exceeded" },
-			{ status: 429 },
+			{
+				status: 429,
+				headers: { "Retry-After": "60" },
+			},
 		);
 	}
 
