@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 ## Current Position
 
-Phase: 24 (model-resilience-voice-optimization) -- COMPLETE
-Plan: 2 of 2 (phase complete)
-Status: Phase complete
-Last activity: 2026-02-19 -- Completed and verified phase 24
+Phase: 25 (security-performance-cost-controls)
+Plan: 1 of 3
+Status: In progress
+Last activity: 2026-02-18 -- Completed 25-01-PLAN.md
 
-Progress: █████████░ 9/12 plans (75%)
+Progress: ██████████░ 10/12 plans (83%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30 (11 v1.2 + 10 v1.3 + 9 v1.4)
-- Average duration: 4min
-- Total execution time: 153min
+- Total plans completed: 31 (11 v1.2 + 10 v1.3 + 10 v1.4)
+- Average duration: 5min
+- Total execution time: 164min
 
 **By Phase:**
 
@@ -41,6 +41,7 @@ Progress: █████████░ 9/12 plans (75%)
 | 22 | 1/1 | 8min | 8min |
 | 23 | 3/3 | 11min | 4min |
 | 24 | 2/2 | 33min | 17min |
+| 25 | 1/3 | 11min | 11min |
 
 ## Accumulated Context
 
@@ -68,6 +69,8 @@ Progress: █████████░ 9/12 plans (75%)
 - Circuit breaker transient errors: 429 + 5xx + network. Client errors (400-404 except 429) never trip circuit
 - Retry-After header parsing capped at 120s to prevent absurd waits
 - Safety middleware wraps outer fallback chain so it applies to both OpenRouter and direct Google responses
+- All API validation errors must use ChatSDKError('bad_request:api').toResponse() -- never expose Zod flatten/errors to clients
+- Server-side Zod diagnostics logged via logger.warn for debugging without client exposure
 
 ### Completed
 
@@ -92,6 +95,6 @@ Progress: █████████░ 9/12 plans (75%)
 
 ## Session Continuity
 
-Last session: 2026-02-19
-Stopped at: Completed phase 24 (model resilience & voice optimization -- verified 5/5 must-haves)
-Resume: `/gsd:plan-phase 25`
+Last session: 2026-02-18
+Stopped at: Completed 25-01 (Zod error sanitization, CSP tightening, ajv patch)
+Resume: `/gsd:execute-phase 25` (plan 25-02 next)
