@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 22 - Auth & Subscription Guards
+**Current focus:** Phase 23 - Webhook Reliability
 
 ## Current Position
 
-Phase: 22 (2 of 6 in v1.4)
-Plan: 1 of 1 (phase complete)
-Status: Phase complete
-Last activity: 2026-02-18 — Completed 22-01-PLAN.md
+Phase: 23 (3 of 6 in v1.4)
+Plan: 1 of 2
+Status: In progress
+Last activity: 2026-02-18 — Completed 23-01-PLAN.md
 
-Progress: ███░░░░░░░ 3/11 plans (27%)
+Progress: ████░░░░░░ 4/11 plans (36%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24 (11 v1.2 + 10 v1.3 + 3 v1.4)
+- Total plans completed: 25 (11 v1.2 + 10 v1.3 + 4 v1.4)
 - Average duration: 4min
-- Total execution time: 94min
+- Total execution time: 99min
 
 **By Phase:**
 
@@ -39,6 +39,7 @@ Progress: ███░░░░░░░ 3/11 plans (27%)
 | 20 | 2/2 | 11min | 5min |
 | 21 | 2/2 | 8min | 4min |
 | 22 | 1/1 | 8min | 8min |
+| 23 | 1/2 | 5min | 5min |
 
 ## Accumulated Context
 
@@ -51,6 +52,9 @@ Progress: ███░░░░░░░ 3/11 plans (27%)
 - Use Number() cast for UserAnalytics.voiceMinutes since DB type is Json, not number
 - Query UserAnalytics for voice rate limit DB fallback instead of Message_v2 (correct metric)
 - Query AuditLog for export rate limit DB fallback (action-based, not message-based)
+- Event-ID dedup via INSERT + unique constraint instead of SELECT-then-INSERT (atomic, race-free)
+- maxDuration = 60 on webhook route for Vercel timeout protection
+- Top-level dedup before switch covers all event types with single check
 
 ### Completed
 
@@ -69,9 +73,10 @@ Progress: ███░░░░░░░ 3/11 plans (27%)
 - 6 phases, 11 planned plans
 - New API routes must be added to publicApiRoutes in lib/supabase/middleware.ts
 - AICostLog migration needs to be applied via Supabase Dashboard SQL Editor
+- StripeWebhookEvent migration needs to be applied via Supabase Dashboard SQL Editor
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed phase 22 (auth & subscription guards)
-Resume: `/gsd:plan-phase 23`
+Stopped at: Completed 23-01 (webhook dedup + maxDuration)
+Resume: `/gsd:execute-phase 23-02`
