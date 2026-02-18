@@ -3,8 +3,7 @@
  * Provides request-scoped logging with request IDs and user context
  */
 
-import type { Logger } from "pino";
-import { logger as baseLogger } from "./logger";
+import { type Logger, logger as baseLogger } from "./logger";
 
 /**
  * API request logger with automatic timing
