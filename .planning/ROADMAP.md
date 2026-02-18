@@ -49,10 +49,10 @@ Plans:
   3. Voice rate limiting tracks actual voice requests (not chat messages) in DB fallback mode
   4. Demo chat endpoint has CSRF protection preventing cross-origin abuse
   5. Export rate limiting queries AuditLog entries when Redis is unavailable
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 22-01: Subscription enforcement and rate limit fixes
+- [ ] 22-01-PLAN.md — Subscription enforcement, rate limit DB fallback fixes, and demo CSRF protection (AUTH-01 through AUTH-05)
 
 ### Phase 23: Webhook Reliability
 **Goal**: Stripe webhook processing is idempotent, race-condition-free, and failure-resilient
