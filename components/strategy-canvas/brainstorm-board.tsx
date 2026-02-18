@@ -11,7 +11,7 @@ import {
 	Trash2,
 	X,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useCsrf } from "@/hooks/use-csrf";
 import { cn, generateUUID } from "@/lib/utils";
 import { CompactHeader } from "./compact-header";
@@ -37,11 +37,15 @@ const categories = [
 
 interface BrainstormBoardProps {
 	compact?: boolean;
+	refreshTrigger?: number;
 }
 
-export function BrainstormBoard({ compact = false }: BrainstormBoardProps) {
+export function BrainstormBoard({
+	compact = false,
+	refreshTrigger,
+}: BrainstormBoardProps) {
 	const { csrfFetch } = useCsrf();
-	const { data, setData, isSaving, isLoading, lastSaved } =
+	const { data, setData, isSaving, isLoading, lastSaved, refresh } =
 		useCanvasPersistence<BrainstormData>({
 			canvasType: "brainstorm",
 			defaultData: defaultBrainstormData,
@@ -60,6 +64,13 @@ export function BrainstormBoard({ compact = false }: BrainstormBoardProps) {
 
 	const [selectedCategory, setSelectedCategory] = useState(0);
 	const canvasRef = useRef<HTMLDivElement>(null);
+
+	// Refresh data when trigger changes
+	useEffect(() => {
+		if (refreshTrigger) {
+			refresh();
+		}
+	}, [refreshTrigger, refresh]);
 
 	const addNote = () => {
 		const newNote: StickyNoteType = {

@@ -200,7 +200,7 @@ export function SwotSlidePanel({
 									exit={{ opacity: 0, x: -10 }}
 									transition={{ duration: 0.15 }}
 								>
-									<SwotBoard compact key={refreshKey} />
+									<SwotBoard compact refreshTrigger={refreshKey} />
 								</motion.div>
 							)}
 							{activeCanvas === "bmc" && (
@@ -211,7 +211,7 @@ export function SwotSlidePanel({
 									exit={{ opacity: 0, x: -10 }}
 									transition={{ duration: 0.15 }}
 								>
-									<BusinessModelCanvas compact key={refreshKey} />
+									<BusinessModelCanvas compact refreshTrigger={refreshKey} />
 								</motion.div>
 							)}
 							{activeCanvas === "journey" && (
@@ -222,7 +222,7 @@ export function SwotSlidePanel({
 									exit={{ opacity: 0, x: -10 }}
 									transition={{ duration: 0.15 }}
 								>
-									<CustomerJourney compact key={refreshKey} />
+									<CustomerJourney compact refreshTrigger={refreshKey} />
 								</motion.div>
 							)}
 							{activeCanvas === "brainstorm" && (
@@ -233,7 +233,7 @@ export function SwotSlidePanel({
 									exit={{ opacity: 0, x: -10 }}
 									transition={{ duration: 0.15 }}
 								>
-									<BrainstormBoard compact key={refreshKey} />
+									<BrainstormBoard compact refreshTrigger={refreshKey} />
 								</motion.div>
 							)}
 						</AnimatePresence>

@@ -8,14 +8,8 @@ export function useMessages({
 }: {
 	status: UseChatHelpers<ChatMessage>["status"];
 }) {
-	const {
-		containerRef,
-		endRef,
-		isAtBottom,
-		scrollToBottom,
-		onViewportEnter,
-		onViewportLeave,
-	} = useScrollToBottom();
+	const { containerRef, endRef, isAtBottom, scrollToBottom } =
+		useScrollToBottom();
 
 	const [hasSentMessage, setHasSentMessage] = useState(false);
 
@@ -30,8 +24,6 @@ export function useMessages({
 		endRef,
 		isAtBottom,
 		scrollToBottom,
-		onViewportEnter,
-		onViewportLeave,
 		hasSentMessage,
 	};
 }

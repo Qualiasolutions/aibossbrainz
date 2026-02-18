@@ -21,6 +21,7 @@ interface UseCanvasPersistenceReturn<T> {
 	lastSaved: Date | null;
 	error: string | null;
 	saveNow: () => Promise<void>;
+	refresh: () => Promise<void>;
 }
 
 export function useCanvasPersistence<T>({
@@ -40,49 +41,45 @@ export function useCanvasPersistence<T>({
 	const isInitialLoadRef = useRef(true);
 	const abortControllerRef = useRef<AbortController | null>(null);
 
-	const doFetch = fetchFn ?? fetch;
+	// Use provided fetch function or default native fetch
+	const doFetch = fetchFn || fetch;
 
-	// Load saved canvas on mount
+	// Load/Refresh function
+	const refresh = useCallback(async () => {
+		// If we're already saving, don't interrupt with a load
+		// But if we're just idling, we can fetch
+
+		setIsLoading(true);
+
+		try {
+			const res = await doFetch(`/api/canvas?type=${canvasType}`);
+			if (res.ok) {
+				const canvas = await res.json();
+				if (canvas?.data) {
+					setCanvasId(canvas.id);
+					const loadedData = transformFromLoad
+						? transformFromLoad(canvas.data)
+						: (canvas.data as T);
+					setData(loadedData);
+				}
+			}
+		} catch (err) {
+			console.warn("[Canvas] Failed to load:", err);
+			setError("Failed to refresh canvas");
+		} finally {
+			setIsLoading(false);
+			setTimeout(() => {
+				isInitialLoadRef.current = false;
+			}, 500);
+		}
+	}, [canvasType, doFetch, transformFromLoad]);
+
+	// Initial load
 	useEffect(() => {
 		if (hasLoadedRef.current) return;
 		hasLoadedRef.current = true;
-
-		let mounted = true;
-
-		async function loadCanvas() {
-			try {
-				const res = await fetch(`/api/canvas?type=${canvasType}`);
-				if (!mounted) return;
-				if (res.ok) {
-					const canvas = await res.json();
-					if (!mounted) return;
-					if (canvas?.data) {
-						setCanvasId(canvas.id);
-						const loadedData = transformFromLoad
-							? transformFromLoad(canvas.data)
-							: (canvas.data as T);
-						setData(loadedData);
-					}
-				}
-			} catch (err) {
-				if (!mounted) return;
-				console.warn("[Canvas] Failed to load:", err);
-			} finally {
-				if (mounted) {
-					setIsLoading(false);
-					setTimeout(() => {
-						isInitialLoadRef.current = false;
-					}, 500);
-				}
-			}
-		}
-
-		loadCanvas();
-
-		return () => {
-			mounted = false;
-		};
-	}, [canvasType, transformFromLoad]);
+		refresh();
+	}, [refresh]);
 
 	// Cleanup abort controller on unmount
 	useEffect(() => {
@@ -201,5 +198,6 @@ export function useCanvasPersistence<T>({
 		lastSaved,
 		error,
 		saveNow,
+		refresh,
 	};
 }

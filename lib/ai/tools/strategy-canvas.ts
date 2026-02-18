@@ -187,7 +187,7 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 					section,
 					itemsAdded: items.length,
 					tab: tabNames[canvasType],
-					message: `Added ${items.length} item(s) to ${section} in the ${tabNames[canvasType]} tab. Continue populating other sections, then tell the user to visit /strategy-canvas.`,
+					message: `Added ${items.length} item(s) to ${section} in the ${tabNames[canvasType]} tab. The Strategy Canvas panel has been automatically opened to show these updates.`,
 				};
 			} catch (error) {
 				if (error instanceof ChatSDKError) {

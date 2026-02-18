@@ -10,7 +10,7 @@ import {
 	Plus,
 	X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCsrf } from "@/hooks/use-csrf";
 import { cn, generateUUID } from "@/lib/utils";
 import { CompactHeader } from "./compact-header";
@@ -79,11 +79,15 @@ const touchpointTypes = [
 
 interface CustomerJourneyProps {
 	compact?: boolean;
+	refreshTrigger?: number;
 }
 
-export function CustomerJourney({ compact = false }: CustomerJourneyProps) {
+export function CustomerJourney({
+	compact = false,
+	refreshTrigger,
+}: CustomerJourneyProps) {
 	const { csrfFetch } = useCsrf();
-	const { data, setData, isSaving, isLoading, lastSaved } =
+	const { data, setData, isSaving, isLoading, lastSaved, refresh } =
 		useCanvasPersistence<JourneyData>({
 			canvasType: "journey",
 			defaultData: defaultJourneyData,
@@ -111,6 +115,13 @@ export function CustomerJourney({ compact = false }: CustomerJourneyProps) {
 	const [expandedStages, setExpandedStages] = useState<Set<string>>(
 		new Set(["awareness"]),
 	);
+
+	// Refresh data when trigger changes
+	useEffect(() => {
+		if (refreshTrigger) {
+			refresh();
+		}
+	}, [refreshTrigger, refresh]);
 
 	const addTouchpoint = (stage: JourneyStage) => {
 		if (!newContent.trim()) return;

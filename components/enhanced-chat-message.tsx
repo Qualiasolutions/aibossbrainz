@@ -14,101 +14,82 @@ type EnhancedChatMessageProps = {
 };
 
 /**
- * Word-by-word typewriter with natural pacing.
- * Uses self-scheduling setTimeout that reads content from refs,
- * so rapid content updates (from AI SDK streaming) don't cancel the timer.
- * Instantly renders history-loaded messages. Gracefully finishes after stream ends.
+ * Word-by-word typewriter with natural pacing and scroll-stickiness awareness.
  */
 const TypewriterContent = memo(
 	({ content, isStreaming }: { content: string; isStreaming: boolean }) => {
-		const [displayedLength, setDisplayedLength] = useState(0);
+		const [displayedContent, setDisplayedContent] = useState("");
 		const contentRef = useRef(content);
 		const isStreamingRef = useRef(isStreaming);
 		const mountedWithStreamingRef = useRef(isStreaming);
 		const hasStreamedRef = useRef(false);
-		const displayedRef = useRef(0);
-		const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-		// Keep refs in sync during render
+		// Keep refs in sync
 		contentRef.current = content;
 		isStreamingRef.current = isStreaming;
 		if (isStreaming) hasStreamedRef.current = true;
 
-		// Self-scheduling tick: advances one word, then schedules next
-		const tick = useCallback(() => {
-			timerRef.current = null;
-
-			const text = contentRef.current;
-			const current = displayedRef.current;
-			const target = text.length;
-
-			// Caught up with available content
-			if (current >= target) {
-				// Still streaming — poll for new content
-				if (isStreamingRef.current) {
-					timerRef.current = setTimeout(tick, 30);
-				}
+		// Effect to handle the typewriter animation
+		useEffect(() => {
+			// If we're staring from history (not streaming), show immediately
+			if (!hasStreamedRef.current && !mountedWithStreamingRef.current) {
+				setDisplayedContent(content);
 				return;
 			}
 
-			const streaming = isStreamingRef.current;
-			const gap = target - current;
-			const wordsPerTick = !streaming && gap > 300 ? 3 : 1;
+			let animationFrameId: number;
+			let lastUpdateTime = 0;
+			const UPDATE_INTERVAL = 16; // ~60fps target
 
-			// Advance to next word boundary
-			let pos = current;
-			for (let w = 0; w < wordsPerTick && pos < target; w++) {
-				while (pos < target && /\s/.test(text[pos])) pos++;
-				while (pos < target && !/\s/.test(text[pos])) pos++;
-			}
-			const next = Math.min(pos > current ? pos : current + 1, target);
+			const update = (timestamp: number) => {
+				if (timestamp - lastUpdateTime < UPDATE_INTERVAL) {
+					animationFrameId = requestAnimationFrame(update);
+					return;
+				}
 
-			displayedRef.current = next;
-			setDisplayedLength(next);
+				setDisplayedContent((current) => {
+					// Logic to advance the cursor:
+					// If we are far behind, jump 3-5 chars per frame
+					// If we are close, do 1 char per frame
+					if (current === contentRef.current) return current;
 
-			// Schedule next word
-			const delay = streaming ? 110 : 35;
-			timerRef.current = setTimeout(tick, delay);
-		}, []);
+					const remaining = contentRef.current.length - current.length;
+					if (remaining <= 0) return contentRef.current;
 
-		// History mode: show instantly (no animation)
+					// Adaptive speed: faster if further behind
+					const chunk = remaining > 50 ? 5 : remaining > 20 ? 3 : 1;
+					const nextContent = contentRef.current.slice(
+						0,
+						current.length + chunk,
+					);
+
+					// Force scroll update (handled by ResizeObserver in hook, but this triggers layout)
+					lastUpdateTime = timestamp;
+					return nextContent;
+				});
+
+				if (
+					isStreamingRef.current ||
+					displayedContent.length < contentRef.current.length
+				) {
+					animationFrameId = requestAnimationFrame(update);
+				}
+			};
+
+			animationFrameId = requestAnimationFrame(update);
+
+			return () => {
+				cancelAnimationFrame(animationFrameId);
+			};
+		}, []); // Empty dependency array - the loop handles updates via refs
+
+		// Catch-up effect when content changes
 		useEffect(() => {
-			if (!hasStreamedRef.current && !mountedWithStreamingRef.current) {
-				displayedRef.current = content.length;
-				setDisplayedLength(content.length);
-			}
+			// This just ensures the loop above has fresh data via refs
+			// We don't restart the loop here to avoid jank
 		}, [content]);
 
-		// Start tick when new content arrives and timer isn't running
-		useEffect(() => {
-			if (!hasStreamedRef.current) return;
-			if (timerRef.current) return;
-			if (content.length <= displayedRef.current) return;
-			tick();
-		}, [content.length, tick]);
-
-		// Kick catch-up when streaming ends with unrevealed content
-		useEffect(() => {
-			if (
-				!isStreaming &&
-				hasStreamedRef.current &&
-				!timerRef.current &&
-				displayedRef.current < contentRef.current.length
-			) {
-				tick();
-			}
-		}, [isStreaming, tick]);
-
-		// Cleanup on unmount only
-		useEffect(
-			() => () => {
-				if (timerRef.current) clearTimeout(timerRef.current);
-			},
-			[],
-		);
-
-		const displayedContent = content.slice(0, displayedLength);
-		const isRevealing = displayedLength < content.length;
+		const isRevealing = displayedContent.length < content.length;
 
 		return (
 			<div className="message-text prose prose-stone max-w-none text-stone-700 selection:bg-rose-100 selection:text-rose-900">
@@ -118,7 +99,9 @@ const TypewriterContent = memo(
 				>
 					{displayedContent}
 				</Response>
-				{isRevealing && <span className="streaming-cursor" />}
+				{isRevealing && (
+					<span className="inline-block h-[1em] w-[0.5em] animate-pulse bg-stone-400 align-middle ml-1" />
+				)}
 			</div>
 		);
 	},

@@ -9,7 +9,7 @@ import {
 	Loader2,
 	Plus,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCsrf } from "@/hooks/use-csrf";
 import { cn, generateUUID } from "@/lib/utils";
 import { CompactHeader } from "./compact-header";
@@ -92,13 +92,15 @@ const defaultData: BusinessModelData = {
 
 interface BusinessModelCanvasProps {
 	compact?: boolean;
+	refreshTrigger?: number;
 }
 
 export function BusinessModelCanvas({
 	compact = false,
+	refreshTrigger,
 }: BusinessModelCanvasProps) {
 	const { csrfFetch } = useCsrf();
-	const { data, setData, isSaving, isLoading, lastSaved } =
+	const { data, setData, isSaving, isLoading, lastSaved, refresh } =
 		useCanvasPersistence<BusinessModelData>({
 			canvasType: "bmc",
 			defaultData,
@@ -107,6 +109,13 @@ export function BusinessModelCanvas({
 	const [expandedSections, setExpandedSections] = useState<Set<string>>(
 		new Set(["valuePropositions"]),
 	);
+
+	// Refresh data when trigger changes
+	useEffect(() => {
+		if (refreshTrigger) {
+			refresh();
+		}
+	}, [refreshTrigger, refresh]);
 
 	const addNote = (section: keyof BusinessModelData, color: NoteColor) => {
 		const newNote: StickyNoteType = {

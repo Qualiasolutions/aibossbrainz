@@ -10,7 +10,7 @@ import {
 	Loader2,
 	Plus,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCsrf } from "@/hooks/use-csrf";
 import { cn, generateUUID } from "@/lib/utils";
 import { CompactHeader } from "./compact-header";
@@ -58,11 +58,12 @@ const defaultData: SwotData = {
 
 interface SwotBoardProps {
 	compact?: boolean;
+	refreshTrigger?: number;
 }
 
-export function SwotBoard({ compact = false }: SwotBoardProps) {
+export function SwotBoard({ compact = false, refreshTrigger }: SwotBoardProps) {
 	const { csrfFetch } = useCsrf();
-	const { data, setData, isSaving, isLoading, lastSaved } =
+	const { data, setData, isSaving, isLoading, lastSaved, refresh } =
 		useCanvasPersistence<SwotData>({
 			canvasType: "swot",
 			defaultData,
@@ -72,6 +73,13 @@ export function SwotBoard({ compact = false }: SwotBoardProps) {
 	const [expandedQuadrants, setExpandedQuadrants] = useState<Set<string>>(
 		new Set(["strengths"]),
 	);
+
+	// Refresh data when trigger changes
+	useEffect(() => {
+		if (refreshTrigger) {
+			refresh();
+		}
+	}, [refreshTrigger, refresh]);
 
 	const addNote = (quadrant: keyof SwotData, color: NoteColor) => {
 		const newNote: StickyNoteType = {
