@@ -4,6 +4,7 @@ import { generateText, type UIMessage } from "ai";
 import { cookies } from "next/headers";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { myProvider } from "@/lib/ai/providers";
+import { logger } from "@/lib/logger";
 import {
 	deleteMessagesByChatIdAfterTimestamp,
 	getChatById,
@@ -38,7 +39,7 @@ export async function generateTitleFromUserMessage({
 			return title;
 		});
 	} catch (error) {
-		console.warn("Title generation failed, using fallback:", error);
+		logger.warn({ err: error }, "Title generation failed, using fallback");
 		return "New conversation";
 	}
 }
@@ -55,9 +56,7 @@ export async function deleteTrailingMessages({ id }: { id: string }) {
 	const [message] = await getMessageById({ id });
 
 	if (!message) {
-		console.warn(
-			`Message with id ${id} not found for deletion of trailing messages`,
-		);
+		logger.warn({ messageId: id }, "Message not found for deletion of trailing messages");
 		return;
 	}
 

@@ -6,6 +6,7 @@ import {
 	saveStrategyCanvas,
 } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -58,7 +59,7 @@ export async function GET(request: Request) {
 		const canvases = await getAllUserCanvases({ userId: user.id });
 		return Response.json(canvases);
 	} catch (error) {
-		console.error("[Canvas API] GET error:", error);
+		logger.error({ err: error }, "Canvas API GET error");
 		return new ChatSDKError("bad_request:database").toResponse();
 	}
 }
@@ -104,7 +105,7 @@ export const POST = withCsrf(async (request: Request) => {
 
 		return Response.json({ id, success: true });
 	} catch (error) {
-		console.error("[Canvas API] POST error:", error);
+		logger.error({ err: error }, "Canvas API POST error");
 		return new ChatSDKError("bad_request:database").toResponse();
 	}
 });
@@ -131,7 +132,7 @@ export const DELETE = withCsrf(async (request: Request) => {
 		await deleteStrategyCanvas({ userId: user.id, canvasId });
 		return Response.json({ success: true });
 	} catch (error) {
-		console.error("[Canvas API] DELETE error:", error);
+		logger.error({ err: error }, "Canvas API DELETE error");
 		return new ChatSDKError("bad_request:database").toResponse();
 	}
 });

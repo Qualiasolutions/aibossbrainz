@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isUserAdmin } from "@/lib/admin/queries";
+import { logger } from "@/lib/logger";
 import { applyTrialTags } from "@/lib/mailchimp/tags";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
@@ -46,10 +47,7 @@ export const POST = withCsrf(async () => {
 		.is("deletedAt", null);
 
 	if (queryError) {
-		console.error(
-			"[Mailchimp Backfill] Failed to query trial users:",
-			queryError,
-		);
+		logger.error({ err: queryError }, "Mailchimp backfill failed to query trial users");
 		return NextResponse.json(
 			{ error: "Failed to query users" },
 			{ status: 500 },
@@ -100,9 +98,7 @@ export const POST = withCsrf(async () => {
 		await new Promise((resolve) => setTimeout(resolve, 400));
 	}
 
-	console.log(
-		`[Mailchimp Backfill] Completed: ${results.success}/${results.total} users tagged`,
-	);
+	logger.info({ success: results.success, total: results.total }, "Mailchimp backfill completed");
 
 	return NextResponse.json(results);
 });

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { addMessageToTicket } from "@/lib/db/support-queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,7 +48,7 @@ export const POST = withCsrf(
 			if (error instanceof ChatSDKError) {
 				return error.toResponse();
 			}
-			console.error("Error adding message:", error);
+			logger.error({ err: error }, "Failed to add support message");
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 	},

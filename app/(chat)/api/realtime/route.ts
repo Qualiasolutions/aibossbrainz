@@ -6,6 +6,7 @@ import { myProvider } from "@/lib/ai/providers";
 import { getVoiceConfig } from "@/lib/ai/voice-config";
 import { apiRequestLogger } from "@/lib/api-logging";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import {
 	CircuitBreakerError,
 	withAIGatewayResilience,
@@ -146,7 +147,7 @@ export const POST = withCsrf(async (request: Request) => {
 					audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
 				}
 			} catch (error) {
-				console.error("TTS error:", error);
+				logger.error({ err: error }, "TTS error in realtime route");
 				// Continue without audio
 			}
 		}

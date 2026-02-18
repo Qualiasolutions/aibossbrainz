@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import { systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
+import { logger } from "@/lib/logger";
 import {
 	getVoiceConfig,
 	MAX_TTS_TEXT_LENGTH,
@@ -86,7 +87,7 @@ async function generateAudioForSegment(
 			clearTimeout(timeoutId);
 
 			if (!res.ok) {
-				console.error("ElevenLabs API error:", res.status, res.statusText);
+				logger.error({ status: res.status, statusText: res.statusText }, "ElevenLabs API error");
 				if (res.status === 401) {
 					throw new Error("INVALID_API_KEY");
 				}
@@ -274,7 +275,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 					}
 				}
 			} catch (error) {
-				console.error("TTS error:", error);
+				logger.error({ err: error }, "TTS error during realtime stream");
 				// Continue without audio
 			}
 		}
@@ -304,7 +305,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 				});
 
 				if (insertError) {
-					console.error("Failed to create voice call chat:", insertError);
+					logger.error({ err: insertError, chatId }, "Failed to create voice call chat");
 				} else {
 					savedChatId = chatId;
 				}
@@ -339,7 +340,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 				await saveMessages({ messages });
 			}
 		} catch (saveError) {
-			console.error("Failed to save voice call messages:", saveError);
+			logger.error({ err: saveError, chatId: savedChatId }, "Failed to save voice call messages");
 		}
 
 		apiLog.success({ botType, hasAudio: !!audioUrl, chatId: savedChatId });

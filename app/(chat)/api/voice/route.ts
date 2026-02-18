@@ -1,6 +1,7 @@
 import { after } from "next/server";
 import { z } from "zod";
 import { getVoiceConfig, MAX_TTS_TEXT_LENGTH } from "@/lib/ai/voice-config";
+import { logger } from "@/lib/logger";
 import { recordAnalytics } from "@/lib/analytics/queries";
 import { apiRequestLogger } from "@/lib/api-logging";
 import { getMessageCountByUserId } from "@/lib/db/queries";
@@ -97,7 +98,7 @@ export const POST = withCsrf(async (request: Request) => {
 		const apiKey = process.env.ELEVENLABS_API_KEY;
 
 		if (!apiKey) {
-			console.error("[Voice API] ELEVENLABS_API_KEY not found in environment");
+			logger.error("ELEVENLABS_API_KEY not found in environment");
 			return Response.json(
 				{ error: "Voice service not configured" },
 				{ status: 503 },
@@ -212,7 +213,7 @@ export const POST = withCsrf(async (request: Request) => {
 				clearTimeout(timeoutId);
 
 				if (!res.ok) {
-					console.error("ElevenLabs API error:", res.status, res.statusText);
+					logger.error({ status: res.status, statusText: res.statusText }, "ElevenLabs API error");
 					if (res.status === 401) {
 						throw new Error("INVALID_API_KEY");
 					}
@@ -323,7 +324,7 @@ async function generateAudioForSegment(
 			clearTimeout(timeoutId);
 
 			if (!res.ok) {
-				console.error("ElevenLabs API error:", res.status, res.statusText);
+				logger.error({ status: res.status, statusText: res.statusText }, "ElevenLabs API error");
 				if (res.status === 401) {
 					throw new Error("INVALID_API_KEY");
 				}

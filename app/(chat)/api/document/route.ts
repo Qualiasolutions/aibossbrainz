@@ -5,6 +5,7 @@ import {
 	saveDocument,
 } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 
@@ -54,7 +55,7 @@ export async function GET(request: Request) {
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("Document GET error:", error);
+		logger.error({ err: error }, "Document GET error");
 		return new ChatSDKError(
 			"bad_request:document",
 			"Failed to fetch document",
@@ -114,7 +115,7 @@ export const POST = withCsrf(async (request: Request) => {
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("Document POST error:", error);
+		logger.error({ err: error }, "Document POST error");
 		return new ChatSDKError(
 			"bad_request:document",
 			"Failed to save document",
@@ -173,7 +174,7 @@ export const DELETE = withCsrf(async (request: Request) => {
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("Document DELETE error:", error);
+		logger.error({ err: error }, "Document DELETE error");
 		return new ChatSDKError(
 			"bad_request:document",
 			"Failed to delete document",

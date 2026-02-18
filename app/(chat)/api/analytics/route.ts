@@ -5,6 +5,7 @@ import {
 	getTopicBreakdown,
 } from "@/lib/analytics/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -51,7 +52,7 @@ export async function GET(request: Request) {
 			},
 		);
 	} catch (error) {
-		console.error("Analytics API error:", error);
+		logger.error({ err: error }, "Analytics API error");
 
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();

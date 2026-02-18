@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { deleteAllChatsByUserId, getChatsByUserId } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,9 +35,7 @@ export async function GET(request: NextRequest) {
 
 		// More explicit session validation
 		if (!user?.id) {
-			console.warn(
-				"[API /history] Unauthorized access attempt - no user session",
-			);
+			logger.warn("History API unauthorized access attempt - no user session");
 			return new ChatSDKError("unauthorized:chat").toResponse();
 		}
 
@@ -59,7 +58,7 @@ export async function GET(request: NextRequest) {
 			stack: error instanceof Error ? error.stack : undefined,
 			timestamp: new Date().toISOString(),
 		};
-		console.error("[API /history] GET error:", errorDetails);
+		logger.error({ err: error }, "History API GET error");
 
 		return new ChatSDKError(
 			"bad_request:api",
@@ -86,7 +85,7 @@ export const DELETE = withCsrf(async () => {
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("History DELETE error:", error);
+		logger.error({ err: error }, "History DELETE error");
 		return new ChatSDKError(
 			"bad_request:api",
 			"Failed to delete chat history",

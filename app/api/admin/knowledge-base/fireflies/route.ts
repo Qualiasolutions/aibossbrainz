@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isUserAdmin } from "@/lib/admin/queries";
 import { clearKnowledgeBaseCache } from "@/lib/ai/knowledge-base";
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
@@ -177,11 +178,7 @@ export const POST = withCsrf(async (request: Request) => {
 
     if (!response.ok) {
       const text = await response.text();
-      console.error(
-        "[Fireflies] API error:",
-        response.status,
-        text,
-      );
+      logger.error({ status: response.status, responseBody: text, transcriptId }, "Fireflies API error");
       return NextResponse.json(
         {
           error: `Fireflies API returned ${response.status}`,
@@ -193,7 +190,7 @@ export const POST = withCsrf(async (request: Request) => {
     const data = await response.json();
 
     if (data.errors) {
-      console.error("[Fireflies] GraphQL errors:", data.errors);
+      logger.error({ errors: data.errors, transcriptId }, "Fireflies GraphQL errors");
       return NextResponse.json(
         {
           error: `Fireflies API error: ${data.errors[0]?.message || "Unknown error"}`,
@@ -211,7 +208,7 @@ export const POST = withCsrf(async (request: Request) => {
 
     transcript = data.data.transcript;
   } catch (err) {
-    console.error("[Fireflies] Fetch error:", err);
+    logger.error({ err, transcriptId }, "Fireflies fetch error");
     return NextResponse.json(
       { error: "Failed to connect to Fireflies API" },
       { status: 502 },
@@ -258,7 +255,7 @@ export const POST = withCsrf(async (request: Request) => {
       );
     }
 
-    console.error("[Knowledge Base] Insert error:", insertError);
+    logger.error({ err: insertError, transcriptId, botType }, "Knowledge base insert error");
     return NextResponse.json(
       { error: "Failed to store transcript" },
       { status: 500 },

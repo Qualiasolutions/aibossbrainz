@@ -1,5 +1,6 @@
 import { createAuditLog, ensureUserExists } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,7 +26,7 @@ export const POST = withCsrf(async (request) => {
 		.eq("id", user.id);
 
 	if (error) {
-		console.error("Failed to update TOS acceptance:", error);
+		logger.error({ err: error }, "Failed to update TOS acceptance");
 		return new ChatSDKError(
 			"bad_request:database",
 			"Failed to accept Terms of Service",
@@ -72,7 +73,7 @@ export async function GET() {
 	}
 
 	if (error) {
-		console.error("Failed to get TOS acceptance status:", error);
+		logger.error({ err: error }, "Failed to get TOS acceptance status");
 		return new ChatSDKError(
 			"bad_request:database",
 			"Failed to get Terms of Service status",

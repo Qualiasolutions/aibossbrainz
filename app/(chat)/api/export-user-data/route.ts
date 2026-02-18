@@ -5,6 +5,7 @@ import {
 	logAuditWithRequest,
 } from "@/lib/audit/logger";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import {
 	checkRateLimit,
 	getRateLimitHeaders,
@@ -234,7 +235,7 @@ export async function GET(request: Request) {
 			},
 		});
 	} catch (error) {
-		console.error("[GDPR Export] Error exporting user data:", error);
+		logger.error({ err: error }, "GDPR export error");
 
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();

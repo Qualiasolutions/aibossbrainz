@@ -3,6 +3,7 @@ import {
 	updateTicketStatus,
 } from "@/lib/db/support-queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 import type { TicketStatus } from "@/lib/supabase/types";
@@ -32,7 +33,7 @@ export async function GET(
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("Error getting ticket:", error);
+		logger.error({ err: error }, "Failed to get ticket");
 		return new ChatSDKError("bad_request:api").toResponse();
 	}
 }
@@ -76,7 +77,7 @@ export const PATCH = withCsrf(
 			if (error instanceof ChatSDKError) {
 				return error.toResponse();
 			}
-			console.error("Error updating ticket:", error);
+			logger.error({ err: error }, "Failed to update ticket");
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 	},

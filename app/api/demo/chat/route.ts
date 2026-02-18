@@ -7,6 +7,7 @@ import {
 import { headers } from "next/headers";
 import { z } from "zod";
 import { myProvider } from "@/lib/ai/providers";
+import { logger } from "@/lib/logger";
 import type { BotType } from "@/lib/bot-personalities";
 import { getSystemPrompt } from "@/lib/bot-personalities";
 import { isProductionEnvironment } from "@/lib/constants";
@@ -154,7 +155,7 @@ export async function POST(request: Request) {
 			},
 		});
 	} catch (error) {
-		console.error("[Demo Chat API] Error:", error);
+		logger.error({ err: error }, "Demo chat API error");
 
 		if (error instanceof z.ZodError) {
 			return Response.json(

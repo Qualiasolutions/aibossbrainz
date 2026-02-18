@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createPortalSession } from "@/lib/stripe/actions";
 import { getValidAppUrl } from "@/lib/stripe/url";
@@ -24,7 +25,7 @@ export const POST = withCsrf(async (request: Request) => {
 
 		return NextResponse.json({ url: portalUrl });
 	} catch (error) {
-		console.error("[Stripe Portal] Error:", error);
+		logger.error({ err: error }, "Stripe portal session error");
 
 		return NextResponse.json(
 			{ error: "Failed to create portal session" },

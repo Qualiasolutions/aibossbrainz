@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import {
 	generateCsrfToken,
 	getCsrfToken,
@@ -44,7 +45,7 @@ export async function GET() {
 		return response;
 	} catch (error) {
 		// Log but don't expose internal errors - generate a new token as fallback
-		console.error("CSRF token error:", error);
+		logger.error({ err: error }, "CSRF token error");
 
 		// Fallback: generate token without checking existing cookie
 		try {
@@ -59,7 +60,7 @@ export async function GET() {
 			});
 			return response;
 		} catch (fallbackError) {
-			console.error("CSRF fallback failed:", fallbackError);
+			logger.error({ err: fallbackError }, "CSRF fallback failed");
 			return NextResponse.json(
 				{ error: "Failed to generate CSRF token" },
 				{ status: 500 },

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { safeParseJson } from "@/lib/api-utils";
 import { getChatById, getVotesByChatId, voteMessage } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,7 +48,7 @@ export async function GET(request: Request) {
 
 		return Response.json(votes, { status: 200 });
 	} catch (error) {
-		console.error("Vote GET error:", error);
+		logger.error({ err: error }, "Vote GET error");
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
@@ -98,7 +99,7 @@ export const PATCH = withCsrf(async (request: Request) => {
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("Failed to vote:", error);
+		logger.error({ err: error }, "Failed to vote");
 		return new ChatSDKError("bad_request:api", "Failed to vote").toResponse();
 	}
 });

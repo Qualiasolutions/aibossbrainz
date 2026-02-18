@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createSupportTicket, getUserTickets } from "@/lib/db/support-queries";
 import { sendTicketNotificationEmail } from "@/lib/email/support-notifications";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,7 +32,7 @@ export async function GET() {
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("Error getting tickets:", error);
+		logger.error({ err: error }, "Failed to get support tickets");
 		return new ChatSDKError("bad_request:api").toResponse();
 	}
 }
@@ -71,7 +72,7 @@ export const POST = withCsrf(async (request: Request) => {
 			message: message.trim(),
 			userEmail: user.email || "unknown",
 		}).catch((err) => {
-			console.error("Failed to send ticket notification email:", err);
+			logger.error({ err }, "Failed to send ticket notification email");
 		});
 
 		return Response.json(ticket, { status: 201 });
@@ -79,7 +80,7 @@ export const POST = withCsrf(async (request: Request) => {
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("Error creating ticket:", error);
+		logger.error({ err: error }, "Failed to create support ticket");
 		return new ChatSDKError("bad_request:api").toResponse();
 	}
 });

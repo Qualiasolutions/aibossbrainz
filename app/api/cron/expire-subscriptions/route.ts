@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { expireSubscriptions } from "@/lib/admin/queries";
+import { logger } from "@/lib/logger";
 
 // Vercel Cron: This endpoint is called by Vercel Cron jobs to expire subscriptions
 // Configure in vercel.json with schedule: "0 0 * * *" (daily at midnight UTC)
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
 	try {
 		const expiredUsers = await expireSubscriptions();
 
-		console.log(`[Cron] Expired ${expiredUsers?.length || 0} subscriptions`);
+		logger.info({ expiredCount: expiredUsers?.length || 0 }, "Cron expired subscriptions");
 
 		return NextResponse.json({
 			success: true,
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error("[Cron] Error expiring subscriptions:", error);
+		logger.error({ err: error }, "Cron error expiring subscriptions");
 		return NextResponse.json(
 			{ error: "Failed to expire subscriptions" },
 			{ status: 500 },

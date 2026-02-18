@@ -1,4 +1,5 @@
 import { safeParseJson } from "@/lib/api-utils";
+import { logger } from "@/lib/logger";
 import {
 	addMessageReaction,
 	getMessageReactionCounts,
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
 			});
 			return Response.json({ items });
 		} catch (error) {
-			console.error("Failed to get reactions by type:", error);
+			logger.error({ err: error, reactionType }, "Failed to get reactions by type");
 			return new Response("Failed to get reactions", { status: 500 });
 		}
 	}
@@ -71,7 +72,7 @@ export async function GET(request: Request) {
 			reactionCounts,
 		});
 	} catch (error) {
-		console.error("Failed to get reactions:", error);
+		logger.error({ err: error, messageId }, "Failed to get reactions");
 		return new Response("Failed to get reactions", { status: 500 });
 	}
 }
@@ -144,7 +145,7 @@ export const POST = withCsrf(async (request: Request) => {
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("Failed to add reaction:", error);
+		logger.error({ err: error }, "Failed to add reaction");
 		return new ChatSDKError(
 			"bad_request:api",
 			"Failed to add reaction",
@@ -186,7 +187,7 @@ export const DELETE = withCsrf(async (request: Request) => {
 		if (error instanceof ChatSDKError) {
 			return error.toResponse();
 		}
-		console.error("Failed to remove reaction:", error);
+		logger.error({ err: error }, "Failed to remove reaction");
 		return new ChatSDKError(
 			"bad_request:api",
 			"Failed to remove reaction",

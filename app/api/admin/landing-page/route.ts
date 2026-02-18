@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isUserAdmin } from "@/lib/admin/queries";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import type {
@@ -20,7 +21,7 @@ export async function GET() {
 		.order("key");
 
 	if (error) {
-		console.error("[Landing Page CMS] Error fetching content:", error);
+		logger.error({ err: error }, "Landing page CMS fetch error");
 		return NextResponse.json(
 			{ error: "Failed to fetch content" },
 			{ status: 500 },
@@ -86,7 +87,7 @@ export const PATCH = withCsrf(async (request: Request) => {
 		.single();
 
 	if (error) {
-		console.error("[Landing Page CMS] Error updating content:", error);
+		logger.error({ err: error, section, key }, "Landing page CMS update error");
 		return NextResponse.json(
 			{ error: "Failed to update content" },
 			{ status: 500 },
