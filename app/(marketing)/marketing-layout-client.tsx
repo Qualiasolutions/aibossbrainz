@@ -64,9 +64,9 @@ function Header({
 							<Image
 								src={content.header.logo_url}
 								alt="AI Boss Brainz"
-								width={160}
-								height={40}
-								className="h-8 w-auto transition-opacity group-hover:opacity-90 sm:h-10"
+								width={200}
+								height={60}
+								className="h-10 w-auto transition-opacity group-hover:opacity-90 sm:h-12"
 							/>
 						</motion.div>
 					</Link>
@@ -181,9 +181,9 @@ function Footer({ content }: { content: LandingPageCMSContent }) {
 							<Image
 								src={content.header.logo_url}
 								alt="AI Boss Brainz"
-								width={120}
-								height={32}
-								className="h-8 w-auto mb-4"
+								width={160}
+								height={48}
+								className="h-10 w-auto mb-4"
 							/>
 						</Link>
 						<p className="max-w-xs text-sm text-stone-600 leading-relaxed">

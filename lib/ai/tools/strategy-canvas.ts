@@ -197,7 +197,10 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 							"Database error while saving canvas data. Please try again.",
 					};
 				}
-				logger.error({ err: error, section, canvasType }, "Strategy canvas unexpected error");
+				logger.error(
+					{ err: error, section, canvasType },
+					"Strategy canvas unexpected error",
+				);
 				return {
 					success: false,
 					message:

@@ -100,7 +100,7 @@ export function AppSidebar({
 									whileTap={{ scale: 0.98 }}
 								>
 									<Image
-										src="/images/AM_Logo_Horizontal_4C+(1).webp"
+										src="/images/alecci-media-logo.webp"
 										alt="Alecci Media"
 										width={160}
 										height={50}
@@ -200,7 +200,7 @@ export function AppSidebar({
 									onClick={handleNewChat}
 								>
 									<Image
-										src="/images/AM_Logo_Horizontal_4C+(1).webp"
+										src="/images/alecci-media-logo.webp"
 										alt="Alecci Media"
 										width={140}
 										height={45}

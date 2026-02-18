@@ -77,8 +77,7 @@ function extractUserId(event: Stripe.Event): string | null {
 	switch (event.type) {
 		case "checkout.session.completed": {
 			return (
-				(event.data.object as Stripe.Checkout.Session).metadata?.userId ??
-				null
+				(event.data.object as Stripe.Checkout.Session).metadata?.userId ?? null
 			);
 		}
 		case "customer.subscription.created":
@@ -195,7 +194,11 @@ export async function POST(request: Request) {
 									trialEndDate,
 								});
 								reqLog.info(
-									{ userId, subscriptionType, eventType: "checkout.session.completed" },
+									{
+										userId,
+										subscriptionType,
+										eventType: "checkout.session.completed",
+									},
 									"Started trial via checkout",
 								);
 
@@ -227,7 +230,11 @@ export async function POST(request: Request) {
 								stripeSubscriptionId: subscription.id,
 							});
 							reqLog.info(
-								{ userId, subscriptionType, eventType: "checkout.session.completed" },
+								{
+									userId,
+									subscriptionType,
+									eventType: "checkout.session.completed",
+								},
 								"Subscription activated via checkout",
 							);
 
@@ -285,10 +292,7 @@ export async function POST(request: Request) {
 							stripeSubscriptionId: subscription.id,
 							trialEndDate,
 						});
-						reqLog.info(
-							{ userId, subscriptionType },
-							"Started 14-day trial",
-						);
+						reqLog.info({ userId, subscriptionType }, "Started 14-day trial");
 
 						// Apply Mailchimp trial tag + send email (non-blocking)
 						after(async () => {
@@ -316,10 +320,7 @@ export async function POST(request: Request) {
 							subscriptionType,
 							stripeSubscriptionId: subscription.id,
 						});
-						reqLog.info(
-							{ userId, subscriptionType },
-							"Subscription activated",
-						);
+						reqLog.info({ userId, subscriptionType }, "Subscription activated");
 
 						// Apply Mailchimp paid tag (non-blocking)
 						after(async () => {
@@ -508,10 +509,7 @@ export async function POST(request: Request) {
 			// Handle failed payment
 			case "invoice.payment_failed": {
 				const invoice = event.data.object as Stripe.Invoice;
-				reqLog.warn(
-					{ invoiceId: invoice.id },
-					"Payment failed",
-				);
+				reqLog.warn({ invoiceId: invoice.id }, "Payment failed");
 				break;
 			}
 

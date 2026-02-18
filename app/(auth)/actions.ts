@@ -184,7 +184,10 @@ export const requestPasswordReset = async (
 		// Check rate limit (3 attempts per 15 minutes per IP for password reset)
 		const rateLimit = await checkAuthRateLimit(ip, "reset", 3);
 		if (!rateLimit.allowed) {
-			logger.warn({ ip, action: "reset" }, "Password reset rate limit exceeded");
+			logger.warn(
+				{ ip, action: "reset" },
+				"Password reset rate limit exceeded",
+			);
 			return { status: "success" }; // Always return success to prevent email enumeration
 		}
 

@@ -20,7 +20,10 @@ export function getValidAppUrl(request?: Request): string {
 			const parsed = new URL(envUrl);
 			return `${parsed.protocol}//${parsed.host}`;
 		} catch {
-			logger.error({ envUrl }, "Invalid NEXT_PUBLIC_APP_URL, using production fallback");
+			logger.error(
+				{ envUrl },
+				"Invalid NEXT_PUBLIC_APP_URL, using production fallback",
+			);
 			return PRODUCTION_URL;
 		}
 	}

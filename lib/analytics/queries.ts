@@ -243,7 +243,10 @@ export async function recordAnalytics(
 			p_export_count: type === "export" ? value : 0,
 		});
 	} catch (error) {
-		logger.error({ err: error, userId, type, value }, "Failed to record analytics");
+		logger.error(
+			{ err: error, userId, type, value },
+			"Failed to record analytics",
+		);
 		// Don't throw - analytics recording shouldn't break the main flow
 	}
 }

@@ -70,7 +70,9 @@ export async function GET(request: Request) {
 		} else {
 			// SECURITY: Redis unavailable - verify via AuditLog (fail closed)
 			const supabaseService = createServiceClient();
-			const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+			const cutoffTime = new Date(
+				Date.now() - 24 * 60 * 60 * 1000,
+			).toISOString();
 			const { count, error } = await supabaseService
 				.from("AuditLog")
 				.select("*", { count: "exact", head: true })

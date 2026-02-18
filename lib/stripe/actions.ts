@@ -45,7 +45,10 @@ export async function getOrCreateStripeCustomer(
 		.eq("id", userId);
 
 	if (error) {
-		logger.error({ err: error, userId }, "Failed to save Stripe customer ID to database");
+		logger.error(
+			{ err: error, userId },
+			"Failed to save Stripe customer ID to database",
+		);
 		throw new Error("Failed to save Stripe customer ID");
 	}
 
@@ -197,7 +200,10 @@ export async function startTrial({
 		.eq("id", userId);
 
 	if (error) {
-		logger.error({ err: error, userId, subscriptionType, stripeSubscriptionId }, "startTrial DB update failed");
+		logger.error(
+			{ err: error, userId, subscriptionType, stripeSubscriptionId },
+			"startTrial DB update failed",
+		);
 		throw new Error(
 			`Failed to start trial for user ${userId}: ${error.message}`,
 		);
@@ -240,7 +246,10 @@ export async function activateSubscription({
 		.eq("id", userId);
 
 	if (error) {
-		logger.error({ err: error, userId, subscriptionType, stripeSubscriptionId }, "activateSubscription DB update failed");
+		logger.error(
+			{ err: error, userId, subscriptionType, stripeSubscriptionId },
+			"activateSubscription DB update failed",
+		);
 		throw new Error(
 			`Failed to activate subscription for user ${userId}: ${error.message}`,
 		);
@@ -273,7 +282,10 @@ export async function cancelSubscription(userId: string): Promise<void> {
 		.eq("id", userId);
 
 	if (error) {
-		logger.error({ err: error, userId }, "Failed to update cancellation status");
+		logger.error(
+			{ err: error, userId },
+			"Failed to update cancellation status",
+		);
 		throw new Error(
 			`Failed to cancel subscription for user ${userId}: ${error.message}`,
 		);
@@ -292,7 +304,10 @@ export async function renewSubscription({
 }): Promise<void> {
 	// Validate the date is valid before proceeding
 	if (!(periodEnd instanceof Date) || Number.isNaN(periodEnd.getTime())) {
-		logger.error({ periodEnd: String(periodEnd), stripeSubscriptionId }, "renewSubscription received invalid periodEnd date");
+		logger.error(
+			{ periodEnd: String(periodEnd), stripeSubscriptionId },
+			"renewSubscription received invalid periodEnd date",
+		);
 		return;
 	}
 
@@ -307,7 +322,10 @@ export async function renewSubscription({
 		.eq("stripeSubscriptionId", stripeSubscriptionId);
 
 	if (error) {
-		logger.error({ err: error, stripeSubscriptionId }, "renewSubscription DB update failed");
+		logger.error(
+			{ err: error, stripeSubscriptionId },
+			"renewSubscription DB update failed",
+		);
 		throw new Error(
 			`Failed to renew subscription ${stripeSubscriptionId}: ${error.message}`,
 		);
@@ -331,7 +349,10 @@ export async function expireSubscription(
 		.eq("stripeSubscriptionId", stripeSubscriptionId);
 
 	if (error) {
-		logger.error({ err: error, stripeSubscriptionId }, "Failed to expire subscription");
+		logger.error(
+			{ err: error, stripeSubscriptionId },
+			"Failed to expire subscription",
+		);
 		throw new Error(
 			`Failed to expire subscription ${stripeSubscriptionId}: ${error.message}`,
 		);

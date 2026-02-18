@@ -60,7 +60,10 @@ export async function updateExecutiveMemory({
 
 		// Fallback to direct query if RPC doesn't exist (42883) or fails
 		if (rpcError.code !== "42883") {
-			logger.warn({ err: rpcError, userId, executive }, "ExecutiveMemory RPC failed, using fallback");
+			logger.warn(
+				{ err: rpcError, userId, executive },
+				"ExecutiveMemory RPC failed, using fallback",
+			);
 		}
 
 		// Optimized fallback: select only needed fields

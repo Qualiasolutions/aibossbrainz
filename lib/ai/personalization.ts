@@ -420,7 +420,10 @@ export function formatPersonalizationPrompt(
 
 	// Profile gets priority
 	if (sanitizedContext.userContext) {
-		const truncated = truncateToBudget(sanitizedContext.userContext, profileBudget);
+		const truncated = truncateToBudget(
+			sanitizedContext.userContext,
+			profileBudget,
+		);
 		sections.push(`## USER PROFILE\n${truncated}`);
 		unusedBudget += profileBudget - truncated.length;
 	} else {

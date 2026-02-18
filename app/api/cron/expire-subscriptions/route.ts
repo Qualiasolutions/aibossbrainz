@@ -18,7 +18,10 @@ export async function GET(request: NextRequest) {
 	try {
 		const expiredUsers = await expireSubscriptions();
 
-		logger.info({ expiredCount: expiredUsers?.length || 0 }, "Cron expired subscriptions");
+		logger.info(
+			{ expiredCount: expiredUsers?.length || 0 },
+			"Cron expired subscriptions",
+		);
 
 		return NextResponse.json({
 			success: true,

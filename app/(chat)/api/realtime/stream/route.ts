@@ -3,7 +3,6 @@ import { z } from "zod";
 import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import { systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
-import { logger } from "@/lib/logger";
 import {
 	getVoiceConfig,
 	MAX_TTS_TEXT_LENGTH,
@@ -12,6 +11,7 @@ import {
 import { apiRequestLogger } from "@/lib/api-logging";
 import { checkUserSubscription, saveMessages } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import {
 	CircuitBreakerError,
 	withAIGatewayResilience,
@@ -24,6 +24,7 @@ import {
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import type { DBMessage } from "@/lib/supabase/types";
+import { buildCacheParams, cacheAudio, getCachedAudio } from "@/lib/tts-cache";
 import {
 	parseCollaborativeSegments,
 	stripMarkdownForTTS,
@@ -87,7 +88,10 @@ async function generateAudioForSegment(
 			clearTimeout(timeoutId);
 
 			if (!res.ok) {
-				logger.error({ status: res.status, statusText: res.statusText }, "ElevenLabs API error");
+				logger.error(
+					{ status: res.status, statusText: res.statusText },
+					"ElevenLabs API error",
+				);
 				if (res.status === 401) {
 					throw new Error("INVALID_API_KEY");
 				}
@@ -242,51 +246,115 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 						.filter((s) => s.text.trim());
 
 					if (validSegments.length > 0) {
-						// Generate segments sequentially with request stitching for prosody-aligned audio
+						// Generate segments sequentially with per-segment error isolation
 						const audioBuffers: ArrayBuffer[] = [];
 						const previousRequestIds: string[] = [];
+						const failedSegments: number[] = [];
 
-						for (const segment of validSegments) {
-							const voiceConfig = getVoiceConfig(segment.speaker);
-							const result = await generateAudioForSegment(
-								segment.text,
-								voiceConfig,
-								apiKey,
-								previousRequestIds,
-							);
-							audioBuffers.push(result.buffer);
-							if (result.requestId) {
-								previousRequestIds.push(result.requestId);
+						for (let i = 0; i < validSegments.length; i++) {
+							const segment = validSegments[i];
+							try {
+								const voiceConfig = getVoiceConfig(segment.speaker);
+
+								// Check TTS cache first
+								const cacheParams = buildCacheParams(segment.text, voiceConfig);
+								const cachedUrl = await getCachedAudio(cacheParams);
+
+								if (cachedUrl) {
+									// Cache hit -- fetch audio from CDN
+									const cachedResponse = await fetch(cachedUrl);
+									const cachedBuffer = await cachedResponse.arrayBuffer();
+									audioBuffers.push(cachedBuffer);
+									continue;
+								}
+
+								// Cache miss -- generate with ElevenLabs
+								const segResult = await generateAudioForSegment(
+									segment.text,
+									voiceConfig,
+									apiKey,
+									previousRequestIds,
+								);
+								audioBuffers.push(segResult.buffer);
+								if (segResult.requestId) {
+									previousRequestIds.push(segResult.requestId);
+								}
+
+								// Cache the generated audio (fire-and-forget)
+								cacheAudio(cacheParams, segResult.buffer).catch(() => {});
+							} catch (err) {
+								logger.warn(
+									{
+										err,
+										segmentIndex: i,
+										speaker: segment.speaker,
+									},
+									"Collaborative segment TTS failed, skipping",
+								);
+								failedSegments.push(i);
 							}
 						}
 
-						// Concatenate audio (now prosody-aligned via request stitching)
-						const totalLength = audioBuffers.reduce(
-							(sum, buf) => sum + buf.byteLength,
-							0,
-						);
-						const combined = new Uint8Array(totalLength);
-						let offset = 0;
-						for (const buffer of audioBuffers) {
-							combined.set(new Uint8Array(buffer), offset);
-							offset += buffer.byteLength;
+						if (failedSegments.length > 0) {
+							logger.warn(
+								{
+									failedSegments,
+									total: validSegments.length,
+								},
+								"Collaborative stream TTS completed with partial failures",
+							);
 						}
 
-						const base64Audio = Buffer.from(combined).toString("base64");
-						audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
+						if (audioBuffers.length > 0) {
+							// Concatenate audio and cache combined result
+							const totalLength = audioBuffers.reduce(
+								(sum, buf) => sum + buf.byteLength,
+								0,
+							);
+							const combined = new Uint8Array(totalLength);
+							let offset = 0;
+							for (const buffer of audioBuffers) {
+								combined.set(new Uint8Array(buffer), offset);
+								offset += buffer.byteLength;
+							}
+
+							// Cache combined audio and use CDN URL
+							const combinedVoiceConfig = getVoiceConfig("collaborative");
+							const combinedCacheParams = buildCacheParams(
+								truncatedText,
+								combinedVoiceConfig,
+							);
+							const blobUrl = await cacheAudio(
+								combinedCacheParams,
+								combined.buffer,
+							);
+							audioUrl = blobUrl || null;
+						}
 					}
 				} else {
 					// Single voice
 					const cleanText = stripMarkdownForTTS(truncatedText);
 					if (cleanText.trim()) {
 						const voiceConfig = getVoiceConfig(botType);
-						const { buffer: audioData } = await generateAudioForSegment(
-							cleanText,
-							voiceConfig,
-							apiKey,
-						);
-						const base64Audio = Buffer.from(audioData).toString("base64");
-						audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
+
+						// Check TTS cache first
+						const cacheParams = buildCacheParams(cleanText, voiceConfig);
+						const cachedUrl = await getCachedAudio(cacheParams);
+
+						if (cachedUrl) {
+							audioUrl = cachedUrl;
+						} else {
+							// Cache miss -- generate with ElevenLabs
+							const { buffer: audioData } = await generateAudioForSegment(
+								cleanText,
+								voiceConfig,
+								apiKey,
+							);
+
+							// Cache and use CDN URL
+							const blobUrl = await cacheAudio(cacheParams, audioData);
+							audioUrl = blobUrl || null;
+						}
 					}
 				}
 			} catch (error) {
@@ -320,7 +388,10 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 				});
 
 				if (insertError) {
-					logger.error({ err: insertError, chatId }, "Failed to create voice call chat");
+					logger.error(
+						{ err: insertError, chatId },
+						"Failed to create voice call chat",
+					);
 				} else {
 					savedChatId = chatId;
 				}
@@ -355,7 +426,10 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 				await saveMessages({ messages });
 			}
 		} catch (saveError) {
-			logger.error({ err: saveError, chatId: savedChatId }, "Failed to save voice call messages");
+			logger.error(
+				{ err: saveError, chatId: savedChatId },
+				"Failed to save voice call messages",
+			);
 		}
 
 		apiLog.success({ botType, hasAudio: !!audioUrl, chatId: savedChatId });

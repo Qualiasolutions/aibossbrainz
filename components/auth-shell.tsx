@@ -23,8 +23,7 @@ type AuthShellProps = {
 	showLogo?: boolean;
 };
 
-const ALECCI_LOGO_URL =
-	"https://images.squarespace-cdn.com/content/v1/5ea759fa9e5575487ad28cd0/1591228238957-80Y8AGN1M9TTXTYNJ5QK/AM_Logo_Horizontal_4C+%281%29.jpg?format=500w";
+const ALECCI_LOGO_URL = "/images/alecci-media-logo.webp";
 
 const navLinks = [
 	{ href: "/", label: "Home" },

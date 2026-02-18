@@ -52,6 +52,9 @@ export async function sendAdminNotification({
 	});
 
 	if (!result.success) {
-		logger.error({ error: result.error, subject }, "Failed to send admin notification");
+		logger.error(
+			{ error: result.error, subject },
+			"Failed to send admin notification",
+		);
 	}
 }

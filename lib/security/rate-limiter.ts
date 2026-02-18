@@ -358,7 +358,9 @@ export async function checkWebhookRateLimit(ip: string): Promise<{
 		return checkWebhookRateLimitMemory(ip);
 	}
 
-	const windowStart = Math.floor(Date.now() / (WEBHOOK_RATE_LIMIT_WINDOW * 1000));
+	const windowStart = Math.floor(
+		Date.now() / (WEBHOOK_RATE_LIMIT_WINDOW * 1000),
+	);
 	const key = `webhookratelimit:${ip}:${windowStart}`;
 
 	try {

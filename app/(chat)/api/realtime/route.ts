@@ -13,8 +13,13 @@ import {
 	withAIGatewayResilience,
 	withElevenLabsResilience,
 } from "@/lib/resilience";
+import {
+	checkRateLimit,
+	getRateLimitHeaders,
+} from "@/lib/security/rate-limiter";
 import { withCsrf } from "@/lib/security/with-csrf";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { buildCacheParams, cacheAudio, getCachedAudio } from "@/lib/tts-cache";
 import { stripMarkdownForTTS } from "@/lib/voice/strip-markdown-tts";
 
 const realtimeRequestSchema = z.object({
@@ -28,6 +33,9 @@ const realtimeRequestSchema = z.object({
 });
 
 export const maxDuration = 30;
+
+// Rate limits for realtime API (match stream route)
+const MAX_REALTIME_REQUESTS_PER_DAY = 200;
 
 export const POST = withCsrf(async (request: Request) => {
 	const apiLog = apiRequestLogger("/api/realtime");
@@ -46,6 +54,46 @@ export const POST = withCsrf(async (request: Request) => {
 		const subscriptionStatus = await checkUserSubscription(user.id);
 		if (!subscriptionStatus.isActive) {
 			return new ChatSDKError("subscription_expired:chat").toResponse();
+		}
+
+		// Rate limiting (matching stream route pattern)
+		const rateLimitResult = await checkRateLimit(
+			`realtime:${user.id}`,
+			MAX_REALTIME_REQUESTS_PER_DAY,
+		);
+
+		if (rateLimitResult.source === "redis") {
+			if (!rateLimitResult.allowed) {
+				const response = new ChatSDKError("rate_limit:chat").toResponse();
+				const headers = getRateLimitHeaders(
+					rateLimitResult.remaining,
+					MAX_REALTIME_REQUESTS_PER_DAY,
+					rateLimitResult.reset,
+				);
+				for (const [key, value] of Object.entries(headers)) {
+					response.headers.set(key, value);
+				}
+				return response;
+			}
+		} else {
+			// SECURITY: Redis unavailable - verify via UserAnalytics (fail closed)
+			const supabaseService = createServiceClient();
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			const { data, error } = await supabaseService
+				.from("UserAnalytics")
+				.select("voiceMinutes")
+				.eq("userId", user.id)
+				.gte("date", today.toISOString())
+				.maybeSingle();
+
+			if (error) {
+				return new ChatSDKError("rate_limit:chat").toResponse();
+			}
+
+			if ((Number(data?.voiceMinutes) || 0) >= MAX_REALTIME_REQUESTS_PER_DAY) {
+				return new ChatSDKError("rate_limit:chat").toResponse();
+			}
 		}
 
 		apiLog.start({ userId: user.id });
@@ -95,7 +143,7 @@ export const POST = withCsrf(async (request: Request) => {
 
 		const responseText = result.text;
 
-		// Generate audio using ElevenLabs
+		// Generate audio using ElevenLabs with TTS cache
 		let audioUrl: string | null = null;
 
 		const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY;
@@ -107,51 +155,62 @@ export const POST = withCsrf(async (request: Request) => {
 				const cleanText = stripMarkdownForTTS(responseText).slice(0, 4000);
 
 				if (cleanText) {
-					// Use resilience wrapper for ElevenLabs TTS (circuit breaker + retry)
-					const audioData = await withElevenLabsResilience(async () => {
-						const controller = new AbortController();
-						const timeoutId = setTimeout(() => controller.abort(), 45000);
+					// Check TTS cache first
+					const cacheParams = buildCacheParams(cleanText, voiceConfig);
+					const cachedUrl = await getCachedAudio(cacheParams);
 
-						try {
-							const ttsResponse = await fetch(
-								`https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}/stream`,
-								{
-									method: "POST",
-									headers: {
-										"Content-Type": "application/json",
-										"xi-api-key": elevenLabsApiKey,
-										Accept: "audio/mpeg",
-									},
-									body: JSON.stringify({
-										text: cleanText,
-										model_id: voiceConfig.modelId,
-										voice_settings: {
-											stability: voiceConfig.settings.stability,
-											similarity_boost: voiceConfig.settings.similarityBoost,
-											style: voiceConfig.settings.style ?? 0,
-											use_speaker_boost:
-												voiceConfig.settings.useSpeakerBoost ?? true,
+					if (cachedUrl) {
+						audioUrl = cachedUrl;
+					} else {
+						// Cache miss -- generate with ElevenLabs
+						const audioData = await withElevenLabsResilience(async () => {
+							const controller = new AbortController();
+							const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+							try {
+								const ttsResponse = await fetch(
+									`https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}/stream`,
+									{
+										method: "POST",
+										headers: {
+											"Content-Type": "application/json",
+											"xi-api-key": elevenLabsApiKey,
+											Accept: "audio/mpeg",
 										},
-										optimize_streaming_latency: 2,
-									}),
-									signal: controller.signal,
-								},
-							);
-							clearTimeout(timeoutId);
+										body: JSON.stringify({
+											text: cleanText,
+											model_id: voiceConfig.modelId,
+											voice_settings: {
+												stability: voiceConfig.settings.stability,
+												similarity_boost: voiceConfig.settings.similarityBoost,
+												style: voiceConfig.settings.style ?? 0,
+												use_speaker_boost:
+													voiceConfig.settings.useSpeakerBoost ?? true,
+											},
+											optimize_streaming_latency: 2,
+										}),
+										signal: controller.signal,
+									},
+								);
+								clearTimeout(timeoutId);
 
-							if (!ttsResponse.ok) {
-								throw new Error(`ElevenLabs API error: ${ttsResponse.status}`);
+								if (!ttsResponse.ok) {
+									throw new Error(
+										`ElevenLabs API error: ${ttsResponse.status}`,
+									);
+								}
+
+								return ttsResponse.arrayBuffer();
+							} catch (err) {
+								clearTimeout(timeoutId);
+								throw err;
 							}
+						});
 
-							return ttsResponse.arrayBuffer();
-						} catch (err) {
-							clearTimeout(timeoutId);
-							throw err;
-						}
-					});
-
-					const base64Audio = Buffer.from(audioData).toString("base64");
-					audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
+						// Cache the generated audio and use CDN URL
+						const blobUrl = await cacheAudio(cacheParams, audioData);
+						audioUrl = blobUrl || null;
+					}
 				}
 			} catch (error) {
 				logger.error({ err: error }, "TTS error in realtime route");

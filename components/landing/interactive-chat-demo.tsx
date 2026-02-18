@@ -180,7 +180,15 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
 			setIsLoading(false);
 			setTimeout(scrollToBottom, 100);
 		}
-	}, [input, isLoading, messages, selectedExec, scrollToBottom, rateLimitHit, csrfFetch]);
+	}, [
+		input,
+		isLoading,
+		messages,
+		selectedExec,
+		scrollToBottom,
+		rateLimitHit,
+		csrfFetch,
+	]);
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === "Enter" && !e.shiftKey) {
@@ -245,9 +253,9 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
 							<Image
 								src={content.header.logo_url}
 								alt="AI Boss Brainz"
-								className="h-4 w-auto"
-								width={80}
-								height={16}
+								className="h-6 w-auto"
+								width={100}
+								height={24}
 							/>
 							<span className="text-[10px] font-medium text-stone-500">
 								app.bossybrainz.ai

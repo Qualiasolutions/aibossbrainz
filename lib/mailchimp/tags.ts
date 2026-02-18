@@ -96,7 +96,10 @@ async function applyTagWithRetry(
 						message: `Email: ${email}\nOperation: ${operation}\nTag: ${tagName}\nError: ${errorMessage}\n\nThis user may not receive the expected email sequence.`,
 					});
 				} catch (notifyErr) {
-					logger.error({ err: notifyErr, operation, email }, "Failed to send Mailchimp admin notification");
+					logger.error(
+						{ err: notifyErr, operation, email },
+						"Failed to send Mailchimp admin notification",
+					);
 				}
 
 				return { success: false, error: fullError };

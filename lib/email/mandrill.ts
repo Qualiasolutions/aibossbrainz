@@ -57,7 +57,10 @@ export async function sendViaMandrill({
 
 		if (!response.ok) {
 			const text = await response.text();
-			logger.error({ status: response.status, responseBody: text, subject }, "Mandrill API error");
+			logger.error(
+				{ status: response.status, responseBody: text, subject },
+				"Mandrill API error",
+			);
 			return { success: false, error: `API error ${response.status}` };
 		}
 
@@ -75,11 +78,17 @@ export async function sendViaMandrill({
 		const first = data[0];
 
 		if (first.status === "rejected" || first.status === "invalid") {
-			logger.error({ rejectReason: first.reject_reason, subject }, "Mandrill email rejected");
+			logger.error(
+				{ rejectReason: first.reject_reason, subject },
+				"Mandrill email rejected",
+			);
 			return { success: false, error: `Rejected: ${first.reject_reason}` };
 		}
 
-		logger.info({ messageId: first._id, status: first.status, subject }, "Mandrill email sent");
+		logger.info(
+			{ messageId: first._id, status: first.status, subject },
+			"Mandrill email sent",
+		);
 		return { success: true, id: first._id };
 	} catch (error) {
 		const msg = error instanceof Error ? error.message : String(error);

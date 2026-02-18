@@ -7,17 +7,17 @@ import {
 import { headers } from "next/headers";
 import { z } from "zod";
 import { myProvider } from "@/lib/ai/providers";
-import { logger } from "@/lib/logger";
 import type { BotType } from "@/lib/bot-personalities";
 import { getSystemPrompt } from "@/lib/bot-personalities";
-import { containsCanary, getCanaryToken } from "@/lib/safety/canary";
-import { redactPII } from "@/lib/safety/pii-redactor";
 import { isProductionEnvironment } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 import {
 	isCircuitOpen,
 	recordCircuitFailure,
 	recordCircuitSuccess,
 } from "@/lib/resilience";
+import { containsCanary, getCanaryToken } from "@/lib/safety/canary";
+import { redactPII } from "@/lib/safety/pii-redactor";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { generateUUID } from "@/lib/utils";
 import { checkDemoRateLimit } from "./rate-limit";

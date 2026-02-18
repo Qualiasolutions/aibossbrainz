@@ -47,7 +47,10 @@ export const POST = withCsrf(async () => {
 		.is("deletedAt", null);
 
 	if (queryError) {
-		logger.error({ err: queryError }, "Mailchimp backfill failed to query trial users");
+		logger.error(
+			{ err: queryError },
+			"Mailchimp backfill failed to query trial users",
+		);
 		return NextResponse.json(
 			{ error: "Failed to query users" },
 			{ status: 500 },
@@ -98,7 +101,10 @@ export const POST = withCsrf(async () => {
 		await new Promise((resolve) => setTimeout(resolve, 400));
 	}
 
-	logger.info({ success: results.success, total: results.total }, "Mailchimp backfill completed");
+	logger.info(
+		{ success: results.success, total: results.total },
+		"Mailchimp backfill completed",
+	);
 
 	return NextResponse.json(results);
 });

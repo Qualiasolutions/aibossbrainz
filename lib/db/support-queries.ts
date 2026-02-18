@@ -61,7 +61,10 @@ export async function createSupportTicket({
 		.single();
 
 	if (ticketError || !ticket) {
-		logger.error({ err: ticketError, userId }, "Failed to create support ticket");
+		logger.error(
+			{ err: ticketError, userId },
+			"Failed to create support ticket",
+		);
 		throw new ChatSDKError("bad_request:database", "Failed to create ticket");
 	}
 
@@ -77,7 +80,10 @@ export async function createSupportTicket({
 		});
 
 	if (msgError) {
-		logger.error({ err: msgError, ticketId: ticket.id }, "Failed to create initial ticket message");
+		logger.error(
+			{ err: msgError, ticketId: ticket.id },
+			"Failed to create initial ticket message",
+		);
 		throw new ChatSDKError("bad_request:database", "Failed to create message");
 	}
 

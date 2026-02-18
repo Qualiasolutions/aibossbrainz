@@ -17,7 +17,9 @@ export function getMailchimpClient(): typeof mailchimp | null {
 	}
 
 	if (!env.MAILCHIMP_SERVER_PREFIX) {
-		logger.warn("Mailchimp server prefix not configured - integration disabled");
+		logger.warn(
+			"Mailchimp server prefix not configured - integration disabled",
+		);
 		return null;
 	}
 

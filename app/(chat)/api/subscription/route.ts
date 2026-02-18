@@ -1,7 +1,6 @@
 import { after } from "next/server";
 import { z } from "zod";
 import { apiRequestLogger } from "@/lib/api-logging";
-import { logger } from "@/lib/logger";
 import {
 	createAuditLog,
 	ensureUserExists,
@@ -9,6 +8,7 @@ import {
 } from "@/lib/db/queries";
 import { sendCancellationEmail } from "@/lib/email/subscription-emails";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { applyPaidTag, applyTrialTags } from "@/lib/mailchimp/tags";
 import { withCsrf } from "@/lib/security/with-csrf";
 import {
@@ -139,7 +139,10 @@ export async function GET() {
 								await applyPaidTag(email, subscriptionType);
 							}
 						} catch (err) {
-							logger.error({ err }, "Subscription API Mailchimp tagging failed");
+							logger.error(
+								{ err },
+								"Subscription API Mailchimp tagging failed",
+							);
 						}
 					});
 				}

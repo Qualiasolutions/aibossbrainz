@@ -50,7 +50,10 @@ async function syncStripeSubscription(
 				stripeSubscriptionId: sub.id,
 				trialEndDate: new Date(sub.trial_end * 1000),
 			});
-			logger.info({ userId, subscriptionType, stripeSubscriptionId: sub.id }, "Synced trial from Stripe");
+			logger.info(
+				{ userId, subscriptionType, stripeSubscriptionId: sub.id },
+				"Synced trial from Stripe",
+			);
 			return true;
 		}
 
@@ -60,13 +63,19 @@ async function syncStripeSubscription(
 				subscriptionType,
 				stripeSubscriptionId: sub.id,
 			});
-			logger.info({ userId, subscriptionType, stripeSubscriptionId: sub.id }, "Synced active subscription from Stripe");
+			logger.info(
+				{ userId, subscriptionType, stripeSubscriptionId: sub.id },
+				"Synced active subscription from Stripe",
+			);
 			return true;
 		}
 
 		return false;
 	} catch (err) {
-		logger.error({ err, userId, stripeCustomerId }, "Stripe sync failed during auth callback");
+		logger.error(
+			{ err, userId, stripeCustomerId },
+			"Stripe sync failed during auth callback",
+		);
 		return false;
 	}
 }
@@ -95,7 +104,10 @@ async function handleAuthenticatedUser(
 					email: user.email,
 					displayName: profile?.displayName,
 				}).catch((err) => {
-					logger.error({ err, userId: user.id }, "Failed to send welcome email");
+					logger.error(
+						{ err, userId: user.id },
+						"Failed to send welcome email",
+					);
 				});
 			}
 		} catch (err) {
@@ -111,7 +123,10 @@ async function handleAuthenticatedUser(
 	if (!subscription.isActive) {
 		const fullProfile = await getUserFullProfile({ userId: user.id });
 		if (fullProfile?.stripeCustomerId) {
-			logger.info({ userId: user.id, stripeCustomerId: fullProfile.stripeCustomerId }, "User has Stripe customer but inactive subscription — syncing");
+			logger.info(
+				{ userId: user.id, stripeCustomerId: fullProfile.stripeCustomerId },
+				"User has Stripe customer but inactive subscription — syncing",
+			);
 			const synced = await syncStripeSubscription(
 				user.id,
 				fullProfile.stripeCustomerId,
@@ -153,7 +168,10 @@ async function handleAuthenticatedUser(
 						await applyPaidTag(email, subscriptionType);
 					}
 				} catch (err) {
-					logger.error({ err, userId: user.id }, "Mailchimp tagging failed during auth callback");
+					logger.error(
+						{ err, userId: user.id },
+						"Mailchimp tagging failed during auth callback",
+					);
 				}
 			});
 		}
@@ -216,7 +234,10 @@ export async function GET(request: Request) {
 	}
 
 	// Log what parameters we received for debugging
-	logger.error({ hasCode: !!code, hasTokenHash: !!tokenHash, type, origin }, "Auth callback failed - no valid auth params");
+	logger.error(
+		{ hasCode: !!code, hasTokenHash: !!tokenHash, type, origin },
+		"Auth callback failed - no valid auth params",
+	);
 
 	// If something went wrong, redirect to login with error
 	return NextResponse.redirect(`${origin}/login?error=auth_callback_error`);

@@ -1,5 +1,4 @@
 import { safeParseJson } from "@/lib/api-utils";
-import { logger } from "@/lib/logger";
 import {
 	addMessageReaction,
 	getMessageReactionCounts,
@@ -8,6 +7,7 @@ import {
 	removeMessageReaction,
 } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { createClient } from "@/lib/supabase/server";
 import type { ReactionType } from "@/lib/supabase/types";
@@ -45,7 +45,10 @@ export async function GET(request: Request) {
 			});
 			return Response.json({ items });
 		} catch (error) {
-			logger.error({ err: error, reactionType }, "Failed to get reactions by type");
+			logger.error(
+				{ err: error, reactionType },
+				"Failed to get reactions by type",
+			);
 			return new Response("Failed to get reactions", { status: 500 });
 		}
 	}

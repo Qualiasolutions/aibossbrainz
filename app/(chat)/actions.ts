@@ -3,15 +3,15 @@
 import { generateText, type UIMessage } from "ai";
 import { cookies } from "next/headers";
 import type { VisibilityType } from "@/components/visibility-selector";
+import { sanitizePromptContent } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
-import { logger } from "@/lib/logger";
 import {
 	deleteMessagesByChatIdAfterTimestamp,
 	getChatById,
 	getMessageById,
 	updateChatVisiblityById,
 } from "@/lib/db/queries";
-import { sanitizePromptContent } from "@/lib/ai/prompts";
+import { logger } from "@/lib/logger";
 import { withAIGatewayResilience } from "@/lib/resilience";
 import { createClient } from "@/lib/supabase/server";
 
@@ -59,7 +59,10 @@ export async function deleteTrailingMessages({ id }: { id: string }) {
 	const [message] = await getMessageById({ id });
 
 	if (!message) {
-		logger.warn({ messageId: id }, "Message not found for deletion of trailing messages");
+		logger.warn(
+			{ messageId: id },
+			"Message not found for deletion of trailing messages",
+		);
 		return;
 	}
 

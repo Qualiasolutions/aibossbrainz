@@ -99,11 +99,22 @@ export async function logAudit(input: AuditLogInput): Promise<void> {
 
 		if (error) {
 			// Log but don't throw - audit logging should never break the main operation
-			logger.error({ err: error, action: input.action, resource: input.resource, resourceId: input.resourceId }, "Failed to write audit log");
+			logger.error(
+				{
+					err: error,
+					action: input.action,
+					resource: input.resource,
+					resourceId: input.resourceId,
+				},
+				"Failed to write audit log",
+			);
 		}
 	} catch (error) {
 		// Fail silently - audit logging should never break the main operation
-		logger.error({ err: error, action: input.action, resource: input.resource }, "Exception during audit logging");
+		logger.error(
+			{ err: error, action: input.action, resource: input.resource },
+			"Exception during audit logging",
+		);
 	}
 }
 

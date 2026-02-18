@@ -20,8 +20,7 @@ export async function GET(request: Request) {
 	}
 
 	const url = new URL(request.url);
-	const year =
-		Number(url.searchParams.get("year")) || new Date().getFullYear();
+	const year = Number(url.searchParams.get("year")) || new Date().getFullYear();
 	const month =
 		Number(url.searchParams.get("month")) || new Date().getMonth() + 1;
 

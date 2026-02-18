@@ -73,10 +73,18 @@ export async function getDailyAICostTotal(
 
 	const supabase = createServiceClient();
 	// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
-	const { data, error } = await (supabase.from as any)("AICostLog")
+	const { data, error } = (await (supabase.from as any)("AICostLog")
 		.select("userId, inputTokens, outputTokens, costUSD")
 		.gte("createdAt", `${dateStr}T00:00:00.000Z`)
-		.lt("createdAt", `${dateStr}T23:59:59.999Z`) as { data: Array<{ userId: string; inputTokens: number; outputTokens: number; costUSD: number }> | null; error: any };
+		.lt("createdAt", `${dateStr}T23:59:59.999Z`)) as {
+		data: Array<{
+			userId: string;
+			inputTokens: number;
+			outputTokens: number;
+			costUSD: number;
+		}> | null;
+		error: any;
+	};
 
 	if (error) {
 		logger.error({ err: error }, "Failed to query daily AI cost");
@@ -88,14 +96,8 @@ export async function getDailyAICostTotal(
 
 	return {
 		totalCostUSD: rows.reduce((sum, r) => sum + Number(r.costUSD ?? 0), 0),
-		totalInputTokens: rows.reduce(
-			(sum, r) => sum + (r.inputTokens ?? 0),
-			0,
-		),
-		totalOutputTokens: rows.reduce(
-			(sum, r) => sum + (r.outputTokens ?? 0),
-			0,
-		),
+		totalInputTokens: rows.reduce((sum, r) => sum + (r.inputTokens ?? 0), 0),
+		totalOutputTokens: rows.reduce((sum, r) => sum + (r.outputTokens ?? 0), 0),
 		uniqueUsers: uniqueUserIds.size,
 		requestCount: rows.length,
 	};
@@ -123,13 +125,25 @@ export async function getMonthlyCostSummary(
 
 	const supabase = createServiceClient();
 	// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
-	const { data, error } = await (supabase.from as any)("AICostLog")
+	const { data, error } = (await (supabase.from as any)("AICostLog")
 		.select("userId, modelId, inputTokens, outputTokens, costUSD")
 		.gte("createdAt", startDate.toISOString())
-		.lt("createdAt", endDate.toISOString()) as { data: Array<{ userId: string; modelId: string; inputTokens: number; outputTokens: number; costUSD: number }> | null; error: any };
+		.lt("createdAt", endDate.toISOString())) as {
+		data: Array<{
+			userId: string;
+			modelId: string;
+			inputTokens: number;
+			outputTokens: number;
+			costUSD: number;
+		}> | null;
+		error: any;
+	};
 
 	if (error) {
-		logger.error({ err: error, year, month }, "Failed to query monthly AI cost");
+		logger.error(
+			{ err: error, year, month },
+			"Failed to query monthly AI cost",
+		);
 		throw error;
 	}
 
@@ -158,14 +172,8 @@ export async function getMonthlyCostSummary(
 
 	return {
 		totalCostUSD: rows.reduce((sum, r) => sum + Number(r.costUSD ?? 0), 0),
-		totalInputTokens: rows.reduce(
-			(sum, r) => sum + (r.inputTokens ?? 0),
-			0,
-		),
-		totalOutputTokens: rows.reduce(
-			(sum, r) => sum + (r.outputTokens ?? 0),
-			0,
-		),
+		totalInputTokens: rows.reduce((sum, r) => sum + (r.inputTokens ?? 0), 0),
+		totalOutputTokens: rows.reduce((sum, r) => sum + (r.outputTokens ?? 0), 0),
 		uniqueUsers: uniqueUserIds.size,
 		requestCount: rows.length,
 		byModel,
