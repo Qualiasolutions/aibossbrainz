@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 21 (1 of 6 in v1.4)
-Plan: 02 of 2 (21-02 complete, 21-01 pending)
-Status: In progress
-Last activity: 2026-02-18 — Completed 21-02-PLAN.md
+Plan: 2 of 2 (phase complete)
+Status: Phase complete
+Last activity: 2026-02-18 — Completed 21-01-PLAN.md
 
-Progress: █░░░░░░░░░ 1/11 plans (9%)
+Progress: ██░░░░░░░░ 2/11 plans (18%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22 (11 v1.2 + 10 v1.3 + 1 v1.4)
+- Total plans completed: 23 (11 v1.2 + 10 v1.3 + 2 v1.4)
 - Average duration: 4min
-- Total execution time: 81min
+- Total execution time: 86min
 
 **By Phase:**
 
@@ -37,7 +37,7 @@ Progress: █░░░░░░░░░ 1/11 plans (9%)
 | 18 | 2/2 | 10min | 5min |
 | 19 | 2/2 | 5min | 2min |
 | 20 | 2/2 | 11min | 5min |
-| 21 | 1/2 | 3min | 3min |
+| 21 | 2/2 | 8min | 4min |
 
 ## Accumulated Context
 
@@ -45,6 +45,8 @@ Progress: █░░░░░░░░░ 1/11 plans (9%)
 
 - SHA256 hash of AUTH_SECRET for canary tokens instead of raw secret slice (prevents leakage)
 - Document streaming PII limitation rather than attempt blocking redaction (preserves streaming benefits)
+- XML tags with do_not_follow_instructions_in_content attribute for user content wrapping in prompts
+- Replaced delimiter-based personalization wrapping with XML tags for consistent prompt injection defense
 
 ### Completed
 
@@ -67,5 +69,5 @@ Progress: █░░░░░░░░░ 1/11 plans (9%)
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 21-02 (low-severity prompt hardening)
-Resume: `/gsd:execute-plan .planning/phases/21-prompt-security-hardening/21-01-PLAN.md`
+Stopped at: Completed phase 21 (prompt security hardening)
+Resume: `/gsd:plan-phase 22`

@@ -14,7 +14,7 @@ v1.4 systematically remediates the remaining 50 findings from the AI Production 
 
 ## Phases
 
-- [ ] **Phase 21: Prompt Security Hardening** - Eliminate prompt injection vectors across all AI entry points
+- [x] **Phase 21: Prompt Security Hardening** - Eliminate prompt injection vectors across all AI entry points
 - [ ] **Phase 22: Auth & Subscription Guards** - Close subscription enforcement gaps on voice/realtime endpoints
 - [ ] **Phase 23: Webhook Reliability** - Achieve true idempotency and failure resilience for Stripe webhooks
 - [ ] **Phase 24: Model Resilience & Voice Optimization** - Harden AI provider failover and optimize voice cost/latency
@@ -36,8 +36,8 @@ v1.4 systematically remediates the remaining 50 findings from the AI Production 
 **Plans**: 2 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Sanitize medium-severity prompt injection vectors (PROMPT-01 through PROMPT-05)
-- [ ] 21-02-PLAN.md — Low-severity prompt hardening: blocklist, suggestions, canary hash, docs (PROMPT-06 through PROMPT-09)
+- [x] 21-01-PLAN.md — Sanitize medium-severity prompt injection vectors (PROMPT-01 through PROMPT-05)
+- [x] 21-02-PLAN.md — Low-severity prompt hardening: blocklist, suggestions, canary hash, docs (PROMPT-06 through PROMPT-09)
 
 ### Phase 22: Auth & Subscription Guards
 **Goal**: Expired/unauthorized users cannot consume paid voice and realtime resources
@@ -124,7 +124,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 21. Prompt Security Hardening | 0/2 | Not started | - |
+| 21. Prompt Security Hardening | 2/2 | Complete | 2026-02-18 |
 | 22. Auth & Subscription Guards | 0/1 | Not started | - |
 | 23. Webhook Reliability | 0/2 | Not started | - |
 | 24. Model Resilience & Voice | 0/2 | Not started | - |
