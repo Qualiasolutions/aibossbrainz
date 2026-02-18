@@ -135,5 +135,9 @@ export interface LandingPageContentUpdate {
 	updatedBy?: string | null;
 }
 
+// TODO: Add StripeWebhookEvent type alias after running `pnpm gen:types`
+// once migration 20260218000200_webhook_reliability.sql is applied:
+// export type StripeWebhookEvent = Database["public"]["Tables"]["StripeWebhookEvent"]["Row"];
+
 // Need to import Json for interfaces above
 import type { Json } from "./database.types";
