@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 23 - Webhook Reliability
+**Current focus:** Phase 24 (next)
 
 ## Current Position
 
-Phase: 23 (3 of 6 in v1.4)
-Plan: 1 of 2
-Status: In progress
-Last activity: 2026-02-18 — Completed 23-01-PLAN.md
+Phase: 23 (3 of 6 in v1.4) -- COMPLETE
+Plan: 2 of 2 (phase complete)
+Status: Phase complete
+Last activity: 2026-02-18 -- Completed 23-02-PLAN.md
 
-Progress: ████░░░░░░ 4/11 plans (36%)
+Progress: █████░░░░░ 5/11 plans (45%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25 (11 v1.2 + 10 v1.3 + 4 v1.4)
+- Total plans completed: 26 (11 v1.2 + 10 v1.3 + 5 v1.4)
 - Average duration: 4min
-- Total execution time: 99min
+- Total execution time: 103min
 
 **By Phase:**
 
@@ -39,7 +39,7 @@ Progress: ████░░░░░░ 4/11 plans (36%)
 | 20 | 2/2 | 11min | 5min |
 | 21 | 2/2 | 8min | 4min |
 | 22 | 1/1 | 8min | 8min |
-| 23 | 1/2 | 5min | 5min |
+| 23 | 2/2 | 9min | 4min |
 
 ## Accumulated Context
 
@@ -55,6 +55,10 @@ Progress: ████░░░░░░ 4/11 plans (36%)
 - Event-ID dedup via INSERT + unique constraint instead of SELECT-then-INSERT (atomic, race-free)
 - maxDuration = 60 on webhook route for Vercel timeout protection
 - Top-level dedup before switch covers all event types with single check
+- process_webhook_event RPC combines dedup + advisory lock atomically (no app-level race window)
+- Advisory lock key from hashtext(user_id), COALESCE to 0 for null users
+- Webhook rate limit: 100 req/min/IP with 1-minute window (generous for Stripe retries)
+- Dead-letter persistence isolated in try-catch so failure never crashes webhook
 
 ### Completed
 
@@ -73,10 +77,10 @@ Progress: ████░░░░░░ 4/11 plans (36%)
 - 6 phases, 11 planned plans
 - New API routes must be added to publicApiRoutes in lib/supabase/middleware.ts
 - AICostLog migration needs to be applied via Supabase Dashboard SQL Editor
-- StripeWebhookEvent migration needs to be applied via Supabase Dashboard SQL Editor
+- StripeWebhookEvent + WebhookDeadLetter migration needs to be applied via Supabase Dashboard SQL Editor
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 23-01 (webhook dedup + maxDuration)
-Resume: `/gsd:execute-phase 23-02`
+Stopped at: Completed phase 23 (webhook reliability -- both plans)
+Resume: `/gsd:plan-phase 24`
