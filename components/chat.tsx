@@ -152,8 +152,8 @@ export function Chat({
 
 	// Handler for suggestion selection - prefills input
 	// Wrapped in useCallback to prevent defeating memo in Messages component
-	const handleSuggestionSelect = useCallback((text: string) => {
-		setInput(text);
+	const handleSuggestionSelect = useCallback((texts: string[]) => {
+		setInput(texts.join("\n\n"));
 	}, []);
 
 	// Track the botType that was active when the last message was sent

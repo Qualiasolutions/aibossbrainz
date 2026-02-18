@@ -10,7 +10,7 @@ import {
 	checkRateLimit,
 	getRateLimitHeaders,
 } from "@/lib/security/rate-limiter";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 const EXPORT_RATE_LIMIT = 5; // Max 5 exports per day per user
 const BATCH_SIZE = 500; // Max IDs per Supabase .in() query
@@ -52,18 +52,45 @@ export async function GET(request: Request) {
 			EXPORT_RATE_LIMIT,
 			"export",
 		);
-		if (!rateLimit.allowed && !rateLimit.requiresDatabaseCheck) {
-			return Response.json(
-				{ error: "Too many export requests. Please try again tomorrow." },
-				{
-					status: 429,
-					headers: getRateLimitHeaders(
-						rateLimit.remaining,
-						EXPORT_RATE_LIMIT,
-						rateLimit.reset,
-					),
-				},
-			);
+
+		if (rateLimit.source === "redis") {
+			if (!rateLimit.allowed) {
+				return Response.json(
+					{ error: "Too many export requests. Please try again tomorrow." },
+					{
+						status: 429,
+						headers: getRateLimitHeaders(
+							rateLimit.remaining,
+							EXPORT_RATE_LIMIT,
+							rateLimit.reset,
+						),
+					},
+				);
+			}
+		} else {
+			// SECURITY: Redis unavailable - verify via AuditLog (fail closed)
+			const supabaseService = createServiceClient();
+			const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+			const { count, error } = await supabaseService
+				.from("AuditLog")
+				.select("*", { count: "exact", head: true })
+				.eq("userId", user.id)
+				.eq("action", "DATA_EXPORT")
+				.gte("createdAt", cutoffTime);
+
+			if (error) {
+				return Response.json(
+					{ error: "Unable to verify export limit. Please try again." },
+					{ status: 503 },
+				);
+			}
+
+			if ((count ?? 0) >= EXPORT_RATE_LIMIT) {
+				return Response.json(
+					{ error: "Too many export requests. Please try again tomorrow." },
+					{ status: 429 },
+				);
+			}
 		}
 
 		// Fetch all user data in parallel

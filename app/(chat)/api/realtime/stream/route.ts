@@ -10,7 +10,7 @@ import {
 	type VoiceConfig,
 } from "@/lib/ai/voice-config";
 import { apiRequestLogger } from "@/lib/api-logging";
-import { getMessageCountByUserId, saveMessages } from "@/lib/db/queries";
+import { checkUserSubscription, saveMessages } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import {
 	CircuitBreakerError,
@@ -22,7 +22,7 @@ import {
 	getRateLimitHeaders,
 } from "@/lib/security/rate-limiter";
 import { withCsrf } from "@/lib/security/with-csrf";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import type { DBMessage } from "@/lib/supabase/types";
 import {
 	parseCollaborativeSegments,
@@ -119,6 +119,12 @@ export const POST = withCsrf(async (request: Request) => {
 			return new ChatSDKError("unauthorized:chat").toResponse();
 		}
 
+		// Check subscription status before consuming AI and ElevenLabs resources
+		const subscriptionStatus = await checkUserSubscription(user.id);
+		if (!subscriptionStatus.isActive) {
+			return new ChatSDKError("subscription_expired:chat").toResponse();
+		}
+
 		apiLog.start({ userId: user.id });
 
 		// Rate limiting
@@ -141,13 +147,22 @@ export const POST = withCsrf(async (request: Request) => {
 				return response;
 			}
 		} else {
-			// SECURITY: Redis unavailable — fall back to DB count (fail closed)
-			const messageCount = await getMessageCountByUserId({
-				id: user.id,
-				differenceInHours: 24,
-			});
+			// SECURITY: Redis unavailable - verify via UserAnalytics (fail closed)
+			const supabaseService = createServiceClient();
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			const { data, error } = await supabaseService
+				.from("UserAnalytics")
+				.select("voiceMinutes")
+				.eq("userId", user.id)
+				.gte("date", today.toISOString())
+				.maybeSingle();
 
-			if (messageCount >= MAX_REALTIME_REQUESTS_PER_DAY) {
+			if (error) {
+				return new ChatSDKError("rate_limit:chat").toResponse();
+			}
+
+			if ((Number(data?.voiceMinutes) || 0) >= MAX_REALTIME_REQUESTS_PER_DAY) {
 				return new ChatSDKError("rate_limit:chat").toResponse();
 			}
 		}

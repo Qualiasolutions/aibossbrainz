@@ -25,7 +25,7 @@ type MessagesProps = {
 	selectedModelId: string;
 	selectedBotType: BotType;
 	className?: string;
-	onSuggestionSelect?: (text: string) => void;
+	onSuggestionSelect?: (texts: string[]) => void;
 };
 
 function PureMessages({

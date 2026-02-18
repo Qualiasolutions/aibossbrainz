@@ -48,7 +48,7 @@ const PurePreviewMessage = ({
 	isReadonly: boolean;
 	requiresScrollPadding: boolean;
 	selectedBotType: BotType;
-	onSuggestionSelect?: (text: string) => void;
+	onSuggestionSelect?: (texts: string[]) => void;
 	onFullscreen?: (content: string, botType: BotType) => void;
 }) => {
 	const [mode, setMode] = useState<"view" | "edit">("view");

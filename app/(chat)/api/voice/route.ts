@@ -4,7 +4,7 @@ import { getVoiceConfig, MAX_TTS_TEXT_LENGTH } from "@/lib/ai/voice-config";
 import { logger } from "@/lib/logger";
 import { recordAnalytics } from "@/lib/analytics/queries";
 import { apiRequestLogger } from "@/lib/api-logging";
-import { getMessageCountByUserId } from "@/lib/db/queries";
+import { checkUserSubscription } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import {
 	CircuitBreakerError,
@@ -16,7 +16,7 @@ import {
 } from "@/lib/security/rate-limiter";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { voiceBreadcrumb } from "@/lib/sentry";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import {
 	parseCollaborativeSegments,
 	stripMarkdownForTTS,
@@ -47,6 +47,12 @@ export const POST = withCsrf(async (request: Request) => {
 			return new ChatSDKError("unauthorized:chat").toResponse();
 		}
 
+		// Check subscription status before consuming ElevenLabs resources
+		const subscriptionStatus = await checkUserSubscription(user.id);
+		if (!subscriptionStatus.isActive) {
+			return new ChatSDKError("subscription_expired:chat").toResponse();
+		}
+
 		// Rate limit voice API to prevent abuse
 		// Skip rate limiting if Redis not available (allows voice to work without Redis)
 		const rateLimitResult = await checkRateLimit(
@@ -69,14 +75,23 @@ export const POST = withCsrf(async (request: Request) => {
 				return response;
 			}
 		} else {
-			// SECURITY: Redis unavailable - verify via database (fail closed)
+			// SECURITY: Redis unavailable - verify via UserAnalytics (fail closed)
 			// Voice API is expensive (ElevenLabs costs), so we must enforce limits
-			const messageCount = await getMessageCountByUserId({
-				id: user.id,
-				differenceInHours: 24,
-			});
+			const supabaseService = createServiceClient();
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			const { data, error } = await supabaseService
+				.from("UserAnalytics")
+				.select("voiceMinutes")
+				.eq("userId", user.id)
+				.gte("date", today.toISOString())
+				.maybeSingle();
 
-			if (messageCount >= MAX_VOICE_REQUESTS_PER_DAY) {
+			if (error) {
+				return new ChatSDKError("rate_limit:chat").toResponse();
+			}
+
+			if ((Number(data?.voiceMinutes) || 0) >= MAX_VOICE_REQUESTS_PER_DAY) {
 				return new ChatSDKError("rate_limit:chat").toResponse();
 			}
 		}

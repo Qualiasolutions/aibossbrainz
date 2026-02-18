@@ -90,7 +90,7 @@ export function AppSidebar({
 						<div className="flex flex-col gap-3">
 							{/* Logo */}
 							<Link
-								className="flex items-center justify-center"
+								className="flex flex-col items-center justify-center gap-0.5"
 								href="/new"
 								onClick={handleNewChat}
 							>
@@ -107,6 +107,9 @@ export function AppSidebar({
 										className="h-auto w-full max-w-[160px]"
 									/>
 								</motion.div>
+								<span className="text-[10px] tracking-wide text-muted-foreground/60">
+									Powered by Alecci Media
+								</span>
 							</Link>
 
 							{/* Action buttons - consistent height */}
@@ -167,6 +170,9 @@ export function AppSidebar({
 							<SidebarUserNav user={user} isAdmin={isAdmin} />
 						</div>
 					)}
+					<p className="text-center text-[10px] tracking-wide text-muted-foreground/50">
+						Powered by Alecci Media
+					</p>
 				</SidebarFooter>
 			</Sidebar>
 
@@ -181,7 +187,7 @@ export function AppSidebar({
 							<SheetTitle className="sr-only">Navigation Menu</SheetTitle>
 							<div className="flex flex-col gap-3">
 								<Link
-									className="flex items-center justify-center"
+									className="flex flex-col items-center justify-center gap-0.5"
 									href="/new"
 									onClick={handleNewChat}
 								>
@@ -192,6 +198,9 @@ export function AppSidebar({
 										height={45}
 										className="h-auto w-full max-w-[140px]"
 									/>
+									<span className="text-[10px] tracking-wide text-muted-foreground/60">
+										Powered by Alecci Media
+									</span>
 								</Link>
 
 								<div className="flex gap-2">
@@ -247,6 +256,9 @@ export function AppSidebar({
 									<SidebarUserNav user={user} isAdmin={isAdmin} />
 								</div>
 							)}
+							<p className="text-center text-[10px] tracking-wide text-muted-foreground/50">
+								Powered by Alecci Media
+							</p>
 						</div>
 					</SheetContent>
 				</Sheet>

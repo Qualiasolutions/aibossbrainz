@@ -2,13 +2,12 @@
 
 import {
 	Check,
-	CornerDownLeft,
 	Lightbulb,
 	MessageSquare,
 	Sparkles,
 	Target,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type {
 	Suggestion,
 	SuggestionCategory,
@@ -48,7 +47,7 @@ const EXECUTIVE_ICON_BG: Record<BotType, string> = {
 
 type MessageSuggestionsProps = {
 	suggestions: Suggestion[];
-	onSelect: (text: string) => void;
+	onSelect: (texts: string[]) => void;
 	isVisible: boolean;
 	botType?: BotType;
 };
@@ -59,39 +58,43 @@ export function MessageSuggestions({
 	isVisible,
 	botType = "collaborative",
 }: MessageSuggestionsProps) {
-	const [copiedId, setCopiedId] = useState<string | null>(null);
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+	const toggleSuggestion = useCallback(
+		(suggestion: Suggestion) => {
+			setSelectedIds((prev) => {
+				const next = new Set(prev);
+				if (next.has(suggestion.id)) {
+					next.delete(suggestion.id);
+				} else {
+					next.add(suggestion.id);
+				}
+				// Build ordered list of selected texts based on original suggestion order
+				const selectedTexts = suggestions
+					.filter((s) => next.has(s.id))
+					.map((s) => s.text);
+				onSelect(selectedTexts);
+				return next;
+			});
+		},
+		[suggestions, onSelect],
+	);
 
 	if (!isVisible || suggestions.length === 0) {
 		return null;
 	}
 
-	const handleSelect = (suggestion: Suggestion, e: React.MouseEvent) => {
-		// Prevent any default behavior and stop propagation
+	const handleClick = (suggestion: Suggestion, e: React.MouseEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
-
-		// Immediately set copied state for visual feedback
-		setCopiedId(suggestion.id);
-
-		// Call onSelect synchronously
-		onSelect(suggestion.text);
-
-		// Reset after animation completes
-		setTimeout(() => {
-			setCopiedId(null);
-		}, 1500);
+		toggleSuggestion(suggestion);
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent, suggestion: Suggestion) => {
 		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			e.stopPropagation();
-			// Set copied state for visual feedback
-			setCopiedId(suggestion.id);
-			onSelect(suggestion.text);
-			setTimeout(() => {
-				setCopiedId(null);
-			}, 1500);
+			toggleSuggestion(suggestion);
 		}
 	};
 
@@ -112,17 +115,23 @@ export function MessageSuggestions({
 				<span className="font-medium text-xs text-stone-500 dark:text-stone-400">
 					Continue the conversation
 				</span>
+				{selectedIds.size > 0 && (
+					<span className="rounded-full bg-emerald-100 px-1.5 py-0.5 font-medium text-[10px] text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+						{selectedIds.size} selected
+					</span>
+				)}
 			</div>
 
 			{/* Suggestions - responsive flex wrap layout */}
 			<div className="flex flex-wrap gap-2">
 				{suggestions.map((suggestion) => {
 					const Icon = CATEGORY_ICONS[suggestion.category];
-					const isCopied = copiedId === suggestion.id;
+					const isSelected = selectedIds.has(suggestion.id);
 
 					return (
 						<button
-							aria-label={`Ask: ${suggestion.text}`}
+							aria-label={`${isSelected ? "Deselect" : "Select"}: ${suggestion.text}`}
+							aria-pressed={isSelected}
 							className={cn(
 								"suggestion-chip",
 								"group relative flex items-start gap-2 rounded-xl border px-3 py-2",
@@ -131,12 +140,12 @@ export function MessageSuggestions({
 								"shadow-sm",
 								// Responsive width: full on mobile, auto-fit on larger screens
 								"w-full sm:w-auto sm:max-w-[calc(50%-0.25rem)] sm:flex-1 sm:min-w-[200px]",
-								EXECUTIVE_BUTTON_STYLES[botType],
-								isCopied &&
-									"border-emerald-400 bg-emerald-50 dark:border-emerald-600 dark:bg-emerald-950/40",
+								isSelected
+									? "border-emerald-400 bg-emerald-50 dark:border-emerald-600 dark:bg-emerald-950/40"
+									: EXECUTIVE_BUTTON_STYLES[botType],
 							)}
 							key={suggestion.id}
-							onClick={(e) => handleSelect(suggestion, e)}
+							onClick={(e) => handleClick(suggestion, e)}
 							onKeyDown={(e) => handleKeyDown(e, suggestion)}
 							type="button"
 						>
@@ -144,13 +153,13 @@ export function MessageSuggestions({
 							<span
 								className={cn(
 									"flex size-6 shrink-0 items-center justify-center rounded-lg transition-colors",
-									isCopied
+									isSelected
 										? "bg-emerald-100 dark:bg-emerald-900/50"
 										: EXECUTIVE_ICON_BG[botType],
 								)}
 							>
 								<span className="flex items-center justify-center">
-									{isCopied ? (
+									{isSelected ? (
 										<Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
 									) : (
 										<Icon
@@ -167,19 +176,11 @@ export function MessageSuggestions({
 							<span
 								className={cn(
 									"text-left font-medium text-stone-700 leading-snug dark:text-stone-200",
-									isCopied && "text-emerald-700 dark:text-emerald-300",
+									isSelected && "text-emerald-700 dark:text-emerald-300",
 								)}
 							>
 								{suggestion.text}
 							</span>
-
-							{/* Action indicator - only show when copied */}
-							{isCopied && (
-								<span className="chip-in ml-1 flex items-center gap-1 whitespace-nowrap text-xs text-emerald-600 dark:text-emerald-400">
-									<CornerDownLeft className="size-3" />
-									<span className="hidden sm:inline">Added to input</span>
-								</span>
-							)}
 						</button>
 					);
 				})}

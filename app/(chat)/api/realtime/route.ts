@@ -5,6 +5,7 @@ import { systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { getVoiceConfig } from "@/lib/ai/voice-config";
 import { apiRequestLogger } from "@/lib/api-logging";
+import { checkUserSubscription } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import {
@@ -39,6 +40,12 @@ export const POST = withCsrf(async (request: Request) => {
 
 		if (!user) {
 			return new ChatSDKError("unauthorized:chat").toResponse();
+		}
+
+		// Check subscription status before consuming AI and ElevenLabs resources
+		const subscriptionStatus = await checkUserSubscription(user.id);
+		if (!subscriptionStatus.isActive) {
+			return new ChatSDKError("subscription_expired:chat").toResponse();
 		}
 
 		apiLog.start({ userId: user.id });
