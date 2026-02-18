@@ -94,11 +94,11 @@ Plans:
   3. Every AI response log entry includes `inputTokens`, `outputTokens`, model ID, and estimated cost in USD
   4. When daily AI spend crosses a configurable threshold, an admin notification is sent (email or structured log alert)
   5. A monthly cost dashboard or API endpoint aggregates token-to-dollar conversion across all users
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 20-01: TBD
-- [ ] 20-02: TBD
+- [ ] 20-01-PLAN.md — Cost infrastructure (AICostLog table, cost tracker, chat route cost recording, Stripe webhook logging migration, cost cron, cost dashboard API)
+- [ ] 20-02-PLAN.md — Broad structured logging migration across all remaining server-side files (80%+ target)
 
 ## Progress
 
@@ -111,8 +111,8 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 | 17. Security Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 18. Safety Rails | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 19. Voice Quality | v1.3 | 2/2 | Complete | 2026-02-17 |
-| 20. Observability & Cost Controls | v1.3 | 0/TBD | Not started | - |
+| 20. Observability & Cost Controls | v1.3 | 0/2 | In progress | - |
 
 ---
 *Roadmap created: 2026-02-16*
-*Last updated: 2026-02-17 (Phase 19 complete)*
+*Last updated: 2026-02-18 (Phase 20 planned)*
