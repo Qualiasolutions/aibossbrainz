@@ -150,7 +150,7 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
 		background_color: "white",
 	},
 	header: {
-		logo_url: "/images/alecci-media-logo.webp",
+		logo_url: "/images/logo.png",
 	},
 	footer: {
 		tagline: "Sales and Marketing Strategy 24/7",
