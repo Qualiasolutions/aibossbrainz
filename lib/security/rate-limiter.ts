@@ -302,3 +302,77 @@ export async function checkAuthRateLimit(
 		return checkAuthRateLimitMemory(ip, action, maxAttempts);
 	}
 }
+
+// Webhook rate limit: 1-minute window, generous limit (Stripe retries)
+const WEBHOOK_RATE_LIMIT_WINDOW = 60; // 1 minute in seconds
+const WEBHOOK_MAX_REQUESTS = 100; // 100 requests per minute per IP
+
+/**
+ * In-memory webhook rate limit fallback.
+ */
+function checkWebhookRateLimitMemory(ip: string): {
+	allowed: boolean;
+	remaining: number;
+} {
+	const key = `webhook:${ip}`;
+	const now = Date.now();
+	const entry = authRateLimitMemory.get(key);
+
+	if (entry && entry.expiresAt <= now) {
+		authRateLimitMemory.delete(key);
+	}
+
+	const existing = authRateLimitMemory.get(key);
+	if (existing) {
+		existing.count++;
+		return {
+			allowed: existing.count <= WEBHOOK_MAX_REQUESTS,
+			remaining: Math.max(0, WEBHOOK_MAX_REQUESTS - existing.count),
+		};
+	}
+
+	authRateLimitMemory.set(key, {
+		count: 1,
+		expiresAt: now + WEBHOOK_RATE_LIMIT_WINDOW * 1000,
+	});
+
+	return {
+		allowed: true,
+		remaining: WEBHOOK_MAX_REQUESTS - 1,
+	};
+}
+
+/**
+ * IP-based rate limit for the Stripe webhook endpoint.
+ * Uses a short window (1 minute) with a generous limit to avoid
+ * blocking legitimate Stripe retries while preventing DoS.
+ * Falls back to in-memory rate limiting when Redis is unavailable.
+ */
+export async function checkWebhookRateLimit(ip: string): Promise<{
+	allowed: boolean;
+	remaining: number;
+}> {
+	const redis = await getRedisClient();
+
+	if (!redis) {
+		return checkWebhookRateLimitMemory(ip);
+	}
+
+	const windowStart = Math.floor(Date.now() / (WEBHOOK_RATE_LIMIT_WINDOW * 1000));
+	const key = `webhookratelimit:${ip}:${windowStart}`;
+
+	try {
+		const current = await redis.incr(key);
+
+		if (current === 1) {
+			await redis.expire(key, WEBHOOK_RATE_LIMIT_WINDOW);
+		}
+
+		return {
+			allowed: current <= WEBHOOK_MAX_REQUESTS,
+			remaining: Math.max(0, WEBHOOK_MAX_REQUESTS - current),
+		};
+	} catch {
+		return checkWebhookRateLimitMemory(ip);
+	}
+}

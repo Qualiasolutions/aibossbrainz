@@ -5,6 +5,7 @@ import { getUserFullProfile } from "@/lib/db/queries";
 import { sendTrialStartedEmail } from "@/lib/email/subscription-emails";
 import { createRequestLogger, logger } from "@/lib/logger";
 import { applyPaidTag, applyTrialTags } from "@/lib/mailchimp/tags";
+import { checkWebhookRateLimit } from "@/lib/security/rate-limiter";
 import {
 	activateSubscription,
 	expireSubscription,
@@ -12,7 +13,10 @@ import {
 	startTrial,
 } from "@/lib/stripe/actions";
 import { getStripe, PLAN_DETAILS, STRIPE_PRICES } from "@/lib/stripe/config";
-import { markEventProcessed } from "@/lib/stripe/webhook-dedup";
+import {
+	persistFailedEvent,
+	shouldProcessEvent,
+} from "@/lib/stripe/webhook-dedup";
 
 export const maxDuration = 60;
 
@@ -99,8 +103,22 @@ export async function POST(request: Request) {
 		);
 	}
 
-	const body = await request.text();
+	// IP-based rate limiting (before signature verification to save CPU)
 	const headersList = await headers();
+	const clientIp =
+		headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+		headersList.get("x-real-ip") ||
+		"unknown";
+	const rateLimitResult = await checkWebhookRateLimit(clientIp);
+	if (!rateLimitResult.allowed) {
+		logger.warn({ clientIp }, "Webhook rate limit exceeded");
+		return NextResponse.json(
+			{ error: "Rate limit exceeded" },
+			{ status: 429 },
+		);
+	}
+
+	const body = await request.text();
 	const signature = headersList.get("stripe-signature");
 
 	if (!signature) {
@@ -123,8 +141,8 @@ export async function POST(request: Request) {
 	reqLog.info({ eventType: event.type }, "Processing Stripe webhook event");
 
 	try {
-		// Event-ID dedup: skip if this exact event was already processed
-		const isNew = await markEventProcessed(
+		// Event-ID dedup + advisory lock: skip if already processed, serialize per-user
+		const isNew = await shouldProcessEvent(
 			event.id,
 			event.type,
 			extractUserId(event),
@@ -501,6 +519,16 @@ export async function POST(request: Request) {
 		return NextResponse.json({ received: true });
 	} catch (error) {
 		reqLog.error({ err: error }, "Error processing webhook event");
+
+		// Persist failed event to dead-letter queue for inspection/replay
+		await persistFailedEvent(
+			event.id,
+			event.type,
+			extractUserId(event),
+			error instanceof Error ? error : new Error(String(error)),
+			event,
+		);
+
 		return NextResponse.json(
 			{ error: "Webhook handler failed" },
 			{ status: 500 },
