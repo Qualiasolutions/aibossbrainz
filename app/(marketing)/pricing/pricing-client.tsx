@@ -257,25 +257,9 @@ function PricingCard({
 								>
 									{feature.text}
 								</p>
-								<p
-									className={cn(
-										"mt-0.5 text-xs",
-										feature.highlight
-											? "text-red-600 font-semibold"
-											: "text-stone-500",
-									)}
-								>
-									VALUED at {feature.value}
-								</p>
 							</div>
 						</motion.div>
 					))}
-				</div>
-
-				{/* Total Value */}
-				<div className="mt-6 rounded-xl border border-dashed border-stone-300 bg-stone-50/50 p-4 text-center">
-					<p className="text-sm text-stone-500">Total Value</p>
-					<p className="font-bold text-2xl text-stone-900">{plan.totalValue}</p>
 				</div>
 
 				{/* CTA */}

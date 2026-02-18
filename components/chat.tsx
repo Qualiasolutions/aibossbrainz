@@ -5,7 +5,40 @@ import { DefaultChatTransport } from "ai";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CanvasType } from "@/lib/supabase/types";
+import useSWR, { useSWRConfig } from "swr";
+import { unstable_serialize } from "swr/infinite";
+import {
+	initialArtifactData,
+	useArtifact,
+	useArtifactSelector,
+} from "@/hooks/use-artifact";
+import { useAutoResume } from "@/hooks/use-auto-resume";
+import { useAutoSpeak } from "@/hooks/use-auto-speak";
+import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useVoiceCall } from "@/hooks/use-voice-call";
+import {
+	BOT_PERSONALITIES,
+	type BotType,
+	type FocusMode,
+} from "@/lib/bot-personalities";
+import { exportConversationToPDF } from "@/lib/conversation-export";
+import { ChatSDKError } from "@/lib/errors";
+import type { CanvasType, Vote } from "@/lib/supabase/types";
+import type { Attachment, ChatMessage } from "@/lib/types";
+import type { AppUsage } from "@/lib/usage";
+import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
+import { ChatHeader } from "./chat/chat-header";
+import { useDataStream } from "./data-stream-provider";
+import { ExecutiveLanding } from "./executive-landing";
+import { FocusModeChips } from "./focus-mode-chips";
+import { Messages } from "./messages";
+import { MultimodalInput } from "./multimodal-input";
+import { OnboardingModal } from "./onboarding-modal";
+import { ReactionItemsPopup } from "./reaction-items-popup";
+import { getChatHistoryPaginationKey } from "./sidebar-history";
+import { toast } from "./toast";
+import { useSidebar } from "./ui/sidebar";
 import type { VisibilityType } from "./visibility-selector";
 
 const Artifact = dynamic(
@@ -139,39 +172,6 @@ export function Chat({
 	};
 
 	// Watch for strategyCanvas tool calls to auto-open the panel
-	useEffect(() => {
-		const lastMessage = messages.at(-1);
-		if (!lastMessage || lastMessage.role !== "assistant") return;
-
-		if (lastMessage.toolInvocations) {
-			for (const toolInvocation of lastMessage.toolInvocations) {
-				// Only process finished tool calls that we haven't seen yet
-				if (
-					toolInvocation.toolName === "strategyCanvas" &&
-					toolInvocation.state === "result" &&
-					!processedToolCallIds.current.has(toolInvocation.toolCallId)
-				) {
-					processedToolCallIds.current.add(toolInvocation.toolCallId);
-
-					// Parse arguments to find section
-					const args = toolInvocation.args;
-					const section = args?.section;
-
-					if (section && sectionToCanvasType[section]) {
-						const canvasType = sectionToCanvasType[section];
-						setTargetCanvasTab(canvasType);
-						setCanvasRefreshVersion((prev) => prev + 1);
-						setIsSwotPanelOpen(true);
-
-						toast({
-							type: "success",
-							description: `Updated ${canvasType.toUpperCase()} canvas`,
-						});
-					}
-				}
-			}
-		}
-	}, [messages]);
 
 	// Handler for bot switching with toast notification
 	const handleBotChange = (newBot: BotType) => {
@@ -280,6 +280,41 @@ export function Chat({
 			clearError();
 		},
 	});
+
+	// Watch for strategyCanvas tool calls to auto-open the panel
+	useEffect(() => {
+		const lastMessage = messages.at(-1);
+		if (!lastMessage || lastMessage.role !== "assistant") return;
+
+		if (lastMessage.toolInvocations) {
+			for (const toolInvocation of lastMessage.toolInvocations) {
+				// Only process finished tool calls that we haven't seen yet
+				if (
+					toolInvocation.toolName === "strategyCanvas" &&
+					toolInvocation.state === "result" &&
+					!processedToolCallIds.current.has(toolInvocation.toolCallId)
+				) {
+					processedToolCallIds.current.add(toolInvocation.toolCallId);
+
+					// Parse arguments to find section
+					const args = toolInvocation.args;
+					const section = args?.section;
+
+					if (section && sectionToCanvasType[section]) {
+						const canvasType = sectionToCanvasType[section];
+						setTargetCanvasTab(canvasType);
+						setCanvasRefreshVersion((prev) => prev + 1);
+						setIsSwotPanelOpen(true);
+
+						toast({
+							type: "success",
+							description: `Updated ${canvasType.toUpperCase()} canvas`,
+						});
+					}
+				}
+			}
+		}
+	}, [messages]);
 
 	// Wrap sendMessage to capture the botType at send time and store message for rollback
 	const sendMessage = (message: Parameters<typeof originalSendMessage>[0]) => {
