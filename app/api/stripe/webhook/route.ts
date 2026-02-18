@@ -3,6 +3,7 @@ import { after, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getUserFullProfile } from "@/lib/db/queries";
 import { sendTrialStartedEmail } from "@/lib/email/subscription-emails";
+import { createRequestLogger, logger } from "@/lib/logger";
 import { applyPaidTag, applyTrialTags } from "@/lib/mailchimp/tags";
 import {
 	activateSubscription,
@@ -31,22 +32,24 @@ async function applyMailchimpTags(
 		if (type === "trial") {
 			const result = await applyTrialTags(email, subscriptionType ?? null);
 			if (!result.success) {
-				console.error(
-					`[Stripe Webhook] Mailchimp trial tagging failed for ${email}: ${result.error}`,
+				logger.error(
+					{ email, tagType: "trial", err: result.error },
+					"Mailchimp trial tagging failed",
 				);
 			}
 		} else if (type === "paid" && subscriptionType) {
 			const result = await applyPaidTag(email, subscriptionType);
 			if (!result.success) {
-				console.error(
-					`[Stripe Webhook] Mailchimp paid tagging failed for ${email}: ${result.error}`,
+				logger.error(
+					{ email, tagType: "paid", subscriptionType, err: result.error },
+					"Mailchimp paid tagging failed",
 				);
 			}
 		}
 	} catch (error) {
-		console.error(
-			`[Stripe Webhook] Mailchimp tagging error for ${email}:`,
-			error,
+		logger.error(
+			{ err: error, email, tagType: type },
+			"Mailchimp tagging error",
 		);
 	}
 }
@@ -84,7 +87,7 @@ async function isAlreadyProcessed(
 
 export async function POST(request: Request) {
 	if (!webhookSecret) {
-		console.error("[Stripe Webhook] Missing STRIPE_WEBHOOK_SECRET");
+		logger.error("Missing STRIPE_WEBHOOK_SECRET");
 		return NextResponse.json(
 			{ error: "Webhook secret not configured" },
 			{ status: 500 },
@@ -107,11 +110,12 @@ export async function POST(request: Request) {
 	try {
 		event = getStripe().webhooks.constructEvent(body, signature, webhookSecret);
 	} catch (_err) {
-		console.error("[Stripe Webhook] Signature verification failed");
+		logger.error("Stripe signature verification failed");
 		return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
 	}
 
-	console.log(`[Stripe Webhook] Processing event: ${event.type}`);
+	const reqLog = createRequestLogger(event.id);
+	reqLog.info({ eventType: event.type }, "Processing Stripe webhook event");
 
 	try {
 		switch (event.type) {
@@ -124,8 +128,9 @@ export async function POST(request: Request) {
 				);
 
 				if (userId && !subscriptionType && session.metadata?.subscriptionType) {
-					console.error(
-						`[SECURITY] Invalid subscriptionType in checkout metadata: "${session.metadata.subscriptionType}" for user ${userId}`,
+					logger.error(
+						{ userId, subscriptionType: session.metadata.subscriptionType },
+						"Invalid subscriptionType in checkout metadata",
 					);
 				}
 
@@ -148,8 +153,9 @@ export async function POST(request: Request) {
 								subscription.id,
 							)
 						) {
-							console.log(
-								`[Stripe Webhook] checkout.session.completed: already processed for user ${userId}, skipping`,
+							reqLog.info(
+								{ userId, eventType: "checkout.session.completed" },
+								"Already processed, skipping",
 							);
 							break;
 						}
@@ -163,8 +169,9 @@ export async function POST(request: Request) {
 									stripeSubscriptionId: subscription.id,
 									trialEndDate,
 								});
-								console.log(
-									`[Stripe Webhook] checkout.session.completed: started trial for user ${userId}`,
+								reqLog.info(
+									{ userId, subscriptionType, eventType: "checkout.session.completed" },
+									"Started trial via checkout",
 								);
 
 								// Apply Mailchimp trial tag + send email (non-blocking)
@@ -181,9 +188,9 @@ export async function POST(request: Request) {
 											planName: planDetails?.name || subscriptionType,
 										});
 									} catch (err) {
-										console.error(
-											"[Stripe Webhook] checkout trial after() error:",
-											err,
+										logger.error(
+											{ err, phase: "after", userId },
+											"Checkout trial after() error",
 										);
 									}
 								});
@@ -194,8 +201,9 @@ export async function POST(request: Request) {
 								subscriptionType,
 								stripeSubscriptionId: subscription.id,
 							});
-							console.log(
-								`[Stripe Webhook] checkout.session.completed: activated subscription for user ${userId}`,
+							reqLog.info(
+								{ userId, subscriptionType, eventType: "checkout.session.completed" },
+								"Subscription activated via checkout",
 							);
 
 							// Apply Mailchimp paid tag (non-blocking)
@@ -210,17 +218,17 @@ export async function POST(request: Request) {
 										);
 									}
 								} catch (err) {
-									console.error(
-										"[Stripe Webhook] checkout paid after() error:",
-										err,
+									logger.error(
+										{ err, phase: "after", userId },
+										"Checkout paid after() error",
 									);
 								}
 							});
 						}
 					} catch (retrieveError) {
-						console.error(
-							`[Stripe Webhook] Failed to retrieve subscription ${subscriptionId}:`,
-							retrieveError,
+						reqLog.error(
+							{ err: retrieveError, subscriptionId },
+							"Failed to retrieve subscription",
 						);
 					}
 				}
@@ -244,8 +252,9 @@ export async function POST(request: Request) {
 							subscription.id,
 						)
 					) {
-						console.log(
-							`[Stripe Webhook] customer.subscription.created: already processed for user ${userId}, skipping`,
+						reqLog.info(
+							{ userId, eventType: "customer.subscription.created" },
+							"Already processed, skipping",
 						);
 						break;
 					}
@@ -253,8 +262,9 @@ export async function POST(request: Request) {
 					if (subscription.status === "trialing" && subscription.trial_end) {
 						const trialEndDate = new Date(subscription.trial_end * 1000);
 						if (Number.isNaN(trialEndDate.getTime())) {
-							console.error(
-								`[Stripe Webhook] Invalid trial_end: ${subscription.trial_end}`,
+							reqLog.error(
+								{ trialEnd: subscription.trial_end },
+								"Invalid trial_end value",
 							);
 							break;
 						}
@@ -265,8 +275,9 @@ export async function POST(request: Request) {
 							stripeSubscriptionId: subscription.id,
 							trialEndDate,
 						});
-						console.log(
-							`[Stripe Webhook] Started 14-day trial for ${subscriptionType} subscription for user ${userId}`,
+						reqLog.info(
+							{ userId, subscriptionType },
+							"Started 14-day trial",
 						);
 
 						// Apply Mailchimp trial tag + send email (non-blocking)
@@ -283,9 +294,9 @@ export async function POST(request: Request) {
 									planName: planDetails?.name || subscriptionType,
 								});
 							} catch (err) {
-								console.error(
-									"[Stripe Webhook] subscription.created trial after() error:",
-									err,
+								logger.error(
+									{ err, phase: "after", userId },
+									"Subscription created trial after() error",
 								);
 							}
 						});
@@ -295,8 +306,9 @@ export async function POST(request: Request) {
 							subscriptionType,
 							stripeSubscriptionId: subscription.id,
 						});
-						console.log(
-							`[Stripe Webhook] Activated ${subscriptionType} subscription for user ${userId}`,
+						reqLog.info(
+							{ userId, subscriptionType },
+							"Subscription activated",
 						);
 
 						// Apply Mailchimp paid tag (non-blocking)
@@ -311,9 +323,9 @@ export async function POST(request: Request) {
 									);
 								}
 							} catch (err) {
-								console.error(
-									"[Stripe Webhook] subscription.created paid after() error:",
-									err,
+								logger.error(
+									{ err, phase: "after", userId },
+									"Subscription created paid after() error",
 								);
 							}
 						});
@@ -353,8 +365,9 @@ export async function POST(request: Request) {
 								subscriptionType,
 								stripeSubscriptionId: subscription.id,
 							});
-							console.log(
-								`[Stripe Webhook] Payment received, activated ${subscriptionType} subscription for user ${userId}`,
+							reqLog.info(
+								{ userId, subscriptionType },
+								"Payment received, subscription activated",
 							);
 
 							// Apply Mailchimp paid tag (non-blocking)
@@ -369,9 +382,9 @@ export async function POST(request: Request) {
 										);
 									}
 								} catch (err) {
-									console.error(
-										"[Stripe Webhook] invoice.paid after() error:",
-										err,
+									logger.error(
+										{ err, phase: "after", userId },
+										"Invoice paid after() error",
 									);
 								}
 							});
@@ -384,8 +397,9 @@ export async function POST(request: Request) {
 								await getStripe().subscriptions.update(subscription.id, {
 									cancel_at_period_end: true,
 								});
-								console.log(
-									`[Stripe Webhook] Set ${subscriptionType} subscription to cancel at period end`,
+								reqLog.info(
+									{ subscriptionType, subscriptionId: subscription.id },
+									"Set subscription to cancel at period end",
 								);
 							}
 						} else if (invoice.period_end) {
@@ -393,27 +407,30 @@ export async function POST(request: Request) {
 							const periodEndDate = new Date(periodEndMs);
 
 							if (Number.isNaN(periodEndDate.getTime())) {
-								console.error(
-									`[Stripe Webhook] Invalid period_end value: ${invoice.period_end}`,
+								reqLog.error(
+									{ periodEnd: invoice.period_end },
+									"Invalid period_end value",
 								);
 							} else {
 								await renewSubscription({
 									stripeSubscriptionId: subscription.id,
 									periodEnd: periodEndDate,
 								});
-								console.log(
-									`[Stripe Webhook] Renewed subscription ${subscription.id}`,
+								reqLog.info(
+									{ subscriptionId: subscription.id },
+									"Renewed subscription",
 								);
 							}
 						} else {
-							console.warn(
-								`[Stripe Webhook] invoice.paid: No userId/subscriptionType in metadata and no period_end. Subscription: ${subscription.id}`,
+							reqLog.warn(
+								{ subscriptionId: subscription.id },
+								"invoice.paid: No userId/subscriptionType in metadata and no period_end",
 							);
 						}
 					} catch (retrieveError) {
-						console.error(
-							`[Stripe Webhook] Failed to retrieve subscription ${subscriptionId}:`,
-							retrieveError,
+						reqLog.error(
+							{ err: retrieveError, subscriptionId },
+							"Failed to retrieve subscription",
 						);
 					}
 				}
@@ -443,12 +460,14 @@ export async function POST(request: Request) {
 							subscriptionType: newSubscriptionType,
 							stripeSubscriptionId: subscription.id,
 						});
-						console.log(
-							`[Stripe Webhook] Plan changed to ${newSubscriptionType} for user ${userId}`,
+						reqLog.info(
+							{ userId, subscriptionType: newSubscriptionType },
+							"Plan changed",
 						);
 					} else {
-						console.warn(
-							`[Stripe Webhook] customer.subscription.updated: Unknown price ID ${newPriceId} for user ${userId}`,
+						reqLog.warn(
+							{ userId, priceId: newPriceId },
+							"customer.subscription.updated: Unknown price ID",
 						);
 					}
 				}
@@ -462,13 +481,15 @@ export async function POST(request: Request) {
 
 				// Don't expire lifetime/annual subscriptions when they "end" - they're still valid
 				if (subscriptionType === "lifetime" || subscriptionType === "annual") {
-					console.log(
-						`[Stripe Webhook] ${subscriptionType} subscription ${subscription.id} ended (user retains access)`,
+					reqLog.info(
+						{ subscriptionType, subscriptionId: subscription.id },
+						"Subscription ended (user retains access)",
 					);
 				} else {
 					await expireSubscription(subscription.id);
-					console.log(
-						`[Stripe Webhook] Expired subscription ${subscription.id}`,
+					reqLog.info(
+						{ subscriptionId: subscription.id },
+						"Subscription expired",
 					);
 				}
 				break;
@@ -477,19 +498,20 @@ export async function POST(request: Request) {
 			// Handle failed payment
 			case "invoice.payment_failed": {
 				const invoice = event.data.object as Stripe.Invoice;
-				console.warn(
-					`[Stripe Webhook] Payment failed for invoice ${invoice.id}`,
+				reqLog.warn(
+					{ invoiceId: invoice.id },
+					"Payment failed",
 				);
 				break;
 			}
 
 			default:
-				console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
+				reqLog.info({ eventType: event.type }, "Unhandled event type");
 		}
 
 		return NextResponse.json({ received: true });
 	} catch (error) {
-		console.error("[Stripe Webhook] Error processing event:", error);
+		reqLog.error({ err: error }, "Error processing webhook event");
 		return NextResponse.json(
 			{ error: "Webhook handler failed" },
 			{ status: 500 },

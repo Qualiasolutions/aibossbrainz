@@ -29,6 +29,7 @@ import { strategyCanvas } from "@/lib/ai/tools/strategy-canvas";
 import { webSearch } from "@/lib/ai/tools/web-search";
 import { classifyTopic } from "@/lib/ai/topic-classifier";
 import { recordAnalytics } from "@/lib/analytics/queries";
+import { recordAICost } from "@/lib/cost/tracker";
 import { apiRequestLogger } from "@/lib/api-logging";
 import type { Session } from "@/lib/artifacts/server";
 import type { BotType, FocusMode } from "@/lib/bot-personalities";
@@ -86,10 +87,7 @@ const getTokenlensCatalog = cache(
 		try {
 			return await fetchModels();
 		} catch (err) {
-			console.warn(
-				"TokenLens: catalog fetch failed, using default catalog",
-				err,
-			);
+			logger.warn({ err }, "TokenLens catalog fetch failed, using default catalog");
 			return; // tokenlens helpers will fall back to defaultCatalog
 		}
 	},
@@ -245,7 +243,7 @@ export const POST = withCsrf(async (request: Request) => {
 						});
 					}
 				} catch (err) {
-					console.warn("Background title generation failed:", err);
+					logger.warn({ err }, "Background title generation failed");
 				}
 			});
 		}
@@ -390,7 +388,7 @@ export const POST = withCsrf(async (request: Request) => {
 							finalMergedUsage = { ...usage, ...summary, modelId } as AppUsage;
 							dataStream.write({ type: "data-usage", data: finalMergedUsage });
 						} catch (err) {
-							console.warn("TokenLens enrichment failed", err);
+							logger.warn({ err }, "TokenLens enrichment failed");
 							finalMergedUsage = usage;
 							dataStream.write({ type: "data-usage", data: finalMergedUsage });
 						}
@@ -498,15 +496,34 @@ export const POST = withCsrf(async (request: Request) => {
 							chatId: id,
 							context: finalMergedUsage,
 						});
-						// Record token usage analytics
+						// Record token usage analytics and AI cost
 						const inputTokens = finalMergedUsage.inputTokens || 0;
 						const outputTokens = finalMergedUsage.outputTokens || 0;
 						const totalTokens = inputTokens + outputTokens;
 						if (totalTokens > 0) {
+							const resolvedModelId = finalMergedUsage.modelId ?? selectedChatModel;
+							const costUSD = finalMergedUsage.costUSD?.totalUSD ?? 0;
+
+							logger.info({
+								chatId: id,
+								modelId: resolvedModelId,
+								inputTokens,
+								outputTokens,
+								costUSD,
+							}, "AI response completed");
+
 							after(() => recordAnalytics(user.id, "token", totalTokens));
+							after(() => recordAICost({
+								userId: user.id,
+								chatId: id,
+								modelId: resolvedModelId,
+								inputTokens,
+								outputTokens,
+								costUSD,
+							}));
 						}
 					} catch (err) {
-						console.warn("Unable to persist last usage for chat", id, err);
+						logger.warn({ err, chatId: id }, "Unable to persist last usage for chat");
 					}
 				}
 
@@ -537,7 +554,7 @@ export const POST = withCsrf(async (request: Request) => {
 							}
 						}
 					} catch (err) {
-						console.warn("Failed to generate conversation summary:", err);
+						logger.warn({ err, chatId: id }, "Failed to generate conversation summary");
 					}
 				});
 			},
