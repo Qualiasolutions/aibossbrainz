@@ -15,7 +15,7 @@ v1.4 systematically remediates the remaining 50 findings from the AI Production 
 ## Phases
 
 - [x] **Phase 21: Prompt Security Hardening** - Eliminate prompt injection vectors across all AI entry points
-- [ ] **Phase 22: Auth & Subscription Guards** - Close subscription enforcement gaps on voice/realtime endpoints
+- [x] **Phase 22: Auth & Subscription Guards** - Close subscription enforcement gaps on voice/realtime endpoints
 - [x] **Phase 23: Webhook Reliability** - Achieve true idempotency and failure resilience for Stripe webhooks
 - [ ] **Phase 24: Model Resilience & Voice Optimization** - Harden AI provider failover and optimize voice cost/latency
 - [ ] **Phase 25: Security, Performance & Cost Controls** - Tighten validation, add pagination, pin model versions
@@ -52,7 +52,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 22-01-PLAN.md — Subscription enforcement, rate limit DB fallback fixes, and demo CSRF protection (AUTH-01 through AUTH-05)
+- [x] 22-01-PLAN.md — Subscription enforcement, rate limit DB fallback fixes, and demo CSRF protection (AUTH-01 through AUTH-05)
 
 ### Phase 23: Webhook Reliability
 **Goal**: Stripe webhook processing is idempotent, race-condition-free, and failure-resilient
@@ -126,7 +126,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 21. Prompt Security Hardening | 2/2 | Complete | 2026-02-18 |
-| 22. Auth & Subscription Guards | 0/1 | Not started | - |
+| 22. Auth & Subscription Guards | 1/1 | Complete | 2026-02-18 |
 | 23. Webhook Reliability | 3/3 | Complete | 2026-02-18 |
 | 24. Model Resilience & Voice | 0/2 | Not started | - |
 | 25. Security, Performance & Cost | 0/3 | Not started | - |
