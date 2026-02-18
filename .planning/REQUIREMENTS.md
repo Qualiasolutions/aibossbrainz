@@ -1,128 +1,120 @@
 # Requirements: AI Boss Brainz
 
-**Defined:** 2026-02-16
-**Core Value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Source:** AI-PRODUCTION-AUDIT.md (scored 58/100, grade F — 10 critical, 24 high findings)
+**Defined:** 2026-02-18
+**Core Value:** Founders get instant, actionable sales and marketing strategy from AI executives who remember context and deliver frameworks-based guidance.
 
-## v1.3 Requirements
+## v1.4 Requirements
 
-Requirements for AI Production Hardening. Each maps to audit findings by ID.
+Requirements for AI Production Audit completion. All findings from audit report systematically addressed.
 
-### Model Resilience (RESIL)
+### Prompt Security
 
-- [ ] **RESIL-01**: AI chat has a fallback model chain — if primary model is unavailable, a secondary model handles requests (C-1)
-- [ ] **RESIL-02**: AI model is pinned to a stable versioned identifier, not a preview/unstable model (C-4)
-- [ ] **RESIL-03**: `generateTitleFromUserMessage` is wrapped in resilience (circuit breaker + retry + AbortController with 10s timeout) (C-6)
-- [ ] **RESIL-04**: Main `streamText` call has explicit AbortController with timeout (H-1)
-- [ ] **RESIL-05**: `generateConversationSummary` is wrapped in resilience (circuit breaker + retry + AbortController) (H-5)
+- [ ] **PROMPT-01**: Fix title generation prompt injection (M-1) - sanitize user messages in title prompts
+- [ ] **PROMPT-02**: Fix document title injection (M-2) - sanitize artifact generation prompts
+- [ ] **PROMPT-03**: Fix personalization context injection (M-3) - sanitize user profile/canvas data
+- [ ] **PROMPT-04**: Fix conversation summarizer injection (M-4) - sanitize conversation text input
+- [ ] **PROMPT-05**: Add demo chat safety middleware (M-5) - canary tokens and PII scanning
+- [ ] **PROMPT-06**: Sanitize request suggestions content (L-1) - XML wrapping for document content
+- [ ] **PROMPT-07**: Extend sanitizePromptContent blocklist (L-2) - cover system tags and role markers
+- [ ] **PROMPT-08**: Hash canary token generation (L-3) - use SHA256 instead of raw secret prefix
+- [ ] **PROMPT-09**: Document streaming PII bypass limitation (L-4) - update docs on detection-only nature
 
-### Safety Rails (SAFE)
+### Auth & Subscription
 
-- [ ] **SAFE-01**: AI responses pass through a streaming output validator that checks for PII patterns and system prompt leaks before delivery (C-2)
-- [ ] **SAFE-02**: User messages are PII-redacted (SSN, credit card, etc.) before storage in Postgres (C-3)
-- [ ] **SAFE-03**: `updateDocumentPrompt` sanitizes document content before injecting into system prompt (H-3)
-- [ ] **SAFE-04**: AI suggests human support escalation when it cannot help (H-6)
-- [ ] **SAFE-05**: When `maxOutputTokens` truncates a response, user sees a clear indicator (H-7)
-- [ ] **SAFE-06**: AI-generated suggestions are validated for content safety and have length limits (H-19)
+- [ ] **AUTH-01**: Add subscription check to voice API (M-6) - prevent expired users from TTS generation
+- [ ] **AUTH-02**: Add subscription check to realtime endpoints (M-7) - prevent expired voice chat access
+- [ ] **AUTH-03**: Fix voice rate limit DB fallback (L-5) - track voice requests not chat messages
+- [ ] **AUTH-04**: Add CSRF protection to demo chat (L-6) - prevent cross-origin abuse
+- [ ] **AUTH-05**: Fix export rate limit DB fallback (L-7) - query AuditLog entries when Redis down
 
-### Tool Hardening (TOOL)
+### Model Resilience
 
-- [ ] **TOOL-01**: Weather API validates `response.ok`, validates response structure, and wraps in try/catch with user-friendly error (C-7)
-- [ ] **TOOL-02**: Weather API fetch has AbortController with 10s timeout (C-10)
-- [ ] **TOOL-03**: `requestSuggestions` tool has explicit authorization check that doesn't leak document ID existence (H-8)
-- [ ] **TOOL-04**: `strategyCanvas` tool has fast-fail auth check before DB write with specific error handling (H-9)
+- [ ] **RESIL-01**: Add OpenRouter rate limit header parsing (M-12) - respect retry-after values
+- [ ] **RESIL-02**: Implement provider-level fallback (M-13) - secondary provider when OpenRouter down
+- [ ] **RESIL-03**: Add collaborative voice error isolation (M-14) - per-segment error handling
+- [ ] **RESIL-04**: Add Zod validation to conversation summarizer (L-11) - schema validation for AI JSON
+- [ ] **RESIL-05**: Add OpenRouter probe to health check (L-12) - verify AI provider reachability
+- [ ] **RESIL-06**: Fix circuit breaker error classification (L-13) - only record transient failures
 
-### Security Hardening (SEC)
+### Voice & Realtime
 
-- [ ] **SEC-01**: Root layout theme script uses `next/script` instead of `dangerouslySetInnerHTML` (C-8)
-- [ ] **SEC-02**: Middleware has allowlist pattern for unauthenticated API routes instead of blanket bypass (H-2)
-- [ ] **SEC-03**: Realtime routes validate user message with Zod (length limit, type check) (H-4)
-- [ ] **SEC-04**: Health endpoint requires authentication or hides internal service names (H-10)
+- [ ] **VOICE-01**: Implement TTS caching system (M-15) - cache repeated audio generation
+- [ ] **VOICE-02**: Add rate limiting to realtime route (M-16) - prevent unbounded AI/TTS costs
+- [ ] **VOICE-03**: Optimize realtime audio streaming (M-17) - avoid base64 data URLs
 
-### Voice Quality (VOICE)
+### Webhook Reliability
 
-- [ ] **VOICE-01**: Collaborative multi-voice audio uses proper MP3 frame boundary detection for concatenation (C-9)
-- [ ] **VOICE-02**: ElevenLabs API calls include `optimize_streaming_latency` parameter (H-15)
-- [ ] **VOICE-03**: Collaborative segments use streaming TTS endpoint instead of non-streaming (H-16)
-- [ ] **VOICE-04**: Realtime route uses same TTS model and voice settings as `voice-config.ts` (H-17)
-- [ ] **VOICE-05**: Greeting audio respects browser autoplay policies (user gesture required) (H-18)
-- [ ] **VOICE-06**: Realtime markdown stripping uses shared utility from `lib/voice/strip-markdown-tts.ts` (H-21)
+- [ ] **WEBHOOK-01**: Add maxDuration to Stripe webhook (M-8) - prevent Vercel timeout
+- [ ] **WEBHOOK-02**: Implement event-ID deduplication (M-9) - true idempotency for Stripe events
+- [ ] **WEBHOOK-03**: Add idempotency to subscription.updated (M-10) - prevent redundant updates
+- [ ] **WEBHOOK-04**: Add idempotency to invoice.paid (M-11) - prevent date drift
+- [ ] **WEBHOOK-05**: Fix webhook race conditions (L-8) - database locking for concurrent events
+- [ ] **WEBHOOK-06**: Add dead-letter queue for failures (L-9) - persistent failure tracking
+- [ ] **WEBHOOK-07**: Add webhook endpoint rate limiting (L-10) - prevent DoS via signed events
 
-### Observability (OBS)
+### Security & Validation
 
-- [ ] **OBS-01**: Stripe webhook uses structured `logger.*` calls with request IDs and user context instead of `console.log` (H-11)
-- [ ] **OBS-02**: At least 80% of logging calls use structured `logger.*` instead of `console.log/error/warn` (H-12)
-- [ ] **OBS-03**: AI response logging includes `inputTokens`, `outputTokens`, model ID, and cost data (H-13)
-- [ ] **OBS-04**: Stack traces in error paths use `apiRequestLogger.error()` pattern (H-20)
+- [ ] **SEC-01**: Fix Zod error detail leaks (L-14) - return generic validation errors to clients
+- [ ] **SEC-02**: Tighten CSP unsafe-inline policy (L-15) - consider nonces/hashes for scripts
+- [ ] **SEC-03**: Update ajv dependency vulnerability (L-16) - upgrade when Sentry updates
 
-### Cost Controls (COST)
+### Performance & Cost
 
-- [ ] **COST-01**: Daily cost check mechanism alerts admin when spend thresholds are breached (C-5)
-- [ ] **COST-02**: Monthly cost estimation tracks token-to-dollar conversion aggregated across users (H-14)
+- [ ] **PERF-01**: Add message pagination to chat page (L-17) - limit initial message load
+- [ ] **PERF-02**: Optimize conversation summary frequency (L-18) - interval-based generation
+- [ ] **PERF-03**: Add message rollback on stream failure (L-19) - clean up dangling messages
+- [ ] **COST-01**: Pin model versions with date suffixes (L-20) - prevent silent version drift
+- [ ] **COST-02**: Align model documentation (L-21) - fix Gemini version references
+- [ ] **COST-03**: Add cost tracking to demo chat (L-22) - log token usage
+- [ ] **COST-04**: Implement per-user spending alerts (L-23) - daily/monthly cost aggregation
 
-## v1.4 Requirements (Deferred)
+### Documentation & Info
 
-Medium and low severity findings deferred from the audit.
+- [ ] **DOC-01**: Document updateDocumentPrompt code handling (I-1) - clarify intentional trade-off
+- [ ] **DOC-02**: Document CSRF token design (I-2) - explain unauthenticated endpoint rationale
+- [ ] **DOC-03**: Document subscription GET behavior (I-3) - clarify graceful unauthenticated return
+- [ ] **DOC-04**: Consider payment failure notifications (I-4) - user visibility for failed payments
+- [ ] **DOC-05**: Document stream recovery Redis requirement (I-5) - clarify resumable limitations
+- [ ] **DOC-06**: Consider focus mode persistence (I-6) - evaluate localStorage vs database storage
+- [ ] **DOC-07**: Update CLAUDE.md focus modes (I-7) - align with actual implementation
+- [ ] **DOC-08**: Acknowledge Supabase ID exposure (I-8) - confirm by-design public nature
+- [ ] **DOC-09**: Consider XSS-Protection header (I-9) - disable buggy auditor in old browsers
+- [ ] **DOC-10**: Consider ElevenLabs cost tracking (I-10) - evaluate character-based logging
 
-### Medium (28 items)
+## v2 Requirements
 
-- **M-1 to M-28**: Prompt sanitization gaps, rate limit metric mismatches, GDPR export fallback, Stripe idempotency improvements, circuit breaker persistence, memory leak fixes, demo route hardening, error detail exposure, focus mode persistence, analytics hardcoded values, stream error logging, speech recognition locale, TTS caching, concurrency limits
+Deferred to future release.
 
-### Low (25 items)
-
-- **L-1 to L-25**: Sanitizer edge cases, demo CSRF, health endpoint client, webhook maxDuration, dead-letter queue, demo rate limiting, AI provider health check, retryable error classification, circuit breaker error recording, tool/system prompt consistency, subscription-gated tools, env validation bypass, CSP unsafe-inline, env var logging, persona context transition, timeout handling, message detection threshold, brevity mode suggestions, Sentry sample rate, analytics column types, abort signal cleanup, base64 encoding overhead, TTS truncation notification
+### Advanced Features
+- **VOICE-04**: Real-time voice conversation streaming
+- **AI-01**: Multi-model AI provider switching UI
+- **ADMIN-01**: Webhook event replay dashboard
+- **PERF-05**: Advanced conversation virtualization
 
 ## Out of Scope
 
+Explicitly excluded for this milestone.
+
 | Feature | Reason |
 |---------|--------|
-| RAG/embeddings system | No embeddings in codebase; Agent 7 skipped |
-| Full OWASP audit | Separate engagement; auth/RLS already passing |
-| Performance optimization | Separate milestone focus |
-| New features | v1.3 is hardening only |
-| Informational findings (Agent 12) | Code-splitting and loading states — low impact |
+| New audit categories | Focus on completing existing 53 findings |
+| UI/UX improvements | Pure remediation milestone, no user-facing changes |
+| Performance benchmarking | Fix implementation first, measure after |
+| Additional safety rules | Current safety rails already comprehensive |
 
 ## Traceability
 
+Which phases cover which requirements. Updated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RESIL-01 | Phase 16 | Pending |
-| RESIL-02 | Phase 16 | Pending |
-| RESIL-03 | Phase 16 | Pending |
-| RESIL-04 | Phase 16 | Pending |
-| RESIL-05 | Phase 16 | Pending |
-| SAFE-01 | Phase 18 | Pending |
-| SAFE-02 | Phase 18 | Pending |
-| SAFE-03 | Phase 18 | Pending |
-| SAFE-04 | Phase 18 | Pending |
-| SAFE-05 | Phase 18 | Pending |
-| SAFE-06 | Phase 18 | Pending |
-| TOOL-01 | Phase 16 | Pending |
-| TOOL-02 | Phase 16 | Pending |
-| TOOL-03 | Phase 16 | Pending |
-| TOOL-04 | Phase 16 | Pending |
-| SEC-01 | Phase 17 | Pending |
-| SEC-02 | Phase 17 | Pending |
-| SEC-03 | Phase 17 | Pending |
-| SEC-04 | Phase 17 | Pending |
-| VOICE-01 | Phase 19 | Pending |
-| VOICE-02 | Phase 19 | Pending |
-| VOICE-03 | Phase 19 | Pending |
-| VOICE-04 | Phase 19 | Pending |
-| VOICE-05 | Phase 19 | Pending |
-| VOICE-06 | Phase 19 | Pending |
-| OBS-01 | Phase 20 | Pending |
-| OBS-02 | Phase 20 | Pending |
-| OBS-03 | Phase 20 | Pending |
-| OBS-04 | Phase 20 | Pending |
-| COST-01 | Phase 20 | Pending |
-| COST-02 | Phase 20 | Pending |
+| (To be populated by roadmapper) | - | - |
 
 **Coverage:**
-- v1.3 requirements: 31 total
-- Mapped to phases: 31
-- Unmapped: 0
+- v1.4 requirements: 53 total
+- Mapped to phases: 0
+- Unmapped: 53 ⚠️
 
 ---
-*Requirements defined: 2026-02-16*
-*Last updated: 2026-02-16 after roadmap creation*
+*Requirements defined: 2026-02-18*
+*Last updated: 2026-02-18 after initial definition*
