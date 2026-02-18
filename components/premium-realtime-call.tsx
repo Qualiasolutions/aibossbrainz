@@ -23,6 +23,11 @@ type CallState =
 	| "speaking"
 	| "ended";
 
+interface TranscriptEntry {
+	role: "user" | "assistant";
+	text: string;
+}
+
 export function PremiumRealtimeCall({
 	botType,
 	onEndCall,
@@ -30,8 +35,10 @@ export function PremiumRealtimeCall({
 	const { mutate } = useSWRConfig();
 	const [callState, setCallState] = useState<CallState>("idle");
 	const [isMuted, setIsMuted] = useState(false);
-	const [_transcript, setTranscript] = useState("");
-	const [_aiResponse, setAiResponse] = useState("");
+	const [liveTranscript, setLiveTranscript] = useState("");
+	const [transcriptHistory, setTranscriptHistory] = useState<
+		TranscriptEntry[]
+	>([]);
 	const [callDuration, setCallDuration] = useState(0);
 	const [audioLevel, setAudioLevel] = useState(0);
 	const [isAiSpeaking, setIsAiSpeaking] = useState(false);
@@ -46,8 +53,14 @@ export function PremiumRealtimeCall({
 	const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const callStartTimeRef = useRef<number>(0);
 	const animationFrameRef = useRef<number | null>(null);
+	const transcriptEndRef = useRef<HTMLDivElement | null>(null);
 
 	const bot = BOT_PERSONALITIES[botType];
+
+	// Auto-scroll transcript
+	useEffect(() => {
+		transcriptEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [transcriptHistory, liveTranscript]);
 
 	// Audio level visualization
 	const updateAudioLevel = useCallback(() => {
@@ -84,7 +97,10 @@ export function PremiumRealtimeCall({
 
 			try {
 				setCallState("processing");
-				setAiResponse("");
+				setTranscriptHistory((prev) => [
+					...prev,
+					{ role: "user", text: text.trim() },
+				]);
 
 				abortControllerRef.current = new AbortController();
 
@@ -105,7 +121,24 @@ export function PremiumRealtimeCall({
 				});
 
 				if (!response.ok) {
-					throw new Error("Failed to get AI response");
+					const errorData = await response.json().catch(() => ({}));
+					const status = response.status;
+					if (status === 402) {
+						throw new Error(
+							"Subscription expired. Please upgrade to continue.",
+						);
+					}
+					if (status === 429) {
+						throw new Error(
+							"Daily voice call limit reached. Try again tomorrow.",
+						);
+					}
+					if (status === 401) {
+						throw new Error("Please sign in to use voice calls.");
+					}
+					throw new Error(
+						errorData.message || "Failed to get AI response",
+					);
 				}
 
 				const data = await response.json();
@@ -117,13 +150,20 @@ export function PremiumRealtimeCall({
 					setVoiceCallChatId(chatId);
 				}
 
-				setAiResponse(aiText);
+				setTranscriptHistory((prev) => [
+					...prev,
+					{ role: "assistant", text: aiText },
+				]);
 				setCallState("speaking");
 				setIsAiSpeaking(true);
 
 				if (audioUrl) {
 					const audio = new Audio(audioUrl);
 					currentAudioRef.current = audio;
+
+					// Apply per-bot volume multiplier
+					const botVolume = bot.voiceVolume ?? 1.0;
+					audio.volume = Math.max(0, Math.min(1, botVolume));
 
 					audio.onended = () => {
 						setIsAiSpeaking(false);
@@ -150,13 +190,13 @@ export function PremiumRealtimeCall({
 			} catch (error: unknown) {
 				if (error instanceof Error && error.name !== "AbortError") {
 					console.error("AI response error:", error);
-					toast.error("Failed to get response");
+					toast.error(error.message || "Failed to get response");
 				}
 				setCallState("active");
 				setIsAiSpeaking(false);
 			}
 		},
-		[botType, isMuted, voiceCallChatId],
+		[botType, bot.voiceVolume, isMuted, voiceCallChatId],
 	);
 
 	// Initialize speech recognition
@@ -193,7 +233,7 @@ export function PremiumRealtimeCall({
 						if (finalTranscript.trim()) {
 							const textToSend = finalTranscript.trim();
 							finalTranscript = "";
-							setTranscript("");
+							setLiveTranscript("");
 
 							recognition.stop();
 							sendToAI(textToSend);
@@ -203,7 +243,7 @@ export function PremiumRealtimeCall({
 					interim += result[0].transcript;
 				}
 			}
-			setTranscript(finalTranscript + interim);
+			setLiveTranscript(finalTranscript + interim);
 		};
 
 		recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -401,6 +441,9 @@ export function PremiumRealtimeCall({
 		callState === "processing" ||
 		callState === "speaking";
 
+	const hasTranscript =
+		transcriptHistory.length > 0 || liveTranscript.trim().length > 0;
+
 	return (
 		<div className="fixed inset-0 z-50 flex flex-col bg-white">
 			{/* Top bar */}
@@ -427,9 +470,9 @@ export function PremiumRealtimeCall({
 			</div>
 
 			{/* Main content */}
-			<div className="flex flex-1 flex-col items-center justify-center px-6">
+			<div className="flex flex-1 flex-col items-center overflow-hidden px-6 pt-8">
 				{/* Avatar with visualization */}
-				<div className="relative mb-10">
+				<div className="relative mb-6 shrink-0">
 					{/* Outer ring - audio visualization */}
 					<div
 						className={cn(
@@ -463,14 +506,14 @@ export function PremiumRealtimeCall({
 					/>
 
 					{/* Avatar */}
-					<div className="relative size-36 overflow-hidden rounded-full bg-neutral-100 shadow-lg shadow-neutral-200/80 md:size-44">
+					<div className="relative size-28 overflow-hidden rounded-full bg-neutral-100 shadow-lg shadow-neutral-200/80 md:size-32">
 						{bot.avatar ? (
 							<Image
 								alt={bot.name}
 								className="size-full object-cover"
-								height={176}
+								height={128}
 								src={bot.avatar}
-								width={176}
+								width={128}
 							/>
 						) : (
 							<div
@@ -479,7 +522,7 @@ export function PremiumRealtimeCall({
 									bot.color,
 								)}
 							>
-								<span className="font-semibold text-4xl text-white">
+								<span className="font-semibold text-3xl text-white">
 									{botType === "collaborative" ? "A&K" : bot.name.charAt(0)}
 								</span>
 							</div>
@@ -499,15 +542,87 @@ export function PremiumRealtimeCall({
 				</div>
 
 				{/* Name and status */}
-				<h1 className="mb-1 text-2xl font-semibold text-neutral-900 md:text-3xl">
+				<h1 className="mb-1 text-xl font-semibold text-neutral-900 md:text-2xl">
 					{bot.name}
 				</h1>
-				<p className="mb-10 text-xs font-medium tracking-wide uppercase text-red-700">
+				<p className="mb-4 text-xs font-medium tracking-wide uppercase text-red-700">
 					{bot.role}
 				</p>
 
+				{/* Transcript area */}
+				<div className="w-full max-w-lg flex-1 overflow-hidden rounded-2xl border border-neutral-100 bg-neutral-50/50">
+					<div className="flex h-full flex-col">
+						<div className="border-b border-neutral-100 px-4 py-2.5">
+							<p className="text-[10px] font-semibold tracking-widest uppercase text-neutral-400">
+								Transcript
+							</p>
+						</div>
+						<div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+							{!hasTranscript && (
+								<p className="py-8 text-center text-sm text-neutral-400">
+									{callState === "active"
+										? "Start speaking..."
+										: getStatusText()}
+								</p>
+							)}
+
+							{transcriptHistory.map((entry, i) => (
+								<div
+									key={`${entry.role}-${i}`}
+									className={cn(
+										"flex gap-2.5",
+										entry.role === "user"
+											? "justify-end"
+											: "justify-start",
+									)}
+								>
+									<div
+										className={cn(
+											"max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+											entry.role === "user"
+												? "bg-neutral-900 text-white"
+												: "bg-white text-neutral-800 shadow-sm ring-1 ring-neutral-100",
+										)}
+									>
+										{entry.role === "assistant" && (
+											<span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-red-600">
+												{bot.name.split(" ")[0]}
+											</span>
+										)}
+										{entry.text}
+									</div>
+								</div>
+							))}
+
+							{/* Live transcript (what user is currently saying) */}
+							{liveTranscript.trim() && (
+								<div className="flex justify-end">
+									<div className="max-w-[85%] rounded-2xl bg-neutral-200/60 px-4 py-2.5 text-sm leading-relaxed text-neutral-600 italic">
+										{liveTranscript}
+									</div>
+								</div>
+							)}
+
+							{/* Processing indicator */}
+							{callState === "processing" && (
+								<div className="flex justify-start">
+									<div className="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-neutral-100">
+										<div className="flex items-center gap-1.5">
+											<span className="size-1.5 animate-[bounce_1s_ease-in-out_infinite] rounded-full bg-red-400" />
+											<span className="size-1.5 animate-[bounce_1s_ease-in-out_infinite_0.15s] rounded-full bg-red-400" />
+											<span className="size-1.5 animate-[bounce_1s_ease-in-out_infinite_0.3s] rounded-full bg-red-400" />
+										</div>
+									</div>
+								</div>
+							)}
+
+							<div ref={transcriptEndRef} />
+						</div>
+					</div>
+				</div>
+
 				{/* Controls */}
-				<div className="flex items-center gap-6">
+				<div className="flex shrink-0 items-center gap-6 py-6">
 					{/* Mute button */}
 					<Button
 						className={cn(
@@ -549,9 +664,6 @@ export function PremiumRealtimeCall({
 					</Button>
 				</div>
 			</div>
-
-			{/* Bottom spacer */}
-			<div className="py-6" />
 		</div>
 	);
 }
