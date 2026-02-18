@@ -241,6 +241,7 @@ export function VoiceInputButton({
 					disabled={disabled || isProcessing}
 					onClick={handleClick}
 					size={size === "sm" ? "sm" : size === "lg" ? "lg" : "default"}
+					type="button"
 					variant="ghost"
 				>
 					<AnimatePresence mode="wait">
