@@ -445,7 +445,61 @@ export function PremiumRealtimeCall({
 		transcriptHistory.length > 0 || liveTranscript.trim().length > 0;
 
 	return (
-		<div className="fixed inset-0 z-50 flex flex-col bg-white">
+		<div className="fixed inset-0 z-50 flex flex-col bg-white overflow-hidden">
+			{/* Ambient background — slow drifting gradients */}
+			<div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+				{/* Large soft orb — top-right, slow drift */}
+				<div
+					className="absolute -top-32 -right-32 size-[420px] rounded-full opacity-[0.04]"
+					style={{
+						background:
+							"radial-gradient(circle, #ef4444 0%, transparent 70%)",
+						animation: "drift-a 18s ease-in-out infinite",
+					}}
+				/>
+				{/* Smaller orb — bottom-left, offset timing */}
+				<div
+					className="absolute -bottom-24 -left-24 size-[320px] rounded-full opacity-[0.03]"
+					style={{
+						background:
+							"radial-gradient(circle, #dc2626 0%, transparent 70%)",
+						animation: "drift-b 22s ease-in-out infinite",
+					}}
+				/>
+				{/* Center haze — breathes with call state */}
+				<div
+					className={cn(
+						"absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 size-[500px] rounded-full transition-opacity duration-[2000ms]",
+						isCallActive ? "opacity-[0.025]" : "opacity-0",
+					)}
+					style={{
+						background:
+							"radial-gradient(circle, #b91c1c 0%, transparent 65%)",
+						animation: "breathe 6s ease-in-out infinite",
+					}}
+				/>
+				{/* Fine grid texture */}
+				<div className="absolute inset-0 bg-[linear-gradient(to_right,#00000003_1px,transparent_1px),linear-gradient(to_bottom,#00000003_1px,transparent_1px)] bg-[size:48px_48px]" />
+			</div>
+
+			{/* Keyframes */}
+			<style>{`
+				@keyframes drift-a {
+					0%, 100% { transform: translate(0, 0) scale(1); }
+					33% { transform: translate(-30px, 20px) scale(1.05); }
+					66% { transform: translate(15px, -15px) scale(0.97); }
+				}
+				@keyframes drift-b {
+					0%, 100% { transform: translate(0, 0) scale(1); }
+					40% { transform: translate(25px, -20px) scale(1.06); }
+					70% { transform: translate(-10px, 15px) scale(0.95); }
+				}
+				@keyframes breathe {
+					0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.025; }
+					50% { transform: translate(-50%, -50%) scale(1.08); opacity: 0.04; }
+				}
+			`}</style>
+
 			{/* Top bar */}
 			<div className="flex items-center justify-between border-b border-neutral-100 px-8 py-5">
 				<div className="flex items-center gap-3">
