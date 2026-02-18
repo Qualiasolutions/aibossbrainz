@@ -8,7 +8,6 @@ import { useRef } from "react";
 import { InteractiveChatDemo } from "@/components/landing/interactive-chat-demo";
 import { Button } from "@/components/ui/button";
 import type { LandingPageCMSContent } from "@/lib/cms/landing-page-types";
-import { cn } from "@/lib/utils";
 
 interface LandingPageClientProps {
 	content: LandingPageCMSContent;
@@ -37,184 +36,188 @@ const revealVariants = {
 };
 
 // ─────────────────────────────────────────────────────────────
-// HERO SECTION — V0/Linear Style: Technical, Clean, Precise
+// HERO SECTION — Centered Stage: Editorial, dramatic, premium
 // ─────────────────────────────────────────────────────────────
 function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true });
 	const { scrollY } = useScroll();
-	const contentY = useTransform(scrollY, [0, 400], [0, 40]);
+	const textY = useTransform(scrollY, [0, 500], [0, 60]);
+	const demoOpacity = useTransform(scrollY, [0, 600], [1, 0.85]);
 
 	return (
 		<section
 			ref={ref}
-			className="relative min-h-[90svh] overflow-hidden bg-white flex items-center justify-center border-b border-stone-100"
+			className="relative min-h-svh overflow-hidden bg-white"
 		>
-			{/* Technical Background Grid */}
-			<div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]" />
-				<div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-white/80" />
+			{/* Background: subtle grid + radial glow */}
+			<div className="absolute inset-0 z-0 pointer-events-none">
+				<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808006_1px,transparent_1px),linear-gradient(to_bottom,#80808006_1px,transparent_1px)] bg-[size:32px_32px]" />
+				<div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-radial from-red-500/[0.04] via-transparent to-transparent rounded-full blur-[80px]" />
+				<div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-white to-transparent" />
 			</div>
 
-			{/* Content */}
+			{/* Text Content — centered, parallax */}
 			<motion.div
-				className="relative z-10 w-full max-w-[1200px] px-6 pt-24 pb-20 lg:px-8 mx-auto"
-				style={{ y: contentY }}
+				className="relative z-10 mx-auto max-w-4xl px-6 pt-36 sm:pt-40 lg:pt-44 text-center"
+				style={{ y: textY }}
 			>
-				<div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
-					{/* Left — Text */}
-					<div className="flex-1 max-w-2xl text-left">
-						{/* Technical Pill Badge */}
-						<motion.div
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.1}
-							className="mb-6"
+				{/* Pill Badge */}
+				<motion.div
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.05}
+					className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-stone-200 bg-stone-50/60 px-4 py-1.5 backdrop-blur-sm"
+				>
+					<span className="flex h-1.5 w-1.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50" />
+					<span className="text-[11px] font-semibold tracking-[0.15em] text-stone-500 uppercase">
+						AI Executive Consulting
+					</span>
+				</motion.div>
+
+				{/* Headline — dramatic scale */}
+				<motion.h1
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.15}
+					className="text-[2.75rem] font-bold tracking-[-0.035em] text-stone-900 sm:text-6xl lg:text-7xl leading-[1.05]"
+				>
+					<span className="block">{content.hero.title_main}</span>
+					<span className="block bg-gradient-to-r from-red-600 via-red-500 to-red-600 bg-clip-text text-transparent">
+						{content.hero.title_highlight}
+					</span>
+				</motion.h1>
+
+				{/* Subtitle */}
+				<motion.p
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.25}
+					className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-stone-500 sm:text-xl/relaxed"
+				>
+					{content.hero.subtitle}
+				</motion.p>
+
+				{/* CTAs */}
+				<motion.div
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.35}
+					className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center"
+				>
+					<Link href={content.hero.cta_primary_link}>
+						<Button
+							size="lg"
+							className="h-12 px-8 text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-xl shadow-lg shadow-stone-900/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-stone-900/15 active:translate-y-0"
 						>
-							<div className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50/50 px-3 py-1 transition-colors hover:bg-stone-100 hover:border-stone-300">
-								<span className="flex h-1.5 w-1.5 rounded-full bg-red-500 shadow-sm" />
-								<span className="text-[11px] font-medium tracking-wide text-stone-500 uppercase">
-									AI Executive Consulting v2.0
-								</span>
+							{content.hero.cta_primary_text}
+							<ArrowRight className="ml-2 h-4 w-4" />
+						</Button>
+					</Link>
+					<Link href={content.hero.cta_secondary_link}>
+						<Button
+							variant="outline"
+							size="lg"
+							className="h-12 px-8 text-sm font-medium text-stone-600 border-stone-200 bg-white hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-xl transition-all duration-200"
+						>
+							{content.hero.cta_secondary_text}
+						</Button>
+					</Link>
+				</motion.div>
+
+				{/* Trust Indicators */}
+				<motion.div
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0.45}
+					className="mt-10 flex items-center justify-center gap-4 text-xs font-medium text-stone-500"
+				>
+					<div className="flex -space-x-1.5">
+						{[...Array(4)].map((_, i) => (
+							<div
+								key={`avatar-${i}`}
+								className="h-6 w-6 rounded-full border-2 border-white bg-stone-100 ring-1 ring-stone-100"
+							>
+								<div className="w-full h-full rounded-full bg-gradient-to-br from-stone-200 to-stone-300" />
 							</div>
-						</motion.div>
-
-						{/* Heading — Smaller, tighter, punchier */}
-						<motion.h1
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.2}
-							className="text-4xl font-bold tracking-tighter text-stone-900 sm:text-5xl lg:text-[3.75rem] leading-[1.1]"
-						>
-							<span className="block">{content.hero.title_main}</span>
-							<span className="block text-stone-500">
-								{content.hero.title_highlight}
-							</span>
-						</motion.h1>
-
-						{/* Subtitle */}
-						<motion.p
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.3}
-							className="mt-6 max-w-lg text-lg leading-relaxed text-stone-600 sm:text-xl/relaxed font-normal tracking-tight"
-						>
-							{content.hero.subtitle}
-						</motion.p>
-
-						{/* CTAs — Smaller, system-ui style */}
-						<motion.div
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.4}
-							className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
-						>
-							<Link href={content.hero.cta_primary_link}>
-								<Button
-									size="lg"
-									className="h-11 px-6 text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-md shadow-sm transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
-								>
-									{content.hero.cta_primary_text}
-									<ArrowRight className="ml-2 h-3.5 w-3.5" />
-								</Button>
-							</Link>
-							<Link href={content.hero.cta_secondary_link}>
-								<Button
-									variant="outline"
-									size="lg"
-									className="h-11 px-6 text-sm font-medium text-stone-600 border-stone-200 bg-white hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-md transition-all duration-200"
-								>
-									{content.hero.cta_secondary_text}
-								</Button>
-							</Link>
-						</motion.div>
-
-						{/* Trust — Minimalist */}
-						<motion.div
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.5}
-							className="mt-10 flex items-center gap-4 text-xs font-medium text-stone-500"
-						>
-							<div className="flex -space-x-1.5">
-								{[...Array(4)].map((_, i) => (
-									<div
-										key={`avatar-${i}`}
-										className="h-6 w-6 rounded-full border-2 border-white bg-stone-100 ring-1 ring-stone-100"
-									>
-										<div className="w-full h-full rounded-full bg-gradient-to-br from-stone-200 to-stone-300" />
-									</div>
-								))}
-							</div>
-							<div className="flex items-center gap-1.5">
-								<div className="flex text-amber-500/80">
-									{[...Array(5)].map((_, i) => (
-										<svg
-											key={`star-${i}`}
-											className="w-3 h-3 fill-current"
-											viewBox="0 0 20 20"
-										>
-											<path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-										</svg>
-									))}
-								</div>
-								<span className="text-stone-400">Trusted by 500+ founders</span>
-							</div>
-						</motion.div>
+						))}
 					</div>
+					<div className="flex items-center gap-1.5">
+						<div className="flex text-amber-500/80">
+							{[...Array(5)].map((_, i) => (
+								<svg
+									key={`star-${i}`}
+									className="w-3 h-3 fill-current"
+									viewBox="0 0 20 20"
+								>
+									<path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+								</svg>
+							))}
+						</div>
+						<span className="text-stone-400">Trusted by 500+ founders</span>
+					</div>
+				</motion.div>
+			</motion.div>
 
-					{/* Right — Interactive Demo or Media */}
-					<motion.div
-						variants={revealVariants}
-						initial="hidden"
-						animate={isInView ? "visible" : "hidden"}
-						custom={0.3}
-						className="flex-1 w-full max-w-xl mx-auto lg:max-w-none"
-					>
-						<div className="relative rounded-xl bg-stone-100/50 p-1 ring-1 ring-stone-200/50">
-							{content.hero.media_type === "image" && content.hero.media_url ? (
-								<Image
+			{/* Demo Stage — full-width showcase */}
+			<motion.div
+				variants={revealVariants}
+				initial="hidden"
+				animate={isInView ? "visible" : "hidden"}
+				custom={0.5}
+				className="relative z-10 mx-auto mt-16 max-w-5xl px-6 pb-12 lg:px-8"
+				style={{ opacity: demoOpacity }}
+			>
+				{/* Ambient glow behind demo */}
+				<div className="absolute inset-x-12 top-8 bottom-0 bg-gradient-to-b from-red-500/[0.03] to-transparent rounded-3xl blur-2xl pointer-events-none" />
+
+				<motion.div
+					initial={{ y: 20, scale: 0.97 }}
+					animate={isInView ? { y: 0, scale: 1 } : {}}
+					transition={{ duration: 1, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+					className="relative rounded-2xl bg-gradient-to-b from-stone-100/80 to-stone-50/40 p-1.5 ring-1 ring-stone-200/60 shadow-2xl shadow-stone-900/10"
+				>
+					{content.hero.media_type === "image" && content.hero.media_url ? (
+						<Image
+							src={content.hero.media_url}
+							alt="AI Boss Brainz"
+							width={1200}
+							height={700}
+							className="relative rounded-xl shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5"
+							priority
+						/>
+					) : content.hero.media_type === "video" &&
+						content.hero.media_url ? (
+						<div className="relative aspect-video rounded-xl overflow-hidden shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5">
+							{content.hero.media_url.includes("youtube.com") ||
+							content.hero.media_url.includes("youtu.be") ||
+							content.hero.media_url.includes("vimeo.com") ? (
+								<iframe
 									src={content.hero.media_url}
-									alt="AI Boss Brainz"
-									width={800}
-									height={600}
-									className="relative rounded-lg shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5"
-									priority
+									className="w-full h-full"
+									allow="autoplay; fullscreen; picture-in-picture"
+									allowFullScreen
+									title="AI Boss Brainz"
 								/>
-							) : content.hero.media_type === "video" &&
-								content.hero.media_url ? (
-								<div className="relative aspect-video rounded-lg overflow-hidden shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5">
-									{content.hero.media_url.includes("youtube.com") ||
-									content.hero.media_url.includes("youtu.be") ||
-									content.hero.media_url.includes("vimeo.com") ? (
-										<iframe
-											src={content.hero.media_url}
-											className="w-full h-full"
-											allow="autoplay; fullscreen; picture-in-picture"
-											allowFullScreen
-											title="AI Boss Brainz"
-										/>
-									) : (
-										<video
-											src={content.hero.media_url}
-											controls
-											className="w-full h-full object-cover"
-										>
-											<track kind="captions" />
-										</video>
-									)}
-								</div>
 							) : (
-								<InteractiveChatDemo content={content} />
+								<video
+									src={content.hero.media_url}
+									controls
+									className="w-full h-full object-cover"
+								>
+									<track kind="captions" />
+								</video>
 							)}
 						</div>
-					</motion.div>
-				</div>
+					) : (
+						<InteractiveChatDemo content={content} />
+					)}
+				</motion.div>
 			</motion.div>
 		</section>
 	);
