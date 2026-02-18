@@ -33,11 +33,11 @@ v1.4 systematically remediates the remaining 50 findings from the AI Production 
   3. Request suggestions wrap document content in XML delimiters to prevent injection
   4. Canary token generation uses SHA256 hashing instead of raw secret prefix
   5. Streaming PII bypass limitation is documented in codebase comments and CLAUDE.md
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 21-01: Sanitize prompt injection vectors (M-1 through M-5)
-- [ ] 21-02: Low-severity prompt hardening (L-1 through L-4)
+- [ ] 21-01-PLAN.md — Sanitize medium-severity prompt injection vectors (PROMPT-01 through PROMPT-05)
+- [ ] 21-02-PLAN.md — Low-severity prompt hardening: blocklist, suggestions, canary hash, docs (PROMPT-06 through PROMPT-09)
 
 ### Phase 22: Auth & Subscription Guards
 **Goal**: Expired/unauthorized users cannot consume paid voice and realtime resources
