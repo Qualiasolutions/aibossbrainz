@@ -29,11 +29,11 @@ import { strategyCanvas } from "@/lib/ai/tools/strategy-canvas";
 import { webSearch } from "@/lib/ai/tools/web-search";
 import { classifyTopic } from "@/lib/ai/topic-classifier";
 import { recordAnalytics } from "@/lib/analytics/queries";
-import { recordAICost } from "@/lib/cost/tracker";
 import { apiRequestLogger } from "@/lib/api-logging";
 import type { Session } from "@/lib/artifacts/server";
 import type { BotType, FocusMode } from "@/lib/bot-personalities";
 import { isProductionEnvironment } from "@/lib/constants";
+import { recordAICost } from "@/lib/cost/tracker";
 import {
 	checkUserSubscription,
 	createStreamId,
@@ -55,6 +55,7 @@ import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import {
 	isCircuitOpen,
+	isTransientError,
 	recordCircuitFailure,
 	recordCircuitSuccess,
 } from "@/lib/resilience";
@@ -87,7 +88,10 @@ const getTokenlensCatalog = cache(
 		try {
 			return await fetchModels();
 		} catch (err) {
-			logger.warn({ err }, "TokenLens catalog fetch failed, using default catalog");
+			logger.warn(
+				{ err },
+				"TokenLens catalog fetch failed, using default catalog",
+			);
 			return; // tokenlens helpers will fall back to defaultCatalog
 		}
 	},
@@ -504,29 +508,38 @@ export const POST = withCsrf(async (request: Request) => {
 						const outputTokens = finalMergedUsage.outputTokens || 0;
 						const totalTokens = inputTokens + outputTokens;
 						if (totalTokens > 0) {
-							const resolvedModelId = finalMergedUsage.modelId ?? selectedChatModel;
+							const resolvedModelId =
+								finalMergedUsage.modelId ?? selectedChatModel;
 							const costUSD = finalMergedUsage.costUSD?.totalUSD ?? 0;
 
-							logger.info({
-								chatId: id,
-								modelId: resolvedModelId,
-								inputTokens,
-								outputTokens,
-								costUSD,
-							}, "AI response completed");
+							logger.info(
+								{
+									chatId: id,
+									modelId: resolvedModelId,
+									inputTokens,
+									outputTokens,
+									costUSD,
+								},
+								"AI response completed",
+							);
 
 							after(() => recordAnalytics(user.id, "token", totalTokens));
-							after(() => recordAICost({
-								userId: user.id,
-								chatId: id,
-								modelId: resolvedModelId,
-								inputTokens,
-								outputTokens,
-								costUSD,
-							}));
+							after(() =>
+								recordAICost({
+									userId: user.id,
+									chatId: id,
+									modelId: resolvedModelId,
+									inputTokens,
+									outputTokens,
+									costUSD,
+								}),
+							);
 						}
 					} catch (err) {
-						logger.warn({ err, chatId: id }, "Unable to persist last usage for chat");
+						logger.warn(
+							{ err, chatId: id },
+							"Unable to persist last usage for chat",
+						);
 					}
 				}
 
@@ -557,13 +570,19 @@ export const POST = withCsrf(async (request: Request) => {
 							}
 						}
 					} catch (err) {
-						logger.warn({ err, chatId: id }, "Failed to generate conversation summary");
+						logger.warn(
+							{ err, chatId: id },
+							"Failed to generate conversation summary",
+						);
 					}
 				});
 			},
-			onError: () => {
-				// Record failure for AI gateway circuit breaker
-				recordCircuitFailure("ai-gateway");
+			onError: (error) => {
+				// Only record transient errors (429, 5xx, network) as circuit breaker failures
+				// Client errors (400, 401, 403) should NOT open the circuit
+				if (isTransientError(error)) {
+					recordCircuitFailure("ai-gateway");
+				}
 				apiLog.warn("Stream onError callback triggered");
 				return "Something went wrong generating a response. Please try again.";
 			},

@@ -1,8 +1,19 @@
 import { generateText } from "ai";
+import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { withAIGatewayResilience } from "@/lib/resilience";
 import { sanitizePromptContent } from "./prompts";
 import { myProvider } from "./providers";
+
+/**
+ * Zod schema for validating AI-generated conversation summary JSON.
+ * Rejects malformed or missing fields instead of silently accepting garbage.
+ */
+const summarySchema = z.object({
+	summary: z.string().min(1).max(2000),
+	topics: z.array(z.string()).min(1).max(10),
+	importance: z.number().min(1).max(10),
+});
 
 interface ConversationSummary {
 	text: string;
@@ -48,7 +59,9 @@ export async function generateConversationSummary(
 
 	try {
 		// PROMPT-04: Sanitize conversation text before injecting into the prompt
-		const sanitizedText = sanitizePromptContent(conversationText.slice(0, 4000));
+		const sanitizedText = sanitizePromptContent(
+			conversationText.slice(0, 4000),
+		);
 
 		const result = await withAIGatewayResilience(async () => {
 			return await generateText({
@@ -74,18 +87,26 @@ The importance field should be 1-10 (10 = critical business decision, 1 = casual
 			});
 		});
 
-		// Parse JSON response
+		// Parse and validate JSON response with Zod schema
 		const jsonMatch = result.text.match(/\{[\s\S]*\}/);
 		if (!jsonMatch) {
 			logger.warn("Summarizer could not extract JSON from response");
 			return null;
 		}
 
-		const parsed = JSON.parse(jsonMatch[0]);
+		const parsed = summarySchema.safeParse(JSON.parse(jsonMatch[0]));
+		if (!parsed.success) {
+			logger.warn(
+				{ issues: parsed.error.issues },
+				"Summarizer JSON failed Zod validation",
+			);
+			return null;
+		}
+
 		return {
-			text: parsed.summary || "",
-			topics: Array.isArray(parsed.topics) ? parsed.topics : [],
-			importance: typeof parsed.importance === "number" ? parsed.importance : 5,
+			text: parsed.data.summary,
+			topics: parsed.data.topics,
+			importance: parsed.data.importance,
 		};
 	} catch (error) {
 		logger.warn({ err: error }, "Failed to generate conversation summary");
