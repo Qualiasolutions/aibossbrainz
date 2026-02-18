@@ -1,10 +1,17 @@
 "use client";
 
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import {
+	motion,
+	useInView,
+	useMotionValue,
+	useScroll,
+	useSpring,
+	useTransform,
+} from "framer-motion";
 import { ArrowRight, Mic, Target, TrendingUp, Users, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { InteractiveChatDemo } from "@/components/landing/interactive-chat-demo";
 import { Button } from "@/components/ui/button";
 import type { LandingPageCMSContent } from "@/lib/cms/landing-page-types";
@@ -36,185 +43,409 @@ const revealVariants = {
 	}),
 };
 
+// Stagger container for hero elements
+const heroStagger = {
+	hidden: { opacity: 0 },
+	visible: {
+		opacity: 1,
+		transition: {
+			staggerChildren: 0.12,
+			delayChildren: 0.1,
+		},
+	},
+};
+
+const heroChild = {
+	hidden: { opacity: 0, y: 30, filter: "blur(10px)" },
+	visible: {
+		opacity: 1,
+		y: 0,
+		filter: "blur(0px)",
+		transition: {
+			duration: 0.8,
+			ease: [0.25, 0.46, 0.45, 0.94],
+		},
+	},
+};
+
 // ─────────────────────────────────────────────────────────────
-// HERO SECTION — V0/Linear Style: Technical, Clean, Precise
+// ANIMATED WORD REVEAL — Cinematic per-word entrance
+// ─────────────────────────────────────────────────────────────
+function AnimatedWords({
+	text,
+	className,
+	delay = 0,
+}: {
+	text: string;
+	className?: string;
+	delay?: number;
+}) {
+	const words = text.split(" ");
+	return (
+		<span className={className}>
+			{words.map((word, i) => (
+				<motion.span
+					key={`${word}-${i}`}
+					initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+					animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+					transition={{
+						duration: 0.5,
+						delay: delay + i * 0.04,
+						ease: [0.25, 0.46, 0.45, 0.94],
+					}}
+					className="inline-block mr-[0.25em]"
+				>
+					{word}
+				</motion.span>
+			))}
+		</span>
+	);
+}
+
+// ─────────────────────────────────────────────────────────────
+// FLOATING ORBS — Ambient background depth
+// ─────────────────────────────────────────────────────────────
+function FloatingOrbs() {
+	return (
+		<div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+			{/* Primary red glow — top right */}
+			<motion.div
+				animate={{
+					x: [0, 30, -10, 0],
+					y: [0, -20, 10, 0],
+					scale: [1, 1.1, 0.95, 1],
+				}}
+				transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+				className="absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-red-500/[0.04] blur-[100px]"
+			/>
+			{/* Secondary warm glow — bottom left */}
+			<motion.div
+				animate={{
+					x: [0, -20, 15, 0],
+					y: [0, 15, -10, 0],
+					scale: [1, 0.95, 1.05, 1],
+				}}
+				transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+				className="absolute -bottom-40 -left-40 h-[600px] w-[600px] rounded-full bg-red-500/[0.03] blur-[120px]"
+			/>
+			{/* Subtle center accent */}
+			<motion.div
+				animate={{
+					scale: [1, 1.15, 1],
+					opacity: [0.03, 0.06, 0.03],
+				}}
+				transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+				className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[800px] rounded-full bg-stone-900/[0.02] blur-[80px]"
+			/>
+		</div>
+	);
+}
+
+// ─────────────────────────────────────────────────────────────
+// HERO SECTION — Premium, Cinematic, Extraordinary
 // ─────────────────────────────────────────────────────────────
 function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
-	const isInView = useInView(ref, { once: true });
+	const isInView = useInView(ref, { once: true, amount: 0.1 });
 	const { scrollY } = useScroll();
-	const contentY = useTransform(scrollY, [0, 400], [0, 40]);
+
+	// Parallax layers
+	const contentY = useTransform(scrollY, [0, 600], [0, 60]);
+	const mediaY = useTransform(scrollY, [0, 600], [0, -30]);
+	const opacityFade = useTransform(scrollY, [0, 400], [1, 0.6]);
+
+	// Smooth spring for mouse-tracking glow
+	const mouseX = useMotionValue(0);
+	const mouseY = useMotionValue(0);
+	const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
+	const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			const x = (e.clientX / window.innerWidth - 0.5) * 40;
+			const y = (e.clientY / window.innerHeight - 0.5) * 40;
+			mouseX.set(x);
+			mouseY.set(y);
+		};
+		window.addEventListener("mousemove", handleMouseMove);
+		return () => window.removeEventListener("mousemove", handleMouseMove);
+	}, [mouseX, mouseY]);
 
 	return (
 		<section
 			ref={ref}
-			className="relative min-h-[90svh] overflow-hidden bg-white flex items-center justify-center border-b border-stone-100"
+			className="relative min-h-svh overflow-hidden bg-background flex items-center"
 		>
-			{/* Technical Background Grid */}
-			<div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]" />
-				<div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-white/80" />
+			{/* Background layers */}
+			<FloatingOrbs />
+
+			{/* Fine grid pattern */}
+			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+				<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808006_1px,transparent_1px),linear-gradient(to_bottom,#80808006_1px,transparent_1px)] bg-[size:32px_32px]" />
+				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,var(--background)_70%)]" />
 			</div>
+
+			{/* Mouse-tracking ambient light */}
+			<motion.div
+				className="absolute h-[600px] w-[600px] rounded-full bg-red-500/[0.03] blur-[100px] pointer-events-none"
+				style={{ x: springX, y: springY, top: "20%", left: "30%" }}
+				aria-hidden="true"
+			/>
 
 			{/* Content */}
 			<motion.div
-				className="relative z-10 w-full max-w-[1200px] px-6 pt-24 pb-20 lg:px-8 mx-auto"
-				style={{ y: contentY }}
+				className="relative z-10 w-full max-w-[1280px] px-6 pt-32 pb-20 lg:px-8 mx-auto"
+				style={{ y: contentY, opacity: opacityFade }}
 			>
-				<div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
-					{/* Left — Text */}
-					<div className="flex-1 max-w-2xl text-left">
-						{/* Technical Pill Badge */}
-						<motion.div
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.1}
-							className="mb-6"
-						>
-							<div className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50/50 px-3 py-1 transition-colors hover:bg-stone-100 hover:border-stone-300">
-								<span className="flex h-1.5 w-1.5 rounded-full bg-red-500 shadow-sm" />
-								<span className="text-[11px] font-medium tracking-wide text-stone-500 uppercase">
+				<div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-center">
+					{/* Left — Text Content */}
+					<motion.div
+						className="flex-1 max-w-2xl text-left"
+						variants={heroStagger}
+						initial="hidden"
+						animate={isInView ? "visible" : "hidden"}
+					>
+						{/* Status Badge */}
+						<motion.div variants={heroChild} className="mb-8">
+							<motion.div
+								whileHover={{ scale: 1.02, y: -1 }}
+								className="inline-flex items-center gap-2.5 rounded-full border border-border bg-secondary/50 px-4 py-1.5 backdrop-blur-sm transition-colors hover:bg-secondary hover:border-foreground/10"
+							>
+								<span className="relative flex h-2 w-2">
+									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+									<span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+								</span>
+								<span className="text-xs font-medium tracking-wide text-muted-foreground">
 									AI Executive Consulting v2.0
 								</span>
-							</div>
+								<ArrowRight className="h-3 w-3 text-muted-foreground/60" />
+							</motion.div>
 						</motion.div>
 
-						{/* Heading — Smaller, tighter, punchier */}
-						<motion.h1
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.2}
-							className="text-4xl font-bold tracking-tighter text-stone-900 sm:text-5xl lg:text-[3.75rem] leading-[1.1]"
-						>
-							<span className="block">{content.hero.title_main}</span>
-							<span className="block text-stone-500">
-								{content.hero.title_highlight}
-							</span>
-						</motion.h1>
+						{/* Heading — Large, cinematic type */}
+						<motion.div variants={heroChild}>
+							<h1 className="text-4xl font-bold tracking-tighter text-foreground sm:text-5xl md:text-6xl lg:text-[4.25rem] leading-[1.05]">
+								<AnimatedWords
+									text={content.hero.title_main}
+									delay={0.3}
+								/>
+								<br />
+								<span className="bg-clip-text text-transparent bg-[linear-gradient(135deg,hsl(0_85%_45%),hsl(0_85%_55%),hsl(0_60%_50%))] leading-[1.2]">
+									<AnimatedWords
+										text={content.hero.title_highlight}
+										delay={0.6}
+									/>
+								</span>
+							</h1>
+						</motion.div>
 
-						{/* Subtitle */}
+						{/* Subtitle with refined spacing */}
 						<motion.p
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.3}
-							className="mt-6 max-w-lg text-lg leading-relaxed text-stone-600 sm:text-xl/relaxed font-normal tracking-tight"
+							variants={heroChild}
+							className="mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl font-normal"
 						>
 							{content.hero.subtitle}
 						</motion.p>
 
-						{/* CTAs — Smaller, system-ui style */}
+						{/* CTA Buttons — Premium treatment */}
 						<motion.div
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.4}
-							className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
+							variants={heroChild}
+							className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center"
 						>
 							<Link href={content.hero.cta_primary_link}>
-								<Button
-									size="lg"
-									className="h-11 px-6 text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-md shadow-sm transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+								<motion.div
+									whileHover={{ scale: 1.02, y: -2 }}
+									whileTap={{ scale: 0.98 }}
+									transition={{ type: "spring", stiffness: 400, damping: 17 }}
 								>
-									{content.hero.cta_primary_text}
-									<ArrowRight className="ml-2 h-3.5 w-3.5" />
-								</Button>
+									<Button
+										size="lg"
+										className="group h-12 px-8 text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-lg shadow-xl shadow-foreground/10 transition-shadow duration-300 hover:shadow-2xl hover:shadow-foreground/15"
+									>
+										{content.hero.cta_primary_text}
+										<ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+									</Button>
+								</motion.div>
 							</Link>
 							<Link href={content.hero.cta_secondary_link}>
-								<Button
-									variant="outline"
-									size="lg"
-									className="h-11 px-6 text-sm font-medium text-stone-600 border-stone-200 bg-white hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-md transition-all duration-200"
+								<motion.div
+									whileHover={{ scale: 1.02 }}
+									whileTap={{ scale: 0.98 }}
 								>
-									{content.hero.cta_secondary_text}
-								</Button>
+									<Button
+										variant="outline"
+										size="lg"
+										className="h-12 px-8 text-sm font-medium text-muted-foreground border-border bg-background hover:bg-secondary hover:text-foreground hover:border-foreground/15 rounded-lg transition-all duration-300"
+									>
+										{content.hero.cta_secondary_text}
+									</Button>
+								</motion.div>
 							</Link>
 						</motion.div>
 
-						{/* Trust — Minimalist */}
+						{/* Trust Indicators — Refined */}
 						<motion.div
-							variants={revealVariants}
-							initial="hidden"
-							animate={isInView ? "visible" : "hidden"}
-							custom={0.5}
-							className="mt-10 flex items-center gap-4 text-xs font-medium text-stone-500"
+							variants={heroChild}
+							className="mt-12 flex items-center gap-5"
 						>
-							<div className="flex -space-x-1.5">
+							{/* Avatars */}
+							<div className="flex -space-x-2">
 								{[...Array(4)].map((_, i) => (
-									<div
+									<motion.div
 										key={`avatar-${i}`}
-										className="h-6 w-6 rounded-full border-2 border-white bg-stone-100 ring-1 ring-stone-100"
+										initial={{ opacity: 0, scale: 0.5 }}
+										animate={isInView ? { opacity: 1, scale: 1 } : {}}
+										transition={{ delay: 1.2 + i * 0.08, duration: 0.4, ease: "easeOut" }}
+										className="h-8 w-8 rounded-full border-2 border-background ring-1 ring-border overflow-hidden"
 									>
-										<div className="w-full h-full rounded-full bg-gradient-to-br from-stone-200 to-stone-300" />
-									</div>
+										<div className="w-full h-full rounded-full bg-secondary" />
+									</motion.div>
 								))}
 							</div>
-							<div className="flex items-center gap-1.5">
-								<div className="flex text-amber-500/80">
+
+							<div className="h-6 w-px bg-border" />
+
+							{/* Stars + text */}
+							<div className="flex flex-col gap-0.5">
+								<div className="flex items-center gap-1">
 									{[...Array(5)].map((_, i) => (
-										<svg
+										<motion.svg
 											key={`star-${i}`}
-											className="w-3 h-3 fill-current"
+											initial={{ opacity: 0, scale: 0 }}
+											animate={isInView ? { opacity: 1, scale: 1 } : {}}
+											transition={{
+												delay: 1.4 + i * 0.06,
+												duration: 0.3,
+												type: "spring",
+												stiffness: 300,
+											}}
+											className="w-3.5 h-3.5 fill-current text-amber-400"
 											viewBox="0 0 20 20"
 										>
 											<path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-										</svg>
+										</motion.svg>
 									))}
 								</div>
-								<span className="text-stone-400">Trusted by 500+ founders</span>
+								<span className="text-xs text-muted-foreground font-medium">
+									Trusted by 500+ founders
+								</span>
 							</div>
 						</motion.div>
-					</div>
+					</motion.div>
 
 					{/* Right — Interactive Demo or Media */}
 					<motion.div
-						variants={revealVariants}
-						initial="hidden"
-						animate={isInView ? "visible" : "hidden"}
-						custom={0.3}
+						initial={{ opacity: 0, y: 40, scale: 0.95 }}
+						animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+						transition={{
+							duration: 1,
+							delay: 0.5,
+							ease: [0.25, 0.46, 0.45, 0.94],
+						}}
 						className="flex-1 w-full max-w-xl mx-auto lg:max-w-none"
+						style={{ y: mediaY }}
 					>
-						<div className="relative rounded-xl bg-stone-100/50 p-1 ring-1 ring-stone-200/50">
-							{content.hero.media_type === "image" && content.hero.media_url ? (
-								<Image
-									src={content.hero.media_url}
-									alt="AI Boss Brainz"
-									width={800}
-									height={600}
-									className="relative rounded-lg shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5"
-									priority
-								/>
-							) : content.hero.media_type === "video" &&
-								content.hero.media_url ? (
-								<div className="relative aspect-video rounded-lg overflow-hidden shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5">
-									{content.hero.media_url.includes("youtube.com") ||
-									content.hero.media_url.includes("youtu.be") ||
-									content.hero.media_url.includes("vimeo.com") ? (
-										<iframe
-											src={content.hero.media_url}
-											className="w-full h-full"
-											allow="autoplay; fullscreen; picture-in-picture"
-											allowFullScreen
-											title="AI Boss Brainz"
-										/>
-									) : (
-										<video
-											src={content.hero.media_url}
-											controls
-											className="w-full h-full object-cover"
-										>
-											<track kind="captions" />
-										</video>
-									)}
-								</div>
-							) : (
-								<InteractiveChatDemo content={content} />
-							)}
-						</div>
+						<motion.div
+							whileHover={{ y: -4 }}
+							transition={{ type: "spring", stiffness: 200, damping: 20 }}
+							className="relative"
+						>
+							{/* Glow behind card */}
+							<div className="absolute -inset-4 bg-red-500/[0.04] rounded-3xl blur-2xl" aria-hidden="true" />
+
+							<div className="relative rounded-2xl border border-border bg-card shadow-2xl shadow-foreground/5 ring-1 ring-foreground/[0.03] overflow-hidden">
+								{/* Subtle top highlight */}
+								<div className="absolute top-0 inset-x-0 h-px bg-[linear-gradient(to_right,transparent,hsl(0_85%_45%/0.3),transparent)]" aria-hidden="true" />
+
+								{content.hero.media_type === "image" && content.hero.media_url ? (
+									<Image
+										src={content.hero.media_url}
+										alt="AI Boss Brainz"
+										width={800}
+										height={600}
+										className="w-full"
+										priority
+									/>
+								) : content.hero.media_type === "video" &&
+									content.hero.media_url ? (
+									<div className="relative aspect-video">
+										{content.hero.media_url.includes("youtube.com") ||
+										content.hero.media_url.includes("youtu.be") ||
+										content.hero.media_url.includes("vimeo.com") ? (
+											<iframe
+												src={content.hero.media_url}
+												className="w-full h-full"
+												allow="autoplay; fullscreen; picture-in-picture"
+												allowFullScreen
+												title="AI Boss Brainz"
+											/>
+										) : (
+											<video
+												src={content.hero.media_url}
+												controls
+												className="w-full h-full object-cover"
+											>
+												<track kind="captions" />
+											</video>
+										)}
+									</div>
+								) : (
+									<InteractiveChatDemo content={content} />
+								)}
+							</div>
+						</motion.div>
 					</motion.div>
 				</div>
+
+				{/* Bottom stats marquee — floating, minimal */}
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={isInView ? { opacity: 1, y: 0 } : {}}
+					transition={{ delay: 1.6, duration: 0.8 }}
+					className="mt-20 flex flex-wrap items-center justify-center gap-8 sm:gap-12 lg:gap-16"
+				>
+					{[
+						{ value: "40+", label: "Years Experience" },
+						{ value: "500+", label: "Brands Helped" },
+						{ value: "24/7", label: "Availability" },
+						{ value: "100%", label: "Results-Focused" },
+					].map((stat, i) => (
+						<motion.div
+							key={stat.label}
+							initial={{ opacity: 0, y: 10 }}
+							animate={isInView ? { opacity: 1, y: 0 } : {}}
+							transition={{ delay: 1.8 + i * 0.1 }}
+							className="text-center group"
+						>
+							<div className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+								{stat.value}
+							</div>
+							<div className="mt-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+								{stat.label}
+							</div>
+						</motion.div>
+					))}
+				</motion.div>
+			</motion.div>
+
+			{/* Scroll indicator */}
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ delay: 2.5 }}
+				className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+			>
+				<motion.div
+					animate={{ y: [0, 8, 0] }}
+					transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+					className="w-5 h-8 rounded-full border-2 border-foreground/10 flex items-start justify-center pt-1.5"
+				>
+					<motion.div
+						animate={{ opacity: [0.5, 1, 0.5], scaleY: [1, 1.5, 1] }}
+						transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+						className="w-1 h-1.5 rounded-full bg-foreground/30"
+					/>
+				</motion.div>
 			</motion.div>
 		</section>
 	);

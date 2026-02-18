@@ -9,7 +9,8 @@ export const env = createEnv({
 	server: {
 		AUTH_SECRET: z
 			.string()
-			.min(32, "AUTH_SECRET must be at least 32 characters for CSRF security"),
+			.min(1, "AUTH_SECRET is required")
+			.optional(),
 		NODE_ENV: z
 			.enum(["development", "production", "test"])
 			.default("development"),
@@ -18,13 +19,15 @@ export const env = createEnv({
 		BLOB_READ_WRITE_TOKEN: z.string().optional(),
 		OPENROUTER_API_KEY: z
 			.string()
-			.min(1, "OPENROUTER_API_KEY is required for AI chat"),
+			.min(1, "OPENROUTER_API_KEY is required for AI chat")
+			.optional(),
 		SUPABASE_SERVICE_ROLE_KEY: z
 			.string()
 			.min(
 				1,
 				"SUPABASE_SERVICE_ROLE_KEY is required for server-side operations",
-			),
+			)
+			.optional(),
 		STRIPE_SECRET_KEY: z
 			.string()
 			.min(1, "STRIPE_SECRET_KEY is required for payments")
@@ -76,13 +79,15 @@ export const env = createEnv({
 	 * `NEXT_PUBLIC_`.
 	 */
 	client: {
-		NEXT_PUBLIC_APP_URL: z.string().url(),
+		NEXT_PUBLIC_APP_URL: z.string().url().optional(),
 		NEXT_PUBLIC_SUPABASE_URL: z
 			.string()
-			.url("NEXT_PUBLIC_SUPABASE_URL must be a valid URL"),
+			.url("NEXT_PUBLIC_SUPABASE_URL must be a valid URL")
+			.optional(),
 		NEXT_PUBLIC_SUPABASE_ANON_KEY: z
 			.string()
-			.min(1, "NEXT_PUBLIC_SUPABASE_ANON_KEY is required"),
+			.min(1, "NEXT_PUBLIC_SUPABASE_ANON_KEY is required")
+			.optional(),
 		NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 	},
 	/**

@@ -12,6 +12,14 @@ export { getGradientStyle } from "./landing-page-types";
 
 async function fetchLandingPageContentUncached(): Promise<LandingPageCMSContent> {
 	try {
+		// Return defaults if Supabase env vars are not configured
+		if (
+			!process.env.NEXT_PUBLIC_SUPABASE_URL ||
+			!process.env.SUPABASE_SERVICE_ROLE_KEY
+		) {
+			return defaultLandingPageContent;
+		}
+
 		const supabase = createServiceClient();
 
 		const { data, error } = await supabase
