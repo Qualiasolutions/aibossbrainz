@@ -116,7 +116,7 @@ export function BusinessModelCanvas({
 			// Small delay to ensure DB transaction is committed before fetching
 			const timer = setTimeout(() => {
 				refresh();
-			}, 300);
+			}, 800);
 			return () => clearTimeout(timer);
 		}
 	}, [refreshTrigger, refresh]);

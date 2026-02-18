@@ -1,7 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { Session } from "@/lib/artifacts/server";
-import { getStrategyCanvas, saveStrategyCanvas } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import type { CanvasType } from "@/lib/supabase/types";
@@ -140,94 +139,62 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 			}
 
 			try {
-				// Get existing canvas for this type
-				const existingCanvas = await getStrategyCanvas({
-					userId: session.user.id,
-					canvasType,
-				});
+				// Use correct storage key (camelCase for BMC)
+				const storageKey =
+					sectionToStorageKey[normalizedSection] || normalizedSection;
 
-				// Parse existing data or start fresh
-				const currentData: Record<
-					string,
-					Array<{ id: string; content: string; color: string }>
-				> = existingCanvas?.data &&
-				typeof existingCanvas.data === "object" &&
-				!Array.isArray(existingCanvas.data)
-					? (existingCanvas.data as Record<
-							string,
-							Array<{ id: string; content: string; color: string }>
-						>)
-					: {};
-
-				// Journey canvas stores items in a flat `touchpoints` array
-				// with a `stage` field, not as top-level section keys.
+				// Build items as JSONB for atomic merge
+				let itemsJson: unknown[];
 				if (canvasType === "journey") {
-					const journeyData = currentData as unknown as {
-						touchpoints?: Array<{
-							id: string;
-							stage: string;
-							content: string;
-							type: string;
-						}>;
-					};
-					if (!journeyData.touchpoints) {
-						journeyData.touchpoints = [];
-					}
-					const newTouchpoints = items.map((content) => ({
+					itemsJson = items.map((content) => ({
 						id: generateUUID(),
 						stage: normalizedSection,
 						content,
-						type: "touchpoint" as const,
+						type: "touchpoint",
 					}));
-					journeyData.touchpoints.push(...newTouchpoints);
 				} else if (canvasType === "brainstorm") {
-					// Brainstorm: notes need category for grouping
-					const brainstormData = currentData as unknown as {
-						notes?: Array<{
-							id: string;
-							content: string;
-							color: string;
-							category: string;
-							x?: number;
-							y?: number;
-						}>;
-					};
-					if (!brainstormData.notes) {
-						brainstormData.notes = [];
-					}
-					const newNotes = items.map((content, idx) => ({
+					itemsJson = items.map((content, idx) => ({
 						id: generateUUID(),
 						content,
-						color: "slate" as const,
-						category: "Ideas", // Default category for AI-generated notes
-						x: Math.random() * 60 + 10, // Random position
-						y: Math.random() * 40 + 10 + idx * 10, // Stagger vertically
+						color: "slate",
+						category: "Ideas",
+						x: Math.random() * 60 + 10,
+						y: Math.random() * 40 + 10 + idx * 10,
 					}));
-					brainstormData.notes.push(...newNotes);
 				} else {
-					// SWOT, BMC: use correct storage key (camelCase for BMC)
-					const storageKey =
-						sectionToStorageKey[normalizedSection] || normalizedSection;
-					const newItems = items.map((content) => ({
+					itemsJson = items.map((content) => ({
 						id: generateUUID(),
 						content,
 						color: "slate",
 					}));
-
-					if (!currentData[storageKey]) {
-						currentData[storageKey] = [];
-					}
-					currentData[storageKey].push(...newItems);
 				}
 
-				// Save back to the canvas
-				await saveStrategyCanvas({
-					userId: session.user.id,
-					canvasType,
-					data: currentData,
-					canvasId: existingCanvas?.id,
-					isDefault: true,
-				});
+				// Use the atomic merge function to prevent race conditions
+				// when multiple tool calls execute concurrently
+				const sectionKey =
+					canvasType === "journey" ? "touchpoints" : storageKey;
+
+				const supabase = (
+					await import("@/lib/supabase/server")
+				).createClient;
+				const client = await supabase();
+				const { error } = await (client.rpc as any)(
+					"merge_canvas_items",
+					{
+						p_user_id: session.user.id,
+						p_canvas_type: canvasType,
+						p_section: sectionKey,
+						p_items: JSON.stringify(itemsJson),
+					},
+				);
+
+				if (error) {
+					logger.error(
+						{ err: error, section, canvasType },
+						"Strategy canvas merge error",
+					);
+					throw error;
+				}
 
 				// Map section to tab name for user-friendly messaging
 				const tabNames: Record<CanvasType, string> = {
@@ -242,9 +209,7 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 					section: normalizedSection,
 					itemsAdded: items.length,
 					tab: tabNames[canvasType],
-					message: `Added ${items.length} item(s) to ${normalizedSection} in the ${tabNames[canvasType]} tab.
-IMPORTANT: The Strategy Canvas side panel has been automatically opened for the user.
-YOU MUST NOW REPLY TO THE USER: Inform them that you have added the items and the panel is open for them to view.`,
+					message: `Added ${items.length} item(s) to ${normalizedSection} in the ${tabNames[canvasType]} tab.`,
 				};
 			} catch (error) {
 				if (error instanceof ChatSDKError) {

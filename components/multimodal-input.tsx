@@ -152,6 +152,14 @@ function PureMultimodalInput({
 	);
 
 	const submitForm = useCallback(() => {
+		const hasText = input.trim().length > 0;
+		const hasAttachments = attachments.length > 0;
+
+		// Guard against empty submissions (race condition with startTransition after voice input)
+		if (!hasText && !hasAttachments) {
+			return;
+		}
+
 		window.history.replaceState({}, "", `/chat/${chatId}`);
 
 		sendMessage({
@@ -163,10 +171,9 @@ function PureMultimodalInput({
 					name: attachment.name,
 					mediaType: attachment.contentType,
 				})),
-				{
-					type: "text",
-					text: input,
-				},
+				...(hasText
+					? [{ type: "text" as const, text: input }]
+					: []),
 			],
 		});
 
@@ -270,6 +277,9 @@ function PureMultimodalInput({
 					event.preventDefault();
 					if (status !== "ready") {
 						toast.error("Please wait for the model to finish its response!");
+					} else if (!input.trim() && attachments.length === 0) {
+						// Prevent empty submissions (Enter key bypasses disabled submit button)
+						return;
 					} else {
 						submitForm();
 					}

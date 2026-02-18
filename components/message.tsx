@@ -311,35 +311,48 @@ const PurePreviewMessage = ({
 						}
 
 						// AI SDK v5: tool parts have type "tool-{toolName}"
+						// Collapse multiple strategyCanvas tool calls into a single banner
 						if ((type as string) === "tool-strategyCanvas") {
-							const { toolCallId, state } = part as any;
-							const output = (part as any).output;
+							const { state } = part as any;
+							if (state !== "output-available") return null;
 
-							if (state === "output-available") {
-								return (
-									<div
-										key={toolCallId}
-										className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-200 animate-in fade-in slide-in-from-bottom-2"
-									>
-										<div className="flex items-center gap-2 font-medium">
-											<span className="flex items-center justify-center size-5 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50">
-												✓
-											</span>
-											Strategy Canvas Updated
-										</div>
-										{output?.message && (
-											<div className="mt-1 ml-7 text-emerald-700/90 dark:text-emerald-300/90">
-												{
-													output.message
-														.replace("IMPORTANT:", "")
-														.split("YOU MUST NOW REPLY")[0]
-												}
-											</div>
-										)}
+							// Only render a banner for the LAST strategyCanvas tool call
+							const allCanvasParts = message.parts.filter(
+								(p: any) =>
+									(p as any).type === "tool-strategyCanvas" &&
+									(p as any).state === "output-available",
+							);
+							const isLast =
+								allCanvasParts[allCanvasParts.length - 1] === part;
+							if (!isLast) return null;
+
+							// Summarize all sections that were updated
+							const sections = allCanvasParts.map(
+								(p: any) => (p as any).input?.section,
+							);
+							const totalItems = allCanvasParts.reduce(
+								(sum: number, p: any) =>
+									sum + ((p as any).output?.itemsAdded || 0),
+								0,
+							);
+
+							return (
+								<div
+									key={`canvas-summary-${(part as any).toolCallId}`}
+									className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-200 animate-in fade-in slide-in-from-bottom-2"
+								>
+									<div className="flex items-center gap-2 font-medium">
+										<span className="flex items-center justify-center size-5 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50">
+											✓
+										</span>
+										Strategy Canvas Updated
 									</div>
-								);
-							}
-							return null;
+									<div className="mt-1 ml-7 text-emerald-700/90 dark:text-emerald-300/90">
+										Added {totalItems} items across{" "}
+										{sections.join(", ")}
+									</div>
+								</div>
+							);
 						}
 
 						return null;
