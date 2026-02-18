@@ -101,7 +101,7 @@ Plans:
 
 Plans:
 - [x] 25-01-PLAN.md — Sanitize Zod error leaks in 8 API routes, tighten CSP, fix ajv vulnerability (SEC-01, SEC-02, SEC-03)
-- [ ] 25-02-PLAN.md — Chat message pagination, summary interval optimization, stream failure cleanup (PERF-01, PERF-02, PERF-03)
+- [x] 25-02-PLAN.md — Chat message pagination, summary interval optimization, stream failure cleanup (PERF-01, PERF-02, PERF-03)
 - [ ] 25-03-PLAN.md — Model documentation alignment, demo cost tracking, per-user spending alerts (COST-01, COST-02, COST-03, COST-04)
 
 ### Phase 26: Documentation & Design Decisions
@@ -129,5 +129,5 @@ Plans:
 | 22. Auth & Subscription Guards | 1/1 | Complete | 2026-02-18 |
 | 23. Webhook Reliability | 3/3 | Complete | 2026-02-18 |
 | 24. Model Resilience & Voice | 2/2 | Complete | 2026-02-19 |
-| 25. Security, Performance & Cost | 1/3 | In progress | - |
+| 25. Security, Performance & Cost | 2/3 | In progress | - |
 | 26. Documentation & Decisions | 0/1 | Not started | - |

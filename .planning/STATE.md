@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 25 (security-performance-cost-controls)
-Plan: 1 of 3
+Plan: 2 of 3
 Status: In progress
-Last activity: 2026-02-18 -- Completed 25-01-PLAN.md
+Last activity: 2026-02-18 -- Completed 25-02-PLAN.md
 
-Progress: ██████████░ 10/12 plans (83%)
+Progress: ███████████░ 11/12 plans (92%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31 (11 v1.2 + 10 v1.3 + 10 v1.4)
-- Average duration: 5min
-- Total execution time: 164min
+- Total plans completed: 32 (11 v1.2 + 10 v1.3 + 11 v1.4)
+- Average duration: 6min
+- Total execution time: 189min
 
 **By Phase:**
 
@@ -41,7 +41,7 @@ Progress: ██████████░ 10/12 plans (83%)
 | 22 | 1/1 | 8min | 8min |
 | 23 | 3/3 | 11min | 4min |
 | 24 | 2/2 | 33min | 17min |
-| 25 | 1/3 | 11min | 11min |
+| 25 | 2/3 | 36min | 18min |
 
 ## Accumulated Context
 
@@ -71,6 +71,10 @@ Progress: ██████████░ 10/12 plans (83%)
 - Safety middleware wraps outer fallback chain so it applies to both OpenRouter and direct Google responses
 - All API validation errors must use ChatSDKError('bad_request:api').toResponse() -- never expose Zod flatten/errors to clients
 - Server-side Zod diagnostics logged via logger.warn for debugging without client exposure
+- SUMMARY_INTERVAL = 10: conversation summaries at messages 4, 10, 20, 30... balances freshness with API cost (~80% reduction)
+- Button-based pagination (not infinite scroll) for predictable UX and simpler message prepending
+- Soft-delete for stream failure cleanup (deletedAt timestamp) matches existing pattern, preserves auditability
+- Cursor-based pagination using createdAt lt operator for efficient descending-order queries
 
 ### Completed
 
@@ -96,5 +100,5 @@ Progress: ██████████░ 10/12 plans (83%)
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 25-01 (Zod error sanitization, CSP tightening, ajv patch)
-Resume: `/gsd:execute-phase 25` (plan 25-02 next)
+Stopped at: Completed 25-02 (chat pagination, summary interval, stream cleanup)
+Resume: `/gsd:execute-phase 25` (plan 25-03 next)
