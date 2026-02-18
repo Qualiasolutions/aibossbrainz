@@ -186,7 +186,7 @@ export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
 		description: "Your Sales Strategy Expert",
 		icon: "UserRound",
 		avatar: "/images/kim-avatar.png",
-		voiceVolume: 0.35,
+		voiceVolume: 0.25,
 	},
 	collaborative: {
 		id: "collaborative",

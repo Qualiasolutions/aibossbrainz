@@ -36,9 +36,9 @@ export function PremiumRealtimeCall({
 	const [callState, setCallState] = useState<CallState>("idle");
 	const [isMuted, setIsMuted] = useState(false);
 	const [liveTranscript, setLiveTranscript] = useState("");
-	const [transcriptHistory, setTranscriptHistory] = useState<
-		TranscriptEntry[]
-	>([]);
+	const [transcriptHistory, setTranscriptHistory] = useState<TranscriptEntry[]>(
+		[],
+	);
 	const [callDuration, setCallDuration] = useState(0);
 	const [audioLevel, setAudioLevel] = useState(0);
 	const [isAiSpeaking, setIsAiSpeaking] = useState(false);
@@ -136,14 +136,13 @@ export function PremiumRealtimeCall({
 					if (status === 401) {
 						throw new Error("Please sign in to use voice calls.");
 					}
-					throw new Error(
-						errorData.message || "Failed to get AI response",
-					);
+					throw new Error(errorData.message || "Failed to get AI response");
 				}
 
 				const data = await response.json();
 				const aiText = data.text;
 				const audioUrl = data.audioUrl;
+				const audioData = data.audioData; // base64 fallback
 				const chatId = data.chatId;
 
 				if (chatId && !voiceCallChatId) {
@@ -157,8 +156,13 @@ export function PremiumRealtimeCall({
 				setCallState("speaking");
 				setIsAiSpeaking(true);
 
-				if (audioUrl) {
-					const audio = new Audio(audioUrl);
+				// Use blob URL if available, otherwise base64 data URL
+				const audioSrc =
+					audioUrl ||
+					(audioData ? `data:audio/mpeg;base64,${audioData}` : null);
+
+				if (audioSrc) {
+					const audio = new Audio(audioSrc);
 					currentAudioRef.current = audio;
 
 					// Apply per-bot volume multiplier
@@ -452,8 +456,7 @@ export function PremiumRealtimeCall({
 				<div
 					className="absolute -top-32 -right-32 size-[420px] rounded-full opacity-[0.04]"
 					style={{
-						background:
-							"radial-gradient(circle, #ef4444 0%, transparent 70%)",
+						background: "radial-gradient(circle, #ef4444 0%, transparent 70%)",
 						animation: "drift-a 18s ease-in-out infinite",
 					}}
 				/>
@@ -461,8 +464,7 @@ export function PremiumRealtimeCall({
 				<div
 					className="absolute -bottom-24 -left-24 size-[320px] rounded-full opacity-[0.03]"
 					style={{
-						background:
-							"radial-gradient(circle, #dc2626 0%, transparent 70%)",
+						background: "radial-gradient(circle, #dc2626 0%, transparent 70%)",
 						animation: "drift-b 22s ease-in-out infinite",
 					}}
 				/>
@@ -473,8 +475,7 @@ export function PremiumRealtimeCall({
 						isCallActive ? "opacity-[0.025]" : "opacity-0",
 					)}
 					style={{
-						background:
-							"radial-gradient(circle, #b91c1c 0%, transparent 65%)",
+						background: "radial-gradient(circle, #b91c1c 0%, transparent 65%)",
 						animation: "breathe 6s ease-in-out infinite",
 					}}
 				/>
@@ -625,9 +626,7 @@ export function PremiumRealtimeCall({
 									key={`${entry.role}-${i}`}
 									className={cn(
 										"flex gap-2.5",
-										entry.role === "user"
-											? "justify-end"
-											: "justify-start",
+										entry.role === "user" ? "justify-end" : "justify-start",
 									)}
 								>
 									<div

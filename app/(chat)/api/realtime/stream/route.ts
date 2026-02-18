@@ -230,8 +230,11 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 
 		const responseText = result.text;
 
-		// Generate audio
+		// Generate audio — deliver via blob URL when possible, base64 inline as fallback.
+		// The previous implementation discarded the audio buffer when blob caching failed,
+		// resulting in silent responses. Now we always keep the raw buffer for base64 delivery.
 		let audioUrl: string | null = null;
+		let audioBase64: string | null = null;
 		const apiKey = process.env.ELEVENLABS_API_KEY;
 
 		if (apiKey && responseText) {
@@ -306,7 +309,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 						}
 
 						if (audioBuffers.length > 0) {
-							// Concatenate audio and cache combined result
+							// Concatenate audio buffers
 							const totalLength = audioBuffers.reduce(
 								(sum, buf) => sum + buf.byteLength,
 								0,
@@ -318,7 +321,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 								offset += buffer.byteLength;
 							}
 
-							// Cache combined audio and use CDN URL
+							// Try blob cache for CDN URL
 							const combinedVoiceConfig = getVoiceConfig("collaborative");
 							const combinedCacheParams = buildCacheParams(
 								truncatedText,
@@ -329,6 +332,11 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 								combined.buffer,
 							);
 							audioUrl = blobUrl || null;
+
+							// Always keep base64 fallback so audio plays even if blob fails
+							if (!audioUrl) {
+								audioBase64 = Buffer.from(combined.buffer).toString("base64");
+							}
 						}
 					}
 				} else {
@@ -351,9 +359,14 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 								apiKey,
 							);
 
-							// Cache and use CDN URL
+							// Try blob cache for CDN URL
 							const blobUrl = await cacheAudio(cacheParams, audioData);
 							audioUrl = blobUrl || null;
+
+							// Always keep base64 fallback so audio plays even if blob fails
+							if (!audioUrl) {
+								audioBase64 = Buffer.from(audioData).toString("base64");
+							}
 						}
 					}
 				}
@@ -432,11 +445,17 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 			);
 		}
 
-		apiLog.success({ botType, hasAudio: !!audioUrl, chatId: savedChatId });
+		apiLog.success({
+			botType,
+			hasAudio: !!(audioUrl || audioBase64),
+			audioDelivery: audioUrl ? "blob" : audioBase64 ? "base64" : "none",
+			chatId: savedChatId,
+		});
 
 		return Response.json({
 			text: responseText,
 			audioUrl,
+			audioData: audioBase64,
 			chatId: savedChatId, // Return chatId so frontend can redirect
 		});
 	} catch (error) {
