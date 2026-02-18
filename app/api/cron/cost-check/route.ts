@@ -1,10 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getDailyAICostTotal } from "@/lib/cost/tracker";
+import { getDailyAICostTotal, getTopUserCosts } from "@/lib/cost/tracker";
 import { sendAdminNotification } from "@/lib/email/admin-notifications";
 import { logger } from "@/lib/logger";
 
 const DAILY_COST_THRESHOLD_USD =
 	Number(process.env.AI_DAILY_COST_THRESHOLD_USD) || 10;
+
+// Flag users spending more than 10x the per-user average
+const ANOMALY_MULTIPLIER = 10;
 
 export async function GET(request: NextRequest) {
 	const authHeader = request.headers.get("authorization");
@@ -41,11 +44,58 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
+		// COST-04: Per-user anomaly detection
+		const topUsers = await getTopUserCosts();
+		let anomalousUsers: Array<{
+			userId: string;
+			costUSD: number;
+			requestCount: number;
+		}> = [];
+
+		if (daily.uniqueUsers > 0 && topUsers.length > 0) {
+			const avgCostPerUser = daily.totalCostUSD / daily.uniqueUsers;
+			const anomalyThreshold = avgCostPerUser * ANOMALY_MULTIPLIER;
+
+			anomalousUsers = topUsers
+				.filter((u) => u.totalCostUSD > anomalyThreshold)
+				.map((u) => ({
+					userId: u.userId,
+					costUSD: u.totalCostUSD,
+					requestCount: u.requestCount,
+				}));
+
+			if (anomalousUsers.length > 0) {
+				const userDetails = anomalousUsers
+					.map(
+						(u) =>
+							`- User ${u.userId}: $${u.costUSD.toFixed(4)} (${u.requestCount} requests)`,
+					)
+					.join("\n");
+
+				await sendAdminNotification({
+					subject: `AI Per-User Anomaly Alert: ${anomalousUsers.length} user(s) flagged`,
+					message: `${anomalousUsers.length} user(s) spending >${ANOMALY_MULTIPLIER}x the average daily cost ($${avgCostPerUser.toFixed(4)}/user).\n\n${userDetails}`,
+					type: "alert",
+				});
+
+				logger.warn(
+					{
+						anomalousUsers: anomalousUsers.length,
+						avgCostPerUser,
+						anomalyThreshold,
+					},
+					"Per-user cost anomalies detected - admin notified",
+				);
+			}
+		}
+
 		return NextResponse.json({
 			success: true,
 			...daily,
 			thresholdUSD: DAILY_COST_THRESHOLD_USD,
 			thresholdExceeded: daily.totalCostUSD > DAILY_COST_THRESHOLD_USD,
+			topUsers: topUsers.slice(0, 5),
+			anomalousUsers,
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {

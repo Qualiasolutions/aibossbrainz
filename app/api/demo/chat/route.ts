@@ -5,11 +5,13 @@ import {
 	streamText,
 } from "ai";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { z } from "zod";
 import { myProvider } from "@/lib/ai/providers";
 import type { BotType } from "@/lib/bot-personalities";
 import { getSystemPrompt } from "@/lib/bot-personalities";
 import { isProductionEnvironment } from "@/lib/constants";
+import { recordAICost } from "@/lib/cost/tracker";
 import { logger } from "@/lib/logger";
 import {
 	isCircuitOpen,
@@ -135,6 +137,28 @@ export const POST = withCsrf(async (request: Request) => {
 					experimental_telemetry: {
 						isEnabled: isProductionEnvironment,
 						functionId: "demo-stream-text",
+					},
+					onFinish: ({ usage }) => {
+						// COST-03: Log demo chat token usage for cost visibility
+						const inputTokens = usage?.inputTokens ?? 0;
+						const outputTokens = usage?.outputTokens ?? 0;
+						const totalTokens = inputTokens + outputTokens;
+						if (totalTokens > 0) {
+							after(() =>
+								recordAICost({
+									userId: null,
+									chatId: null,
+									modelId: "google/gemini-2.5-flash",
+									inputTokens,
+									outputTokens,
+									costUSD: 0, // Demo cost estimation: $0 tracking (actual cost calculated by OpenRouter)
+								}),
+							);
+							logger.debug(
+								{ inputTokens, outputTokens, ip },
+								"Demo chat token usage recorded",
+							);
+						}
 					},
 				});
 
