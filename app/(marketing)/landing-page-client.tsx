@@ -37,43 +37,59 @@ const revealVariants = {
 };
 
 // ─────────────────────────────────────────────────────────────
-// HERO SECTION — Clean, white background, high-contrast typography
+// HERO SECTION — V0/Linear Style: Technical, Clean, Precise
 // ─────────────────────────────────────────────────────────────
 function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
 	const isInView = useInView(ref, { once: true });
 	const { scrollY } = useScroll();
-	const contentY = useTransform(scrollY, [0, 400], [0, 60]);
+	const contentY = useTransform(scrollY, [0, 400], [0, 40]);
 
 	return (
 		<section
 			ref={ref}
-			className="relative min-h-[100svh] overflow-hidden bg-white flex items-center justify-center"
+			className="relative min-h-[90svh] overflow-hidden bg-white flex items-center justify-center border-b border-stone-100"
 		>
-			{/* Background Pattern */}
-			<div className="absolute inset-0 z-0 overflow-hidden">
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-				<div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white" />
+			{/* Technical Background Grid */}
+			<div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+				<div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]" />
+				<div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-white/80" />
 			</div>
 
 			{/* Content */}
 			<motion.div
-				className="relative z-10 w-full max-w-7xl px-6 pt-32 pb-20 lg:px-8"
+				className="relative z-10 w-full max-w-[1200px] px-6 pt-24 pb-20 lg:px-8 mx-auto"
 				style={{ y: contentY }}
 			>
-				<div className="grid w-full gap-16 lg:grid-cols-2 lg:gap-24 items-center">
+				<div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
 					{/* Left — Text */}
-					<div className="flex flex-col justify-center text-left">
-						{/* Heading */}
+					<div className="flex-1 max-w-2xl text-left">
+						{/* Technical Pill Badge */}
+						<motion.div
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.1}
+							className="mb-6"
+						>
+							<div className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50/50 px-3 py-1 transition-colors hover:bg-stone-100 hover:border-stone-300">
+								<span className="flex h-1.5 w-1.5 rounded-full bg-red-500 shadow-sm" />
+								<span className="text-[11px] font-medium tracking-wide text-stone-500 uppercase">
+									AI Executive Consulting v2.0
+								</span>
+							</div>
+						</motion.div>
+
+						{/* Heading — Smaller, tighter, punchier */}
 						<motion.h1
 							variants={revealVariants}
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
 							custom={0.2}
-							className="text-5xl font-bold tracking-tight text-stone-900 sm:text-6xl lg:text-7xl xl:text-[5rem] leading-[1.05]"
+							className="text-4xl font-bold tracking-tighter text-stone-900 sm:text-5xl lg:text-[3.75rem] leading-[1.1]"
 						>
 							<span className="block">{content.hero.title_main}</span>
-							<span className="mt-2 block bg-gradient-to-r from-red-600 via-red-500 to-orange-500 bg-clip-text text-transparent pb-2">
+							<span className="block text-stone-500">
 								{content.hero.title_highlight}
 							</span>
 						</motion.h1>
@@ -83,75 +99,71 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							variants={revealVariants}
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
-							custom={0.35}
-							className="mt-8 max-w-xl text-lg leading-relaxed text-stone-600 sm:text-xl font-light"
+							custom={0.3}
+							className="mt-6 max-w-lg text-lg leading-relaxed text-stone-600 sm:text-xl/relaxed font-normal tracking-tight"
 						>
 							{content.hero.subtitle}
 						</motion.p>
 
-						{/* CTAs */}
+						{/* CTAs — Smaller, system-ui style */}
 						<motion.div
 							variants={revealVariants}
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
-							custom={0.5}
-							className="mt-10 flex flex-col gap-4 sm:flex-row"
+							custom={0.4}
+							className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
 						>
 							<Link href={content.hero.cta_primary_link}>
 								<Button
 									size="lg"
-									className="h-14 px-8 text-base font-semibold text-white bg-red-600 hover:bg-red-700 rounded-full shadow-xl shadow-red-600/20 transition-all duration-300 hover:shadow-2xl hover:shadow-red-600/30 hover:-translate-y-0.5"
+									className="h-11 px-6 text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-md shadow-sm transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
 								>
 									{content.hero.cta_primary_text}
-									<ArrowRight className="ml-2 h-4 w-4" />
+									<ArrowRight className="ml-2 h-3.5 w-3.5" />
 								</Button>
 							</Link>
 							<Link href={content.hero.cta_secondary_link}>
 								<Button
 									variant="outline"
 									size="lg"
-									className="h-14 px-8 text-base font-medium text-stone-600 border-stone-200 bg-white hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-full transition-all duration-300"
+									className="h-11 px-6 text-sm font-medium text-stone-600 border-stone-200 bg-white hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-md transition-all duration-200"
 								>
 									{content.hero.cta_secondary_text}
 								</Button>
 							</Link>
 						</motion.div>
 
-						{/* Trust */}
+						{/* Trust — Minimalist */}
 						<motion.div
 							variants={revealVariants}
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
-							custom={0.65}
-							className="mt-14 flex items-center gap-6 text-xs text-stone-500 font-medium"
+							custom={0.5}
+							className="mt-10 flex items-center gap-4 text-xs font-medium text-stone-500"
 						>
-							<div className="flex items-center gap-3">
-								<div className="flex -space-x-2">
-									{[...Array(4)].map((_, i) => (
-										<div
-											key={`avatar-${i}`}
-											className="h-8 w-8 rounded-full border-2 border-white bg-stone-100 flex items-center justify-center overflow-hidden ring-1 ring-stone-200"
-										>
-											<div className="w-full h-full bg-gradient-to-br from-stone-200 to-stone-300" />
-										</div>
-									))}
-								</div>
-								<span>Trusted by 500+ founders</span>
+							<div className="flex -space-x-1.5">
+								{[...Array(4)].map((_, i) => (
+									<div
+										key={`avatar-${i}`}
+										className="h-6 w-6 rounded-full border-2 border-white bg-stone-100 ring-1 ring-stone-100"
+									>
+										<div className="w-full h-full rounded-full bg-gradient-to-br from-stone-200 to-stone-300" />
+									</div>
+								))}
 							</div>
-							<div className="h-4 w-px bg-stone-200" />
-							<div className="flex items-center gap-2">
-								<div className="flex text-amber-400">
+							<div className="flex items-center gap-1.5">
+								<div className="flex text-amber-500/80">
 									{[...Array(5)].map((_, i) => (
 										<svg
 											key={`star-${i}`}
-											className="w-3.5 h-3.5 fill-current"
+											className="w-3 h-3 fill-current"
 											viewBox="0 0 20 20"
 										>
 											<path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
 										</svg>
 									))}
 								</div>
-								<span className="text-stone-600">5.0 Rating</span>
+								<span className="text-stone-400">Trusted by 500+ founders</span>
 							</div>
 						</motion.div>
 					</div>
@@ -161,25 +173,22 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						variants={revealVariants}
 						initial="hidden"
 						animate={isInView ? "visible" : "hidden"}
-						custom={0.4}
-						className="relative flex items-center justify-center lg:justify-end"
+						custom={0.3}
+						className="flex-1 w-full max-w-xl mx-auto lg:max-w-none"
 					>
-						{/* Shadow behind the interface */}
-						<div className="absolute -inset-4 bg-gradient-to-tr from-stone-200/50 to-stone-100/50 blur-2xl rounded-[3rem] -z-10" />
-
-						<div className="w-full max-w-2xl xl:max-w-3xl relative">
+						<div className="relative rounded-xl bg-stone-100/50 p-1 ring-1 ring-stone-200/50">
 							{content.hero.media_type === "image" && content.hero.media_url ? (
 								<Image
 									src={content.hero.media_url}
 									alt="AI Boss Brainz"
 									width={800}
 									height={600}
-									className="relative rounded-2xl shadow-2xl shadow-stone-900/10 ring-1 ring-stone-900/5"
+									className="relative rounded-lg shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5"
 									priority
 								/>
 							) : content.hero.media_type === "video" &&
 								content.hero.media_url ? (
-								<div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-stone-900/10 ring-1 ring-stone-900/5">
+								<div className="relative aspect-video rounded-lg overflow-hidden shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5">
 									{content.hero.media_url.includes("youtube.com") ||
 									content.hero.media_url.includes("youtu.be") ||
 									content.hero.media_url.includes("vimeo.com") ? (
@@ -206,25 +215,6 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						</div>
 					</motion.div>
 				</div>
-			</motion.div>
-
-			{/* Scroll Indicator */}
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={isInView ? { opacity: 1 } : {}}
-				transition={{ delay: 1.5, duration: 0.8 }}
-				className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2"
-			>
-				<motion.div
-					animate={{ y: [0, 6, 0] }}
-					transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-					className="flex flex-col items-center gap-3"
-				>
-					<span className="text-[10px] font-medium tracking-[0.3em] uppercase text-stone-400">
-						Scroll
-					</span>
-					<div className="h-10 w-px bg-gradient-to-b from-stone-300 to-transparent" />
-				</motion.div>
 			</motion.div>
 		</section>
 	);

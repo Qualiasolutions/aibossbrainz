@@ -220,8 +220,8 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
 
 	return (
 		<div className="relative w-full">
-			{/* Browser Chrome - Enhanced */}
-			<div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-2xl shadow-stone-900/10 ring-4 ring-stone-900/5">
+			{/* Browser Chrome - V0 Style */}
+			<div className="relative overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm ring-1 ring-stone-900/5">
 				{/* Window Controls */}
 				<div className="flex items-center justify-between border-b border-stone-100 bg-gradient-to-r from-stone-50 to-stone-100/80 px-4 py-3">
 					<div className="flex items-center gap-3">
