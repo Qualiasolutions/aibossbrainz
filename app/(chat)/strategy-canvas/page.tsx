@@ -248,7 +248,7 @@ export default function StrategyCanvasPage() {
 											{isActive && (
 												<motion.div
 													layoutId="activeTab"
-													className="absolute inset-0 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 shadow-lg shadow-rose-500/30"
+													className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 shadow-lg shadow-rose-500/30"
 													transition={{
 														type: "spring",
 														stiffness: 400,
@@ -261,7 +261,7 @@ export default function StrategyCanvasPage() {
 											)}
 											{/* Hover effect for inactive */}
 											{!isActive && (
-												<div className="absolute inset-0 rounded-xl bg-gradient-to-b from-rose-50/0 to-rose-50/0 opacity-0 transition-all duration-300 group-hover:from-rose-50/60 group-hover:to-rose-100/30 group-hover:opacity-100 dark:group-hover:from-rose-900/20 dark:group-hover:to-rose-950/10" />
+												<div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-b from-rose-50/0 to-rose-50/0 opacity-0 transition-all duration-300 group-hover:from-rose-50/60 group-hover:to-rose-100/30 group-hover:opacity-100 dark:group-hover:from-rose-900/20 dark:group-hover:to-rose-950/10" />
 											)}
 											<div className="relative z-10 flex items-center gap-3">
 												<div
@@ -330,7 +330,7 @@ export default function StrategyCanvasPage() {
 											{isActive && (
 												<motion.div
 													layoutId="activeTabletTab"
-													className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/10 to-white/10"
+													className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-t from-black/10 to-white/10"
 													transition={{
 														type: "spring",
 														stiffness: 400,
@@ -414,7 +414,7 @@ export default function StrategyCanvasPage() {
 										{isActive && (
 											<motion.div
 												layoutId="activeMobileTab"
-												className="absolute inset-0 rounded-full bg-gradient-to-t from-black/10 to-white/10"
+												className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-t from-black/10 to-white/10"
 												transition={{
 													type: "spring",
 													stiffness: 400,

@@ -180,8 +180,32 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 						type: "touchpoint" as const,
 					}));
 					journeyData.touchpoints.push(...newTouchpoints);
+				} else if (canvasType === "brainstorm") {
+					// Brainstorm: notes need category for grouping
+					const brainstormData = currentData as unknown as {
+						notes?: Array<{
+							id: string;
+							content: string;
+							color: string;
+							category: string;
+							x?: number;
+							y?: number;
+						}>;
+					};
+					if (!brainstormData.notes) {
+						brainstormData.notes = [];
+					}
+					const newNotes = items.map((content, idx) => ({
+						id: generateUUID(),
+						content,
+						color: "slate" as const,
+						category: "Ideas", // Default category for AI-generated notes
+						x: Math.random() * 60 + 10, // Random position
+						y: Math.random() * 40 + 10 + idx * 10, // Stagger vertically
+					}));
+					brainstormData.notes.push(...newNotes);
 				} else {
-					// SWOT, BMC, Brainstorm: use correct storage key (camelCase for BMC)
+					// SWOT, BMC: use correct storage key (camelCase for BMC)
 					const storageKey =
 						sectionToStorageKey[normalizedSection] || normalizedSection;
 					const newItems = items.map((content) => ({

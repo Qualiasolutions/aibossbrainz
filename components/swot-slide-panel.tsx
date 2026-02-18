@@ -104,12 +104,13 @@ export function SwotSlidePanel({
 }: SwotSlidePanelProps) {
 	const [activeCanvas, setActiveCanvas] = useState<CanvasType>("swot");
 
-	// Sync active tab when prop changes (useEffect instead of sync state update during render)
+	// Sync active tab when prop changes from parent (e.g., when AI tool populates a canvas)
+	// Only depend on activeTab - NOT activeCanvas - to avoid resetting user's tab selection
 	useEffect(() => {
-		if (activeTab && activeTab !== activeCanvas) {
+		if (activeTab) {
 			setActiveCanvas(activeTab);
 		}
-	}, [activeTab, activeCanvas]);
+	}, [activeTab]);
 
 	return (
 		<AnimatePresence>
