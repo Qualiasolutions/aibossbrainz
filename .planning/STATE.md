@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 24 plan 02 complete
+**Current focus:** Phase 24 complete
 
 ## Current Position
 
-Phase: 24 (model-resilience-voice-optimization)
-Plan: 2 of 2 (phase complete pending 24-01 verification)
-Status: Plan 02 complete
-Last activity: 2026-02-18 -- Completed 24-02-PLAN.md (voice optimization)
+Phase: 24 (model-resilience-voice-optimization) -- COMPLETE
+Plan: 2 of 2 (phase complete)
+Status: Phase complete
+Last activity: 2026-02-18 -- Completed 24-01-PLAN.md (AI provider resilience)
 
 Progress: █████████░ 9/12 plans (75%)
 
@@ -21,7 +21,7 @@ Progress: █████████░ 9/12 plans (75%)
 **Velocity:**
 - Total plans completed: 30 (11 v1.2 + 10 v1.3 + 9 v1.4)
 - Average duration: 4min
-- Total execution time: 135min
+- Total execution time: 153min
 
 **By Phase:**
 
@@ -40,7 +40,7 @@ Progress: █████████░ 9/12 plans (75%)
 | 21 | 2/2 | 8min | 4min |
 | 22 | 1/1 | 8min | 8min |
 | 23 | 3/3 | 11min | 4min |
-| 24 | 2/2 | 15min | 8min |
+| 24 | 2/2 | 33min | 17min |
 
 ## Accumulated Context
 
@@ -64,6 +64,10 @@ Progress: █████████░ 9/12 plans (75%)
 - SECURITY DEFINER functions must include SET search_path = public
 - TTS cache: Vercel Blob list() with prefix for lookup (head() requires full URL), addRandomSuffix: false for deterministic keys
 - TTS cache writes are fire-and-forget to never block audio generation
+- Used @ai-sdk/google@2.0.20 + ai-fallback@1.0.8 for LanguageModelV2 compatibility (latest versions use V3 types incompatible with ai@5.0.118)
+- Circuit breaker transient errors: 429 + 5xx + network. Client errors (400-404 except 429) never trip circuit
+- Retry-After header parsing capped at 120s to prevent absurd waits
+- Safety middleware wraps outer fallback chain so it applies to both OpenRouter and direct Google responses
 
 ### Completed
 
@@ -84,9 +88,10 @@ Progress: █████████░ 9/12 plans (75%)
 - AICostLog migration needs to be applied via Supabase Dashboard SQL Editor
 - StripeWebhookEvent + WebhookDeadLetter migration needs to be applied via Supabase Dashboard SQL Editor
 - Gap closure migration (20260218000300) also needs to be applied via Supabase Dashboard SQL Editor
+- GOOGLE_AI_API_KEY is optional env var -- set it in Vercel for provider fallback
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 24-02-PLAN.md (voice optimization -- TTS cache, error isolation, CDN URLs, rate limiting)
+Stopped at: Completed 24-01-PLAN.md (AI provider resilience -- circuit breaker fix, fallback chain, health probe)
 Resume: Phase 24 complete, proceed to next phase
