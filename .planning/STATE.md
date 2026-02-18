@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 25 (next)
+**Current focus:** Phase 26 (next)
 
 ## Current Position
 
-Phase: 25 (security-performance-cost-controls)
-Plan: 2 of 3
-Status: In progress
-Last activity: 2026-02-18 -- Completed 25-02-PLAN.md
+Phase: 25 (security-performance-cost-controls) -- COMPLETE
+Plan: 3 of 3 (phase complete)
+Status: Phase complete
+Last activity: 2026-02-18 -- Completed 25-03-PLAN.md
 
-Progress: ███████████░ 11/12 plans (92%)
+Progress: ████████████ 12/12 plans (100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 32 (11 v1.2 + 10 v1.3 + 11 v1.4)
-- Average duration: 6min
-- Total execution time: 189min
+- Total plans completed: 33 (11 v1.2 + 10 v1.3 + 12 v1.4)
+- Average duration: 7min
+- Total execution time: 217min
 
 **By Phase:**
 
@@ -41,7 +41,7 @@ Progress: ███████████░ 11/12 plans (92%)
 | 22 | 1/1 | 8min | 8min |
 | 23 | 3/3 | 11min | 4min |
 | 24 | 2/2 | 33min | 17min |
-| 25 | 2/3 | 36min | 18min |
+| 25 | 3/3 | 64min | 21min |
 
 ## Accumulated Context
 
@@ -75,6 +75,9 @@ Progress: ███████████░ 11/12 plans (92%)
 - Button-based pagination (not infinite scroll) for predictable UX and simpler message prepending
 - Soft-delete for stream failure cleanup (deletedAt timestamp) matches existing pattern, preserves auditability
 - Cursor-based pagination using createdAt lt operator for efficient descending-order queries
+- Nullable userId in AICostLog for demo/anonymous cost tracking (FK constraint relaxed in migration)
+- Per-user anomaly threshold: 10x daily per-user average cost (configurable ANOMALY_MULTIPLIER)
+- Demo cost entries use costUSD=0 since actual cost determined by OpenRouter billing
 
 ### Completed
 
@@ -96,9 +99,10 @@ Progress: ███████████░ 11/12 plans (92%)
 - StripeWebhookEvent + WebhookDeadLetter migration needs to be applied via Supabase Dashboard SQL Editor
 - Gap closure migration (20260218000300) also needs to be applied via Supabase Dashboard SQL Editor
 - GOOGLE_AI_API_KEY is optional env var -- set it in Vercel for provider fallback
+- AICostLog userId index migration (20260219000200) needs to be applied via Supabase Dashboard SQL Editor
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 25-02 (chat pagination, summary interval, stream cleanup)
-Resume: `/gsd:execute-phase 25` (plan 25-03 next)
+Stopped at: Completed phase 25 (security, performance & cost controls -- all 3 plans done)
+Resume: `/gsd:plan-phase 26`
