@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 20 in progress -- Observability & Cost Controls. Plan 01 complete, plan 02 next.
+**Current focus:** Phase 20 complete -- v1.3 AI Production Hardening milestone complete.
 
 ## Current Position
 
 Phase: 20 of 20 (Observability & Cost Controls)
-Plan: 1 of 2
-Status: In progress
-Last activity: 2026-02-18 -- Completed 20-01-PLAN.md (cost infrastructure, Stripe webhook logging, cost cron)
+Plan: 2 of 2
+Status: Phase complete
+Last activity: 2026-02-18 -- Completed 20-02-PLAN.md (structured logging migration)
 
-Progress: ██████████░ 97%
+Progress: ██████████ 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20 (11 v1.2 + 9 v1.3)
-- Average duration: 3min
-- Total execution time: 72min
+- Total plans completed: 21 (11 v1.2 + 10 v1.3)
+- Average duration: 4min
+- Total execution time: 78min
 
 **By Phase:**
 
@@ -36,7 +36,7 @@ Progress: ██████████░ 97%
 | 17 | 2/2 | 5min | 2min |
 | 18 | 2/2 | 10min | 5min |
 | 19 | 2/2 | 5min | 2min |
-| 20 | 1/2 | 5min | 5min |
+| 20 | 2/2 | 11min | 5min |
 
 ## Accumulated Context
 
@@ -73,9 +73,12 @@ Progress: ██████████░ 97%
 - Non-blocking cost recording via after() to avoid chat response latency
 - AI_DAILY_COST_THRESHOLD_USD env var with $10 default for configurable alerting
 - createRequestLogger(event.id) for Stripe webhook request-scoped log correlation
+- Client-side files (lib/utils.ts, lib/audio-manager.ts) intentionally left with console.* -- pino is server-only
+- Error objects always logged as { err: error } key for pino serializer compatibility
 
 ### Completed
 
+**v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans
 **Quick tasks:** 2 completed (chat animations, typewriter tuning)
@@ -96,5 +99,5 @@ Progress: ██████████░ 97%
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Phase 20 plan 01 complete (cost infrastructure)
-Resume: Execute phase 20 plan 02 (broad structured logging migration)
+Stopped at: Phase 20 complete -- all v1.3 phases done
+Resume: v1.3 is complete. Next milestone would be v1.4 (medium/low severity findings)

@@ -5,7 +5,7 @@
 - v1.0 MVP - Phases 1-5 (shipped)
 - v1.1 Branding & Billing - Phases 6-10 (shipped 2026-02-02)
 - v1.2 Client Feedback Sweep - Phases 11-15 (shipped 2026-02-11)
-- v1.3 AI Production Hardening - Phases 16-20 (in progress)
+- v1.3 AI Production Hardening - Phases 16-20 (shipped 2026-02-18)
 
 ## Overview
 
@@ -17,7 +17,7 @@ v1.3 remediates all critical and high-severity findings from the AI Production A
 - [x] **Phase 17: Security Hardening** - XSS removal, middleware auth allowlist, input validation, health endpoint lockdown
 - [x] **Phase 18: Safety Rails** - Output filtering, PII redaction, prompt sanitization, human escalation, truncation indicators
 - [x] **Phase 19: Voice Quality** - MP3 frame concatenation, streaming TTS, config alignment, autoplay policies
-- [ ] **Phase 20: Observability & Cost Controls** - Structured logging migration, AI metrics, cost alerting and tracking
+- [x] **Phase 20: Observability & Cost Controls** - Structured logging migration, AI metrics, cost alerting and tracking
 
 ## Phase Details
 
@@ -98,7 +98,7 @@ Plans:
 
 Plans:
 - [x] 20-01-PLAN.md — Cost infrastructure (AICostLog table, cost tracker, chat route cost recording, Stripe webhook logging migration, cost cron, cost dashboard API)
-- [ ] 20-02-PLAN.md — Broad structured logging migration across all remaining server-side files (80%+ target)
+- [x] 20-02-PLAN.md — Broad structured logging migration across all remaining server-side files (98% achieved)
 
 ## Progress
 
@@ -111,8 +111,8 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 | 17. Security Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 18. Safety Rails | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 19. Voice Quality | v1.3 | 2/2 | Complete | 2026-02-17 |
-| 20. Observability & Cost Controls | v1.3 | 1/2 | In progress | - |
+| 20. Observability & Cost Controls | v1.3 | 2/2 | Complete | 2026-02-18 |
 
 ---
 *Roadmap created: 2026-02-16*
-*Last updated: 2026-02-18 (Phase 20 plan 01 complete)*
+*Last updated: 2026-02-18 (Phase 20 complete -- v1.3 milestone shipped)*
