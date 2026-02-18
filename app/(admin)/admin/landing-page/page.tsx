@@ -5,7 +5,9 @@ import {
 	Check,
 	ExternalLink,
 	Eye,
+	HelpCircle,
 	Loader2,
+	Mail,
 	Mic,
 	Palette,
 	RefreshCw,
@@ -38,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useCsrf } from "@/hooks/use-csrf";
 import type { LandingPageSection } from "@/lib/supabase/types";
 
 type ContentMap = Record<string, Record<string, string>>;
@@ -66,6 +69,7 @@ export default function LandingPageCMSPage() {
 	const [pendingChanges, setPendingChanges] = useState<
 		Map<string, { section: LandingPageSection; key: string; value: string }>
 	>(new Map());
+	const { csrfFetch } = useCsrf();
 
 	const fetchContent = useCallback(async () => {
 		setIsLoading(true);
@@ -116,7 +120,7 @@ export default function LandingPageCMSPage() {
 		setIsSaving(true);
 		try {
 			const updates = Array.from(pendingChanges.values());
-			const res = await fetch("/api/admin/landing-page", {
+			const res = await csrfFetch("/api/admin/landing-page", {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ updates }),
@@ -211,7 +215,7 @@ export default function LandingPageCMSPage() {
 			{/* Content */}
 			<div className="flex-1 overflow-auto p-6">
 				<Tabs defaultValue="hero" className="w-full">
-					<TabsList className="mb-6 grid w-full grid-cols-6 lg:w-auto lg:grid-cols-none lg:flex">
+					<TabsList className="mb-6 grid w-full grid-cols-5 lg:w-auto lg:grid-cols-none lg:flex">
 						<TabsTrigger value="hero" className="gap-2">
 							<Type className="h-4 w-4" />
 							Hero
@@ -231,6 +235,14 @@ export default function LandingPageCMSPage() {
 						</TabsTrigger>
 						<TabsTrigger value="checkup" className="gap-2">
 							Checkup
+						</TabsTrigger>
+						<TabsTrigger value="faq" className="gap-2">
+							<HelpCircle className="h-4 w-4" />
+							FAQs
+						</TabsTrigger>
+						<TabsTrigger value="contact" className="gap-2">
+							<Mail className="h-4 w-4" />
+							Contact
 						</TabsTrigger>
 						<TabsTrigger value="header-footer" className="gap-2">
 							Header/Footer
@@ -1156,6 +1168,328 @@ export default function LandingPageCMSPage() {
 												updateField("footer", "copyright", e.target.value)
 											}
 										/>
+									</div>
+								</CardContent>
+							</Card>
+						</div>
+					</TabsContent>
+
+					{/* FAQ Section */}
+					<TabsContent value="faq">
+						<div className="space-y-6">
+							<Card>
+								<CardHeader>
+									<CardTitle>FAQ Section Header</CardTitle>
+									<CardDescription>
+										Title and subtitle shown above the FAQ accordion on the
+										pricing page
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="space-y-4">
+									<div className="space-y-2">
+										<Label>Section Title</Label>
+										<Input
+											value={getFieldValue("faq", "section_title")}
+											onChange={(e) =>
+												updateField("faq", "section_title", e.target.value)
+											}
+											placeholder="Frequently Asked Questions"
+										/>
+									</div>
+									<div className="space-y-2">
+										<Label>Section Subtitle</Label>
+										<Textarea
+											value={getFieldValue("faq", "section_subtitle")}
+											onChange={(e) =>
+												updateField("faq", "section_subtitle", e.target.value)
+											}
+											rows={2}
+											placeholder="Everything you need to know about our membership plans."
+										/>
+									</div>
+								</CardContent>
+							</Card>
+
+							<div className="grid gap-4 md:grid-cols-2">
+								{[1, 2, 3, 4, 5].map((num) => (
+									<Card key={num}>
+										<CardHeader>
+											<CardTitle className="flex items-center gap-2 text-base">
+												<HelpCircle className="h-4 w-4 text-rose-500" />
+												FAQ {num}
+											</CardTitle>
+										</CardHeader>
+										<CardContent className="space-y-4">
+											<div className="space-y-2">
+												<Label>Question</Label>
+												<Input
+													value={getFieldValue("faq", `faq_${num}_question`)}
+													onChange={(e) =>
+														updateField(
+															"faq",
+															`faq_${num}_question`,
+															e.target.value,
+														)
+													}
+													placeholder="Enter the question..."
+												/>
+											</div>
+											<div className="space-y-2">
+												<Label>Answer</Label>
+												<Textarea
+													value={getFieldValue("faq", `faq_${num}_answer`)}
+													onChange={(e) =>
+														updateField(
+															"faq",
+															`faq_${num}_answer`,
+															e.target.value,
+														)
+													}
+													rows={3}
+													placeholder="Enter the answer..."
+												/>
+											</div>
+										</CardContent>
+									</Card>
+								))}
+							</div>
+						</div>
+					</TabsContent>
+
+					{/* Contact Page Section */}
+					<TabsContent value="contact">
+						<div className="space-y-6">
+							<div className="grid gap-6 lg:grid-cols-2">
+								<Card>
+									<CardHeader>
+										<CardTitle>Page Header</CardTitle>
+										<CardDescription>
+											Main title and subtitle for the contact page
+										</CardDescription>
+									</CardHeader>
+									<CardContent className="space-y-4">
+										<div className="space-y-2">
+											<Label>Page Title</Label>
+											<Input
+												value={getFieldValue("contact", "page_title")}
+												onChange={(e) =>
+													updateField("contact", "page_title", e.target.value)
+												}
+												placeholder="Get in Touch"
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label>Page Subtitle</Label>
+											<Input
+												value={getFieldValue("contact", "page_subtitle")}
+												onChange={(e) =>
+													updateField(
+														"contact",
+														"page_subtitle",
+														e.target.value,
+													)
+												}
+												placeholder="Sales and Marketing Strategy 24/7"
+											/>
+										</div>
+									</CardContent>
+								</Card>
+
+								<Card>
+									<CardHeader>
+										<CardTitle>Contact Information</CardTitle>
+									</CardHeader>
+									<CardContent className="space-y-4">
+										<div className="space-y-2">
+											<Label>Email Address</Label>
+											<Input
+												type="email"
+												value={getFieldValue("contact", "email")}
+												onChange={(e) =>
+													updateField("contact", "email", e.target.value)
+												}
+												placeholder="ai.bossbrainz@aleccimedia.com"
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label>Location</Label>
+											<Input
+												value={getFieldValue("contact", "location")}
+												onChange={(e) =>
+													updateField("contact", "location", e.target.value)
+												}
+												placeholder="Phoenix, Arizona"
+											/>
+										</div>
+									</CardContent>
+								</Card>
+							</div>
+
+							<div className="grid gap-6 lg:grid-cols-2">
+								<Card>
+									<CardHeader>
+										<CardTitle>Contact Form</CardTitle>
+									</CardHeader>
+									<CardContent className="space-y-4">
+										<div className="space-y-2">
+											<Label>Form Title</Label>
+											<Input
+												value={getFieldValue("contact", "form_title")}
+												onChange={(e) =>
+													updateField("contact", "form_title", e.target.value)
+												}
+												placeholder="Send us a Message"
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label>Form Subtitle</Label>
+											<Textarea
+												value={getFieldValue("contact", "form_subtitle")}
+												onChange={(e) =>
+													updateField(
+														"contact",
+														"form_subtitle",
+														e.target.value,
+													)
+												}
+												rows={2}
+												placeholder="Fill out the form below..."
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label>Success Message</Label>
+											<Textarea
+												value={getFieldValue("contact", "success_message")}
+												onChange={(e) =>
+													updateField(
+														"contact",
+														"success_message",
+														e.target.value,
+													)
+												}
+												rows={2}
+												placeholder="Thank you for reaching out..."
+											/>
+										</div>
+									</CardContent>
+								</Card>
+
+								<Card>
+									<CardHeader>
+										<CardTitle>AI Team CTA</CardTitle>
+										<CardDescription>
+											Call-to-action to chat with AI executives
+										</CardDescription>
+									</CardHeader>
+									<CardContent className="space-y-4">
+										<div className="space-y-2">
+											<Label>CTA Title</Label>
+											<Input
+												value={getFieldValue("contact", "cta_title")}
+												onChange={(e) =>
+													updateField("contact", "cta_title", e.target.value)
+												}
+												placeholder="Talk to Our AI Executives"
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label>CTA Description</Label>
+											<Textarea
+												value={getFieldValue("contact", "cta_description")}
+												onChange={(e) =>
+													updateField(
+														"contact",
+														"cta_description",
+														e.target.value,
+													)
+												}
+												rows={2}
+											/>
+										</div>
+										<div className="grid grid-cols-2 gap-4">
+											<div className="space-y-2">
+												<Label>Button Text</Label>
+												<Input
+													value={getFieldValue("contact", "cta_button_text")}
+													onChange={(e) =>
+														updateField(
+															"contact",
+															"cta_button_text",
+															e.target.value,
+														)
+													}
+													placeholder="Start Consulting Now"
+												/>
+											</div>
+											<div className="space-y-2">
+												<Label>Button Link</Label>
+												<Input
+													value={getFieldValue("contact", "cta_button_link")}
+													onChange={(e) =>
+														updateField(
+															"contact",
+															"cta_button_link",
+															e.target.value,
+														)
+													}
+													placeholder="/login"
+												/>
+											</div>
+										</div>
+									</CardContent>
+								</Card>
+							</div>
+
+							<Card>
+								<CardHeader>
+									<CardTitle>Quick FAQs</CardTitle>
+									<CardDescription>
+										Short FAQ items shown on the contact page sidebar
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<div className="grid gap-4 md:grid-cols-3">
+										{[1, 2, 3].map((num) => (
+											<div
+												key={num}
+												className="space-y-4 rounded-lg border border-stone-200 p-4"
+											>
+												<p className="text-sm font-semibold text-stone-700">
+													Quick FAQ {num}
+												</p>
+												<div className="space-y-2">
+													<Label>Title</Label>
+													<Input
+														value={getFieldValue("contact", `faq_${num}_title`)}
+														onChange={(e) =>
+															updateField(
+																"contact",
+																`faq_${num}_title`,
+																e.target.value,
+															)
+														}
+														placeholder="Free trial?"
+													/>
+												</div>
+												<div className="space-y-2">
+													<Label>Answer</Label>
+													<Textarea
+														value={getFieldValue(
+															"contact",
+															`faq_${num}_answer`,
+														)}
+														onChange={(e) =>
+															updateField(
+																"contact",
+																`faq_${num}_answer`,
+																e.target.value,
+															)
+														}
+														rows={2}
+													/>
+												</div>
+											</div>
+										))}
 									</div>
 								</CardContent>
 							</Card>

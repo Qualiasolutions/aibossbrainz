@@ -156,9 +156,14 @@ export default function SwotPage() {
 				<div className="container mx-auto px-4 text-center sm:px-6">
 					<p className="text-slate-500 text-sm dark:text-slate-400">
 						SWOT Analysis by{" "}
-						<span className="font-semibold text-purple-600 dark:text-purple-400">
+						<a
+							href="https://aleccimedia.com"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="font-semibold text-purple-600 hover:underline dark:text-purple-400"
+						>
 							Alecci Media
-						</span>
+						</a>
 					</p>
 				</div>
 			</footer>

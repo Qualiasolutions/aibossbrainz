@@ -1,14 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-	CheckCircle,
-	Clock,
-	Mail,
-	MapPin,
-	MessageSquare,
-	Send,
-} from "lucide-react";
+import { CheckCircle, Mail, MapPin, MessageSquare, Send } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -23,12 +16,6 @@ const contactInfo = [
 		icon: MapPin,
 		title: "Location",
 		value: "Phoenix, Arizona",
-		href: null,
-	},
-	{
-		icon: Clock,
-		title: "Response Time",
-		value: "Within 24 hours",
 		href: null,
 	},
 ];
@@ -117,8 +104,7 @@ export function ContactPageClient() {
 										Message Sent!
 									</h3>
 									<p className="mb-6 text-muted-foreground">
-										Thank you for reaching out. We'll get back to you within 24
-										hours.
+										Thank you for reaching out. We'll get back to you soon.
 									</p>
 									<Button
 										onClick={() => setIsSubmitted(false)}

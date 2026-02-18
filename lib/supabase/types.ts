@@ -104,7 +104,9 @@ export type LandingPageSection =
 	| "theme"
 	| "header"
 	| "footer"
-	| "checkup";
+	| "checkup"
+	| "faq"
+	| "contact";
 
 export interface LandingPageContent {
 	id: string;

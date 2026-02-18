@@ -171,7 +171,15 @@ export function AppSidebar({
 						</div>
 					)}
 					<p className="text-center text-[10px] tracking-wide text-muted-foreground/50">
-						Powered by Alecci Media
+						Powered by{" "}
+						<a
+							href="https://aleccimedia.com"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="hover:text-primary hover:underline"
+						>
+							Alecci Media
+						</a>
 					</p>
 				</SidebarFooter>
 			</Sidebar>
@@ -257,7 +265,15 @@ export function AppSidebar({
 								</div>
 							)}
 							<p className="text-center text-[10px] tracking-wide text-muted-foreground/50">
-								Powered by Alecci Media
+								Powered by{" "}
+								<a
+									href="https://aleccimedia.com"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="hover:text-primary hover:underline"
+								>
+									Alecci Media
+								</a>
 							</p>
 						</div>
 					</SheetContent>
