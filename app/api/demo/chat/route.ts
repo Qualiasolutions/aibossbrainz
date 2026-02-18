@@ -10,6 +10,8 @@ import { myProvider } from "@/lib/ai/providers";
 import { logger } from "@/lib/logger";
 import type { BotType } from "@/lib/bot-personalities";
 import { getSystemPrompt } from "@/lib/bot-personalities";
+import { containsCanary, getCanaryToken } from "@/lib/safety/canary";
+import { redactPII } from "@/lib/safety/pii-redactor";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
 	isCircuitOpen,
@@ -53,8 +55,11 @@ const demoRequestSchema = z.object({
 function getDemoSystemPrompt(botType: BotType): string {
 	const basePrompt = getSystemPrompt(botType, "default");
 
+	// Embed canary token for system prompt leak detection (PROMPT-05)
+	const canary = `\n\n<!-- ${getCanaryToken()} -->`;
+
 	// Add demo-specific constraints
-	return `${basePrompt}
+	return `${basePrompt}${canary}
 
 ## DEMO MODE CONSTRAINTS
 This is a demo conversation on the landing page. Keep responses:
@@ -140,8 +145,41 @@ export async function POST(request: Request) {
 				);
 			},
 			generateId: generateUUID,
-			onFinish: () => {
+			onFinish: async ({ messages: finishedMessages }) => {
 				recordCircuitSuccess("ai-gateway");
+
+				// PROMPT-05: Post-hoc safety scan (same pattern as main chat route)
+				try {
+					const assistantText = finishedMessages
+						.filter((m) => m.role === "assistant")
+						.flatMap((m) => m.parts)
+						.filter(
+							(p): p is { type: "text"; text: string } => p.type === "text",
+						)
+						.map((p) => p.text)
+						.join(" ");
+
+					if (assistantText) {
+						const piiResult = redactPII(assistantText);
+						if (piiResult.redactedCount > 0) {
+							logger.error(
+								{
+									redactedCount: piiResult.redactedCount,
+									redactedTypes: piiResult.redactedTypes,
+								},
+								"PII detected in demo response (post-hoc scan)",
+							);
+						}
+
+						if (containsCanary(assistantText)) {
+							logger.error(
+								"CANARY LEAK: Demo response contains system prompt fragment",
+							);
+						}
+					}
+				} catch (scanErr) {
+					logger.warn({ err: scanErr }, "Post-hoc demo safety scan failed");
+				}
 			},
 			onError: () => {
 				recordCircuitFailure("ai-gateway");
