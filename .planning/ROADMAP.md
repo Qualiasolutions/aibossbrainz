@@ -97,7 +97,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 20-01-PLAN.md — Cost infrastructure (AICostLog table, cost tracker, chat route cost recording, Stripe webhook logging migration, cost cron, cost dashboard API)
+- [x] 20-01-PLAN.md — Cost infrastructure (AICostLog table, cost tracker, chat route cost recording, Stripe webhook logging migration, cost cron, cost dashboard API)
 - [ ] 20-02-PLAN.md — Broad structured logging migration across all remaining server-side files (80%+ target)
 
 ## Progress
@@ -111,8 +111,8 @@ Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 
 | 17. Security Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 18. Safety Rails | v1.3 | 2/2 | Complete | 2026-02-16 |
 | 19. Voice Quality | v1.3 | 2/2 | Complete | 2026-02-17 |
-| 20. Observability & Cost Controls | v1.3 | 0/2 | In progress | - |
+| 20. Observability & Cost Controls | v1.3 | 1/2 | In progress | - |
 
 ---
 *Roadmap created: 2026-02-16*
-*Last updated: 2026-02-18 (Phase 20 planned)*
+*Last updated: 2026-02-18 (Phase 20 plan 01 complete)*

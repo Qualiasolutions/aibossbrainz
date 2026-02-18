@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 19 complete -- Voice Quality. Phase 20 next.
+**Current focus:** Phase 20 in progress -- Observability & Cost Controls. Plan 01 complete, plan 02 next.
 
 ## Current Position
 
-Phase: 19 of 20 (Voice Quality)
-Plan: 2 of 2
-Status: Phase complete
-Last activity: 2026-02-17 -- Completed 19-02-PLAN.md (request stitching, gesture gate)
+Phase: 20 of 20 (Observability & Cost Controls)
+Plan: 1 of 2
+Status: In progress
+Last activity: 2026-02-18 -- Completed 20-01-PLAN.md (cost infrastructure, Stripe webhook logging, cost cron)
 
-Progress: ██████████░ 95%
+Progress: ██████████░ 97%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19 (11 v1.2 + 8 v1.3)
+- Total plans completed: 20 (11 v1.2 + 9 v1.3)
 - Average duration: 3min
-- Total execution time: 67min
+- Total execution time: 72min
 
 **By Phase:**
 
@@ -36,6 +36,7 @@ Progress: ██████████░ 95%
 | 17 | 2/2 | 5min | 2min |
 | 18 | 2/2 | 10min | 5min |
 | 19 | 2/2 | 5min | 2min |
+| 20 | 1/2 | 5min | 5min |
 
 ## Accumulated Context
 
@@ -68,6 +69,10 @@ Progress: ██████████░ 95%
 - Realtime route switched to streaming endpoint for lower TTFB, consistent with voice route
 - Sequential generation over parallel for collaborative segments -- request stitching requires ordered request IDs
 - User gesture gate (click/keydown) for greeting audio instead of setTimeout auto-play
+- AICostLog as separate table (not UserAnalytics JSONB) for per-request cost granularity and per-model breakdown
+- Non-blocking cost recording via after() to avoid chat response latency
+- AI_DAILY_COST_THRESHOLD_USD env var with $10 default for configurable alerting
+- createRequestLogger(event.id) for Stripe webhook request-scoped log correlation
 
 ### Completed
 
@@ -86,9 +91,10 @@ Progress: ██████████░ 95%
 - pnpm build fails locally due to missing env vars (not a code issue)
 - All v1.2 migrations applied; run `pnpm gen:types` after deployment for latest types
 - New API routes must be added to publicApiRoutes in lib/supabase/middleware.ts if they need unauthenticated access
+- AICostLog migration needs to be applied via Supabase Dashboard SQL Editor
 
 ## Session Continuity
 
-Last session: 2026-02-17
-Stopped at: Phase 19 complete (both plans executed)
-Resume: Execute phase 20 (observability and cost controls)
+Last session: 2026-02-18
+Stopped at: Phase 20 plan 01 complete (cost infrastructure)
+Resume: Execute phase 20 plan 02 (broad structured logging migration)
