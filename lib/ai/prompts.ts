@@ -28,6 +28,14 @@ export function sanitizePromptContent(content: string): string {
 			.replace(/\[\/INST\]/gi, "[/inst]")
 			.replace(/<\|.*?\|>/g, "") // Remove special tokens
 			.replace(/<<SYS>>|<<\/SYS>>/gi, "") // Remove system markers
+			// Additional system/role markers (PROMPT-07)
+			.replace(/\[SYSTEM\]/gi, "[system_blocked]")
+			.replace(/<system>/gi, "&lt;system&gt;")
+			.replace(/<\/system>/gi, "&lt;/system&gt;")
+			.replace(/^(Human|Assistant|User|System):/gim, "$1_:")
+			.replace(/<\|system\|>/gi, "")
+			.replace(/<\|user\|>/gi, "")
+			.replace(/<\|assistant\|>/gi, "")
 			// Limit consecutive newlines to prevent layout attacks
 			.replace(/\n{4,}/g, "\n\n\n")
 			// Truncate extremely long content
