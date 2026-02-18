@@ -1,5 +1,35 @@
 # Milestones
 
+## v1.3 — AI Production Hardening (Shipped: 2026-02-18)
+
+**Delivered:** Remediated all critical and high-severity findings from the AI Production Audit (score 58/100, grade F) — model resilience, security hardening, safety rails, voice quality fixes, and observability infrastructure.
+
+**Phases completed:** 16-20 (10 plans total)
+
+**Key accomplishments:**
+
+- Model resilience with OpenRouter fallback chain and circuit breakers — AI survives outages gracefully
+- Security hardening: XSS elimination, middleware API allowlist, Zod input validation, health endpoint lockdown
+- PII redaction with Luhn-validated credit card detection, canary leak detection, and AI SDK safety middleware
+- Voice quality: request stitching for glitch-free collaborative audio, streaming TTS, autoplay compliance
+- Structured logging migration achieving 98% coverage (247/250 calls) with pino
+- AI cost tracking with per-request logging, daily spend alerting, and monthly dashboard API
+
+**Stats:**
+
+- 5 phases, 10 plans, 23 tasks
+- 31/31 requirements shipped
+- 123 files changed (+9,628 / -1,192)
+- Completed in 2 days (2026-02-16 → 2026-02-18)
+
+**Git range:** `926b568` → `b79822f`
+
+**Archive:** [milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md)
+
+**What's next:** v1.4 — Medium and low severity findings from the production audit (28 medium + 25 low items)
+
+---
+
 ## v1.2 — Client Feedback Sweep (Shipped: 2026-02-11)
 
 **Delivered:** Auth hardening, PDF/copy export quality, AI content generation, voice call fixes, homepage/SEO updates, billing portal, Fireflies KB ingestion, analytics user categories, multi-select reactions.
