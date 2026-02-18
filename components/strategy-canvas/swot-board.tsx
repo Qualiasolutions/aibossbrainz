@@ -74,10 +74,14 @@ export function SwotBoard({ compact = false, refreshTrigger }: SwotBoardProps) {
 		new Set(["strengths"]),
 	);
 
-	// Refresh data when trigger changes
+	// Refresh data when trigger changes (with small delay to ensure DB write completes)
 	useEffect(() => {
-		if (refreshTrigger) {
-			refresh();
+		if (refreshTrigger !== undefined && refreshTrigger > 0) {
+			// Small delay to ensure DB transaction is committed before fetching
+			const timer = setTimeout(() => {
+				refresh();
+			}, 300);
+			return () => clearTimeout(timer);
 		}
 	}, [refreshTrigger, refresh]);
 

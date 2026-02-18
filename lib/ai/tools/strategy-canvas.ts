@@ -10,23 +10,23 @@ type StrategyCanvasProps = {
 	session: Session;
 };
 
-// Map sections to their canvas types
+// Map normalized (lowercase) sections to their canvas types
 const sectionToCanvasType: Record<string, CanvasType> = {
 	// SWOT
 	strengths: "swot",
 	weaknesses: "swot",
 	opportunities: "swot",
 	threats: "swot",
-	// BMC
-	keyPartners: "bmc",
-	keyActivities: "bmc",
-	keyResources: "bmc",
-	valuePropositions: "bmc",
-	customerRelationships: "bmc",
+	// BMC (lowercase keys for lookup after normalization)
+	keypartners: "bmc",
+	keyactivities: "bmc",
+	keyresources: "bmc",
+	valuepropositions: "bmc",
+	customerrelationships: "bmc",
 	channels: "bmc",
-	customerSegments: "bmc",
-	costStructure: "bmc",
-	revenueStreams: "bmc",
+	customersegments: "bmc",
+	coststructure: "bmc",
+	revenuestreams: "bmc",
 	// Journey
 	awareness: "journey",
 	consideration: "journey",
@@ -36,6 +36,34 @@ const sectionToCanvasType: Record<string, CanvasType> = {
 	advocacy: "journey",
 	// Brainstorm
 	notes: "brainstorm",
+};
+
+// Map normalized sections to their correct storage keys (for BMC which uses camelCase)
+const sectionToStorageKey: Record<string, string> = {
+	// SWOT - already lowercase
+	strengths: "strengths",
+	weaknesses: "weaknesses",
+	opportunities: "opportunities",
+	threats: "threats",
+	// BMC - need camelCase for storage
+	keypartners: "keyPartners",
+	keyactivities: "keyActivities",
+	keyresources: "keyResources",
+	valuepropositions: "valuePropositions",
+	customerrelationships: "customerRelationships",
+	channels: "channels",
+	customersegments: "customerSegments",
+	coststructure: "costStructure",
+	revenuestreams: "revenueStreams",
+	// Journey - uses touchpoints array, not section keys
+	awareness: "awareness",
+	consideration: "consideration",
+	decision: "decision",
+	purchase: "purchase",
+	retention: "retention",
+	advocacy: "advocacy",
+	// Brainstorm
+	notes: "notes",
 };
 
 // Generate UUID
@@ -153,17 +181,19 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 					}));
 					journeyData.touchpoints.push(...newTouchpoints);
 				} else {
-					// SWOT, BMC, Brainstorm: use section keys directly
+					// SWOT, BMC, Brainstorm: use correct storage key (camelCase for BMC)
+					const storageKey =
+						sectionToStorageKey[normalizedSection] || normalizedSection;
 					const newItems = items.map((content) => ({
 						id: generateUUID(),
 						content,
 						color: "slate",
 					}));
 
-					if (!currentData[normalizedSection]) {
-						currentData[normalizedSection] = [];
+					if (!currentData[storageKey]) {
+						currentData[storageKey] = [];
 					}
-					currentData[normalizedSection].push(...newItems);
+					currentData[storageKey].push(...newItems);
 				}
 
 				// Save back to the canvas

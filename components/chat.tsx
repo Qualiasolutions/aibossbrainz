@@ -27,7 +27,13 @@ import { ChatSDKError } from "@/lib/errors";
 import type { CanvasType, Vote } from "@/lib/supabase/types";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
-import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
+import type { DBMessage } from "@/lib/supabase/types";
+import {
+	convertToUIMessages,
+	fetcher,
+	fetchWithErrorHandlers,
+	generateUUID,
+} from "@/lib/utils";
 import { ChatHeader } from "./chat/chat-header";
 import { useDataStream } from "./data-stream-provider";
 import { ExecutiveLanding } from "./executive-landing";
@@ -73,6 +79,7 @@ export interface ChatProps {
 	initialVisibilityType: VisibilityType;
 	isReadonly: boolean;
 	autoResume: boolean;
+	hasMoreMessages?: boolean;
 	initialLastContext?: AppUsage;
 	initialBotType?: BotType;
 }
@@ -84,6 +91,7 @@ export function Chat({
 	initialVisibilityType,
 	isReadonly,
 	autoResume,
+	hasMoreMessages: initialHasMore = false,
 	initialLastContext,
 	initialBotType = "collaborative",
 }: ChatProps) {
@@ -123,6 +131,9 @@ export function Chat({
 	const [isSwotPanelOpen, setIsSwotPanelOpen] = useState(false);
 	const [isSupportOpen, setIsSupportOpen] = useState(false);
 	const [isTruncated, setIsTruncated] = useState(false);
+	// Pagination state for loading older messages
+	const [hasMoreMessages, setHasMoreMessages] = useState(initialHasMore);
+	const [isLoadingOlder, setIsLoadingOlder] = useState(false);
 	// Store last sent message for retry on error
 	const [lastSentMessage, setLastSentMessage] = useState<ChatMessage | null>(
 		null,
@@ -143,23 +154,23 @@ export function Chat({
 	const [targetCanvasTab, setTargetCanvasTab] = useState<CanvasType>("swot");
 	const processedToolCallIds = useRef<Set<string>>(new Set());
 
-	// Map sections to their canvas types (must match tool definition)
+	// Map sections to their canvas types (all lowercase to match tool normalization)
 	const sectionToCanvasType: Record<string, CanvasType> = {
 		// SWOT
 		strengths: "swot",
 		weaknesses: "swot",
 		opportunities: "swot",
 		threats: "swot",
-		// BMC
-		keyPartners: "bmc",
-		keyActivities: "bmc",
-		keyResources: "bmc",
-		valuePropositions: "bmc",
-		customerRelationships: "bmc",
+		// BMC (lowercase to match tool normalization)
+		keypartners: "bmc",
+		keyactivities: "bmc",
+		keyresources: "bmc",
+		valuepropositions: "bmc",
+		customerrelationships: "bmc",
 		channels: "bmc",
-		customerSegments: "bmc",
-		costStructure: "bmc",
-		revenueStreams: "bmc",
+		customersegments: "bmc",
+		coststructure: "bmc",
+		revenuestreams: "bmc",
 		// Journey
 		awareness: "journey",
 		consideration: "journey",
@@ -280,6 +291,49 @@ export function Chat({
 			clearError();
 		},
 	});
+
+	// Load older messages for pagination
+	const loadOlderMessages = useCallback(async () => {
+		if (isLoadingOlder || !hasMoreMessages) return;
+		setIsLoadingOlder(true);
+		try {
+			// Get the oldest message's createdAt as cursor
+			const oldestMessage = messages[0];
+			const before = oldestMessage?.metadata?.createdAt;
+			if (!before) {
+				setIsLoadingOlder(false);
+				return;
+			}
+
+			const params = new URLSearchParams({
+				chatId: id,
+				before: before as string,
+				limit: "50",
+			});
+			const res = await fetch(`/api/chat/messages?${params.toString()}`);
+			if (!res.ok) {
+				throw new Error("Failed to load older messages");
+			}
+			const { messages: olderDbMessages, hasMore } =
+				(await res.json()) as {
+					messages: DBMessage[];
+					hasMore: boolean;
+				};
+
+			if (olderDbMessages.length > 0) {
+				const olderUIMessages = convertToUIMessages(olderDbMessages);
+				setMessages((prev) => [...olderUIMessages, ...prev]);
+			}
+			setHasMoreMessages(hasMore);
+		} catch (err) {
+			toast({
+				type: "error",
+				description: "Failed to load older messages. Please try again.",
+			});
+		} finally {
+			setIsLoadingOlder(false);
+		}
+	}, [id, messages, isLoadingOlder, hasMoreMessages, setMessages]);
 
 	// Watch for strategyCanvas tool calls to auto-open the panel
 	useEffect(() => {
@@ -472,9 +526,12 @@ export function Chat({
 										<Messages
 											chatId={id}
 											className="h-full"
+											hasMoreMessages={hasMoreMessages}
 											isArtifactVisible={isArtifactVisible}
+											isLoadingOlder={isLoadingOlder}
 											isReadonly={isReadonly}
 											messages={messages}
+											onLoadOlder={loadOlderMessages}
 											onSuggestionSelect={handleSuggestionSelect}
 											regenerate={regenerate}
 											selectedBotType={activeBotTypeForStreaming}

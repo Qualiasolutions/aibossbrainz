@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CanvasType } from "@/components/strategy-canvas/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -104,10 +104,12 @@ export function SwotSlidePanel({
 }: SwotSlidePanelProps) {
 	const [activeCanvas, setActiveCanvas] = useState<CanvasType>("swot");
 
-	// Sync active tab when prop changes
-	if (activeTab && activeTab !== activeCanvas) {
-		setActiveCanvas(activeTab);
-	}
+	// Sync active tab when prop changes (useEffect instead of sync state update during render)
+	useEffect(() => {
+		if (activeTab && activeTab !== activeCanvas) {
+			setActiveCanvas(activeTab);
+		}
+	}, [activeTab, activeCanvas]);
 
 	return (
 		<AnimatePresence>
