@@ -50,7 +50,9 @@ Three personas with distinct system prompts and styling:
 - **Kim** - CSO, sales/revenue (red gradient)
 - **Collaborative** - Both executives together (mixed gradient)
 
-Focus modes: `default`, `brand_crisis`, `launch_campaign`, `pipeline_audit`, `deal_closing`, `market_entry`, `team_scaling`
+Focus modes: `default`, `business_analysis`, `pricing`, `key_messaging`, `customer_journey`, `social_media`, `launch_strategy`
+
+Note: `social_media` is only available for `alexandria` and `collaborative` (not `kim`).
 
 ### Key Directories
 
@@ -116,8 +118,8 @@ All tables have RLS enabled. See `supabase/migrations/` for schema.
 Required:
 - `AUTH_SECRET` - NextAuth secret
 - `OPENROUTER_API_KEY` - AI model access
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL (intentionally client-exposed; security relies on RLS, not ID obscurity)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key (intentionally client-exposed; RLS enforces access control)
 - `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role (server-side only, never expose)
 - `BLOB_READ_WRITE_TOKEN` - Vercel Blob
 - `STRIPE_SECRET_KEY` - Stripe API key (server-side only)
@@ -125,7 +127,7 @@ Required:
 - `NEXT_PUBLIC_APP_URL` - Production URL (exactly `https://bossbrainz.aleccimedia.com`, no trailing slash)
 
 Optional:
-- `REDIS_URL` - Rate limiting (falls back to DB)
+- `REDIS_URL` - Rate limiting (falls back to DB) + resumable stream recovery (without Redis, interrupted streams cannot be resumed)
 - `TAVILY_API_KEY` - Enhanced web search
 - `ELEVENLABS_API_KEY` - Text-to-speech
 
@@ -176,6 +178,38 @@ Dev server auto-starts on `pnpm test`.
 - **CSRF**: All state-changing API routes that handle sensitive operations (Stripe, profile updates) use `withCsrf()` wrapper. Client-side uses `useCsrf()` hook → `csrfFetch()` for requests.
 - **Rate limiting**: `lib/security/` - Redis primary, DB fallback. Limits in `lib/ai/entitlements.ts`.
 - **Input validation**: All API routes validate with Zod schemas. See individual route files.
+
+### Design Decisions (Audit Acknowledgements)
+
+These patterns were reviewed during the AI Production Audit and confirmed as intentional. Each has a `// DESIGN(DOC-XX)` comment at the code decision point.
+
+#### CSRF Token Endpoint Unauthenticated (DOC-02)
+**Decision:** `/api/csrf` serves tokens without requiring authentication.
+**Rationale:** CSRF tokens must be available before auth completes (subscribe page during checkout, login forms). The double-submit pattern (HMAC-signed token in httpOnly cookie + request header) provides security independent of auth state.
+
+#### Subscription GET Graceful Degradation (DOC-03)
+**Decision:** `GET /api/subscription` returns `{ isActive: false }` for unauthenticated users instead of 401.
+**Rationale:** The subscribe page polls this endpoint after Stripe checkout. During the webhook-to-auth race window, a 401 would break the payment completion flow.
+
+#### Payment Failure Notifications (DOC-04)
+**Decision:** `invoice.payment_failed` webhook logs a warning only -- no user or admin notification.
+**Rationale:** Stripe handles user-facing dunning (retry emails) automatically. Custom notifications would duplicate and potentially conflict. Admin payment failure dashboard deferred to v2.
+
+#### Focus Mode Client-State Only (DOC-06)
+**Decision:** Focus mode is `useState` only -- resets on page reload, not persisted.
+**Rationale:** Focus mode is a session-level preference. Persistence (localStorage or per-chat DB column) deferred to v2 pending user feedback.
+
+#### Supabase ID Exposure (DOC-08)
+**Decision:** Supabase project ID and anon key are intentionally in `NEXT_PUBLIC_` environment variables.
+**Rationale:** Standard Supabase architecture. Security relies on Row-Level Security (RLS) policies on every table, not obscurity of the project ID or anon key.
+
+#### X-XSS-Protection Disabled (DOC-09)
+**Decision:** `X-XSS-Protection: 0` set in `vercel.json` instead of enabling it.
+**Rationale:** The XSS Auditor is deprecated and removed from all modern browsers. Setting it to `1` can create side-channel data leak vulnerabilities in legacy browsers (per OWASP). CSP provides actual XSS protection.
+
+#### ElevenLabs Cost Estimation (DOC-10)
+**Decision:** Voice cost tracked as estimated minutes (`chars / 750`), not exact character-level billing.
+**Rationale:** Provides directional usage data. Actual ElevenLabs costs monitored via their dashboard. Rate limiting (500 voice requests/day for regular users) provides cost protection. Character-level tracking with `AICostLog` integration deferred to v2.
 
 ### Streaming PII Scan Limitation
 
