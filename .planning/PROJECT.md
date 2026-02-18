@@ -81,7 +81,15 @@ Founders get instant, actionable sales and marketing strategy from AI executives
 
 ### Active
 
-(None — next milestone requirements TBD via `/gsd:new-milestone`)
+## Current Milestone: v1.4 AI Production Audit Completion
+
+**Goal:** Achieve 100% AI Production Audit compliance by systematically addressing all remaining findings.
+
+**Target scope:**
+- Complete remediation of 17 medium-severity findings
+- Address 23 low-severity findings for code quality
+- Review 10 informational items for best practices
+- Maintain current score of 87/100 and push toward A-grade (90+)
 
 ### Out of Scope
 
@@ -132,4 +140,4 @@ Known tech debt: cost dashboard API-only (no frontend), AICostLog migration manu
 
 ---
 
-*Last updated: 2026-02-18 after v1.3 milestone*
+*Last updated: 2026-02-18 after v1.4 milestone start*
