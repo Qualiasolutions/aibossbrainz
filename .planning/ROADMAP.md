@@ -64,11 +64,11 @@ Plans:
   3. Concurrent webhook events for the same user are serialized via database locking
   4. Failed webhook events are persisted to a dead-letter table for later inspection/replay
   5. Webhook endpoint has rate limiting to prevent DoS via high-volume signed events
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 23-01: Webhook idempotency and timeout fixes (M-8 through M-11)
-- [ ] 23-02: Webhook race conditions, dead-letter queue, and rate limiting (L-8 through L-10)
+- [ ] 23-01-PLAN.md — maxDuration export and event-ID-based idempotency replacing status-based dedup (WEBHOOK-01 through WEBHOOK-04)
+- [ ] 23-02-PLAN.md — Advisory lock serialization, dead-letter queue, and IP-based rate limiting (WEBHOOK-05 through WEBHOOK-07)
 
 ### Phase 24: Model Resilience & Voice Optimization
 **Goal**: AI responses survive provider outages gracefully and voice features are cost-optimized
