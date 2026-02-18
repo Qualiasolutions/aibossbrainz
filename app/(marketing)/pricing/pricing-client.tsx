@@ -24,7 +24,6 @@ import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
 
 interface PricingFeature {
 	text: string;
-	value: string;
 	icon: typeof Phone;
 	highlight?: boolean;
 }
@@ -36,7 +35,6 @@ interface PricingPlan {
 	period: string;
 	description: string;
 	popular: boolean;
-	totalValue: string;
 	savings?: string;
 	features: PricingFeature[];
 	cta: string;
@@ -49,28 +47,23 @@ const pricingPlans: PricingPlan[] = [
 		name: "Most Flexible",
 		price: 297,
 		period: "Monthly",
-		description: "12 Month Membership",
+		description: "Monthly Membership",
 		popular: false,
-		totalValue: "$6,180+",
 		features: [
 			{
 				text: "Sales and Marketing Message Makeover",
-				value: "$50",
 				icon: MessageSquare,
 			},
 			{
 				text: "Prompt Guide",
-				value: "$33",
 				icon: Zap,
 			},
 			{
 				text: "24/7 Access",
-				value: "Priceless",
 				icon: Clock,
 			},
 			{
 				text: "Cancel Anytime",
-				value: "Flexibility",
 				icon: Check,
 			},
 		],
@@ -84,29 +77,24 @@ const pricingPlans: PricingPlan[] = [
 		period: "Annual",
 		description: "Annual Membership",
 		popular: true,
-		totalValue: "$7,100+",
 		savings: "SAVE $1,000 + EXCLUSIVE BONUSES",
 		features: [
 			{
 				text: "Everything in Monthly Subscription",
-				value: "Included",
 				icon: Check,
 			},
 			{
 				text: "The Sales & Marketing Checkup",
-				value: "$97",
 				icon: Target,
 				highlight: true,
 			},
 			{
 				text: "Access to Our Resource Library",
-				value: "$1,000+",
 				icon: Gift,
 				highlight: true,
 			},
 			{
 				text: "Monthly Group Sales & Marketing Strategy Call",
-				value: "$6,000",
 				icon: Phone,
 				highlight: true,
 			},
@@ -121,29 +109,24 @@ const pricingPlans: PricingPlan[] = [
 		period: "One-Time",
 		description: "Limited to 10 Seats Only",
 		popular: false,
-		totalValue: "Unlimited",
 		savings: "ONE PAYMENT. NO SURPRISES. EVER.",
 		features: [
 			{
 				text: "Everything in Monthly Membership",
-				value: "Forever",
 				icon: Check,
 			},
 			{
 				text: "Private Quarterly Coaching Calls",
-				value: "Priceless",
 				icon: Users,
 				highlight: true,
 			},
 			{
 				text: "Lifetime Sales + Marketing Support",
-				value: "Forever",
 				icon: Star,
 				highlight: true,
 			},
 			{
 				text: "Fresh insights & real-time pivots every 90 days",
-				value: "Included",
 				icon: Sparkles,
 				highlight: true,
 			},

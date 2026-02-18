@@ -270,7 +270,16 @@ function Footer({ content }: { content: LandingPageCMSContent }) {
 				{/* Bottom section - Enhanced */}
 				<div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-stone-200 pt-8 sm:flex-row">
 					<p className="text-sm text-stone-500">
-						&copy; {new Date().getFullYear()} {content.footer.copyright}
+						&copy; {new Date().getFullYear()}{" "}
+						<a
+							href="https://aleccimedia.com"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline transition-colors hover:text-stone-900"
+						>
+							Alecci Media
+						</a>
+						. All rights reserved.
 					</p>
 					<div className="flex gap-4">
 						<a

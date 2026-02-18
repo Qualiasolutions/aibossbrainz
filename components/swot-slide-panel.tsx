@@ -60,6 +60,8 @@ const BrainstormBoard = dynamic(
 interface SwotSlidePanelProps {
 	isOpen: boolean;
 	onClose: () => void;
+	activeTab?: CanvasType;
+	refreshKey?: number;
 }
 
 const canvasTabs: {
@@ -94,8 +96,18 @@ const canvasTabs: {
 	},
 ];
 
-export function SwotSlidePanel({ isOpen, onClose }: SwotSlidePanelProps) {
+export function SwotSlidePanel({
+	isOpen,
+	onClose,
+	activeTab,
+	refreshKey,
+}: SwotSlidePanelProps) {
 	const [activeCanvas, setActiveCanvas] = useState<CanvasType>("swot");
+
+	// Sync active tab when prop changes
+	if (activeTab && activeTab !== activeCanvas) {
+		setActiveCanvas(activeTab);
+	}
 
 	return (
 		<AnimatePresence>
@@ -188,7 +200,7 @@ export function SwotSlidePanel({ isOpen, onClose }: SwotSlidePanelProps) {
 									exit={{ opacity: 0, x: -10 }}
 									transition={{ duration: 0.15 }}
 								>
-									<SwotBoard compact />
+									<SwotBoard compact key={refreshKey} />
 								</motion.div>
 							)}
 							{activeCanvas === "bmc" && (
@@ -199,7 +211,7 @@ export function SwotSlidePanel({ isOpen, onClose }: SwotSlidePanelProps) {
 									exit={{ opacity: 0, x: -10 }}
 									transition={{ duration: 0.15 }}
 								>
-									<BusinessModelCanvas compact />
+									<BusinessModelCanvas compact key={refreshKey} />
 								</motion.div>
 							)}
 							{activeCanvas === "journey" && (
@@ -210,7 +222,7 @@ export function SwotSlidePanel({ isOpen, onClose }: SwotSlidePanelProps) {
 									exit={{ opacity: 0, x: -10 }}
 									transition={{ duration: 0.15 }}
 								>
-									<CustomerJourney compact />
+									<CustomerJourney compact key={refreshKey} />
 								</motion.div>
 							)}
 							{activeCanvas === "brainstorm" && (
@@ -221,7 +233,7 @@ export function SwotSlidePanel({ isOpen, onClose }: SwotSlidePanelProps) {
 									exit={{ opacity: 0, x: -10 }}
 									transition={{ duration: 0.15 }}
 								>
-									<BrainstormBoard compact />
+									<BrainstormBoard compact key={refreshKey} />
 								</motion.div>
 							)}
 						</AnimatePresence>
