@@ -81,11 +81,11 @@ Plans:
   3. Collaborative voice generation isolates errors per-segment so one failure does not kill the entire response
   4. Repeated TTS requests for identical text return cached audio instead of regenerating
   5. Health check endpoint probes OpenRouter reachability and reports AI provider status
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 24-01: OpenRouter resilience and provider fallback
-- [ ] 24-02: Voice caching, rate limiting, and streaming optimization
+- [ ] 24-01-PLAN.md — Circuit breaker fix, retry-after parsing, provider fallback, Zod summarizer validation, health probe (RESIL-01 through RESIL-06)
+- [ ] 24-02-PLAN.md — TTS caching with Vercel Blob, per-segment error isolation, realtime base64 elimination, rate limiting (VOICE-01 through VOICE-03, RESIL-03)
 
 ### Phase 25: Security, Performance & Cost Controls
 **Goal**: Validation is tight, chat loads fast, and model versions are pinned for cost predictability
