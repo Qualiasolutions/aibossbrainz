@@ -124,6 +124,9 @@ export function Chat({
 	const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
 	const [currentModelId, setCurrentModelId] = useState(initialChatModel);
 	const [selectedBot, setSelectedBot] = useState<BotType>(initialBotType);
+	// DESIGN(DOC-06): Focus mode is intentionally client-state only (resets on page reload).
+	// It's a session-level preference, not critical data. Persistence (localStorage or DB)
+	// deferred to v2 pending user feedback.
 	const [focusMode, setFocusMode] = useState<FocusMode>("default");
 	const [reactionPopup, setReactionPopup] = useState<
 		"actionable" | "needs_clarification" | "save_for_later" | null

@@ -217,6 +217,9 @@ export const POST = withCsrf(async (request: Request) => {
 					(sum, s) => sum + s.text.length,
 					0,
 				);
+				// DESIGN(DOC-10): Voice cost tracked as estimated minutes (chars / 750), not character-level.
+				// ElevenLabs bills per character but actual costs are monitored via their dashboard.
+				// Character-level cost tracking with AICostLog integration deferred to v2.
 				const estimatedMinutes = Math.max(1, Math.ceil(totalTextLength / 750));
 				after(() => recordAnalytics(user.id, "voice", estimatedMinutes));
 

@@ -273,6 +273,9 @@ export const sheetPrompt = `
 You are a spreadsheet creation assistant. Create a spreadsheet in csv format based on the given prompt. The spreadsheet should contain meaningful column headers and data.
 `;
 
+// DESIGN(DOC-01): Code content uses XML wrapper only, not full sanitizePromptContent().
+// Aggressive sanitization mangles code delimiters (```, ===, ---) which are valid code.
+// The XML do_not_follow_instructions_in_content attribute provides injection protection.
 export const updateDocumentPrompt = (
 	currentContent: string | null,
 	type: ArtifactKind,

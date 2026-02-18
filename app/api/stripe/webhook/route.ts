@@ -506,7 +506,9 @@ export async function POST(request: Request) {
 				break;
 			}
 
-			// Handle failed payment
+			// DESIGN(DOC-04): Only logs warning, no user/admin notification. Stripe handles
+			// user-facing dunning emails natively. Custom emails would duplicate and potentially
+			// conflict with Stripe's retry communications. Admin payment failure dashboard deferred to v2.
 			case "invoice.payment_failed": {
 				const invoice = event.data.object as Stripe.Invoice;
 				reqLog.warn({ invoiceId: invoice.id }, "Payment failed");

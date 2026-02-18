@@ -103,6 +103,10 @@ const getTokenlensCatalog = cache(
 	{ revalidate: 24 * 60 * 60 }, // 24 hours
 );
 
+// DESIGN(DOC-05): Resumable streams require REDIS_URL. Without Redis, stream recovery
+// degrades silently -- interrupted streams cannot be resumed. The app functions normally
+// (streams just aren't resumable). This is an acceptable degradation for environments
+// without Redis.
 export function getStreamContext() {
 	if (!globalStreamContext) {
 		try {

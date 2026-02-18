@@ -85,7 +85,9 @@ export async function GET() {
 			error: authError,
 		} = await supabase.auth.getUser();
 
-		// Return gracefully for unauthenticated users (needed for subscribe page polling)
+		// DESIGN(DOC-03): Returns graceful empty response instead of 401 for unauthenticated users.
+		// The subscribe page polls this endpoint after Stripe checkout to detect subscription activation.
+		// During this window, the auth session may not be established yet -- a 401 would break the flow.
 		if (authError || !user || !user.email) {
 			return Response.json({
 				isActive: false,

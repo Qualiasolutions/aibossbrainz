@@ -11,6 +11,10 @@ export const runtime = "nodejs"; // Required for node:crypto
 
 const CSRF_COOKIE_NAME = "__csrf";
 
+// DESIGN(DOC-02): This endpoint is intentionally unauthenticated. CSRF tokens must be
+// available before auth (subscribe page, login forms). Security relies on the double-submit
+// pattern: HMAC-signed token must match in both httpOnly cookie and request header.
+
 /**
  * GET /api/csrf - Get or generate CSRF token
  * Returns existing token if valid, otherwise generates new one
