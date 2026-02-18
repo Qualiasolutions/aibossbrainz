@@ -439,7 +439,8 @@ function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 					<Link href="/pricing">
 						<Button
 							size="lg"
-							className="gap-2.5 rounded-2xl bg-white px-8 py-6 text-sm font-semibold text-red-700 shadow-2xl shadow-black/20 transition-all duration-300 hover:bg-white/95 hover:shadow-black/30"
+							variant="ghost"
+							className="gap-2.5 rounded-2xl bg-white px-8 py-6 text-sm font-semibold text-red-700 shadow-2xl shadow-black/20 transition-all duration-300 hover:bg-white/95 hover:text-red-800 hover:shadow-black/30"
 						>
 							See All Plans
 							<ArrowRight className="size-4" />
