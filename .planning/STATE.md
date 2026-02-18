@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives
-**Current focus:** Phase 21 - Prompt Security Hardening
+**Current focus:** Phase 22 - Auth & Subscription Guards
 
 ## Current Position
 
-Phase: 21 (1 of 6 in v1.4)
-Plan: 2 of 2 (phase complete)
+Phase: 22 (2 of 6 in v1.4)
+Plan: 1 of 1 (phase complete)
 Status: Phase complete
-Last activity: 2026-02-18 — Completed 21-01-PLAN.md
+Last activity: 2026-02-18 — Completed 22-01-PLAN.md
 
-Progress: ██░░░░░░░░ 2/11 plans (18%)
+Progress: ███░░░░░░░ 3/11 plans (27%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23 (11 v1.2 + 10 v1.3 + 2 v1.4)
+- Total plans completed: 24 (11 v1.2 + 10 v1.3 + 3 v1.4)
 - Average duration: 4min
-- Total execution time: 86min
+- Total execution time: 94min
 
 **By Phase:**
 
@@ -38,6 +38,7 @@ Progress: ██░░░░░░░░ 2/11 plans (18%)
 | 19 | 2/2 | 5min | 2min |
 | 20 | 2/2 | 11min | 5min |
 | 21 | 2/2 | 8min | 4min |
+| 22 | 1/1 | 8min | 8min |
 
 ## Accumulated Context
 
@@ -47,6 +48,9 @@ Progress: ██░░░░░░░░ 2/11 plans (18%)
 - Document streaming PII limitation rather than attempt blocking redaction (preserves streaming benefits)
 - XML tags with do_not_follow_instructions_in_content attribute for user content wrapping in prompts
 - Replaced delimiter-based personalization wrapping with XML tags for consistent prompt injection defense
+- Use Number() cast for UserAnalytics.voiceMinutes since DB type is Json, not number
+- Query UserAnalytics for voice rate limit DB fallback instead of Message_v2 (correct metric)
+- Query AuditLog for export rate limit DB fallback (action-based, not message-based)
 
 ### Completed
 
@@ -69,5 +73,5 @@ Progress: ██░░░░░░░░ 2/11 plans (18%)
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed phase 21 (prompt security hardening)
-Resume: `/gsd:plan-phase 22`
+Stopped at: Completed phase 22 (auth & subscription guards)
+Resume: `/gsd:plan-phase 23`
