@@ -102,7 +102,8 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 				};
 			}
 
-			const canvasType = sectionToCanvasType[section];
+			const normalizedSection = section.toLowerCase();
+			const canvasType = sectionToCanvasType[normalizedSection];
 			if (!canvasType) {
 				return {
 					success: false,
@@ -146,7 +147,7 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 					}
 					const newTouchpoints = items.map((content) => ({
 						id: generateUUID(),
-						stage: section,
+						stage: normalizedSection,
 						content,
 						type: "touchpoint" as const,
 					}));
@@ -159,10 +160,10 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 						color: "slate",
 					}));
 
-					if (!currentData[section]) {
-						currentData[section] = [];
+					if (!currentData[normalizedSection]) {
+						currentData[normalizedSection] = [];
 					}
-					currentData[section].push(...newItems);
+					currentData[normalizedSection].push(...newItems);
 				}
 
 				// Save back to the canvas
@@ -184,10 +185,12 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 
 				return {
 					success: true,
-					section,
+					section: normalizedSection,
 					itemsAdded: items.length,
 					tab: tabNames[canvasType],
-					message: `Added ${items.length} item(s) to ${section} in the ${tabNames[canvasType]} tab. The Strategy Canvas panel has been automatically opened to show these updates.`,
+					message: `Added ${items.length} item(s) to ${normalizedSection} in the ${tabNames[canvasType]} tab.
+IMPORTANT: The Strategy Canvas side panel has been automatically opened for the user.
+YOU MUST NOW REPLY TO THE USER: Inform them that you have added the items and the panel is open for them to view.`,
 				};
 			} catch (error) {
 				if (error instanceof ChatSDKError) {

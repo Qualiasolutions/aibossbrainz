@@ -19,75 +19,83 @@ type EnhancedChatMessageProps = {
 const TypewriterContent = memo(
 	({ content, isStreaming }: { content: string; isStreaming: boolean }) => {
 		const [displayedContent, setDisplayedContent] = useState("");
+		const [isStarted, setIsStarted] = useState(false);
+
 		const contentRef = useRef(content);
 		const isStreamingRef = useRef(isStreaming);
-		const mountedWithStreamingRef = useRef(isStreaming);
-		const hasStreamedRef = useRef(false);
+		const displayedLengthRef = useRef(0);
+		const animationFrameRef = useRef<number | null>(null);
+		const lastUpdateTimeRef = useRef(0);
 
 		// Keep refs in sync
 		contentRef.current = content;
 		isStreamingRef.current = isStreaming;
-		if (isStreaming) hasStreamedRef.current = true;
 
-		// Effect to handle the typewriter animation
 		useEffect(() => {
-			// If we're staring from history (not streaming), show immediately
-			if (!hasStreamedRef.current && !mountedWithStreamingRef.current) {
+			// If not streaming and never started animation, show full content immediately
+			// This handles history loading or pre-streaming state
+			if (!isStreaming && !isStarted) {
 				setDisplayedContent(content);
+				displayedLengthRef.current = content.length;
 				return;
 			}
 
-			let animationFrameId: number;
-			let lastUpdateTime = 0;
-			const UPDATE_INTERVAL = 16; // ~60fps target
+			// If streaming started, enable animation mode
+			if (isStreaming && !isStarted) {
+				setIsStarted(true);
+			}
 
-			const update = (timestamp: number) => {
-				if (timestamp - lastUpdateTime < UPDATE_INTERVAL) {
-					animationFrameId = requestAnimationFrame(update);
-					return;
+			// If we are animating (isStarted), run the loop
+			if (isStarted) {
+				const animate = (timestamp: number) => {
+					// Throttle updates to ~60fps (16ms)
+					if (timestamp - lastUpdateTimeRef.current < 16) {
+						animationFrameRef.current = requestAnimationFrame(animate);
+						return;
+					}
+
+					const currentLength = displayedLengthRef.current;
+					const targetLength = contentRef.current.length;
+
+					if (currentLength < targetLength) {
+						// Logic to advance cursor
+						const remaining = targetLength - currentLength;
+
+						// Adaptive speed: faster if further behind
+						// Jump more characters if we are lagging significantly
+						const chunk = remaining > 50 ? 5 : remaining > 20 ? 3 : 1;
+
+						const nextLength = Math.min(currentLength + chunk, targetLength);
+						const nextContent = contentRef.current.slice(0, nextLength);
+
+						setDisplayedContent(nextContent);
+						displayedLengthRef.current = nextLength;
+						lastUpdateTimeRef.current = timestamp;
+					}
+
+					// Continue loop if streaming or not yet caught up
+					if (
+						isStreamingRef.current ||
+						displayedLengthRef.current < contentRef.current.length
+					) {
+						animationFrameRef.current = requestAnimationFrame(animate);
+					} else {
+						animationFrameRef.current = null;
+					}
+				};
+
+				if (!animationFrameRef.current) {
+					animationFrameRef.current = requestAnimationFrame(animate);
 				}
-
-				setDisplayedContent((current) => {
-					// Logic to advance the cursor:
-					// If we are far behind, jump 3-5 chars per frame
-					// If we are close, do 1 char per frame
-					if (current === contentRef.current) return current;
-
-					const remaining = contentRef.current.length - current.length;
-					if (remaining <= 0) return contentRef.current;
-
-					// Adaptive speed: faster if further behind
-					const chunk = remaining > 50 ? 5 : remaining > 20 ? 3 : 1;
-					const nextContent = contentRef.current.slice(
-						0,
-						current.length + chunk,
-					);
-
-					// Force scroll update (handled by ResizeObserver in hook, but this triggers layout)
-					lastUpdateTime = timestamp;
-					return nextContent;
-				});
-
-				if (
-					isStreamingRef.current ||
-					displayedContent.length < contentRef.current.length
-				) {
-					animationFrameId = requestAnimationFrame(update);
-				}
-			};
-
-			animationFrameId = requestAnimationFrame(update);
+			}
 
 			return () => {
-				cancelAnimationFrame(animationFrameId);
+				if (animationFrameRef.current) {
+					cancelAnimationFrame(animationFrameRef.current);
+					animationFrameRef.current = null;
+				}
 			};
-		}, []); // Empty dependency array - the loop handles updates via refs
-
-		// Catch-up effect when content changes
-		useEffect(() => {
-			// This just ensures the loop above has fresh data via refs
-			// We don't restart the loop here to avoid jank
-		}, [content]);
+		}, [isStreaming, isStarted, content]); // Re-run if these change to ensure loop is active/checked
 
 		const isRevealing = displayedContent.length < content.length;
 

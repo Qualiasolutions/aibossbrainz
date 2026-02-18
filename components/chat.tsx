@@ -298,7 +298,10 @@ export function Chat({
 
 					// Parse arguments to find section
 					const args = toolInvocation.args;
-					const section = args?.section;
+					const sectionRaw = args?.section;
+
+					// Normalize section to lowercase to handle model variations (e.g. "Strengths" vs "strengths")
+					const section = sectionRaw?.toLowerCase();
 
 					if (section && sectionToCanvasType[section]) {
 						const canvasType = sectionToCanvasType[section];
