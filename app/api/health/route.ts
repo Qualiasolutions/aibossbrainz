@@ -47,10 +47,7 @@ export async function GET() {
 		(async () => {
 			try {
 				const supabase = createServiceClient();
-				const { error } = await supabase
-					.from("User")
-					.select("id")
-					.limit(1);
+				const { error } = await supabase.from("User").select("id").limit(1);
 				return { status: (error ? "down" : "up") as "up" | "down" };
 			} catch {
 				return { status: "down" as const };
