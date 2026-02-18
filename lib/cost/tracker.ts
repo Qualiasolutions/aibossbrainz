@@ -20,7 +20,8 @@ interface AICostRecord {
 export async function recordAICost(record: AICostRecord): Promise<void> {
 	try {
 		const supabase = createServiceClient();
-		const { error } = await supabase.from("AICostLog").insert({
+		// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
+		const { error } = await (supabase.from as any)("AICostLog").insert({
 			userId: record.userId,
 			chatId: record.chatId,
 			modelId: record.modelId,
@@ -71,11 +72,11 @@ export async function getDailyAICostTotal(
 	const dateStr = targetDate.toISOString().split("T")[0]; // YYYY-MM-DD
 
 	const supabase = createServiceClient();
-	const { data, error } = await supabase
-		.from("AICostLog")
+	// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
+	const { data, error } = await (supabase.from as any)("AICostLog")
 		.select("userId, inputTokens, outputTokens, costUSD")
 		.gte("createdAt", `${dateStr}T00:00:00.000Z`)
-		.lt("createdAt", `${dateStr}T23:59:59.999Z`);
+		.lt("createdAt", `${dateStr}T23:59:59.999Z`) as { data: Array<{ userId: string; inputTokens: number; outputTokens: number; costUSD: number }> | null; error: any };
 
 	if (error) {
 		logger.error({ err: error }, "Failed to query daily AI cost");
@@ -121,11 +122,11 @@ export async function getMonthlyCostSummary(
 	const endDate = new Date(Date.UTC(year, month, 1)); // First day of next month
 
 	const supabase = createServiceClient();
-	const { data, error } = await supabase
-		.from("AICostLog")
+	// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
+	const { data, error } = await (supabase.from as any)("AICostLog")
 		.select("userId, modelId, inputTokens, outputTokens, costUSD")
 		.gte("createdAt", startDate.toISOString())
-		.lt("createdAt", endDate.toISOString());
+		.lt("createdAt", endDate.toISOString()) as { data: Array<{ userId: string; modelId: string; inputTokens: number; outputTokens: number; costUSD: number }> | null; error: any };
 
 	if (error) {
 		logger.error({ err: error, year, month }, "Failed to query monthly AI cost");
