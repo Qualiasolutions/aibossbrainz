@@ -2,117 +2,131 @@
 
 ## Milestones
 
-- v1.0 MVP - Phases 1-5 (shipped)
-- v1.1 Branding & Billing - Phases 6-10 (shipped 2026-02-02)
-- v1.2 Client Feedback Sweep - Phases 11-15 (shipped 2026-02-11)
-- v1.3 AI Production Hardening - Phases 16-20 (shipped 2026-02-18)
+- v1.0 MVP (Phases 1-5) - shipped
+- v1.1 Alexandria Requests (Phases 6-10) - shipped
+- v1.2 Client Feedback Sweep (Phases 11-15) - shipped
+- v1.3 AI Production Hardening (Phases 16-20) - shipped
+- **v1.4 AI Production Audit Completion** (Phases 21-26) - in progress
 
 ## Overview
 
-v1.3 remediates all critical and high-severity findings from the AI Production Audit (score 58/100, grade F). The milestone hardens model resilience and tool reliability first (the app breaks without these), then locks down security surfaces, adds safety rails for AI output, fixes the voice subsystem, and finishes with observability and cost controls that benefit from all other fixes being in place. 31 requirements across 5 phases.
+v1.4 systematically remediates the remaining 50 findings from the AI Production Audit -- 17 medium-severity and 33 low/informational items. Work is organized by security domain: prompt injection hardening first (highest user-facing risk), then auth/subscription gaps, webhook reliability, model resilience with voice optimization, general security/performance tuning, and finally documentation of design decisions. Target: push audit score from 87/100 to 90+ (A-grade).
 
 ## Phases
 
-- [x] **Phase 16: Model Resilience & Tool Hardening** - Fallback model chain, version pinning, resilience wrappers, weather API fixes
-- [x] **Phase 17: Security Hardening** - XSS removal, middleware auth allowlist, input validation, health endpoint lockdown
-- [x] **Phase 18: Safety Rails** - Output filtering, PII redaction, prompt sanitization, human escalation, truncation indicators
-- [x] **Phase 19: Voice Quality** - MP3 frame concatenation, streaming TTS, config alignment, autoplay policies
-- [x] **Phase 20: Observability & Cost Controls** - Structured logging migration, AI metrics, cost alerting and tracking
+- [ ] **Phase 21: Prompt Security Hardening** - Eliminate prompt injection vectors across all AI entry points
+- [ ] **Phase 22: Auth & Subscription Guards** - Close subscription enforcement gaps on voice/realtime endpoints
+- [ ] **Phase 23: Webhook Reliability** - Achieve true idempotency and failure resilience for Stripe webhooks
+- [ ] **Phase 24: Model Resilience & Voice Optimization** - Harden AI provider failover and optimize voice cost/latency
+- [ ] **Phase 25: Security, Performance & Cost Controls** - Tighten validation, add pagination, pin model versions
+- [ ] **Phase 26: Documentation & Design Decisions** - Document trade-offs and informational findings
 
 ## Phase Details
 
-### Phase 16: Model Resilience & Tool Hardening
-**Goal**: AI chat survives model outages gracefully and all tool invocations fail safely with user-friendly errors
-**Depends on**: Nothing (first phase of v1.3)
-**Requirements**: RESIL-01, RESIL-02, RESIL-03, RESIL-04, RESIL-05, TOOL-01, TOOL-02, TOOL-03, TOOL-04
+### Phase 21: Prompt Security Hardening
+**Goal**: All AI prompt paths sanitize user-controlled input, preventing injection from manipulating AI behavior
+**Depends on**: Nothing (first phase -- highest risk items)
+**Requirements**: PROMPT-01, PROMPT-02, PROMPT-03, PROMPT-04, PROMPT-05, PROMPT-06, PROMPT-07, PROMPT-08, PROMPT-09
 **Success Criteria** (what must be TRUE):
-  1. When the primary AI model is unavailable, chat automatically falls back to a secondary model and the user gets a response (not an error)
-  2. The AI model identifier in `providers.ts` is a stable versioned ID, not a preview/unstable slug
-  3. Title generation and conversation summary calls cannot hang indefinitely -- they timeout after 10s and surface a graceful fallback
-  4. Weather tool errors (network failure, bad response, timeout) show a user-friendly message instead of crashing the chat
-  5. Tool calls to `requestSuggestions` and `strategyCanvas` reject unauthorized users without leaking resource existence
-**Plans:** 2 plans
+  1. User-controlled text in title generation, document creation, personalization, and conversation summarization is sanitized through `sanitizePromptContent()` before reaching any AI prompt
+  2. Demo chat route applies the same safety middleware (canary tokens, PII scanning) as the main chat route
+  3. Request suggestions wrap document content in XML delimiters to prevent injection
+  4. Canary token generation uses SHA256 hashing instead of raw secret prefix
+  5. Streaming PII bypass limitation is documented in codebase comments and CLAUDE.md
+**Plans**: TBD
 
 Plans:
-- [x] 16-01-PLAN.md — Model resilience: stable IDs, fallback chain, title/summary resilience wrappers, streamText timeout
-- [x] 16-02-PLAN.md — Tool hardening: weather API error handling, requestSuggestions/strategyCanvas auth checks
+- [ ] 21-01: Sanitize prompt injection vectors (M-1 through M-5)
+- [ ] 21-02: Low-severity prompt hardening (L-1 through L-4)
 
-### Phase 17: Security Hardening
-**Goal**: Known XSS vectors, auth bypasses, and information leaks in middleware and endpoints are closed
-**Depends on**: Phase 16
-**Requirements**: SEC-01, SEC-02, SEC-03, SEC-04
+### Phase 22: Auth & Subscription Guards
+**Goal**: Expired/unauthorized users cannot consume paid voice and realtime resources
+**Depends on**: Nothing (independent of Phase 21)
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05
 **Success Criteria** (what must be TRUE):
-  1. Root layout theme initialization uses `next/script` with no `dangerouslySetInnerHTML` anywhere in layout files
-  2. Middleware uses an explicit allowlist of public API routes -- unknown routes require authentication by default
-  3. Realtime endpoint rejects messages that fail Zod validation (too long, wrong type) with a 400 response
-  4. Health endpoint either requires auth or returns only a status boolean with no internal service names
-**Plans:** 2 plans
+  1. Voice TTS endpoint rejects requests from users with expired subscriptions
+  2. Realtime voice chat endpoints reject requests from users with expired subscriptions
+  3. Voice rate limiting tracks actual voice requests (not chat messages) in DB fallback mode
+  4. Demo chat endpoint has CSRF protection preventing cross-origin abuse
+  5. Export rate limiting queries AuditLog entries when Redis is unavailable
+**Plans**: TBD
 
 Plans:
-- [x] 17-01-PLAN.md — XSS removal (next/script) and middleware API route allowlist
-- [x] 17-02-PLAN.md — Realtime Zod validation and health endpoint two-tier response
+- [ ] 22-01: Subscription enforcement and rate limit fixes
 
-### Phase 18: Safety Rails
-**Goal**: AI responses are filtered for safety, user PII is redacted before storage, and edge cases (truncation, inability to help) are handled gracefully
-**Depends on**: Phase 16 (model must be resilient before adding output filtering on top)
-**Requirements**: SAFE-01, SAFE-02, SAFE-03, SAFE-04, SAFE-05, SAFE-06
+### Phase 23: Webhook Reliability
+**Goal**: Stripe webhook processing is idempotent, race-condition-free, and failure-resilient
+**Depends on**: Nothing (independent)
+**Requirements**: WEBHOOK-01, WEBHOOK-02, WEBHOOK-03, WEBHOOK-04, WEBHOOK-05, WEBHOOK-06, WEBHOOK-07
 **Success Criteria** (what must be TRUE):
-  1. If a user pastes a credit card number or SSN into chat, it is redacted to `[REDACTED]` before being stored in Postgres
-  2. Non-streaming AI output (titles, summaries) has PII redacted before delivery; streaming responses are scanned post-completion with canary leak and PII detection logged as security events
-  3. When the AI cannot adequately help (repeated failures, out-of-domain queries), it suggests contacting human support with a link or email
-  4. When a response hits `maxOutputTokens` and is truncated, the user sees a clear "Response was truncated" indicator with an option to continue
-  5. AI-generated follow-up suggestions are validated for length limits and do not contain unsafe content
-**Plans:** 2 plans
+  1. Stripe webhook route has `maxDuration` configured to prevent Vercel timeout on slow processing
+  2. Duplicate Stripe events (same event ID) are detected and skipped without side effects
+  3. Concurrent webhook events for the same user are serialized via database locking
+  4. Failed webhook events are persisted to a dead-letter table for later inspection/replay
+  5. Webhook endpoint has rate limiting to prevent DoS via high-volume signed events
+**Plans**: TBD
 
 Plans:
-- [x] 18-01-PLAN.md — PII redaction infrastructure, canary leak detection, safety middleware, message storage redaction, document prompt sanitization
-- [x] 18-02-PLAN.md — Truncation detection with UI indicator, human escalation in system prompt, suggestion content validation
+- [ ] 23-01: Webhook idempotency and timeout fixes (M-8 through M-11)
+- [ ] 23-02: Webhook race conditions, dead-letter queue, and rate limiting (L-8 through L-10)
 
-### Phase 19: Voice Quality
-**Goal**: Voice playback produces clean audio with correct personas, optimized latency, and proper browser compatibility
-**Depends on**: Nothing (self-contained voice subsystem, can run after Phase 16)
-**Requirements**: VOICE-01, VOICE-02, VOICE-03, VOICE-04, VOICE-05, VOICE-06
+### Phase 24: Model Resilience & Voice Optimization
+**Goal**: AI responses survive provider outages gracefully and voice features are cost-optimized
+**Depends on**: Phase 22 (subscription checks should exist before optimizing voice paths)
+**Requirements**: RESIL-01, RESIL-02, RESIL-03, RESIL-04, RESIL-05, RESIL-06, VOICE-01, VOICE-02, VOICE-03
 **Success Criteria** (what must be TRUE):
-  1. Collaborative mode multi-voice audio plays without glitches at segment boundaries (proper MP3 frame detection, no pops/clicks)
-  2. ElevenLabs API calls use `optimize_streaming_latency` and collaborative segments use the streaming TTS endpoint for faster first-byte
-  3. Realtime route produces audio with the same voice model and settings as defined in `voice-config.ts` (no config drift)
-  4. Greeting audio does not auto-play on page load -- it requires a user gesture (click/tap) to comply with browser autoplay policies
-  5. All TTS text preprocessing uses the shared `lib/voice/strip-markdown-tts.ts` utility (no duplicate stripping logic)
-**Plans:** 2 plans
+  1. Application respects OpenRouter `retry-after` headers instead of hammering a rate-limited provider
+  2. When OpenRouter is completely down, a secondary AI provider serves requests (degraded but functional)
+  3. Collaborative voice generation isolates errors per-segment so one failure does not kill the entire response
+  4. Repeated TTS requests for identical text return cached audio instead of regenerating
+  5. Health check endpoint probes OpenRouter reachability and reports AI provider status
+**Plans**: TBD
 
 Plans:
-- [x] 19-01-PLAN.md — Config drift fix, shared markdown stripping, optimize_streaming_latency across all routes
-- [x] 19-02-PLAN.md — Request stitching for collaborative audio quality, streaming endpoint for collab segments, user gesture gate for greeting
+- [ ] 24-01: OpenRouter resilience and provider fallback
+- [ ] 24-02: Voice caching, rate limiting, and streaming optimization
 
-### Phase 20: Observability & Cost Controls
-**Goal**: Application has structured logging throughout, AI usage is tracked with cost data, and spend alerts prevent bill shock
-**Depends on**: Phases 16-19 (logging migration touches files modified by all prior phases; cost tracking benefits from stable AI layer)
-**Requirements**: OBS-01, OBS-02, OBS-03, OBS-04, COST-01, COST-02
+### Phase 25: Security, Performance & Cost Controls
+**Goal**: Validation is tight, chat loads fast, and model versions are pinned for cost predictability
+**Depends on**: Nothing (independent low-severity improvements)
+**Requirements**: SEC-01, SEC-02, SEC-03, PERF-01, PERF-02, PERF-03, COST-01, COST-02, COST-03, COST-04
 **Success Criteria** (what must be TRUE):
-  1. Stripe webhook handler uses structured `logger.*` calls with request IDs and user context -- no `console.log` remaining
-  2. At least 80% of all logging calls across the codebase use structured `logger.*` instead of `console.log/error/warn`
-  3. Every AI response log entry includes `inputTokens`, `outputTokens`, model ID, and estimated cost in USD
-  4. When daily AI spend crosses a configurable threshold, an admin notification is sent (email or structured log alert)
-  5. A monthly cost dashboard or API endpoint aggregates token-to-dollar conversion across all users
-**Plans:** 2 plans
+  1. API validation errors return generic messages without leaking Zod schema details to clients
+  2. Chat page loads initial messages via pagination (not full history), with older messages loaded on demand
+  3. Model versions are pinned with date suffixes in provider configuration, preventing silent drift
+  4. Demo chat logs token usage for cost tracking
+  5. Per-user spending alerts aggregate daily/monthly costs and flag anomalies
+**Plans**: TBD
 
 Plans:
-- [x] 20-01-PLAN.md — Cost infrastructure (AICostLog table, cost tracker, chat route cost recording, Stripe webhook logging migration, cost cron, cost dashboard API)
-- [x] 20-02-PLAN.md — Broad structured logging migration across all remaining server-side files (98% achieved)
+- [ ] 25-01: Security validation and CSP tightening
+- [ ] 25-02: Chat pagination, summary optimization, and stream failure cleanup
+- [ ] 25-03: Model pinning, documentation alignment, and cost tracking
+
+### Phase 26: Documentation & Design Decisions
+**Goal**: All informational audit findings are documented as intentional design decisions or considered enhancements
+**Depends on**: Phases 21-25 (documents decisions made during implementation)
+**Requirements**: DOC-01, DOC-02, DOC-03, DOC-04, DOC-05, DOC-06, DOC-07, DOC-08, DOC-09, DOC-10
+**Success Criteria** (what must be TRUE):
+  1. Code comments or CLAUDE.md explain intentional trade-offs for updateDocumentPrompt, CSRF token design, subscription GET behavior, and Supabase ID exposure
+  2. Stream recovery Redis requirement and resumable stream limitations are documented
+  3. Focus mode persistence options (localStorage vs database) are evaluated and decision recorded
+  4. CLAUDE.md focus modes list matches actual implementation
+  5. ElevenLabs cost tracking and payment failure notification considerations are documented with accept/defer decisions
+**Plans**: TBD
+
+Plans:
+- [ ] 26-01: Code and architecture documentation updates
 
 ## Progress
 
-**Execution Order:**
-Phase 16 first (critical infrastructure), then 17, 18, 19, 20. Phases 17 and 19 have no cross-dependency and could run in parallel after 16.
+**Execution Order:** 21 -> 22 -> 23 -> 24 -> 25 -> 26
 
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 16. Model Resilience & Tool Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
-| 17. Security Hardening | v1.3 | 2/2 | Complete | 2026-02-16 |
-| 18. Safety Rails | v1.3 | 2/2 | Complete | 2026-02-16 |
-| 19. Voice Quality | v1.3 | 2/2 | Complete | 2026-02-17 |
-| 20. Observability & Cost Controls | v1.3 | 2/2 | Complete | 2026-02-18 |
-
----
-*Roadmap created: 2026-02-16*
-*Last updated: 2026-02-18 (Phase 20 complete -- v1.3 milestone shipped)*
+| Phase | Plans Complete | Status | Completed |
+|-------|---------------|--------|-----------|
+| 21. Prompt Security Hardening | 0/2 | Not started | - |
+| 22. Auth & Subscription Guards | 0/1 | Not started | - |
+| 23. Webhook Reliability | 0/2 | Not started | - |
+| 24. Model Resilience & Voice | 0/2 | Not started | - |
+| 25. Security, Performance & Cost | 0/3 | Not started | - |
+| 26. Documentation & Decisions | 0/1 | Not started | - |

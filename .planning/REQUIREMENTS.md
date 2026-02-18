@@ -97,24 +97,71 @@ Explicitly excluded for this milestone.
 
 | Feature | Reason |
 |---------|--------|
-| New audit categories | Focus on completing existing 53 findings |
+| New audit categories | Focus on completing existing findings |
 | UI/UX improvements | Pure remediation milestone, no user-facing changes |
 | Performance benchmarking | Fix implementation first, measure after |
 | Additional safety rules | Current safety rails already comprehensive |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (To be populated by roadmapper) | - | - |
+| PROMPT-01 | Phase 21 | Pending |
+| PROMPT-02 | Phase 21 | Pending |
+| PROMPT-03 | Phase 21 | Pending |
+| PROMPT-04 | Phase 21 | Pending |
+| PROMPT-05 | Phase 21 | Pending |
+| PROMPT-06 | Phase 21 | Pending |
+| PROMPT-07 | Phase 21 | Pending |
+| PROMPT-08 | Phase 21 | Pending |
+| PROMPT-09 | Phase 21 | Pending |
+| AUTH-01 | Phase 22 | Pending |
+| AUTH-02 | Phase 22 | Pending |
+| AUTH-03 | Phase 22 | Pending |
+| AUTH-04 | Phase 22 | Pending |
+| AUTH-05 | Phase 22 | Pending |
+| WEBHOOK-01 | Phase 23 | Pending |
+| WEBHOOK-02 | Phase 23 | Pending |
+| WEBHOOK-03 | Phase 23 | Pending |
+| WEBHOOK-04 | Phase 23 | Pending |
+| WEBHOOK-05 | Phase 23 | Pending |
+| WEBHOOK-06 | Phase 23 | Pending |
+| WEBHOOK-07 | Phase 23 | Pending |
+| RESIL-01 | Phase 24 | Pending |
+| RESIL-02 | Phase 24 | Pending |
+| RESIL-03 | Phase 24 | Pending |
+| RESIL-04 | Phase 24 | Pending |
+| RESIL-05 | Phase 24 | Pending |
+| RESIL-06 | Phase 24 | Pending |
+| VOICE-01 | Phase 24 | Pending |
+| VOICE-02 | Phase 24 | Pending |
+| VOICE-03 | Phase 24 | Pending |
+| SEC-01 | Phase 25 | Pending |
+| SEC-02 | Phase 25 | Pending |
+| SEC-03 | Phase 25 | Pending |
+| PERF-01 | Phase 25 | Pending |
+| PERF-02 | Phase 25 | Pending |
+| PERF-03 | Phase 25 | Pending |
+| COST-01 | Phase 25 | Pending |
+| COST-02 | Phase 25 | Pending |
+| COST-03 | Phase 25 | Pending |
+| COST-04 | Phase 25 | Pending |
+| DOC-01 | Phase 26 | Pending |
+| DOC-02 | Phase 26 | Pending |
+| DOC-03 | Phase 26 | Pending |
+| DOC-04 | Phase 26 | Pending |
+| DOC-05 | Phase 26 | Pending |
+| DOC-06 | Phase 26 | Pending |
+| DOC-07 | Phase 26 | Pending |
+| DOC-08 | Phase 26 | Pending |
+| DOC-09 | Phase 26 | Pending |
+| DOC-10 | Phase 26 | Pending |
 
 **Coverage:**
-- v1.4 requirements: 53 total
-- Mapped to phases: 0
-- Unmapped: 53 ⚠️
+- v1.4 requirements: 50 total
+- Mapped to phases: 50
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-18 after initial definition*
+*Last updated: 2026-02-18 after roadmap creation*
