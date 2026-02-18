@@ -166,8 +166,7 @@ export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
 		color: "from-red-600 to-red-800",
 		description: "Your Marketing Mastermind",
 		icon: "Crown",
-		avatar:
-			"https://i.ibb.co/39XxGyN1/Chat-GPT-Image-Oct-22-2025-04-39-58-AM.png",
+		avatar: "/images/alex-avatar.png",
 	},
 	kim: {
 		id: "kim",
@@ -186,7 +185,7 @@ export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
 		color: "from-red-700 to-red-900",
 		description: "Your Sales Strategy Expert",
 		icon: "UserRound",
-		avatar: "https://i.ibb.co/m7vk4JF/KIM-3.png",
+		avatar: "/images/kim-avatar.png",
 		voiceVolume: 0.7,
 	},
 	collaborative: {
@@ -206,8 +205,7 @@ export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
 		color: "from-red-600 via-red-700 to-red-900",
 		description: "Your Complete Executive Team",
 		icon: "Users",
-		avatar:
-			"https://i.ibb.co/35bkJ1xR/Chat-GPT-Image-Oct-22-2025-05-59-09-PM.png",
+		avatar: "/images/alex-avatar.png",
 	},
 };
 

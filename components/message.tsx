@@ -310,6 +310,45 @@ const PurePreviewMessage = ({
 							);
 						}
 
+						if (
+							(type as string) === "tool-invocation" &&
+							(part as any).toolName === "strategyCanvas"
+						) {
+							const { toolCallId, state } = part as any;
+							const output = (part as any).result; // SDK uses 'result' for completed calls in tool-invocation
+
+							if (state === "result") {
+								return (
+									<div
+										key={toolCallId}
+										className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-200 animate-in fade-in slide-in-from-bottom-2"
+									>
+										<div className="flex items-center gap-2 font-medium">
+											<span className="flex items-center justify-center size-5 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50">
+												✓
+											</span>
+											Strategy Canvas Updated
+										</div>
+										{output?.message && (
+											<div className="mt-1 ml-7 text-emerald-700/90 dark:text-emerald-300/90">
+												{
+													output.message
+														.replace("IMPORTANT:", "")
+														.split("YOU MUST NOW REPLY")[0]
+												}
+											</div>
+										)}
+									</div>
+								);
+							}
+							return null;
+						}
+
+						// Maintain compatibility if internal types are used
+						if ((type as string) === "tool-strategyCanvas") {
+							return null;
+						}
+
 						return null;
 					})}
 

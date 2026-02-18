@@ -505,7 +505,7 @@ export default function LandingPageCMSPage() {
 											<Image
 												src={
 													getFieldValue("executives", "alex_image") ||
-													"https://i.ibb.co/39XxGyN1/Chat-GPT-Image-Oct-22-2025-04-39-58-AM.png"
+													"/images/alex-avatar.png"
 												}
 												alt="Alexandria"
 												width={32}
@@ -586,7 +586,7 @@ export default function LandingPageCMSPage() {
 											<Image
 												src={
 													getFieldValue("executives", "kim_image") ||
-													"https://i.ibb.co/m7vk4JF/KIM-3.png"
+													"/images/kim-avatar.png"
 												}
 												alt="Kim"
 												width={32}
