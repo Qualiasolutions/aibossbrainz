@@ -32,6 +32,16 @@ export async function updateSession(request: NextRequest) {
 	// Generate request ID for tracing
 	const requestId = generateRequestId(request);
 
+	// If Supabase env vars are not configured, skip auth entirely
+	if (
+		!process.env.NEXT_PUBLIC_SUPABASE_URL ||
+		!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+	) {
+		const response = NextResponse.next({ request });
+		response.headers.set("x-request-id", requestId);
+		return response;
+	}
+
 	let supabaseResponse = NextResponse.next({
 		request,
 	});
