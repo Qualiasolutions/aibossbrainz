@@ -38,7 +38,7 @@ const realtimeStreamSchema = z.object({
 	botType: z
 		.enum(["alexandria", "kim", "collaborative"])
 		.default("collaborative"),
-	chatId: z.string().uuid("Invalid chat ID").optional(),
+	chatId: z.string().uuid("Invalid chat ID").nullish(),
 });
 
 export const maxDuration = 60;
