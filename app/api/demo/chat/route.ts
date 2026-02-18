@@ -18,6 +18,7 @@ import {
 	recordCircuitFailure,
 	recordCircuitSuccess,
 } from "@/lib/resilience";
+import { withCsrf } from "@/lib/security/with-csrf";
 import { generateUUID } from "@/lib/utils";
 import { checkDemoRateLimit } from "./rate-limit";
 
@@ -74,7 +75,7 @@ After 2-3 exchanges, gently encourage the user to sign up for the full experienc
 Do NOT use any tools or create documents - just provide helpful advice directly.`;
 }
 
-export async function POST(request: Request) {
+export const POST = withCsrf(async (request: Request) => {
 	try {
 		// Get IP for rate limiting
 		const headersList = await headers();
@@ -204,4 +205,4 @@ export async function POST(request: Request) {
 
 		return Response.json({ error: "Internal server error" }, { status: 500 });
 	}
-}
+});

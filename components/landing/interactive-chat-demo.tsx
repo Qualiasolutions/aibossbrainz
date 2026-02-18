@@ -5,6 +5,7 @@ import { Loader2, Mic, Paperclip, Send, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
+import { useCsrf } from "@/hooks/use-csrf";
 import type { BotType } from "@/lib/bot-personalities";
 import type { LandingPageCMSContent } from "@/lib/cms/landing-page-types";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,7 @@ function formatBoldText(text: string) {
 }
 
 export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
+	const { csrfFetch } = useCsrf();
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [input, setInput] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +82,7 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
 				parts: [{ type: "text" as const, text: m.content }],
 			}));
 
-			const response = await fetch("/api/demo/chat", {
+			const response = await csrfFetch("/api/demo/chat", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -178,7 +180,7 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
 			setIsLoading(false);
 			setTimeout(scrollToBottom, 100);
 		}
-	}, [input, isLoading, messages, selectedExec, scrollToBottom, rateLimitHit]);
+	}, [input, isLoading, messages, selectedExec, scrollToBottom, rateLimitHit, csrfFetch]);
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === "Enter" && !e.shiftKey) {
