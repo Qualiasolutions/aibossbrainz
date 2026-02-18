@@ -38,6 +38,7 @@ import {
 	checkUserSubscription,
 	createStreamId,
 	deleteChatById,
+	deleteMessageById,
 	ensureUserExists,
 	getAllUserCanvases,
 	getChatById,
@@ -78,6 +79,9 @@ import { type PostRequestBody, postRequestBodySchema } from "./schema";
 // Maximum number of messages to keep in context (prevents context overflow)
 // Keeps first message + last N messages for continuity via DB-level bounded fetch
 const MAX_CONTEXT_MESSAGES = 60;
+
+// Generate conversation summaries every N messages instead of on every response (PERF-02)
+const SUMMARY_INTERVAL = 10;
 
 export const maxDuration = 60; // Vercel Pro limit is 60s - must match to avoid 504
 
@@ -547,12 +551,16 @@ export const POST = withCsrf(async (request: Request) => {
 				after(() => recordAnalytics(user.id, "message", messages.length));
 
 				// Generate conversation summary for cross-chat memory (in background)
-				// Use messages from onFinish callback instead of re-fetching from DB
+				// PERF-02: Only summarize at intervals (4, 10, 20, 30...) instead of every response
 				const finishedMessages = messages;
-				after(async () => {
-					try {
-						// Only summarize if conversation has substantive content (4+ messages)
-						if (finishedMessages.length >= 4) {
+				const messageCount = finishedMessages.length;
+				const shouldSummarize =
+					messageCount >= 4 &&
+					(messageCount === 4 || messageCount % SUMMARY_INTERVAL === 0);
+
+				if (shouldSummarize) {
+					after(async () => {
+						try {
 							const summary = await generateConversationSummary(
 								finishedMessages.map((m) => ({
 									role: m.role,
@@ -568,14 +576,14 @@ export const POST = withCsrf(async (request: Request) => {
 									importance: summary.importance,
 								});
 							}
+						} catch (err) {
+							logger.warn(
+								{ err, chatId: id },
+								"Failed to generate conversation summary",
+							);
 						}
-					} catch (err) {
-						logger.warn(
-							{ err, chatId: id },
-							"Failed to generate conversation summary",
-						);
-					}
-				});
+					});
+				}
 			},
 			onError: (error) => {
 				// Only record transient errors (429, 5xx, network) as circuit breaker failures
@@ -584,6 +592,23 @@ export const POST = withCsrf(async (request: Request) => {
 					recordCircuitFailure("ai-gateway");
 				}
 				apiLog.warn("Stream onError callback triggered");
+
+				// PERF-03: Clean up dangling user message that was pre-saved before streaming
+				after(async () => {
+					try {
+						await deleteMessageById({ id: message.id });
+						apiLog.info(
+							"Cleaned up dangling user message after stream failure",
+							{ messageId: message.id },
+						);
+					} catch (cleanupErr) {
+						apiLog.warn(
+							"Failed to clean up dangling message",
+							{ err: cleanupErr, messageId: message.id },
+						);
+					}
+				});
+
 				return "Something went wrong generating a response. Please try again.";
 			},
 		});
