@@ -5,7 +5,13 @@ import { DataStreamHandler } from "@/components/data-stream-handler";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import type { BotType } from "@/lib/bot-personalities";
-import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
+import {
+	getChatById,
+	getMessageCountByChatId,
+	getMessagesByChatId,
+} from "@/lib/db/queries";
+
+const INITIAL_MESSAGE_LIMIT = 50;
 import { createClient } from "@/lib/supabase/server";
 import { convertToUIMessages } from "@/lib/utils";
 
@@ -45,11 +51,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 		}
 	}
 
-	const messagesFromDb = await getMessagesByChatId({
-		id,
-	});
+	const [messagesFromDb, totalMessageCount] = await Promise.all([
+		getMessagesByChatId({ id, limit: INITIAL_MESSAGE_LIMIT }),
+		getMessageCountByChatId({ id }),
+	]);
 
 	const uiMessages = convertToUIMessages(messagesFromDb);
+	const hasMoreMessages = totalMessageCount > messagesFromDb.length;
 
 	// Get the bot type from the last assistant message with type safety
 	const lastAssistantMessage = messagesFromDb
@@ -67,6 +75,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 			<>
 				<ChatWithErrorBoundary
 					autoResume={true}
+					hasMoreMessages={hasMoreMessages}
 					id={chat.id}
 					initialBotType={initialBotType}
 					initialChatModel={DEFAULT_CHAT_MODEL}
@@ -84,6 +93,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 		<>
 			<ChatWithErrorBoundary
 				autoResume={true}
+				hasMoreMessages={hasMoreMessages}
 				id={chat.id}
 				initialBotType={initialBotType}
 				initialChatModel={chatModelFromCookie.value}

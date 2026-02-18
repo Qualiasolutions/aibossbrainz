@@ -57,11 +57,14 @@ export {
 // Message queries
 export {
 	addMessageReaction,
+	deleteMessageById,
 	deleteMessagesByChatIdAfterTimestamp,
 	getMessageById,
+	getMessageCountByChatId,
 	getMessageReactionCounts,
 	getMessageReactions,
 	getMessagesByChatId,
+	getMessagesByChatIdPaginated,
 	getUserReactionForMessage,
 	getUserReactionsByType,
 	getVotesByChatId,

@@ -7,6 +7,25 @@ import { logger } from "@/lib/logger";
 import { safetyMiddleware } from "@/lib/safety/output-guard";
 import { isTestEnvironment } from "../constants";
 
+/**
+ * Model Version Configuration
+ *
+ * Primary: google/gemini-2.5-flash (OpenRouter stable alias)
+ *   - Auto-updates when Google promotes new stable versions
+ *   - OpenRouter fallback chain: gemini-2.5-flash -> gemini-2.5-flash-lite
+ *
+ * Secondary (direct Google fallback): gemini-2.0-flash
+ *   - Used when OpenRouter is completely down
+ *   - Set GOOGLE_AI_API_KEY env var to enable
+ *
+ * For date-pinned versions (testing only):
+ *   google/gemini-2.5-flash-preview-09-2025
+ *
+ * Monitor actual model via OpenRouter response header: x-model-id
+ *
+ * Last verified: 2026-02-19
+ */
+
 // Validate OpenRouter API key at module load (fail fast)
 if (!process.env.OPENROUTER_API_KEY && !isTestEnvironment) {
 	logger.error(

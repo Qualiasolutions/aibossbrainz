@@ -110,6 +110,76 @@ export async function getMessagesByChatId({
 	}
 }
 
+export async function getMessagesByChatIdPaginated({
+	id,
+	limit = 50,
+	before,
+}: {
+	id: string;
+	limit?: number;
+	before?: string; // ISO timestamp cursor
+}) {
+	try {
+		const supabase = await createClient();
+		let query = supabase
+			.from("Message_v2")
+			.select("*")
+			.eq("chatId", id)
+			.is("deletedAt", null)
+			.order("createdAt", { ascending: false })
+			.limit(limit);
+
+		if (before) {
+			query = query.lt("createdAt", before);
+		}
+
+		const { data, error } = await query;
+		if (error) throw error;
+		return (data || []).reverse(); // Return in ascending order
+	} catch (_error) {
+		throw new ChatSDKError(
+			"bad_request:database",
+			"Failed to get paginated messages",
+		);
+	}
+}
+
+export async function getMessageCountByChatId({ id }: { id: string }) {
+	try {
+		const supabase = await createClient();
+		const { count, error } = await supabase
+			.from("Message_v2")
+			.select("*", { count: "exact", head: true })
+			.eq("chatId", id)
+			.is("deletedAt", null);
+		if (error) throw error;
+		return count ?? 0;
+	} catch (_error) {
+		throw new ChatSDKError(
+			"bad_request:database",
+			"Failed to count messages",
+		);
+	}
+}
+
+export async function deleteMessageById({ id }: { id: string }) {
+	try {
+		const supabase = await createClient();
+		const deletedAt = new Date().toISOString();
+		const { error } = await supabase
+			.from("Message_v2")
+			.update({ deletedAt })
+			.eq("id", id)
+			.is("deletedAt", null);
+		if (error) throw error;
+	} catch (_error) {
+		throw new ChatSDKError(
+			"bad_request:database",
+			"Failed to delete message by id",
+		);
+	}
+}
+
 export async function getMessageById({ id }: { id: string }) {
 	try {
 		const supabase = await createClient();

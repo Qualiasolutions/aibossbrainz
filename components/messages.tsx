@@ -1,6 +1,6 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
-import { ArrowDownIcon } from "lucide-react";
+import { ArrowDownIcon, Loader2Icon } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useMessages } from "@/hooks/use-messages";
 import type { BotType } from "@/lib/bot-personalities";
@@ -25,6 +25,9 @@ type MessagesProps = {
 	selectedModelId: string;
 	selectedBotType: BotType;
 	className?: string;
+	hasMoreMessages?: boolean;
+	isLoadingOlder?: boolean;
+	onLoadOlder?: () => void;
 	onSuggestionSelect?: (texts: string[]) => void;
 };
 
@@ -39,6 +42,9 @@ function PureMessages({
 	selectedModelId: _selectedModelId,
 	selectedBotType,
 	className,
+	hasMoreMessages,
+	isLoadingOlder,
+	onLoadOlder,
 	onSuggestionSelect,
 }: MessagesProps) {
 	const [fullscreenMessage, setFullscreenMessage] = useState<{
@@ -80,6 +86,26 @@ function PureMessages({
 			<Conversation className="flex h-full w-full min-w-0 flex-col gap-4 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8">
 				<ConversationContent className="flex flex-col gap-5 px-1 py-2 md:gap-7">
 					{messages.length === 0 && <Greeting botType={selectedBotType} />}
+
+					{hasMoreMessages && onLoadOlder && (
+						<div className="flex justify-center pb-2">
+							<button
+								type="button"
+								className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/80 px-4 py-2 font-medium text-stone-600 text-xs shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md disabled:opacity-50 dark:border-stone-700 dark:bg-stone-800/80 dark:text-stone-300 dark:hover:bg-stone-800"
+								disabled={isLoadingOlder}
+								onClick={onLoadOlder}
+							>
+								{isLoadingOlder ? (
+									<>
+										<Loader2Icon className="size-3.5 animate-spin" />
+										Loading...
+									</>
+								) : (
+									"Load earlier messages"
+								)}
+							</button>
+						</div>
+					)}
 
 					{messages.map((message, index) => (
 						<PreviewMessage
@@ -184,6 +210,12 @@ export const Messages = memo(PureMessages, (prevProps, nextProps) => {
 		return false;
 	}
 	if (prevProps.onSuggestionSelect !== nextProps.onSuggestionSelect) {
+		return false;
+	}
+	if (prevProps.hasMoreMessages !== nextProps.hasMoreMessages) {
+		return false;
+	}
+	if (prevProps.isLoadingOlder !== nextProps.isLoadingOlder) {
 		return false;
 	}
 
