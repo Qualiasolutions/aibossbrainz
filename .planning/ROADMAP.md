@@ -97,12 +97,12 @@ Plans:
   3. Model versions are pinned with date suffixes in provider configuration, preventing silent drift
   4. Demo chat logs token usage for cost tracking
   5. Per-user spending alerts aggregate daily/monthly costs and flag anomalies
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 25-01: Security validation and CSP tightening
-- [ ] 25-02: Chat pagination, summary optimization, and stream failure cleanup
-- [ ] 25-03: Model pinning, documentation alignment, and cost tracking
+- [ ] 25-01-PLAN.md — Sanitize Zod error leaks in 8 API routes, tighten CSP, fix ajv vulnerability (SEC-01, SEC-02, SEC-03)
+- [ ] 25-02-PLAN.md — Chat message pagination, summary interval optimization, stream failure cleanup (PERF-01, PERF-02, PERF-03)
+- [ ] 25-03-PLAN.md — Model documentation alignment, demo cost tracking, per-user spending alerts (COST-01, COST-02, COST-03, COST-04)
 
 ### Phase 26: Documentation & Design Decisions
 **Goal**: All informational audit findings are documented as intentional design decisions or considered enhancements
