@@ -452,7 +452,10 @@ export const POST = withCsrf(async (request: Request) => {
 				});
 
 				// SAFE-01: Post-hoc scan of streamed AI responses for PII and canary leaks
-				// This is detection/logging only -- text has already been streamed to client
+				// LIMITATION (PROMPT-09): This is detection/logging ONLY -- text has already
+				// been streamed to the client and cannot be recalled or redacted. The safety
+				// middleware in output-guard.ts handles non-streaming (generateText) responses.
+				// Streaming PII detection serves as an alerting mechanism for security review.
 				try {
 					const assistantText = messages
 						.filter((m) => m.role === "assistant")

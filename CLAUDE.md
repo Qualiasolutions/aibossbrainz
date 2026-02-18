@@ -177,6 +177,13 @@ Dev server auto-starts on `pnpm test`.
 - **Rate limiting**: `lib/security/` - Redis primary, DB fallback. Limits in `lib/ai/entitlements.ts`.
 - **Input validation**: All API routes validate with Zod schemas. See individual route files.
 
+### Streaming PII Scan Limitation
+
+- **Detection-only**: The post-hoc PII scan in `app/(chat)/api/chat/route.ts` (onFinish callback) runs AFTER content has been streamed to the client. It can detect and log PII occurrences but CANNOT redact or recall already-streamed text.
+- **Why**: Vercel AI SDK streams tokens incrementally to the client. There is no middleware hook to intercept and modify individual tokens before they reach the client in streaming mode. The `safetyMiddleware` in `lib/safety/output-guard.ts` only works on non-streaming (`generateText`) responses.
+- **Mitigation**: PII is redacted from user messages before storage (in `saveMessages`). The streaming scan serves as an alert mechanism for unexpected PII in AI responses, triggering security event logs for investigation.
+- **DO NOT** attempt to add blocking PII redaction to the streaming path -- it would require buffering the entire response (defeating streaming latency benefits) or modifying the AI SDK transport layer.
+
 ## Roadmap
 
 See `ROADMAP.md` for features and `PROGRESS.md` for status.
