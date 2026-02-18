@@ -47,7 +47,7 @@ const pricingPlans: PricingPlan[] = [
 		name: "Most Flexible",
 		price: 297,
 		period: "Monthly",
-		description: "Monthly Membership",
+		description: "",
 		popular: false,
 		features: [
 			{
@@ -197,7 +197,7 @@ function PricingCard({
 					</div>
 					<div>
 						<h3 className="font-bold text-xl text-stone-900">{plan.name}</h3>
-						<p className="text-sm text-stone-500">{plan.description}</p>
+						{plan.description && <p className="text-sm text-stone-500">{plan.description}</p>}
 					</div>
 				</div>
 
@@ -300,7 +300,7 @@ function FAQSection() {
 		{
 			question: "Can I cancel my subscription?",
 			answer:
-				"Your subscription is yours to control -- upgrade, downgrade, or cancel whenever you want. No penalties, no hassle.",
+				"Your subscription is yours to control, upgrade, downgrade, or cancel whenever you want. No penalties, no hassle.",
 		},
 		{
 			question: "What is 24/7 Access?",
@@ -406,7 +406,7 @@ function GuaranteeSection() {
 						<p className="mx-auto mt-4 max-w-lg text-stone-300">
 							Your membership is completely flexible. Cancel anytime with no
 							penalties or hidden fees. We're confident you'll love working with
-							our AI executive team -- and we'll keep earning your business
+							our AI executive team, and we'll keep earning your business
 							every month.
 						</p>
 					</div>
@@ -538,8 +538,7 @@ export function PricingPageClient() {
 						Still have questions?
 					</h2>
 					<p className="mt-4 text-stone-600">
-						We're here to help. Reach out and we'll get back to you within 24
-						hours.
+						We're here to help. Reach out and we'll get back to you.
 					</p>
 					<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
 						<Link href="/contact">
