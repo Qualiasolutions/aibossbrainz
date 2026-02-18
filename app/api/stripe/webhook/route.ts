@@ -12,7 +12,9 @@ import {
 	startTrial,
 } from "@/lib/stripe/actions";
 import { getStripe, PLAN_DETAILS, STRIPE_PRICES } from "@/lib/stripe/config";
-import { createServiceClient } from "@/lib/supabase/server";
+import { markEventProcessed } from "@/lib/stripe/webhook-dedup";
+
+export const maxDuration = 60;
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -64,25 +66,28 @@ function validateSubscriptionType(
 }
 
 /**
- * Check if user's subscription is already in the target state to prevent
- * duplicate processing from overlapping webhook events.
+ * Extract userId from Stripe event metadata where available.
+ * Returns null for event types where userId is only obtainable via API call.
  */
-async function isAlreadyProcessed(
-	userId: string,
-	targetStatus: "trialing" | "active",
-	stripeSubscriptionId: string,
-): Promise<boolean> {
-	const supabase = createServiceClient();
-	const { data } = await supabase
-		.from("User")
-		.select("subscriptionStatus, stripeSubscriptionId")
-		.eq("id", userId)
-		.single();
-
-	return (
-		data?.subscriptionStatus === targetStatus &&
-		data?.stripeSubscriptionId === stripeSubscriptionId
-	);
+function extractUserId(event: Stripe.Event): string | null {
+	switch (event.type) {
+		case "checkout.session.completed": {
+			return (
+				(event.data.object as Stripe.Checkout.Session).metadata?.userId ??
+				null
+			);
+		}
+		case "customer.subscription.created":
+		case "customer.subscription.updated":
+		case "customer.subscription.deleted": {
+			return (
+				(event.data.object as Stripe.Subscription).metadata?.userId ?? null
+			);
+		}
+		// invoice.paid, invoice.payment_failed: userId not in invoice metadata
+		default:
+			return null;
+	}
 }
 
 export async function POST(request: Request) {
@@ -118,6 +123,20 @@ export async function POST(request: Request) {
 	reqLog.info({ eventType: event.type }, "Processing Stripe webhook event");
 
 	try {
+		// Event-ID dedup: skip if this exact event was already processed
+		const isNew = await markEventProcessed(
+			event.id,
+			event.type,
+			extractUserId(event),
+		);
+		if (!isNew) {
+			reqLog.info(
+				{ eventId: event.id, eventType: event.type },
+				"Duplicate event, skipping",
+			);
+			return NextResponse.json({ received: true });
+		}
+
 		switch (event.type) {
 			// Handle checkout completion - backup for subscription activation
 			case "checkout.session.completed": {
@@ -144,21 +163,6 @@ export async function POST(request: Request) {
 						const subscription = (await getStripe().subscriptions.retrieve(
 							subscriptionId,
 						)) as Stripe.Subscription;
-
-						// Skip if already processed by customer.subscription.created
-						if (
-							await isAlreadyProcessed(
-								userId,
-								subscription.status === "trialing" ? "trialing" : "active",
-								subscription.id,
-							)
-						) {
-							reqLog.info(
-								{ userId, eventType: "checkout.session.completed" },
-								"Already processed, skipping",
-							);
-							break;
-						}
 
 						if (subscription.status === "trialing" && subscription.trial_end) {
 							const trialEndDate = new Date(subscription.trial_end * 1000);
@@ -244,21 +248,6 @@ export async function POST(request: Request) {
 				);
 
 				if (userId && subscriptionType) {
-					// Check if already processed (idempotency)
-					if (
-						await isAlreadyProcessed(
-							userId,
-							subscription.status === "trialing" ? "trialing" : "active",
-							subscription.id,
-						)
-					) {
-						reqLog.info(
-							{ userId, eventType: "customer.subscription.created" },
-							"Already processed, skipping",
-						);
-						break;
-					}
-
 					if (subscription.status === "trialing" && subscription.trial_end) {
 						const trialEndDate = new Date(subscription.trial_end * 1000);
 						if (Number.isNaN(trialEndDate.getTime())) {
