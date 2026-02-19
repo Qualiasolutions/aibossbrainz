@@ -53,10 +53,12 @@ const PurePreviewMessage = ({
 }) => {
 	const [mode, setMode] = useState<"view" | "edit">("view");
 
+	const parts = Array.isArray(message.parts) ? message.parts : [];
+
 	// Memoize expensive computations to prevent re-renders
 	const attachmentsFromMessage = useMemo(
-		() => message.parts.filter((part) => part.type === "file"),
-		[message.parts],
+		() => parts.filter((part) => part.type === "file"),
+		[parts],
 	);
 
 	// Get bot type from message metadata if available, otherwise use the selected bot
@@ -66,12 +68,12 @@ const PurePreviewMessage = ({
 	// Get text content for fullscreen view - memoized
 	const textFromParts = useMemo(
 		() =>
-			message.parts
-				?.filter((part) => part.type === "text")
+			parts
+				.filter((part) => part.type === "text")
 				.map((part) => part.text)
 				.join("\n")
 				.trim(),
-		[message.parts],
+		[parts],
 	);
 
 	// Parse suggestions from message content - memoized
@@ -105,7 +107,7 @@ const PurePreviewMessage = ({
 			>
 				<div
 					className={cn("flex w-full flex-col", {
-						"gap-2 md:gap-4": message.parts?.some(
+						"gap-2 md:gap-4": parts.some(
 							(p) => p.type === "text" && p.text?.trim(),
 						),
 						"min-h-16": message.role === "assistant" && requiresScrollPadding,
@@ -132,7 +134,7 @@ const PurePreviewMessage = ({
 					{/* Loading state for assistant messages */}
 					{message.role === "assistant" &&
 						isLoading &&
-						!message.parts?.some(
+						!parts.some(
 							(p) => p.type === "text" && p.text?.trim(),
 						) && (
 							<div className="w-full">
@@ -146,7 +148,7 @@ const PurePreviewMessage = ({
 							</div>
 						)}
 
-					{message.parts?.map((part, index) => {
+					{parts.map((part, index) => {
 						const { type } = part;
 						const key = `message-${message.id}-part-${index}`;
 
@@ -317,7 +319,7 @@ const PurePreviewMessage = ({
 							if (state !== "output-available") return null;
 
 							// Only render a banner for the LAST strategyCanvas tool call
-							const allCanvasParts = message.parts.filter(
+							const allCanvasParts = parts.filter(
 								(p: any) =>
 									(p as any).type === "tool-strategyCanvas" &&
 									(p as any).state === "output-available",
@@ -335,6 +337,28 @@ const PurePreviewMessage = ({
 									sum + ((p as any).output?.itemsAdded || 0),
 								0,
 							);
+							const hasError = allCanvasParts.some(
+								(p: any) => (p as any).output?.success === false,
+							);
+
+							if (hasError && totalItems === 0) {
+								return (
+									<div
+										key={`canvas-summary-${(part as any).toolCallId}`}
+										className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-200 animate-in fade-in slide-in-from-bottom-2"
+									>
+										<div className="flex items-center gap-2 font-medium">
+											<span className="flex items-center justify-center size-5 rounded-full bg-red-100 text-red-600 dark:bg-red-900/50">
+												✕
+											</span>
+											Strategy Canvas Error
+										</div>
+										<div className="mt-1 ml-7 text-red-700/90 dark:text-red-300/90">
+											Failed to save canvas data. Please try again.
+										</div>
+									</div>
+								);
+							}
 
 							return (
 								<div
