@@ -217,15 +217,23 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 							<p className="text-stone-600 leading-relaxed mb-6">
 								{content.executives.alex_description}
 							</p>
-							<div className="flex flex-wrap justify-center gap-2">
-								{content.executives.alex_expertise.split(",").map((skill) => (
-									<span
-										key={skill}
-										className="px-3 py-1 text-xs font-medium rounded-full bg-white border border-red-200 text-red-700"
-									>
-										{skill.trim()}
-									</span>
-								))}
+							<div className="rounded-xl bg-red-50/60 border border-red-100 p-4">
+								<p className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-400 mb-3">
+									Expertise
+								</p>
+								<div className="space-y-2">
+									{content.executives.alex_expertise
+										.split(",")
+										.map((skill) => (
+											<div
+												key={skill}
+												className="flex items-center gap-2.5 text-sm text-stone-700"
+											>
+												<span className="size-1.5 rounded-full bg-red-400 shrink-0" />
+												{skill.trim()}
+											</div>
+										))}
+								</div>
 							</div>
 						</motion.div>
 
@@ -256,15 +264,23 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 							<p className="text-stone-600 leading-relaxed mb-6">
 								{content.executives.kim_description}
 							</p>
-							<div className="flex flex-wrap justify-center gap-2">
-								{content.executives.kim_expertise.split(",").map((skill) => (
-									<span
-										key={skill}
-										className="px-3 py-1 text-xs font-medium rounded-full bg-white border border-stone-300 text-stone-700"
-									>
-										{skill.trim()}
-									</span>
-								))}
+							<div className="rounded-xl bg-stone-50 border border-stone-200 p-4">
+								<p className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-3">
+									Expertise
+								</p>
+								<div className="space-y-2">
+									{content.executives.kim_expertise
+										.split(",")
+										.map((skill) => (
+											<div
+												key={skill}
+												className="flex items-center gap-2.5 text-sm text-stone-700"
+											>
+												<span className="size-1.5 rounded-full bg-stone-400 shrink-0" />
+												{skill.trim()}
+											</div>
+										))}
+								</div>
 							</div>
 						</motion.div>
 					</div>
