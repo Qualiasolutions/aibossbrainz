@@ -8,7 +8,7 @@ export function useMessages({
 }: {
 	status: UseChatHelpers<ChatMessage>["status"];
 }) {
-	const { containerRef, endRef, isAtBottom, scrollToBottom, disableAutoScroll } =
+	const { containerRef, endRef, isAtBottom, scrollToBottom, lockAutoScroll } =
 		useScrollToBottom();
 
 	const [hasSentMessage, setHasSentMessage] = useState(false);
@@ -19,14 +19,14 @@ export function useMessages({
 			setHasSentMessage(true);
 		}
 
-		// When streaming starts, disable auto-scroll so user can read from the beginning
-		// This prevents force-scrolling to bottom during AI responses
+		// When streaming starts, lock auto-scroll so user can read from the beginning.
+		// The lock can only be released by explicit user action (clicking "scroll to bottom").
 		if (prevStatusRef.current === "submitted" && status === "streaming") {
-			disableAutoScroll();
+			lockAutoScroll();
 		}
 
 		prevStatusRef.current = status;
-	}, [status, disableAutoScroll]);
+	}, [status, lockAutoScroll]);
 
 	return {
 		containerRef,
