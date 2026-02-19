@@ -47,6 +47,15 @@ function fadeIn(variant = 0) {
 	};
 }
 
+/** Parse expertise text into individual achievement lines.
+ *  CMS data uses double-space separation between achievements. */
+function parseExpertise(text: string): string[] {
+	return text
+		.split(/\s{2,}/)
+		.map((s) => s.trim())
+		.filter(Boolean);
+}
+
 export function AboutPageClient({ content }: AboutPageClientProps) {
 	return (
 		<div className="min-h-screen">
@@ -189,50 +198,54 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 						</h2>
 					</motion.div>
 
-					<div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+					<div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto items-stretch">
 						{/* Alexandria */}
 						<motion.div
 							initial={{ opacity: 0, y: 30 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true }}
 							transition={{ delay: 0.1, duration: 0.6 }}
-							className="bg-gradient-to-b from-red-50 to-white rounded-2xl p-8 border border-red-100 text-center"
+							className="flex flex-col bg-gradient-to-b from-red-50 to-white rounded-2xl p-8 border border-red-100"
 						>
-							<div className="relative inline-block mb-6">
-								<div className="absolute inset-0 bg-gradient-to-br from-red-400 to-rose-500 rounded-full blur-xl opacity-30" />
-								<Image
-									src={content.executives.alex_image}
-									alt={content.executives.alex_name}
-									width={120}
-									height={120}
-									className="relative size-32 rounded-full border-4 border-white shadow-lg mx-auto"
-								/>
+							<div className="flex items-center gap-5 mb-6">
+								<div className="relative shrink-0">
+									<div className="absolute inset-0 bg-gradient-to-br from-red-400 to-rose-500 rounded-full blur-xl opacity-30" />
+									<Image
+										src={content.executives.alex_image}
+										alt={content.executives.alex_name}
+										width={96}
+										height={96}
+										className="relative size-24 rounded-full border-4 border-white shadow-lg object-cover"
+									/>
+								</div>
+								<div>
+									<h3 className="text-2xl font-bold text-stone-900">
+										{content.executives.alex_name}
+									</h3>
+									<p className="text-sm font-bold uppercase tracking-wider text-red-600 mt-1">
+										{content.executives.alex_role}
+									</p>
+								</div>
 							</div>
-							<h3 className="text-2xl font-bold text-stone-900 mb-2">
-								{content.executives.alex_name}
-							</h3>
-							<p className="text-sm font-bold uppercase tracking-wider text-red-600 mb-4">
-								{content.executives.alex_role}
-							</p>
 							<p className="text-stone-600 leading-relaxed mb-6">
 								{content.executives.alex_description}
 							</p>
-							<div className="rounded-xl bg-red-50/60 border border-red-100 p-4">
+							<div className="mt-auto rounded-xl bg-red-50/60 border border-red-100 p-5">
 								<p className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-400 mb-3">
-									Expertise
+									Track Record
 								</p>
-								<div className="space-y-2">
-									{content.executives.alex_expertise
-										.split(",")
-										.map((skill) => (
-											<div
-												key={skill}
-												className="flex items-center gap-2.5 text-sm text-stone-700"
-											>
-												<span className="size-1.5 rounded-full bg-red-400 shrink-0" />
-												{skill.trim()}
-											</div>
-										))}
+								<div className="space-y-2.5">
+									{parseExpertise(
+										content.executives.alex_expertise,
+									).map((achievement) => (
+										<div
+											key={achievement}
+											className="flex items-start gap-2.5 text-sm text-stone-700 leading-relaxed"
+										>
+											<span className="size-1.5 rounded-full bg-red-400 shrink-0 mt-1.5" />
+											{achievement}
+										</div>
+									))}
 								</div>
 							</div>
 						</motion.div>
@@ -243,43 +256,47 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true }}
 							transition={{ delay: 0.2, duration: 0.6 }}
-							className="bg-gradient-to-b from-stone-100 to-white rounded-2xl p-8 border border-stone-200 text-center"
+							className="flex flex-col bg-gradient-to-b from-stone-100 to-white rounded-2xl p-8 border border-stone-200"
 						>
-							<div className="relative inline-block mb-6">
-								<div className="absolute inset-0 bg-gradient-to-br from-stone-400 to-stone-600 rounded-full blur-xl opacity-30" />
-								<Image
-									src={content.executives.kim_image}
-									alt={content.executives.kim_name}
-									width={120}
-									height={120}
-									className="relative size-32 rounded-full border-4 border-white shadow-lg mx-auto"
-								/>
+							<div className="flex items-center gap-5 mb-6">
+								<div className="relative shrink-0">
+									<div className="absolute inset-0 bg-gradient-to-br from-stone-400 to-stone-600 rounded-full blur-xl opacity-30" />
+									<Image
+										src={content.executives.kim_image}
+										alt={content.executives.kim_name}
+										width={96}
+										height={96}
+										className="relative size-24 rounded-full border-4 border-white shadow-lg object-cover"
+									/>
+								</div>
+								<div>
+									<h3 className="text-2xl font-bold text-stone-900">
+										{content.executives.kim_name}
+									</h3>
+									<p className="text-sm font-bold uppercase tracking-wider text-stone-600 mt-1">
+										{content.executives.kim_role}
+									</p>
+								</div>
 							</div>
-							<h3 className="text-2xl font-bold text-stone-900 mb-2">
-								{content.executives.kim_name}
-							</h3>
-							<p className="text-sm font-bold uppercase tracking-wider text-stone-600 mb-4">
-								{content.executives.kim_role}
-							</p>
 							<p className="text-stone-600 leading-relaxed mb-6">
 								{content.executives.kim_description}
 							</p>
-							<div className="rounded-xl bg-stone-50 border border-stone-200 p-4">
+							<div className="mt-auto rounded-xl bg-stone-50 border border-stone-200 p-5">
 								<p className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-400 mb-3">
-									Expertise
+									Track Record
 								</p>
-								<div className="space-y-2">
-									{content.executives.kim_expertise
-										.split(",")
-										.map((skill) => (
-											<div
-												key={skill}
-												className="flex items-center gap-2.5 text-sm text-stone-700"
-											>
-												<span className="size-1.5 rounded-full bg-stone-400 shrink-0" />
-												{skill.trim()}
-											</div>
-										))}
+								<div className="space-y-2.5">
+									{parseExpertise(
+										content.executives.kim_expertise,
+									).map((achievement) => (
+										<div
+											key={achievement}
+											className="flex items-start gap-2.5 text-sm text-stone-700 leading-relaxed"
+										>
+											<span className="size-1.5 rounded-full bg-stone-400 shrink-0 mt-1.5" />
+											{achievement}
+										</div>
+									))}
 								</div>
 							</div>
 						</motion.div>

@@ -159,7 +159,7 @@ export async function updateUserByAdmin(
 		displayName?: string;
 		companyName?: string;
 		industry?: string;
-		userType?: string;
+		userType?: string | null;
 		isAdmin?: boolean;
 		subscriptionType?: SubscriptionType;
 		subscriptionStatus?: SubscriptionStatus;
@@ -578,7 +578,9 @@ export async function getSubscriptionStats(options?: {
 		.is("deletedAt", null);
 
 	// Filter by user type when specified (e.g., 'client' to exclude team users from revenue)
-	if (options?.userTypeFilter) {
+	if (options?.userTypeFilter === "none") {
+		query = query.is("userType", null);
+	} else if (options?.userTypeFilter) {
 		query = query.eq("userType", options.userTypeFilter);
 	}
 
@@ -627,6 +629,11 @@ export async function getSubscriptionStats(options?: {
 // Get subscription stats filtered to clients only (excludes team/internal users from revenue)
 export async function getClientOnlyStats(): Promise<SubscriptionStats> {
 	return getSubscriptionStats({ userTypeFilter: "client" });
+}
+
+// Get subscription stats for uncategorized users (no team/client label)
+export async function getUncategorizedStats(): Promise<SubscriptionStats> {
+	return getSubscriptionStats({ userTypeFilter: "none" });
 }
 
 export interface UserPreview {

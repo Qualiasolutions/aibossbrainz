@@ -7,17 +7,20 @@ import {
 	getAllUsers,
 	getClientOnlyStats,
 	getSubscriptionStats,
+	getUncategorizedStats,
 } from "@/lib/admin/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
-	const [stats, users, allSubStats, clientSubStats] = await Promise.all([
-		getAdminStats(),
-		getAllUsers(),
-		getSubscriptionStats(),
-		getClientOnlyStats(),
-	]);
+	const [stats, users, allSubStats, clientSubStats, uncategorizedSubStats] =
+		await Promise.all([
+			getAdminStats(),
+			getAllUsers(),
+			getSubscriptionStats(),
+			getClientOnlyStats(),
+			getUncategorizedStats(),
+		]);
 
 	// Calculate additional metrics
 	const avgMessagesPerUser =
@@ -80,7 +83,11 @@ export default async function AnalyticsPage() {
 
 			{/* Revenue Filter - Clients Only vs All Users */}
 			<div className="mb-8">
-				<RevenueFilter allStats={allSubStats} clientStats={clientSubStats} />
+				<RevenueFilter
+					allStats={allSubStats}
+					clientStats={clientSubStats}
+					uncategorizedStats={uncategorizedSubStats}
+				/>
 			</div>
 
 			<div className="grid gap-6 lg:grid-cols-2 mb-8">

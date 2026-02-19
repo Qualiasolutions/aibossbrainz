@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Users } from "lucide-react";
+import { Building2, CircleOff, Users } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,16 @@ interface UserTypeSelectorProps {
 }
 
 const USER_TYPE_OPTIONS = [
+	{
+		value: "none",
+		label: "Subscriber",
+		description: "Regular subscriber",
+		icon: CircleOff,
+		bgColor: "bg-neutral-50",
+		textColor: "text-neutral-600",
+		borderColor: "border-neutral-200",
+		ringColor: "ring-neutral-400",
+	},
 	{
 		value: "client",
 		label: "Client",
@@ -42,14 +52,15 @@ export function UserTypeSelector({
 	const [isPending, startTransition] = useTransition();
 
 	const handleChange = (newType: string) => {
-		if (newType === currentType || isPending) return;
+		const effective = currentType || "none";
+		if (newType === effective || isPending) return;
 
 		startTransition(async () => {
 			try {
 				await updateAction(userId, newType);
-				toast.success(
-					`User type updated to ${newType === "team" ? "Team" : "Client"}`,
-				);
+				const label =
+					USER_TYPE_OPTIONS.find((o) => o.value === newType)?.label ?? newType;
+				toast.success(`User type updated to ${label}`);
 			} catch {
 				toast.error("Failed to update user type");
 			}
@@ -61,7 +72,7 @@ export function UserTypeSelector({
 			<div className="flex gap-2">
 				{USER_TYPE_OPTIONS.map((option) => {
 					const Icon = option.icon;
-					const isActive = (currentType || "client") === option.value;
+					const isActive = (currentType || "none") === option.value;
 
 					return (
 						<button

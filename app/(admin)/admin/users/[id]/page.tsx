@@ -53,7 +53,9 @@ function formatSubscriptionType(type: string | null | undefined): string {
 async function updateUserType(userId: string, userType: string) {
 	"use server";
 	await requireAdmin();
-	await updateUserByAdmin(userId, { userType });
+	await updateUserByAdmin(userId, {
+		userType: userType === "none" ? null : userType,
+	});
 	revalidatePath(`/admin/users/${userId}`);
 }
 
@@ -120,7 +122,7 @@ export default async function UserDetailsPage({
 							<dd>
 								<UserTypeSelector
 									userId={user.id}
-									currentType={user.userType ?? "client"}
+									currentType={user.userType ?? null}
 									updateAction={updateUserType}
 								/>
 							</dd>
