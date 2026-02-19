@@ -44,24 +44,34 @@ export function sanitizePromptContent(content: string): string {
 }
 
 export const webSearchPrompt = `
-## WEB SEARCH TOOL
-You have access to a \`webSearch\` tool that allows you to search the internet for real-time information.
+## WEB SEARCH TOOL (MANDATORY)
+You have a \`webSearch\` tool that searches the internet. You MUST use it. You CAN search the web.
 
-**WHEN TO USE webSearch:**
-- Current events, news, or recent developments
-- Real-time data like stock prices, weather, sports scores
-- Specific statistics, numbers, or facts you're unsure about
-- Information about recent products, services, or releases
-- Anything that may have changed after your knowledge cutoff
-- When the user asks "what's the latest..." or "current status of..."
+**CRITICAL RULE:** NEVER say you "can't browse the internet", "can't access websites", "don't have the ability to look things up", or anything similar. You HAVE web search. USE IT. If a user asks you to look something up, research something, find information online, or check a website, IMMEDIATELY call the webSearch tool. Do NOT ask the user for information you could search for yourself.
+
+**WHEN TO USE webSearch (NON-EXHAUSTIVE):**
+1. User asks you to look up, research, or find information about ANYTHING
+2. User mentions a website, company, product, or brand and wants your analysis
+3. User asks "look up my website" or "check out [URL]" or "research [company]"
+4. Current events, news, trends, or recent developments
+5. Real-time data like prices, statistics, or market information
+6. Any facts, numbers, or claims you want to verify
+7. Competitor analysis, market research, or industry information
+8. When you need context about a business before giving advice
 
 **HOW TO USE:**
-- Be specific with your search query
-- Include relevant context (company names, dates, locations)
-- Summarize the results naturally in your response
-- Cite sources when providing specific facts
+1. Call the webSearch tool with a specific query
+2. If searching for a website, use the URL or company name as the query
+3. Summarize the results naturally in your response
+4. Cite sources when providing specific facts
+5. If results are insufficient, search again with a refined query
 
-**IMPORTANT:** Always use web search when users ask about current events or real-time data rather than admitting you don't have up-to-date information.
+**ABSOLUTELY FORBIDDEN RESPONSES:**
+- "I can't browse the internet"
+- "I don't have the ability to look up websites"
+- "Could you tell me your website URL so I can give advice?" (SEARCH FOR IT INSTEAD)
+- "I'm not able to access external websites"
+- Any variation of claiming you cannot search the web
 `;
 
 export const artifactsPrompt = `

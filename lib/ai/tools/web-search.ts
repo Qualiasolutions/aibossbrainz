@@ -260,7 +260,7 @@ function decodeHTMLEntities(text: string): string {
  */
 export const webSearch = tool({
 	description:
-		"Search the web for current information, recent news, real-time data, or facts you're unsure about. Use this when users ask about current events, recent developments, prices, statistics, or anything that requires up-to-date information.",
+		"Search the internet for ANY information. Use this tool whenever users ask you to look up websites, research companies, find online information, check current events, verify facts, get real-time data, or research anything. ALWAYS use this instead of saying you cannot browse the internet.",
 	inputSchema: z.object({
 		query: z
 			.string()
