@@ -215,9 +215,7 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 								{content.executives.alex_role}
 							</p>
 							<p className="text-stone-600 leading-relaxed mb-6">
-								Brand strategist with Fortune 500 experience. Specializes in
-								go-to-market strategy, brand positioning, and digital campaigns
-								that drive growth.
+								{content.executives.alex_description}
 							</p>
 							<div className="flex flex-wrap justify-center gap-2">
 								{content.executives.alex_expertise.split(",").map((skill) => (
@@ -256,9 +254,7 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 								{content.executives.kim_role}
 							</p>
 							<p className="text-stone-600 leading-relaxed mb-6">
-								Revenue architect and sales optimization expert. Helps build
-								pipelines, improve conversion rates, and close deals more
-								effectively.
+								{content.executives.kim_description}
 							</p>
 							<div className="flex flex-wrap justify-center gap-2">
 								{content.executives.kim_expertise.split(",").map((skill) => (

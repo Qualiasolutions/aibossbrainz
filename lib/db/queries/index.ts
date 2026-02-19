@@ -32,6 +32,7 @@ export {
 	getMessageCountByUserId,
 	getStreamIdsByChatId,
 	saveChat,
+	updateChatCategory,
 	updateChatLastContextById,
 	updateChatPinStatus,
 	updateChatTitle,
@@ -87,6 +88,7 @@ export type {
 	StrategyCanvas,
 	Suggestion,
 	User,
+	UserCategory,
 	VisibilityType,
 	Vote,
 } from "./shared";

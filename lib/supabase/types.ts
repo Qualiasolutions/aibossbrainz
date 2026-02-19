@@ -53,6 +53,9 @@ export type VisibilityType = "public" | "private";
 // Bot type for messages
 export type BotType = "alexandria" | "kim" | "collaborative";
 
+// User-assigned chat category
+export type UserCategory = "team" | "client" | "none";
+
 // Reaction types
 export type ReactionType =
 	| "actionable"

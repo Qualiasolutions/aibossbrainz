@@ -19,6 +19,7 @@ import type {
 	StrategyCanvas,
 	Suggestion,
 	User,
+	UserCategory,
 	VisibilityType,
 	Vote,
 } from "../../supabase/types";
@@ -122,6 +123,7 @@ export type {
 	StrategyCanvas,
 	Suggestion,
 	User,
+	UserCategory,
 	VisibilityType,
 	Vote,
 };

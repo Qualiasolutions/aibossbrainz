@@ -8,6 +8,7 @@ import {
 	createClient,
 	dbRetryOptions,
 	type Json,
+	type UserCategory,
 	type VisibilityType,
 	withRetry,
 } from "./shared";
@@ -332,6 +333,30 @@ export async function updateChatTopic({
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to update chat topic",
+		);
+	}
+}
+
+export async function updateChatCategory({
+	chatId,
+	userCategory,
+}: {
+	chatId: string;
+	userCategory: UserCategory;
+}) {
+	try {
+		const supabase = await createClient();
+		const { error } = await supabase
+			.from("Chat")
+			.update({ userCategory })
+			.eq("id", chatId);
+
+		if (error) throw error;
+	} catch (error) {
+		logger.error({ error, chatId }, "Failed to update chat category");
+		throw new ChatSDKError(
+			"bad_request:database",
+			"Failed to update chat category",
 		);
 	}
 }

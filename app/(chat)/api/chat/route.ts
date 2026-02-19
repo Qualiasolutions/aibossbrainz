@@ -47,11 +47,13 @@ import {
 	saveChat,
 	saveConversationSummary,
 	saveMessages,
+	updateChatCategory,
 	updateChatLastContextById,
 	updateChatPinStatus,
 	updateChatTitle,
 	updateChatTopic,
 } from "@/lib/db/queries";
+import type { UserCategory } from "@/lib/supabase/types";
 import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import {
@@ -661,11 +663,20 @@ export const DELETE = withCsrf(async (request: Request) => {
 	return Response.json(deletedChat, { status: 200 });
 });
 
+const VALID_USER_CATEGORIES: UserCategory[] = ["team", "client", "none"];
+
 export const PATCH = withCsrf(async (request: Request) => {
 	try {
-		const { id, isPinned } = await request.json();
+		const body = await request.json();
+		const { id, isPinned, userCategory } = body;
 
-		if (!id || typeof isPinned !== "boolean") {
+		// Require id and at least one valid update field
+		const hasValidPinUpdate = typeof isPinned === "boolean";
+		const hasValidCategoryUpdate =
+			userCategory !== undefined &&
+			VALID_USER_CATEGORIES.includes(userCategory as UserCategory);
+
+		if (!id || (!hasValidPinUpdate && !hasValidCategoryUpdate)) {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 
@@ -688,9 +699,27 @@ export const PATCH = withCsrf(async (request: Request) => {
 			return new ChatSDKError("forbidden:chat").toResponse();
 		}
 
-		await updateChatPinStatus({ chatId: id, isPinned });
+		// Handle pin status update
+		if (hasValidPinUpdate) {
+			await updateChatPinStatus({ chatId: id, isPinned });
+		}
 
-		return Response.json({ success: true, isPinned }, { status: 200 });
+		// Handle category update
+		if (hasValidCategoryUpdate) {
+			await updateChatCategory({
+				chatId: id,
+				userCategory: userCategory as UserCategory,
+			});
+		}
+
+		return Response.json(
+			{
+				success: true,
+				...(hasValidPinUpdate && { isPinned }),
+				...(hasValidCategoryUpdate && { userCategory }),
+			},
+			{ status: 200 },
+		);
 	} catch (_error) {
 		return new ChatSDKError("bad_request:api").toResponse();
 	}

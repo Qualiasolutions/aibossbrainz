@@ -2,7 +2,15 @@
 
 import type { User } from "@supabase/supabase-js";
 import { isToday, isYesterday, subMonths, subWeeks } from "date-fns";
-import { Clock, Filter, Search, X } from "lucide-react";
+import {
+	Briefcase,
+	Clock,
+	Filter,
+	Search,
+	User as UserIcon,
+	Users,
+	X,
+} from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -26,7 +34,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useCsrf } from "@/hooks/use-csrf";
 import { getTopicCategories } from "@/lib/ai/topic-classifier";
-import type { Chat } from "@/lib/supabase/types";
+import type { Chat, UserCategory } from "@/lib/supabase/types";
 import { fetcher } from "@/lib/utils";
 import { LoaderIcon } from "./icons";
 import { ChatItem } from "./sidebar-history-item";
@@ -138,9 +146,24 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [topicFilter, setTopicFilter] = useState<string | null>(null);
+	const [categoryFilter, setCategoryFilter] = useState<UserCategory | null>(
+		null,
+	);
 	const [showTopicDropdown, setShowTopicDropdown] = useState(false);
 	const loadMoreRef = useRef<HTMLDivElement>(null);
 	const topicCategories = useMemo(() => getTopicCategories(), []);
+
+	// Category options for user-assigned categories
+	const userCategories: {
+		value: UserCategory;
+		label: string;
+		icon: typeof Users;
+		color: string;
+	}[] = [
+		{ value: "team", label: "Team", icon: Users, color: "bg-blue-500" },
+		{ value: "client", label: "Client", icon: Briefcase, color: "bg-green-500" },
+		{ value: "none", label: "General", icon: UserIcon, color: "bg-gray-400" },
+	];
 
 	const hasReachedEnd = paginatedChatHistories
 		? paginatedChatHistories.some((page) => page.hasMore === false)
@@ -172,12 +195,19 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 		};
 	}, [isValidating, hasReachedEnd, setSize]);
 
-	// Filter chats by search query and topic (client-side for speed)
+	// Filter chats by search query, topic, and user category (client-side for speed)
 	const filteredChats = useMemo(() => {
 		if (!paginatedChatHistories) return [];
 		let allChats = paginatedChatHistories.flatMap((page) => page.chats);
 
-		// Filter by topic first
+		// Filter by user category first
+		if (categoryFilter) {
+			allChats = allChats.filter(
+				(chat) => (chat.userCategory || "none") === categoryFilter,
+			);
+		}
+
+		// Filter by topic
 		if (topicFilter) {
 			allChats = allChats.filter((chat) => chat.topic === topicFilter);
 		}
@@ -191,7 +221,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 		}
 
 		return allChats;
-	}, [paginatedChatHistories, searchQuery, topicFilter]);
+	}, [paginatedChatHistories, searchQuery, topicFilter, categoryFilter]);
 
 	const groupedChats = useMemo(
 		() => groupChatsByDate(filteredChats),
@@ -275,6 +305,67 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 		[csrfFetch, mutate],
 	);
 
+	const handleCategoryChange = useCallback(
+		async (chatId: string, newCategory: UserCategory) => {
+			// Get current category for rollback
+			const currentCategory =
+				paginatedChatHistories
+					?.flatMap((p) => p.chats)
+					.find((c) => c.id === chatId)?.userCategory || "none";
+
+			// Optimistically update the SWR cache
+			mutate(
+				(chatHistories) => {
+					if (chatHistories) {
+						return chatHistories.map((chatHistory) => ({
+							...chatHistory,
+							chats: chatHistory.chats.map((chat) =>
+								chat.id === chatId
+									? { ...chat, userCategory: newCategory }
+									: chat,
+							),
+						}));
+					}
+				},
+				{ revalidate: false },
+			);
+
+			try {
+				const response = await csrfFetch("/api/chat", {
+					method: "PATCH",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ id: chatId, userCategory: newCategory }),
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to update category");
+				}
+				toast.success(
+					`Moved to ${userCategories.find((c) => c.value === newCategory)?.label || newCategory}`,
+				);
+			} catch (_error) {
+				// Rollback on failure
+				mutate(
+					(chatHistories) => {
+						if (chatHistories) {
+							return chatHistories.map((chatHistory) => ({
+								...chatHistory,
+								chats: chatHistory.chats.map((chat) =>
+									chat.id === chatId
+										? { ...chat, userCategory: currentCategory }
+										: chat,
+								),
+							}));
+						}
+					},
+					{ revalidate: false },
+				);
+				toast.error("Failed to update category");
+			}
+		},
+		[csrfFetch, mutate, paginatedChatHistories, userCategories],
+	);
+
 	const onDeleteRequest = useCallback((chatId: string) => {
 		setDeleteId(chatId);
 		setShowDeleteDialog(true);
@@ -331,6 +422,38 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 
 	return (
 		<>
+			{/* Category Filter Tabs */}
+			<div className="px-2 pb-2">
+				<div className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
+					<button
+						type="button"
+						className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${
+							categoryFilter === null
+								? "bg-white text-neutral-900 shadow-sm"
+								: "text-neutral-600 hover:text-neutral-800"
+						}`}
+						onClick={() => setCategoryFilter(null)}
+					>
+						All
+					</button>
+					{userCategories.map((cat) => (
+						<button
+							key={cat.value}
+							type="button"
+							className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${
+								categoryFilter === cat.value
+									? "bg-white text-neutral-900 shadow-sm"
+									: "text-neutral-600 hover:text-neutral-800"
+							}`}
+							onClick={() => setCategoryFilter(cat.value)}
+						>
+							<cat.icon className="size-3" />
+							<span className="hidden sm:inline">{cat.label}</span>
+						</button>
+					))}
+				</div>
+			</div>
+
 			{/* Search and Filter */}
 			<div className="px-2 pb-2 space-y-2">
 				<div className="relative">
@@ -459,14 +582,22 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 				<SidebarGroupContent>
 					<SidebarMenu>
 						{paginatedChatHistories &&
-							((searchQuery.trim() || topicFilter) &&
+							((searchQuery.trim() || topicFilter || categoryFilter) &&
 							filteredChats.length === 0 ? (
 								<div className="px-3 py-6 text-center text-neutral-500 text-sm">
-									{topicFilter && searchQuery.trim()
-										? `No ${topicFilter} conversations match "${searchQuery}"`
-										: topicFilter
-											? `No ${topicFilter} conversations found`
-											: `No conversations match "${searchQuery}"`}
+									{categoryFilter && topicFilter && searchQuery.trim()
+										? `No ${userCategories.find((c) => c.value === categoryFilter)?.label} ${topicFilter} conversations match "${searchQuery}"`
+										: categoryFilter && topicFilter
+											? `No ${userCategories.find((c) => c.value === categoryFilter)?.label} ${topicFilter} conversations found`
+											: categoryFilter && searchQuery.trim()
+												? `No ${userCategories.find((c) => c.value === categoryFilter)?.label} conversations match "${searchQuery}"`
+												: categoryFilter
+													? `No ${userCategories.find((c) => c.value === categoryFilter)?.label} conversations found`
+													: topicFilter && searchQuery.trim()
+														? `No ${topicFilter} conversations match "${searchQuery}"`
+														: topicFilter
+															? `No ${topicFilter} conversations found`
+															: `No conversations match "${searchQuery}"`}
 								</div>
 							) : (
 								<div className="flex flex-col gap-8">
@@ -488,6 +619,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 														isActive={chat.id === id}
 														onDelete={onDeleteRequest}
 														onPinToggle={handlePinToggle}
+														onCategoryChange={handleCategoryChange}
 														setOpenMobile={setOpenMobile}
 													/>
 													{index < groupedChats.pinned.length - 1 && (
@@ -512,6 +644,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 														isActive={chat.id === id}
 														onDelete={onDeleteRequest}
 														onPinToggle={handlePinToggle}
+														onCategoryChange={handleCategoryChange}
 														setOpenMobile={setOpenMobile}
 													/>
 													{index < groupedChats.today.length - 1 && (
@@ -536,6 +669,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 														isActive={chat.id === id}
 														onDelete={onDeleteRequest}
 														onPinToggle={handlePinToggle}
+														onCategoryChange={handleCategoryChange}
 														setOpenMobile={setOpenMobile}
 													/>
 													{index < groupedChats.yesterday.length - 1 && (
@@ -560,6 +694,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 														isActive={chat.id === id}
 														onDelete={onDeleteRequest}
 														onPinToggle={handlePinToggle}
+														onCategoryChange={handleCategoryChange}
 														setOpenMobile={setOpenMobile}
 													/>
 													{index < groupedChats.lastWeek.length - 1 && (
@@ -584,6 +719,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 														isActive={chat.id === id}
 														onDelete={onDeleteRequest}
 														onPinToggle={handlePinToggle}
+														onCategoryChange={handleCategoryChange}
 														setOpenMobile={setOpenMobile}
 													/>
 													{index < groupedChats.lastMonth.length - 1 && (
@@ -608,6 +744,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 														isActive={chat.id === id}
 														onDelete={onDeleteRequest}
 														onPinToggle={handlePinToggle}
+														onCategoryChange={handleCategoryChange}
 														setOpenMobile={setOpenMobile}
 													/>
 													{index < groupedChats.older.length - 1 && (
