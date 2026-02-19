@@ -422,38 +422,6 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 
 	return (
 		<>
-			{/* Category Filter Tabs */}
-			<div className="px-2 pb-2">
-				<div className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
-					<button
-						type="button"
-						className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${
-							categoryFilter === null
-								? "bg-white text-neutral-900 shadow-sm"
-								: "text-neutral-600 hover:text-neutral-800"
-						}`}
-						onClick={() => setCategoryFilter(null)}
-					>
-						All
-					</button>
-					{userCategories.map((cat) => (
-						<button
-							key={cat.value}
-							type="button"
-							className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${
-								categoryFilter === cat.value
-									? "bg-white text-neutral-900 shadow-sm"
-									: "text-neutral-600 hover:text-neutral-800"
-							}`}
-							onClick={() => setCategoryFilter(cat.value)}
-						>
-							<cat.icon className="size-3" />
-							<span className="hidden sm:inline">{cat.label}</span>
-						</button>
-					))}
-				</div>
-			</div>
-
 			{/* Search and Filter */}
 			<div className="px-2 pb-2 space-y-2">
 				<div className="relative">
