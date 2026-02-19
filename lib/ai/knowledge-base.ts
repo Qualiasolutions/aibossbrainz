@@ -70,7 +70,15 @@ function evictOldestFileCacheEntries(): void {
 
 async function parsePDF(buffer: Buffer): Promise<string> {
 	try {
+		const originalWarn = console.warn;
+		console.warn = (...args: unknown[]) => {
+			const msg = String(args[0]);
+			if (msg.includes("@napi-rs/canvas") || msg.includes("Cannot polyfill"))
+				return;
+			originalWarn.apply(console, args);
+		};
 		const { PDFParse } = await import("pdf-parse");
+		console.warn = originalWarn;
 		const pdfParse = new PDFParse({ data: buffer });
 		// @ts-expect-error - pdf-parse v2 marks load() as private but it needs to be called
 		await pdfParse.load();

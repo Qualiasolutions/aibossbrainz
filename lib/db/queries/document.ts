@@ -1,5 +1,7 @@
 import "server-only";
 
+import { logger } from "@/lib/logger";
+
 import {
 	type ArtifactKind,
 	ChatSDKError,
@@ -43,7 +45,8 @@ export async function saveDocument({
 
 		if (error) throw error;
 		return data;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to save document");
 		throw new ChatSDKError("bad_request:database", "Failed to save document");
 	}
 }
@@ -64,7 +67,8 @@ export async function getDocumentsById({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get documents by id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get documents by id",
@@ -90,7 +94,8 @@ export async function getDocumentById({
 
 		if (error && error.code !== "PGRST116") throw error;
 		return data || null;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get document by id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get document by id",
@@ -114,7 +119,8 @@ export async function getDocumentsByUserId({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get documents by user id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get documents by user id",
@@ -153,7 +159,8 @@ export async function deleteDocumentsByIdAfterTimestamp({
 			if (error) throw error;
 			return data;
 		}, dbRetryOptions);
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to delete documents by id after timestamp");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to delete documents by id after timestamp",
@@ -179,7 +186,8 @@ export async function saveSuggestions({
 
 		if (error) throw error;
 		return data;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to save suggestions");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to save suggestions",
@@ -202,7 +210,8 @@ export async function getSuggestionsByDocumentId({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get suggestions by document id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get suggestions by document id",

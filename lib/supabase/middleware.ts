@@ -96,6 +96,7 @@ export async function updateSession(request: NextRequest) {
 
 	const {
 		data: { user },
+		error: authError,
 	} = await supabase.auth.getUser();
 
 	// Set Sentry user context for error correlation
@@ -154,6 +155,12 @@ export async function updateSession(request: NextRequest) {
 	if (!user) {
 		const url = request.nextUrl.clone();
 		url.pathname = "/login";
+		if (
+			authError?.code === "refresh_token_not_found" ||
+			authError?.message?.includes("Refresh Token")
+		) {
+			url.searchParams.set("reason", "session_expired");
+		}
 		const redirectResponse = NextResponse.redirect(url);
 		redirectResponse.headers.set("x-request-id", requestId);
 		return redirectResponse;

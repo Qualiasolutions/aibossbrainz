@@ -1,5 +1,7 @@
 import "server-only";
 
+import { logger } from "@/lib/logger";
+
 import {
 	type CanvasType,
 	ChatSDKError,
@@ -54,7 +56,8 @@ export async function getStrategyCanvas({
 
 		if (error && error.code !== "PGRST116") throw error;
 		return data || null;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get strategy canvas");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get strategy canvas",
@@ -78,7 +81,8 @@ export async function getAllUserCanvases({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get user canvases");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get user canvases",
@@ -147,7 +151,8 @@ export async function saveStrategyCanvas({
 
 		if (error) throw error;
 		return newCanvas?.id || null;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to save strategy canvas");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to save strategy canvas",
@@ -171,7 +176,8 @@ export async function deleteStrategyCanvas({
 			.eq("userId", userId);
 
 		if (error) throw error;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to delete strategy canvas");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to delete strategy canvas",
@@ -210,7 +216,8 @@ export async function saveConversationSummary({
 		});
 
 		if (error) throw error;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to save conversation summary");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to save conversation summary",
@@ -237,7 +244,8 @@ export async function getRecentConversationSummaries({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get recent summaries");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get recent summaries",
@@ -274,7 +282,8 @@ export async function getRelevantConversationHistory({
 		const { data, error } = await query;
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get conversation history");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get conversation history",

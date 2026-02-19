@@ -40,6 +40,7 @@ function LoginContent() {
 	const redirect =
 		rawRedirect && isInternalPath(rawRedirect) ? rawRedirect : null;
 
+	const reason = searchParams.get("reason");
 	const [email, setEmail] = useState("");
 	const [isSuccessful, setIsSuccessful] = useState(false);
 	const [isRedirecting, setIsRedirecting] = useState(false);
@@ -51,6 +52,15 @@ function LoginContent() {
 			status: "idle",
 		},
 	);
+
+	useEffect(() => {
+		if (reason === "session_expired") {
+			toast({
+				type: "error",
+				description: "Your session has expired. Please sign in again.",
+			});
+		}
+	}, [reason]);
 
 	useEffect(() => {
 		if (state.status === "failed") {

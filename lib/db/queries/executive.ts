@@ -28,7 +28,8 @@ export async function getExecutiveMemory({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get executive memory");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get executive memory",
@@ -102,7 +103,8 @@ export async function updateExecutiveMemory({
 				preferenceScore: 1,
 			});
 		}
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to update executive memory");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to update executive memory",
@@ -138,7 +140,8 @@ export async function getExecutiveStats({
 		const preferred = memories.length > 0 ? memories[0].executive : null;
 
 		return { total, breakdown, preferred };
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get executive stats");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get executive stats",

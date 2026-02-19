@@ -66,7 +66,8 @@ export async function saveMessages({ messages }: { messages: DBMessage[] }) {
 		}
 
 		return data;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to save messages");
 		throw new ChatSDKError("bad_request:database", "Failed to save messages");
 	}
 }
@@ -102,7 +103,8 @@ export async function getMessagesByChatId({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get messages by chat id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get messages by chat id",
@@ -136,7 +138,8 @@ export async function getMessagesByChatIdPaginated({
 		const { data, error } = await query;
 		if (error) throw error;
 		return (data || []).reverse(); // Return in ascending order
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get paginated messages");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get paginated messages",
@@ -154,7 +157,8 @@ export async function getMessageCountByChatId({ id }: { id: string }) {
 			.is("deletedAt", null);
 		if (error) throw error;
 		return count ?? 0;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to count messages");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to count messages",
@@ -172,7 +176,8 @@ export async function deleteMessageById({ id }: { id: string }) {
 			.eq("id", id)
 			.is("deletedAt", null);
 		if (error) throw error;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to delete message by id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to delete message by id",
@@ -191,7 +196,8 @@ export async function getMessageById({ id }: { id: string }) {
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get message by id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get message by id",
@@ -239,7 +245,8 @@ export async function deleteMessagesByChatIdAfterTimestamp({
 					.in("id", messageIds);
 			}
 		}, dbRetryOptions);
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to delete messages by chat id after timestamp");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to delete messages by chat id after timestamp",
@@ -276,7 +283,8 @@ export async function voteMessage({
 		);
 
 		if (error) throw error;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to vote message");
 		throw new ChatSDKError("bad_request:database", "Failed to vote message");
 	}
 }
@@ -296,7 +304,8 @@ export async function getVotesByChatId({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get votes by chat id");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get votes by chat id",
@@ -330,8 +339,9 @@ export async function addMessageReaction({
 		// Silently handle unique constraint violations (reaction already exists)
 		if (error && error.code === "23505") return;
 		if (error) throw error;
-	} catch (_error) {
-		if (_error instanceof ChatSDKError) throw _error;
+	} catch (error) {
+		logger.error({ err: error }, "Failed to add message reaction");
+		if (error instanceof ChatSDKError) throw error;
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to add message reaction",
@@ -363,7 +373,8 @@ export async function removeMessageReaction({
 		}
 
 		await query;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to remove message reaction");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to remove message reaction",
@@ -385,7 +396,8 @@ export async function getMessageReactions({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get message reactions");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get message reactions",
@@ -421,7 +433,8 @@ export async function getMessageReactionCounts({
 			counts[row.reaction_type] = Number(row.count);
 		}
 		return counts;
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get message reaction counts");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get message reaction counts",
@@ -446,7 +459,8 @@ export async function getUserReactionForMessage({
 
 		if (error) throw error;
 		return data || [];
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get user reaction for message");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get user reaction for message",
@@ -562,7 +576,8 @@ export async function getUserReactionsByType({
 						: null,
 				};
 			});
-	} catch (_error) {
+	} catch (error) {
+		logger.error({ err: error }, "Failed to get user reactions by type");
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to get user reactions by type",
