@@ -9,6 +9,10 @@ export function useScrollToBottom() {
 	// We use a ref for isAtBottom to access it in event listeners without re-binding
 	const isAtBottomRef = useRef(true);
 
+	// Track if auto-scroll is enabled
+	// Disabled by default - only enabled when user explicitly scrolls to bottom or clicks button
+	const autoScrollEnabledRef = useRef(false);
+
 	const { data: shouldScrollToBottom, mutate: setShouldScrollToBottom } =
 		useSWR<boolean>("messages:should-scroll", null, { fallbackData: false });
 
@@ -23,6 +27,15 @@ export function useScrollToBottom() {
 
 		setIsAtBottom(atBottom);
 		isAtBottomRef.current = atBottom;
+
+		// Enable auto-scroll only when user manually scrolls to bottom
+		// This means they WANT to follow along with streaming content
+		if (atBottom) {
+			autoScrollEnabledRef.current = true;
+		} else {
+			// User scrolled away from bottom - disable auto-scroll
+			autoScrollEnabledRef.current = false;
+		}
 	}, []);
 
 	// Initial scroll check
@@ -41,14 +54,14 @@ export function useScrollToBottom() {
 		return () => container.removeEventListener("scroll", handleScroll);
 	}, [handleScroll]);
 
-	// Auto-scroll when content changes IF we are sticky
+	// Auto-scroll when content changes - ONLY if user has opted in by scrolling to bottom
 	useEffect(() => {
 		const container = containerRef.current;
 		if (!container) return;
 
 		const resizeObserver = new ResizeObserver(() => {
-			if (isAtBottomRef.current) {
-				// Use 'auto' for instant updates during streaming to prevent lag
+			// Only auto-scroll if user has explicitly enabled it by scrolling to bottom
+			if (autoScrollEnabledRef.current && isAtBottomRef.current) {
 				container.scrollTo({
 					top: container.scrollHeight,
 					behavior: "auto",
@@ -61,7 +74,8 @@ export function useScrollToBottom() {
 
 		// Also watch for DOM mutations (new messages added)
 		const mutationObserver = new MutationObserver(() => {
-			if (isAtBottomRef.current) {
+			// Only auto-scroll if user has explicitly enabled it
+			if (autoScrollEnabledRef.current && isAtBottomRef.current) {
 				container.scrollTo({
 					top: container.scrollHeight,
 					behavior: "auto",
@@ -90,6 +104,7 @@ export function useScrollToBottom() {
 			});
 			setIsAtBottom(true);
 			isAtBottomRef.current = true;
+			autoScrollEnabledRef.current = true; // Enable auto-scroll after explicit action
 			setShouldScrollToBottom(false);
 		}
 	}, [shouldScrollToBottom, setShouldScrollToBottom]);
@@ -100,10 +115,16 @@ export function useScrollToBottom() {
 				top: containerRef.current.scrollHeight,
 				behavior,
 			});
-			// Force sticky state
+			// Force sticky state and enable auto-scroll
 			setIsAtBottom(true);
 			isAtBottomRef.current = true;
+			autoScrollEnabledRef.current = true;
 		}
+	}, []);
+
+	// Disable auto-scroll (call when streaming starts to let user read from top)
+	const disableAutoScroll = useCallback(() => {
+		autoScrollEnabledRef.current = false;
 	}, []);
 
 	return {
@@ -111,5 +132,6 @@ export function useScrollToBottom() {
 		endRef,
 		isAtBottom,
 		scrollToBottom,
+		disableAutoScroll,
 	};
 }

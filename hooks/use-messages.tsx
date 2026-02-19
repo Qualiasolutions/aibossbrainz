@@ -1,5 +1,5 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
 import { useScrollToBottom } from "./use-scroll-to-bottom";
 
@@ -8,16 +8,25 @@ export function useMessages({
 }: {
 	status: UseChatHelpers<ChatMessage>["status"];
 }) {
-	const { containerRef, endRef, isAtBottom, scrollToBottom } =
+	const { containerRef, endRef, isAtBottom, scrollToBottom, disableAutoScroll } =
 		useScrollToBottom();
 
 	const [hasSentMessage, setHasSentMessage] = useState(false);
+	const prevStatusRef = useRef(status);
 
 	useEffect(() => {
 		if (status === "submitted") {
 			setHasSentMessage(true);
 		}
-	}, [status]);
+
+		// When streaming starts, disable auto-scroll so user can read from the beginning
+		// This prevents force-scrolling to bottom during AI responses
+		if (prevStatusRef.current === "submitted" && status === "streaming") {
+			disableAutoScroll();
+		}
+
+		prevStatusRef.current = status;
+	}, [status, disableAutoScroll]);
 
 	return {
 		containerRef,
