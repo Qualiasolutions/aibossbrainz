@@ -1,9 +1,7 @@
 "use client";
 
 import {
-	Building2,
 	Calendar,
-	CircleOff,
 	Clock,
 	CreditCard,
 	Eye,
@@ -13,7 +11,6 @@ import {
 	ShieldOff,
 	Trash2,
 	UserPlus,
-	Users,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -105,7 +102,6 @@ export function UsersTable({
 	onChangeSubscription,
 }: UsersTableProps) {
 	const [search, setSearch] = useState("");
-	const [typeFilter, setTypeFilter] = useState<"all" | "team" | "client" | "subscriber">("all");
 	const [isPending, startTransition] = useTransition();
 	const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -122,20 +118,12 @@ export function UsersTable({
 		subscriptionType: "trial" as SubscriptionType,
 	});
 
-	const filteredUsers = users.filter((user) => {
-		const matchesSearch =
+	const filteredUsers = users.filter(
+		(user) =>
 			user.email.toLowerCase().includes(search.toLowerCase()) ||
 			user.displayName?.toLowerCase().includes(search.toLowerCase()) ||
-			user.companyName?.toLowerCase().includes(search.toLowerCase());
-
-		if (!matchesSearch) return false;
-
-		if (typeFilter === "all") return true;
-		if (typeFilter === "team") return user.userType === "team";
-		if (typeFilter === "client") return user.userType === "client";
-		if (typeFilter === "subscriber") return !user.userType;
-		return true;
-	});
+			user.companyName?.toLowerCase().includes(search.toLowerCase()),
+	);
 
 	const handleDelete = () => {
 		if (!deleteUserId) return;
@@ -178,41 +166,8 @@ export function UsersTable({
 		});
 	};
 
-	const typeFilterOptions = [
-		{ value: "all" as const, label: "All", icon: Users, count: users.length },
-		{ value: "team" as const, label: "Team", icon: Users, count: users.filter((u) => u.userType === "team").length },
-		{ value: "client" as const, label: "Client", icon: Building2, count: users.filter((u) => u.userType === "client").length },
-		{ value: "subscriber" as const, label: "Subscriber", icon: CircleOff, count: users.filter((u) => !u.userType).length },
-	];
-
 	return (
 		<div className="space-y-4">
-			{/* Type Filter Tabs */}
-			<div className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-neutral-50 p-1 w-fit">
-				{typeFilterOptions.map((option) => {
-					const Icon = option.icon;
-					const isActive = typeFilter === option.value;
-					return (
-						<button
-							key={option.value}
-							type="button"
-							onClick={() => setTypeFilter(option.value)}
-							className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-								isActive
-									? "bg-white text-neutral-900 shadow-sm"
-									: "text-neutral-500 hover:text-neutral-700"
-							}`}
-						>
-							<Icon className="h-3.5 w-3.5" />
-							{option.label}
-							<span className={`ml-0.5 text-[10px] ${isActive ? "text-neutral-500" : "text-neutral-400"}`}>
-								{option.count}
-							</span>
-						</button>
-					);
-				})}
-			</div>
-
 			{/* Search and Actions */}
 			<div className="flex items-center justify-between gap-4">
 				<div className="relative flex-1 max-w-sm">
