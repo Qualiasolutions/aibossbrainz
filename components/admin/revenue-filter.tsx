@@ -44,7 +44,7 @@ export function RevenueFilter({
 	clientStats,
 	uncategorizedStats,
 }: RevenueFilterProps) {
-	const [mode, setMode] = useState<FilterMode>("clients");
+	const [mode, setMode] = useState<FilterMode>("uncategorized");
 
 	const statsMap: Record<FilterMode, SubscriptionStatsData> = {
 		clients: clientStats,
