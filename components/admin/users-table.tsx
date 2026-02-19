@@ -311,6 +311,15 @@ export function UsersTable({
 									</td>
 									<td className="px-6 py-4">
 										<div className="flex flex-col gap-1">
+											{user.userType === "team" ? (
+												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-indigo-50 text-indigo-600">
+													Team
+												</span>
+											) : user.userType === "client" ? (
+												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-sky-50 text-sky-600">
+													Client
+												</span>
+											) : null}
 											{user.isAdmin && (
 												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-rose-50 text-rose-600">
 													<Shield className="h-3 w-3" />
