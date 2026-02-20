@@ -46,6 +46,11 @@ interface CanvasItem {
 	data: Json;
 }
 
+/** Safely coerce a field to an array — guards against non-array truthy values from DB */
+function asArray<T>(value: unknown): T[] {
+	return Array.isArray(value) ? value : [];
+}
+
 function formatNotes(notes: StickyNote[]): string {
 	const validNotes = notes.filter((n) => n.content?.trim());
 	if (validNotes.length === 0) return "(none yet)";
@@ -54,10 +59,10 @@ function formatNotes(notes: StickyNote[]): string {
 
 function formatSwot(data: SwotData): string {
 	const sections = [
-		{ label: "Strengths", items: data.strengths || [] },
-		{ label: "Weaknesses", items: data.weaknesses || [] },
-		{ label: "Opportunities", items: data.opportunities || [] },
-		{ label: "Threats", items: data.threats || [] },
+		{ label: "Strengths", items: asArray<StickyNote>(data.strengths) },
+		{ label: "Weaknesses", items: asArray<StickyNote>(data.weaknesses) },
+		{ label: "Opportunities", items: asArray<StickyNote>(data.opportunities) },
+		{ label: "Threats", items: asArray<StickyNote>(data.threats) },
 	];
 
 	const hasContent = sections.some((s) =>
@@ -72,18 +77,18 @@ function formatSwot(data: SwotData): string {
 
 function formatBmc(data: BusinessModelData): string {
 	const sections = [
-		{ label: "Key Partners", items: data.keyPartners || [] },
-		{ label: "Key Activities", items: data.keyActivities || [] },
-		{ label: "Key Resources", items: data.keyResources || [] },
-		{ label: "Value Propositions", items: data.valuePropositions || [] },
+		{ label: "Key Partners", items: asArray<StickyNote>(data.keyPartners) },
+		{ label: "Key Activities", items: asArray<StickyNote>(data.keyActivities) },
+		{ label: "Key Resources", items: asArray<StickyNote>(data.keyResources) },
+		{ label: "Value Propositions", items: asArray<StickyNote>(data.valuePropositions) },
 		{
 			label: "Customer Relationships",
-			items: data.customerRelationships || [],
+			items: asArray<StickyNote>(data.customerRelationships),
 		},
-		{ label: "Channels", items: data.channels || [] },
-		{ label: "Customer Segments", items: data.customerSegments || [] },
-		{ label: "Cost Structure", items: data.costStructure || [] },
-		{ label: "Revenue Streams", items: data.revenueStreams || [] },
+		{ label: "Channels", items: asArray<StickyNote>(data.channels) },
+		{ label: "Customer Segments", items: asArray<StickyNote>(data.customerSegments) },
+		{ label: "Cost Structure", items: asArray<StickyNote>(data.costStructure) },
+		{ label: "Revenue Streams", items: asArray<StickyNote>(data.revenueStreams) },
 	];
 
 	const hasContent = sections.some((s) =>
@@ -98,7 +103,7 @@ function formatBmc(data: BusinessModelData): string {
 }
 
 function formatJourney(data: JourneyData): string {
-	const touchpoints = data.touchpoints || [];
+	const touchpoints = asArray<JourneyTouchpoint>(data.touchpoints);
 	if (touchpoints.length === 0) return "";
 
 	const stages = [
@@ -143,7 +148,7 @@ function formatJourney(data: JourneyData): string {
 }
 
 function formatBrainstorm(data: BrainstormData): string {
-	const notes = data.notes || [];
+	const notes = asArray<StickyNote>(data.notes);
 	const validNotes = notes.filter((n) => n.content?.trim());
 	if (validNotes.length === 0) return "";
 

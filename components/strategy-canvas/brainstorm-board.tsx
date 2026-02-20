@@ -51,14 +51,16 @@ export function BrainstormBoard({
 			defaultData: defaultBrainstormData,
 			fetchFn: csrfFetch,
 		});
-	const notes = data.notes || [];
+	const notes = Array.isArray(data.notes) ? data.notes : [];
 	const setNotes = (
 		updater: StickyNoteType[] | ((prev: StickyNoteType[]) => StickyNoteType[]),
 	) => {
 		setData((prev) => ({
 			...prev,
 			notes:
-				typeof updater === "function" ? updater(prev.notes || []) : updater,
+				typeof updater === "function"
+					? updater(Array.isArray(prev.notes) ? prev.notes : [])
+					: updater,
 		}));
 	};
 
