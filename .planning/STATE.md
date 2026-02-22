@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 Phase: 26 (documentation-design-decisions) -- COMPLETE
 Plan: 1 of 1 (phase complete)
 Status: Phase complete
-Last activity: 2026-02-22 - Completed quick task 3: Fix critical production issues
+Last activity: 2026-02-22 - Completed quick task 4: Fix PDF export filenames with conversation topic
 
 Progress: ████████████ 12/12 plans (100%)
 
@@ -79,6 +79,8 @@ Progress: ████████████ 12/12 plans (100%)
 - Nullable userId in AICostLog for demo/anonymous cost tracking (FK constraint relaxed in migration)
 - Per-user anomaly threshold: 10x daily per-user average cost (configurable ANOMALY_MULTIPLIER)
 - Demo cost entries use costUSD=0 since actual cost determined by OpenRouter billing
+- PDF filenames use chat.topic || chat.title (AI-classified topic preferred, AI-generated title as fallback)
+- Three-tier suggestion stripping: code block regex -> raw JSON regex -> JSON.parse fallback
 
 ### Completed
 
@@ -86,13 +88,14 @@ Progress: ████████████ 12/12 plans (100%)
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 3 completed (chat animations, typewriter tuning, CSRF/index/KB fixes)
+**Quick tasks:** 4 completed (chat animations, typewriter tuning, CSRF/index/KB fixes, PDF export filenames)
 
 ### Quick Tasks Completed
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 3 | Fix critical production issues: CSRF on login checkout, StrategyCanvas indexes, knowledge base query limit | 2026-02-22 | 50ad44c | [3-fix-critical-production-issues-csrf-on-l](./quick/3-fix-critical-production-issues-csrf-on-l/) |
+| 4 | Fix PDF export: proper filenames with conversation topic, title headers, suggestion stripping | 2026-02-22 | ba30095 | [4-fix-pdf-export-proper-filenames-with-con](./quick/4-fix-pdf-export-proper-filenames-with-con/) |
 
 ### Blockers
 
@@ -113,5 +116,5 @@ Progress: ████████████ 12/12 plans (100%)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed quick task 3 (CSRF on login checkout, StrategyCanvas index, KB query limit).
+Stopped at: Completed quick task 4 (PDF export filenames with conversation topic).
 Resume: v2 planning or new feature work
