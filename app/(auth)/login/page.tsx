@@ -8,6 +8,7 @@ import { AuthForm } from "@/components/auth-form";
 import { AuthShell } from "@/components/auth-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
+import { getCsrfToken, initCsrfToken } from "@/lib/utils";
 import { type LoginActionState, login } from "../actions";
 
 const loginHighlights = [
@@ -80,24 +81,30 @@ function LoginContent() {
 			// If there's a plan, redirect to checkout
 			if (plan) {
 				setIsRedirecting(true);
-				fetch("/api/stripe/checkout", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ planId: plan }),
-				})
-					.then((res) => res.json())
-					.then((data) => {
+				(async () => {
+					try {
+						await initCsrfToken();
+						const csrfToken = getCsrfToken() || "";
+						const res = await fetch("/api/stripe/checkout", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+								"X-CSRF-Token": csrfToken,
+							},
+							body: JSON.stringify({ planId: plan }),
+						});
+						const data = await res.json();
 						if (data.url) {
 							window.location.href = data.url;
 						} else {
 							toast({ type: "error", description: "Failed to start checkout" });
 							router.push(redirect || "/new");
 						}
-					})
-					.catch(() => {
+					} catch {
 						toast({ type: "error", description: "Failed to start checkout" });
 						router.push(redirect || "/new");
-					});
+					}
+				})();
 			} else if (redirect) {
 				// Respect redirect param (e.g. from subscribe page after session loss)
 				window.location.href = redirect;
