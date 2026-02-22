@@ -124,20 +124,20 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
 		benefit_1_icon: "Zap",
 		benefit_2_title: "Talk It Out or Type It In",
 		benefit_2_desc:
-			"'Live' call feature - hear our voices in real-time. Feel like you're talking to Alexandria and Kim.",
+			"'Live' call feature. Hear our voices in real-time. Feel like you're talking to Alexandria and Kim.",
 		benefit_2_icon: "Mic",
 		benefit_3_title: "Plug-and-Play Plans",
-		benefit_3_desc: "Sales and marketing plans built to convert, no generic BS",
+		benefit_3_desc: "Sales and marketing plans built to convert. No generic BS.",
 		benefit_3_icon: "Target",
 		benefit_4_title: "40+ Years of Proof",
 		benefit_4_desc:
-			"Fortune 500 and founder success - proven strategies from hundreds of brands and teams",
+			"Fortune 500 and founder success. Proven strategies from hundreds of brands and teams.",
 		benefit_4_icon: "TrendingUp",
 	},
 	cta: {
 		title: "This Is How You Grow Without Being Great at Sales or Marketing",
 		subtitle:
-			"You don't need to be a sales expert or marketing genius to grow - you just need the right messaging and strategy. Thousands of entrepreneurs are using our proven tools to scale. Stop second-guessing every move. Start dominating.",
+			"You don't need to be a sales expert or marketing genius to grow. You just need the right messaging and strategy. Thousands of entrepreneurs are using our proven tools to scale. Stop second-guessing every move. Start dominating.",
 		cta_primary_text: "Start 14-Day Free Trial",
 		cta_primary_link: "/signup",
 		cta_secondary_text: "View Pricing",
@@ -155,7 +155,7 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
 	footer: {
 		tagline: "Sales and Marketing Strategy 24/7",
 		email: "ai.bossbrainz@aleccimedia.com",
-		copyright: "AI Boss Brainz. All rights reserved.",
+		copyright: "AI Boss Brainz & Alecci Media. All rights reserved.",
 	},
 };
 

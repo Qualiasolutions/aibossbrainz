@@ -319,11 +319,23 @@ export function UsersTable({
 												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-sky-50 text-sky-600">
 													Client
 												</span>
-											) : null}
+											) : (
+												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-teal-50 text-teal-600">
+													Subscriber
+												</span>
+											)}
 											{user.isAdmin && (
 												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-rose-50 text-rose-600">
 													<Shield className="h-3 w-3" />
 													Admin
+												</span>
+											)}
+											{(user.subscriptionStatus === "expired" ||
+												user.subscriptionStatus === "cancelled" ||
+												(getDaysRemaining(user.subscriptionEndDate) !== null &&
+													(getDaysRemaining(user.subscriptionEndDate) ?? 0) <= 0)) && (
+												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-50 text-orange-600">
+													Unsubscribed
 												</span>
 											)}
 											{user.onboardedAt ? (

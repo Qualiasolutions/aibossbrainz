@@ -1,3 +1,4 @@
+import { parseSuggestions } from "@/lib/ai/parse-suggestions";
 import { parseMarkdown } from "./pdf/markdown-parser";
 import { renderBlocksToPDF } from "./pdf/pdf-renderer";
 import { STYLES } from "./pdf/pdf-styles";
@@ -46,8 +47,9 @@ export async function exportToPDF(
 		doc.line(STYLES.marginLeft, y, STYLES.pageWidth - STYLES.marginRight, y);
 		y += 10;
 
-		// Parse markdown and render content blocks
-		const blocks = parseMarkdown(text);
+		// Strip suggestion JSON before rendering, then parse markdown
+		const { content: cleanText } = parseSuggestions(text);
+		const blocks = parseMarkdown(cleanText);
 		y = renderBlocksToPDF(doc, blocks, y);
 
 		// Footer divider

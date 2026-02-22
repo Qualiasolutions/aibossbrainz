@@ -267,7 +267,7 @@ export function Chat({
 		onError: (error) => {
 			// Restore last sent message to input for retry
 			if (lastSentMessage) {
-				const text = lastSentMessage.parts
+				const text = (Array.isArray(lastSentMessage.parts) ? lastSentMessage.parts : [])
 					.filter((p) => p.type === "text")
 					.map((p) => p.text)
 					.join("");
@@ -342,7 +342,7 @@ export function Chat({
 		const lastMessage = messages.at(-1);
 		if (!lastMessage || lastMessage.role !== "assistant") return;
 
-		for (const part of lastMessage.parts) {
+		for (const part of (Array.isArray(lastMessage.parts) ? lastMessage.parts : [])) {
 			const partType = (part as any).type as string;
 			if (
 				partType === "tool-strategyCanvas" &&

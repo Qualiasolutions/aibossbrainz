@@ -1,3 +1,4 @@
+import { parseSuggestions } from "@/lib/ai/parse-suggestions";
 import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
 import type { ChatMessage } from "@/lib/types";
 import { parseMarkdown } from "./pdf/markdown-parser";
@@ -79,9 +80,10 @@ export async function exportConversationToPDF(
 		doc.text(isUser ? "You" : msgPersonality.name, STYLES.marginLeft, y);
 		y += 6;
 
-		// Message content
+		// Message content (strip suggestion JSON before rendering)
 		doc.setTextColor(...STYLES.textColor);
-		const blocks = parseMarkdown(textContent);
+		const { content: cleanContent } = parseSuggestions(textContent);
+		const blocks = parseMarkdown(cleanContent);
 		y = renderBlocksToPDF(doc, blocks, y);
 
 		// Extra spacing between messages

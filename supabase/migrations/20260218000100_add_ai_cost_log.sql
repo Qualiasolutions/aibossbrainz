@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS "AICostLog" (
 );
 
 CREATE INDEX idx_aicostlog_createdat ON "AICostLog"("createdAt");
-CREATE INDEX idx_aicostlog_date ON "AICostLog"(DATE("createdAt"));
 
 ALTER TABLE "AICostLog" ENABLE ROW LEVEL SECURITY;
 

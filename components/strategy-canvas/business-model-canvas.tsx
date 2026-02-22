@@ -167,7 +167,9 @@ export function BusinessModelCanvas({
 			sections: Object.fromEntries(
 				Object.entries(data).map(([key, notes]) => [
 					key,
-					notes.map((n: { content: string }) => n.content).filter(Boolean),
+					(Array.isArray(notes) ? notes : [])
+						.map((n: { content: string }) => n.content)
+						.filter(Boolean),
 				]),
 			),
 		};
@@ -194,7 +196,9 @@ export function BusinessModelCanvas({
 		});
 	};
 
-	const totalNotes = Object.values(data).flat().length;
+	const totalNotes = Object.values(data)
+		.filter(Array.isArray)
+		.flat().length;
 
 	// Compact Layout for Side Panel
 	if (compact) {
@@ -394,7 +398,7 @@ export function BusinessModelCanvas({
 					{/* Key Partners */}
 					<BMCSection
 						section={sections[0]}
-						notes={data.keyPartners}
+						notes={data.keyPartners || []}
 						onAdd={(color) => addNote("keyPartners", color)}
 						onUpdate={(id, content) => updateNote("keyPartners", id, content)}
 						onDelete={(id) => deleteNote("keyPartners", id)}
@@ -405,7 +409,7 @@ export function BusinessModelCanvas({
 					<div className="flex flex-col gap-px">
 						<BMCSection
 							section={sections[1]}
-							notes={data.keyActivities}
+							notes={data.keyActivities || []}
 							onAdd={(color) => addNote("keyActivities", color)}
 							onUpdate={(id, content) =>
 								updateNote("keyActivities", id, content)
@@ -415,7 +419,7 @@ export function BusinessModelCanvas({
 						/>
 						<BMCSection
 							section={sections[2]}
-							notes={data.keyResources}
+							notes={data.keyResources || []}
 							onAdd={(color) => addNote("keyResources", color)}
 							onUpdate={(id, content) =>
 								updateNote("keyResources", id, content)
@@ -428,7 +432,7 @@ export function BusinessModelCanvas({
 					{/* Value Propositions */}
 					<BMCSection
 						section={sections[3]}
-						notes={data.valuePropositions}
+						notes={data.valuePropositions || []}
 						onAdd={(color) => addNote("valuePropositions", color)}
 						onUpdate={(id, content) =>
 							updateNote("valuePropositions", id, content)
@@ -441,7 +445,7 @@ export function BusinessModelCanvas({
 					<div className="flex flex-col gap-px">
 						<BMCSection
 							section={sections[4]}
-							notes={data.customerRelationships}
+							notes={data.customerRelationships || []}
 							onAdd={(color) => addNote("customerRelationships", color)}
 							onUpdate={(id, content) =>
 								updateNote("customerRelationships", id, content)
@@ -451,7 +455,7 @@ export function BusinessModelCanvas({
 						/>
 						<BMCSection
 							section={sections[5]}
-							notes={data.channels}
+							notes={data.channels || []}
 							onAdd={(color) => addNote("channels", color)}
 							onUpdate={(id, content) => updateNote("channels", id, content)}
 							onDelete={(id) => deleteNote("channels", id)}
@@ -462,7 +466,7 @@ export function BusinessModelCanvas({
 					{/* Customer Segments */}
 					<BMCSection
 						section={sections[6]}
-						notes={data.customerSegments}
+						notes={data.customerSegments || []}
 						onAdd={(color) => addNote("customerSegments", color)}
 						onUpdate={(id, content) =>
 							updateNote("customerSegments", id, content)
@@ -476,7 +480,7 @@ export function BusinessModelCanvas({
 				<div className="grid grid-cols-1 gap-px sm:grid-cols-2">
 					<BMCSection
 						section={sections[7]}
-						notes={data.costStructure}
+						notes={data.costStructure || []}
 						onAdd={(color) => addNote("costStructure", color)}
 						onUpdate={(id, content) => updateNote("costStructure", id, content)}
 						onDelete={(id) => deleteNote("costStructure", id)}
@@ -484,7 +488,7 @@ export function BusinessModelCanvas({
 					/>
 					<BMCSection
 						section={sections[8]}
-						notes={data.revenueStreams}
+						notes={data.revenueStreams || []}
 						onAdd={(color) => addNote("revenueStreams", color)}
 						onUpdate={(id, content) =>
 							updateNote("revenueStreams", id, content)

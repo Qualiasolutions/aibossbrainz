@@ -22,7 +22,7 @@ const features = [
 		icon: Users,
 		title: "Dual Executive Perspectives",
 		description:
-			"Access both marketing brilliance (Alexandria) and sales mastery (Kim) - or collaborate with both simultaneously.",
+			"Access both marketing brilliance (Alexandria) and sales mastery (Kim), or collaborate with both simultaneously.",
 	},
 	{
 		icon: Building2,
@@ -129,12 +129,12 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 						<p className="text-stone-600 leading-relaxed mb-6">
 							AI Boss Brainz bridges that gap. Our AI executives embody the
 							strategies, frameworks, and thinking patterns of seasoned Fortune
-							500 leaders—available instantly whenever you need them.
+							500 leaders. Available instantly whenever you need them.
 						</p>
 						<p className="text-stone-600 leading-relaxed">
 							Whether you&apos;re stuck on a go-to-market strategy, need to
 							improve sales conversion, or want to refine your brand
-							positioning—our AI executives are ready to help, 24/7.
+							positioning, our AI executives are ready to help, 24/7.
 						</p>
 					</motion.div>
 				</div>

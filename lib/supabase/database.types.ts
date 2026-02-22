@@ -726,35 +726,35 @@ export type Database = {
         Row: {
           createdAt: string | null
           date: string
-          exportCount: Json | null
+          exportCount: number | null
           id: string
-          messageCount: Json | null
-          tokenUsage: Json | null
+          messageCount: number | null
+          tokenUsage: number | null
           updatedAt: string | null
           userId: string
-          voiceMinutes: Json | null
+          voiceMinutes: number | null
         }
         Insert: {
           createdAt?: string | null
           date: string
-          exportCount?: Json | null
+          exportCount?: number | null
           id?: string
-          messageCount?: Json | null
-          tokenUsage?: Json | null
+          messageCount?: number | null
+          tokenUsage?: number | null
           updatedAt?: string | null
           userId: string
-          voiceMinutes?: Json | null
+          voiceMinutes?: number | null
         }
         Update: {
           createdAt?: string | null
           date?: string
-          exportCount?: Json | null
+          exportCount?: number | null
           id?: string
-          messageCount?: Json | null
-          tokenUsage?: Json | null
+          messageCount?: number | null
+          tokenUsage?: number | null
           updatedAt?: string | null
           userId?: string
-          voiceMinutes?: Json | null
+          voiceMinutes?: number | null
         }
         Relationships: [
           {

@@ -1,3 +1,5 @@
+import { parseSuggestions } from "@/lib/ai/parse-suggestions";
+
 export interface ExcelExportOptions {
 	filename: string;
 	sheetName?: string;
@@ -12,8 +14,11 @@ export async function exportToExcel(
 
 	const { filename, sheetName = "Message" } = options;
 
+	// Strip suggestion JSON before exporting
+	const { content: cleanText } = parseSuggestions(text);
+
 	// Split text into paragraphs for better formatting
-	const paragraphs = text.split(/\n\n+/).filter(Boolean);
+	const paragraphs = cleanText.split(/\n\n+/).filter(Boolean);
 
 	// Create workbook and worksheet
 	const workbook = new ExcelJS.Workbook();

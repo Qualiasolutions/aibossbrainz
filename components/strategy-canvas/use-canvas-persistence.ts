@@ -57,9 +57,17 @@ export function useCanvasPersistence<T>({
 				const canvas = await res.json();
 				if (canvas?.data) {
 					setCanvasId(canvas.id);
+					const raw = canvas.data;
 					const loadedData = transformFromLoad
-						? transformFromLoad(canvas.data)
-						: (canvas.data as T);
+						? transformFromLoad(raw)
+						: ({
+								...defaultData,
+								...(typeof raw === "object" &&
+								raw !== null &&
+								!Array.isArray(raw)
+									? raw
+									: {}),
+							} as T);
 					setData(loadedData);
 				}
 			}
@@ -72,7 +80,7 @@ export function useCanvasPersistence<T>({
 				isInitialLoadRef.current = false;
 			}, 500);
 		}
-	}, [canvasType, doFetch, transformFromLoad]);
+	}, [canvasType, defaultData, doFetch, transformFromLoad]);
 
 	// Initial load
 	useEffect(() => {

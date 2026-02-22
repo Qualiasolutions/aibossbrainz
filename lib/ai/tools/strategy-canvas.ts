@@ -1,8 +1,12 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { Session } from "@/lib/artifacts/server";
-import { ChatSDKError } from "@/lib/errors";
+import {
+	getStrategyCanvas,
+	saveStrategyCanvas,
+} from "@/lib/db/queries/canvas";
 import { logger } from "@/lib/logger";
+import type { Json } from "@/lib/supabase/database.types";
 import type { CanvasType } from "@/lib/supabase/types";
 
 type StrategyCanvasProps = {
@@ -143,17 +147,17 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 				const storageKey =
 					sectionToStorageKey[normalizedSection] || normalizedSection;
 
-				// Build items as JSONB for atomic merge
-				let itemsJson: unknown[];
+				// Build new items
+				let newItems: unknown[];
 				if (canvasType === "journey") {
-					itemsJson = items.map((content) => ({
+					newItems = items.map((content) => ({
 						id: generateUUID(),
 						stage: normalizedSection,
 						content,
 						type: "touchpoint",
 					}));
 				} else if (canvasType === "brainstorm") {
-					itemsJson = items.map((content, idx) => ({
+					newItems = items.map((content, idx) => ({
 						id: generateUUID(),
 						content,
 						color: "slate",
@@ -162,39 +166,40 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 						y: Math.random() * 40 + 10 + idx * 10,
 					}));
 				} else {
-					itemsJson = items.map((content) => ({
+					newItems = items.map((content) => ({
 						id: generateUUID(),
 						content,
 						color: "slate",
 					}));
 				}
 
-				// Use the atomic merge function to prevent race conditions
-				// when multiple tool calls execute concurrently
 				const sectionKey =
 					canvasType === "journey" ? "touchpoints" : storageKey;
 
-				const supabase = (
-					await import("@/lib/supabase/server")
-				).createClient;
-				const client = await supabase();
-				const { error } = await (client.rpc as any)(
-					"merge_canvas_items",
-					{
-						p_user_id: session.user.id,
-						p_canvas_type: canvasType,
-						p_section: sectionKey,
-						p_items: JSON.stringify(itemsJson),
-					},
-				);
+				// Fetch existing canvas (or start fresh)
+				const existing = await getStrategyCanvas({
+					userId: session.user.id,
+					canvasType,
+				});
 
-				if (error) {
-					logger.error(
-						{ err: error, section, canvasType },
-						"Strategy canvas merge error",
-					);
-					throw error;
-				}
+				const existingData = (existing?.data as Record<string, unknown>) || {};
+				const existingItems = Array.isArray(existingData[sectionKey])
+					? (existingData[sectionKey] as unknown[])
+					: [];
+
+				// Merge new items into existing data
+				const mergedData: Record<string, unknown> = {
+					...existingData,
+					[sectionKey]: [...existingItems, ...newItems],
+				};
+
+				await saveStrategyCanvas({
+					userId: session.user.id,
+					canvasType,
+					data: mergedData as unknown as Json,
+					canvasId: existing?.id,
+					isDefault: true,
+				});
 
 				// Map section to tab name for user-friendly messaging
 				const tabNames: Record<CanvasType, string> = {
@@ -212,13 +217,6 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 					message: `Added ${items.length} item(s) to ${normalizedSection} in the ${tabNames[canvasType]} tab.`,
 				};
 			} catch (error) {
-				if (error instanceof ChatSDKError) {
-					return {
-						success: false,
-						message:
-							"Database error while saving canvas data. Please try again.",
-					};
-				}
 				logger.error(
 					{ err: error, section, canvasType },
 					"Strategy canvas unexpected error",
