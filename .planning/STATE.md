@@ -86,7 +86,7 @@ Progress: ████████████ 12/12 plans (100%)
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 2 completed (chat animations, typewriter tuning)
+**Quick tasks:** 3 completed (chat animations, typewriter tuning, CSRF/index/KB fixes)
 
 ### Blockers
 
@@ -102,9 +102,10 @@ Progress: ████████████ 12/12 plans (100%)
 - Gap closure migration (20260218000300) also needs to be applied via Supabase Dashboard SQL Editor
 - GOOGLE_AI_API_KEY is optional env var -- set it in Vercel for provider fallback
 - AICostLog userId index migration (20260219000200) needs to be applied via Supabase Dashboard SQL Editor
+- StrategyCanvas composite index migration (20260222000100) needs to be applied via Supabase Dashboard SQL Editor
 
 ## Session Continuity
 
-Last session: 2026-02-18
-Stopped at: Completed phase 26 (documentation & design decisions -- 1 plan done). v1.4 audit complete.
+Last session: 2026-02-22
+Stopped at: Completed quick task 3 (CSRF on login checkout, StrategyCanvas index, KB query limit).
 Resume: v2 planning or new feature work
