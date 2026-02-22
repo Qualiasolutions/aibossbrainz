@@ -43,6 +43,7 @@ import { PreviewAttachment } from "./preview-attachment";
 import { Button } from "./ui/button";
 import type { VisibilityType } from "./visibility-selector";
 import { VoiceInputButton } from "./voice-input-button";
+import { VoiceModeButton } from "./voice-mode-button";
 
 function PureMultimodalInput({
 	chatId,
@@ -67,6 +68,9 @@ function PureMultimodalInput({
 	voiceTranscript = "",
 	onVoiceToggle,
 	onVoiceStop,
+	isDictating = false,
+	isDictationSupported = true,
+	onDictationToggle,
 }: {
 	chatId: string;
 	input: string;
@@ -90,6 +94,9 @@ function PureMultimodalInput({
 	voiceTranscript?: string;
 	onVoiceToggle?: () => void;
 	onVoiceStop?: () => void;
+	isDictating?: boolean;
+	isDictationSupported?: boolean;
+	onDictationToggle?: () => void;
 }) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const { width } = useWindowSize();
@@ -160,9 +167,7 @@ function PureMultimodalInput({
 					name: attachment.name,
 					mediaType: attachment.contentType,
 				})),
-				...(hasText
-					? [{ type: "text" as const, text: input }]
-					: []),
+				...(hasText ? [{ type: "text" as const, text: input }] : []),
 			],
 		});
 
@@ -309,22 +314,21 @@ function PureMultimodalInput({
 				)}
 				<div className="flex flex-row items-center gap-1.5">
 					{!isVoiceMode && (
-						<AttachmentsButton
-							fileInputRef={fileInputRef}
-							selectedModelId={selectedModelId}
-							status={status}
-						/>
+						<>
+							<AttachmentsButton
+								fileInputRef={fileInputRef}
+								selectedModelId={selectedModelId}
+								status={status}
+							/>
+							<VoiceInputButton
+								className="size-6 rounded text-muted-foreground/70 transition-colors duration-200 hover:text-red-400"
+								disabled={status !== "ready" || isVoiceMode}
+								isRecording={isDictating}
+								isSupported={isDictationSupported}
+								onToggle={onDictationToggle ?? (() => {})}
+							/>
+						</>
 					)}
-					<VoiceInputButton
-						className="size-6 rounded text-muted-foreground/70 transition-colors duration-200 hover:text-red-400"
-						disabled={status !== "ready" && !isVoiceMode}
-						isListening={isVoiceListening}
-						isProcessing={isVoiceProcessing}
-						isSupported={isVoiceSupported}
-						isVoiceMode={isVoiceMode}
-						onToggle={onVoiceToggle ?? (() => {})}
-						size="sm"
-					/>
 					<PromptInputTextarea
 						autoFocus
 						className="grow resize-none border-0! border-none! bg-transparent py-0.5 pl-0 text-xs leading-normal text-foreground caret-primary outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground placeholder:text-xs placeholder:pl-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden"
@@ -336,7 +340,10 @@ function PureMultimodalInput({
 						onChange={handleInput}
 						placeholder={
 							isVoiceMode
-								? voiceTranscript || (isVoiceListening ? "Listening..." : "Waiting for response...")
+								? voiceTranscript ||
+									(isVoiceListening
+										? "Listening..."
+										: "Waiting for response...")
 								: "Message your executive team..."
 						}
 						ref={textareaRef}
@@ -352,16 +359,28 @@ function PureMultimodalInput({
 							<StopIcon size={10} />
 							End
 						</button>
-					) : status === "submitted" ? (
-						<StopButton setMessages={setMessages} stop={stop} />
 					) : (
-						<PromptInputSubmit
-							className="size-6 rounded bg-gradient-to-br from-red-500 to-red-600 text-white shadow-sm transition-all hover:from-red-400 hover:to-red-500 disabled:from-white/10 disabled:to-white/5 disabled:text-muted-foreground disabled:shadow-none shrink-0"
-							disabled={!input.trim() || uploadQueue.length > 0}
-							status={status}
-						>
-							<ArrowUpIcon size={12} />
-						</PromptInputSubmit>
+						<>
+							<VoiceModeButton
+								disabled={status !== "ready" || isDictating}
+								isListening={isVoiceListening}
+								isProcessing={isVoiceProcessing}
+								isSupported={isVoiceSupported}
+								isVoiceMode={isVoiceMode}
+								onToggle={onVoiceToggle ?? (() => {})}
+							/>
+							{status === "submitted" ? (
+								<StopButton setMessages={setMessages} stop={stop} />
+							) : (
+								<PromptInputSubmit
+									className="size-6 rounded bg-gradient-to-br from-red-500 to-red-600 text-white shadow-sm transition-all hover:from-red-400 hover:to-red-500 disabled:from-white/10 disabled:to-white/5 disabled:text-muted-foreground disabled:shadow-none shrink-0"
+									disabled={!input.trim() || uploadQueue.length > 0}
+									status={status}
+								>
+									<ArrowUpIcon size={12} />
+								</PromptInputSubmit>
+							)}
+						</>
 					)}
 				</div>
 			</PromptInput>
@@ -375,12 +394,15 @@ export const MultimodalInput = memo(
 		if (prevProps.input !== nextProps.input) return false;
 		if (prevProps.status !== nextProps.status) return false;
 		if (!equal(prevProps.attachments, nextProps.attachments)) return false;
-		if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) return false;
+		if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
+			return false;
 		if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
 		if (prevProps.isVoiceMode !== nextProps.isVoiceMode) return false;
 		if (prevProps.isVoiceListening !== nextProps.isVoiceListening) return false;
-		if (prevProps.isVoiceProcessing !== nextProps.isVoiceProcessing) return false;
+		if (prevProps.isVoiceProcessing !== nextProps.isVoiceProcessing)
+			return false;
 		if (prevProps.voiceTranscript !== nextProps.voiceTranscript) return false;
+		if (prevProps.isDictating !== nextProps.isDictating) return false;
 		return true;
 	},
 );

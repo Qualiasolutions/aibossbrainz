@@ -17,6 +17,7 @@ import { useAutoSpeak } from "@/hooks/use-auto-speak";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInlineVoice } from "@/hooks/use-inline-voice";
+import { useVoiceToText } from "@/hooks/use-voice-to-text";
 import {
 	BOT_PERSONALITIES,
 	type BotType,
@@ -463,6 +464,13 @@ export function Chat({
 		stopVoiceMode,
 	} = useInlineVoice({ status, sendMessage });
 
+	// One-shot dictation (speech-to-text into input field)
+	const {
+		isRecording: isDictating,
+		isSupported: isDictationSupported,
+		toggleRecording: onDictationToggle,
+	} = useVoiceToText({ setInput });
+
 	return (
 		<>
 			<div className="flex h-dvh w-full overflow-hidden bg-background">
@@ -566,11 +574,14 @@ export function Chat({
 										attachments={attachments}
 										chatId={id}
 										input={input}
+										isDictating={isDictating}
+										isDictationSupported={isDictationSupported}
 										isVoiceListening={isVoiceListening}
 										isVoiceMode={isVoiceMode}
 										isVoiceProcessing={isVoiceProcessing}
 										isVoiceSupported={isVoiceSupported}
 										messages={messages}
+										onDictationToggle={onDictationToggle}
 										onModelChange={setCurrentModelId}
 										onVoiceStop={stopVoiceMode}
 										onVoiceToggle={toggleVoiceMode}
