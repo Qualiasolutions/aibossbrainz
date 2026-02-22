@@ -64,6 +64,7 @@ export default async function UserDetailsPage({
 }: {
 	params: Promise<{ id: string }>;
 }) {
+	await requireAdmin();
 	const { id } = await params;
 	const user = await getUserById(id);
 

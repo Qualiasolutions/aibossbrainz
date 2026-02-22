@@ -16,7 +16,7 @@ import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useAutoSpeak } from "@/hooks/use-auto-speak";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useVoiceCall } from "@/hooks/use-voice-call";
+import { useInlineVoice } from "@/hooks/use-inline-voice";
 import {
 	BOT_PERSONALITIES,
 	type BotType,
@@ -51,13 +51,6 @@ const Artifact = dynamic(
 	() => import("./artifact").then((mod) => ({ default: mod.Artifact })),
 	{ ssr: false, loading: () => null },
 );
-const VoiceCallDialog = dynamic(
-	() =>
-		import("./chat/voice-call-dialog").then((mod) => ({
-			default: mod.VoiceCallDialog,
-		})),
-	{ ssr: false, loading: () => null },
-);
 const SwotSlidePanel = dynamic(
 	() =>
 		import("./swot-slide-panel").then((mod) => ({
@@ -84,6 +77,34 @@ export interface ChatProps {
 	initialLastContext?: AppUsage;
 	initialBotType?: BotType;
 }
+
+// Map sections to their canvas types (all lowercase to match tool normalization)
+const sectionToCanvasType: Record<string, CanvasType> = {
+	// SWOT
+	strengths: "swot",
+	weaknesses: "swot",
+	opportunities: "swot",
+	threats: "swot",
+	// BMC (lowercase to match tool normalization)
+	keypartners: "bmc",
+	keyactivities: "bmc",
+	keyresources: "bmc",
+	valuepropositions: "bmc",
+	customerrelationships: "bmc",
+	channels: "bmc",
+	customersegments: "bmc",
+	coststructure: "bmc",
+	revenuestreams: "bmc",
+	// Journey
+	awareness: "journey",
+	consideration: "journey",
+	decision: "journey",
+	purchase: "journey",
+	retention: "journey",
+	advocacy: "journey",
+	// Brainstorm
+	notes: "brainstorm",
+};
 
 export function Chat({
 	id,
@@ -159,34 +180,6 @@ export function Chat({
 	const [targetCanvasTab, setTargetCanvasTab] = useState<CanvasType>("swot");
 	const processedToolCallIds = useRef<Set<string>>(new Set());
 
-	// Map sections to their canvas types (all lowercase to match tool normalization)
-	const sectionToCanvasType: Record<string, CanvasType> = {
-		// SWOT
-		strengths: "swot",
-		weaknesses: "swot",
-		opportunities: "swot",
-		threats: "swot",
-		// BMC (lowercase to match tool normalization)
-		keypartners: "bmc",
-		keyactivities: "bmc",
-		keyresources: "bmc",
-		valuepropositions: "bmc",
-		customerrelationships: "bmc",
-		channels: "bmc",
-		customersegments: "bmc",
-		coststructure: "bmc",
-		revenuestreams: "bmc",
-		// Journey
-		awareness: "journey",
-		consideration: "journey",
-		decision: "journey",
-		purchase: "journey",
-		retention: "journey",
-		advocacy: "journey",
-		// Brainstorm
-		notes: "brainstorm",
-	};
-
 	// Handler for bot switching with toast notification
 	const handleBotChange = (newBot: BotType) => {
 		if (newBot !== selectedBot) {
@@ -222,7 +215,7 @@ export function Chat({
 	} = useChat<ChatMessage>({
 		id,
 		messages: initialMessages,
-		experimental_throttle: 5,
+		experimental_throttle: 50,
 		generateId: generateUUID,
 		transport: new DefaultChatTransport({
 			api: "/api/chat",
@@ -257,7 +250,7 @@ export function Chat({
 			}
 
 			// Stream immediately for smoother typewriter effect
-			setDataStream((ds) => [...(ds || []), dataPart]);
+			setDataStream((ds) => (ds || []).concat(dataPart));
 		},
 		onFinish: () => {
 			// Clear stored message on successful completion
@@ -459,25 +452,16 @@ export function Chat({
 		}
 	};
 
-	// Voice call functionality (extracted to custom hook)
+	// Inline voice mode (ChatGPT-style)
 	const {
-		voiceCallOpen,
-		voiceCallStatus,
-		voiceTranscript,
-		voiceCallError,
-		voiceCallDuration,
-		setVoiceCallOpen,
-		startVoiceCall,
-		endVoiceCall,
-		formatDuration,
-	} = useVoiceCall({
-		selectedBot,
-		messages,
-		status,
-		sendMessage,
-	});
-
-	const personality = BOT_PERSONALITIES[selectedBot];
+		isVoiceMode,
+		isListening: isVoiceListening,
+		isProcessing: isVoiceProcessing,
+		isSupported: isVoiceSupported,
+		transcript: voiceTranscript,
+		toggleVoiceMode,
+		stopVoiceMode,
+	} = useInlineVoice({ status, sendMessage });
 
 	return (
 		<>
@@ -582,8 +566,14 @@ export function Chat({
 										attachments={attachments}
 										chatId={id}
 										input={input}
+										isVoiceListening={isVoiceListening}
+										isVoiceMode={isVoiceMode}
+										isVoiceProcessing={isVoiceProcessing}
+										isVoiceSupported={isVoiceSupported}
 										messages={messages}
 										onModelChange={setCurrentModelId}
+										onVoiceStop={stopVoiceMode}
+										onVoiceToggle={toggleVoiceMode}
 										selectedModelId={currentModelId}
 										selectedVisibilityType={visibilityType}
 										sendMessage={sendMessage}
@@ -593,6 +583,7 @@ export function Chat({
 										status={status}
 										stop={stop}
 										usage={usage}
+										voiceTranscript={voiceTranscript}
 									/>
 								</div>
 							</div>
@@ -629,19 +620,6 @@ export function Chat({
 				status={status}
 				stop={stop}
 				votes={votes}
-			/>
-
-			<VoiceCallDialog
-				duration={voiceCallDuration}
-				error={voiceCallError}
-				formatDuration={formatDuration}
-				onEndCall={endVoiceCall}
-				onOpenChange={setVoiceCallOpen}
-				onStartCall={startVoiceCall}
-				open={voiceCallOpen}
-				personality={personality}
-				status={voiceCallStatus}
-				transcript={voiceTranscript}
 			/>
 
 			{/* Onboarding Modal - collects user profile info if not set */}

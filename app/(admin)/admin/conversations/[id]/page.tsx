@@ -3,9 +3,21 @@ import { ArrowLeft, Crown, Sparkles, User, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getChatWithMessages } from "@/lib/admin/queries";
+import { getChatWithMessages, isUserAdmin } from "@/lib/admin/queries";
+import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
+
+async function requireAdmin() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) throw new Error("Unauthorized");
+	const admin = await isUserAdmin(user.id);
+	if (!admin) throw new Error("Forbidden");
+	return user;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +65,7 @@ export default async function ConversationDetailPage({
 }: {
 	params: Promise<{ id: string }>;
 }) {
+	await requireAdmin();
 	const { id } = await params;
 	const data = await getChatWithMessages(id);
 
