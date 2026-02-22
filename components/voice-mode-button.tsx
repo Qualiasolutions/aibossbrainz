@@ -121,7 +121,7 @@ export function VoiceModeButton({
 					)}
 				</Button>
 			</TooltipTrigger>
-			<TooltipContent>
+			<TooltipContent side="top">
 				<p>{getTooltip()}</p>
 			</TooltipContent>
 		</Tooltip>
