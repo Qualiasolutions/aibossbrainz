@@ -1,5 +1,4 @@
 import { MessageSquare, Sparkles, TrendingUp, Users } from "lucide-react";
-import { redirect } from "next/navigation";
 import { ConversationsPreview } from "@/components/admin/conversations-preview";
 import {
 	DashboardGrid,
@@ -107,9 +106,24 @@ export default async function AdminDashboard() {
 		safeGetRecentSupportTickets(5),
 	]);
 
-	// If all queries failed, there might be a database issue
+	// If all queries failed, show fallback UI instead of redirecting
+	// (redirecting to /admin would cause an infinite loop since this IS /admin)
 	if (!stats && activity.length === 0 && !subscriptionStats) {
-		redirect("/admin?error=dashboard_load_failed");
+		return (
+			<div className="p-8">
+				<div className="mb-8">
+					<h1 className="text-3xl font-bold text-neutral-900">Dashboard</h1>
+					<p className="text-neutral-500 mt-1">Welcome back.</p>
+				</div>
+				<div className="flex flex-col items-center justify-center min-h-[400px] gap-4 rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
+					<p className="text-lg font-medium text-neutral-700">Unable to load dashboard data</p>
+					<p className="text-sm text-neutral-500">There may be a temporary database issue. Please try refreshing.</p>
+					<a href="/admin" className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90">
+						Refresh Dashboard
+					</a>
+				</div>
+			</div>
+		);
 	}
 
 	// Define all dashboard widgets
