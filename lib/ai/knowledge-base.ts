@@ -293,7 +293,8 @@ async function getSupabaseKnowledgeContent(botType: string): Promise<string> {
 			.from("knowledge_base_content")
 			.select("title, content, source, created_at")
 			.in("bot_type", botTypes)
-			.order("created_at", { ascending: false });
+			.order("created_at", { ascending: false })
+			.limit(100);
 
 		if (error) {
 			// Table might not exist yet -- degrade gracefully
