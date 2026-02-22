@@ -28,6 +28,7 @@ import { Weather } from "./weather";
 
 const PurePreviewMessage = ({
 	chatId,
+	chatTitle,
 	message,
 	vote,
 	isLoading,
@@ -40,6 +41,7 @@ const PurePreviewMessage = ({
 	onFullscreen,
 }: {
 	chatId: string;
+	chatTitle?: string;
 	message: ChatMessage;
 	vote: Vote | undefined;
 	isLoading: boolean;
@@ -49,7 +51,7 @@ const PurePreviewMessage = ({
 	requiresScrollPadding: boolean;
 	selectedBotType: BotType;
 	onSuggestionSelect?: (texts: string[]) => void;
-	onFullscreen?: (content: string, botType: BotType) => void;
+	onFullscreen?: (content: string, botType: BotType, title?: string) => void;
 }) => {
 	const [mode, setMode] = useState<"view" | "edit">("view");
 
@@ -386,12 +388,18 @@ const PurePreviewMessage = ({
 						<MessageActions
 							botType={messageBotType as BotType}
 							chatId={chatId}
+							chatTitle={chatTitle}
 							isLoading={isLoading}
 							key={`action-${message.id}`}
 							message={message}
 							onExpand={
 								message.role === "assistant" && textFromParts && onFullscreen
-									? () => onFullscreen(textFromParts, messageBotType as BotType)
+									? () =>
+											onFullscreen(
+												textFromParts,
+												messageBotType as BotType,
+												chatTitle,
+											)
 									: undefined
 							}
 							setMode={setMode}

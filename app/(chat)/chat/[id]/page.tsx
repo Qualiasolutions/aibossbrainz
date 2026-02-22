@@ -75,6 +75,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 			<>
 				<ChatWithErrorBoundary
 					autoResume={true}
+					chatTopic={chat.topic || chat.title}
 					hasMoreMessages={hasMoreMessages}
 					id={chat.id}
 					initialBotType={initialBotType}
@@ -93,6 +94,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 		<>
 			<ChatWithErrorBoundary
 				autoResume={true}
+				chatTopic={chat.topic || chat.title}
 				hasMoreMessages={hasMoreMessages}
 				id={chat.id}
 				initialBotType={initialBotType}

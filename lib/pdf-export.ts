@@ -11,12 +11,14 @@ import { STYLES } from "./pdf/pdf-styles";
  * @param filename - Output filename (without .pdf extension)
  * @param executiveName - Name of the executive persona (e.g. "Alexandria Voss")
  * @param executiveRole - Role of the executive (e.g. "Chief Marketing Officer (CMO)")
+ * @param chatTitle - Optional conversation topic rendered as title above executive header
  */
 export async function exportToPDF(
 	text: string,
 	filename: string,
 	executiveName: string,
 	executiveRole: string,
+	chatTitle?: string,
 ): Promise<void> {
 	try {
 		// Dynamic import to reduce bundle size
@@ -26,6 +28,19 @@ export async function exportToPDF(
 
 		const doc = new jsPDF("p", "mm", "a4");
 		let y: number = STYLES.marginTop;
+
+		// Title: Conversation topic (if provided)
+		if (chatTitle?.trim()) {
+			doc.setFont("helvetica", "bold");
+			doc.setFontSize(14);
+			doc.setTextColor(...STYLES.headingColor);
+			const titleLines = doc.splitTextToSize(
+				chatTitle,
+				STYLES.contentWidth,
+			);
+			doc.text(titleLines, STYLES.marginLeft, y);
+			y += titleLines.length * 14 * 0.3528 * STYLES.lineHeight + 8;
+		}
 
 		// Header: Executive name
 		doc.setFont("helvetica", "bold");

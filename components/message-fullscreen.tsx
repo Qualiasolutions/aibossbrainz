@@ -18,6 +18,7 @@ type MessageFullscreenProps = {
 	onOpenChange: (open: boolean) => void;
 	content: string;
 	botType: BotType;
+	chatTitle?: string;
 };
 
 export function MessageFullscreen({
@@ -25,6 +26,7 @@ export function MessageFullscreen({
 	onOpenChange,
 	content,
 	botType,
+	chatTitle,
 }: MessageFullscreenProps) {
 	const [_, copyToClipboard] = useCopyToClipboard();
 	const [isExporting, setIsExporting] = useState(false);
@@ -55,9 +57,23 @@ export function MessageFullscreen({
 			// Dynamic import to reduce initial bundle size
 			const { exportToPDF } = await import("@/lib/pdf-export");
 
-			const timestamp = new Date().toISOString().split("T")[0];
-			const filename = `${personality.name.replace(/\s+/g, "-")}-message-${timestamp}`;
-			await exportToPDF(content, filename, personality.name, personality.role);
+			const name = personality.name.split(" ")[0] || "Assistant";
+			const safeTopic = (chatTitle || "Message")
+				.replace(/[^a-zA-Z0-9\s-]/g, "")
+				.replace(/\s+/g, "-")
+				.slice(0, 40);
+			const timestamp = new Date()
+				.toISOString()
+				.replace(/[:.]/g, "-")
+				.slice(0, 19);
+			const filename = `${safeTopic}-${name}-${timestamp}`;
+			await exportToPDF(
+				content,
+				filename,
+				personality.name,
+				personality.role,
+				chatTitle,
+			);
 			toast.success("PDF exported successfully!");
 		} catch (_error) {
 			toast.error("Failed to export PDF");

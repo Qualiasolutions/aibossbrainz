@@ -15,6 +15,7 @@ import { MessageFullscreen } from "./message-fullscreen";
 
 type MessagesProps = {
 	chatId: string;
+	chatTopic?: string;
 	status: UseChatHelpers<ChatMessage>["status"];
 	votes: Vote[] | undefined;
 	messages: ChatMessage[];
@@ -33,6 +34,7 @@ type MessagesProps = {
 
 function PureMessages({
 	chatId,
+	chatTopic,
 	status,
 	votes,
 	messages,
@@ -50,11 +52,15 @@ function PureMessages({
 	const [fullscreenMessage, setFullscreenMessage] = useState<{
 		content: string;
 		botType: BotType;
+		chatTitle?: string;
 	} | null>(null);
 
-	const handleFullscreen = useCallback((content: string, botType: BotType) => {
-		setFullscreenMessage({ content, botType });
-	}, []);
+	const handleFullscreen = useCallback(
+		(content: string, botType: BotType, title?: string) => {
+			setFullscreenMessage({ content, botType, chatTitle: title });
+		},
+		[],
+	);
 
 	const {
 		containerRef: messagesContainerRef,
@@ -110,6 +116,7 @@ function PureMessages({
 					{messages.map((message, index) => (
 						<PreviewMessage
 							chatId={chatId}
+							chatTitle={chatTopic}
 							isLoading={
 								status === "streaming" && messages.length - 1 === index
 							}
@@ -167,6 +174,7 @@ function PureMessages({
 			{/* Single fullscreen dialog for all messages */}
 			<MessageFullscreen
 				botType={fullscreenMessage?.botType ?? "alexandria"}
+				chatTitle={fullscreenMessage?.chatTitle}
 				content={fullscreenMessage?.content ?? ""}
 				onOpenChange={(open) => {
 					if (!open) setFullscreenMessage(null);

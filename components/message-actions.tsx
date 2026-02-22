@@ -24,6 +24,7 @@ import { VoicePlayerButton } from "./voice-player-button";
 
 export function PureMessageActions({
 	chatId,
+	chatTitle,
 	message,
 	vote,
 	isLoading,
@@ -32,6 +33,7 @@ export function PureMessageActions({
 	onExpand,
 }: {
 	chatId: string;
+	chatTitle?: string;
 	message: ChatMessage;
 	vote: Vote | undefined;
 	isLoading: boolean;
@@ -83,14 +85,22 @@ export function PureMessageActions({
 
 			const personality = botType ? BOT_PERSONALITIES[botType] : null;
 			const name = personality?.name?.split(" ")[0] || "Assistant";
-			const date = new Date().toISOString().split("T")[0];
-			const filename = `${name}-message-${date}`;
+			const safeTopic = (chatTitle || "Message")
+				.replace(/[^a-zA-Z0-9\s-]/g, "")
+				.replace(/\s+/g, "-")
+				.slice(0, 40);
+			const timestamp = new Date()
+				.toISOString()
+				.replace(/[:.]/g, "-")
+				.slice(0, 19);
+			const filename = `${safeTopic}-${name}-${timestamp}`;
 
 			await exportToPDF(
 				textFromParts,
 				filename,
 				personality?.name || "Assistant",
 				personality?.role || "",
+				chatTitle,
 			);
 
 			toast.success("PDF exported successfully");

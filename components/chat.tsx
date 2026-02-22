@@ -79,6 +79,7 @@ export interface ChatProps {
 	initialVisibilityType: VisibilityType;
 	isReadonly: boolean;
 	autoResume: boolean;
+	chatTopic?: string;
 	hasMoreMessages?: boolean;
 	initialLastContext?: AppUsage;
 	initialBotType?: BotType;
@@ -91,6 +92,7 @@ export function Chat({
 	initialVisibilityType,
 	isReadonly,
 	autoResume,
+	chatTopic,
 	hasMoreMessages: initialHasMore = false,
 	initialLastContext,
 	initialBotType = "collaborative",
@@ -446,10 +448,7 @@ export function Chat({
 		if (messages.length === 0 || isExporting) return;
 		setIsExporting(true);
 		try {
-			const chatTitle =
-				messages[0]?.parts
-					?.find((p) => p.type === "text")
-					?.text?.slice(0, 50) || "Conversation";
+			const chatTitle = chatTopic || "Conversation";
 			await exportConversationToPDF(messages, chatTitle, selectedBot);
 			toast({ type: "success", description: "Conversation exported to PDF" });
 		} catch (error) {
@@ -525,6 +524,7 @@ export function Chat({
 									<div className="flex-1 overflow-hidden">
 										<Messages
 											chatId={id}
+											chatTopic={chatTopic}
 											className="h-full"
 											hasMoreMessages={hasMoreMessages}
 											isArtifactVisible={isArtifactVisible}
