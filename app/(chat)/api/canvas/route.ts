@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const CANVAS_TYPES = ["swot", "bmc", "journey", "brainstorm"] as const;
 const MAX_DATA_SIZE = 100_000; // ~100KB
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const canvasPostSchema = z.object({
 	canvasType: z.enum(CANVAS_TYPES),
@@ -39,6 +40,9 @@ export async function GET(request: Request) {
 		const canvasId = searchParams.get("id");
 
 		if (canvasId) {
+			if (!UUID_REGEX.test(canvasId)) {
+				return new ChatSDKError("bad_request:api").toResponse();
+			}
 			const canvas = await getStrategyCanvas({ userId: user.id, canvasId });
 			return Response.json(canvas);
 		}
@@ -124,6 +128,11 @@ export const DELETE = withCsrf(async (request: Request) => {
 		const canvasId = searchParams.get("id");
 
 		if (!canvasId) {
+			return new ChatSDKError("bad_request:api").toResponse();
+		}
+
+		// Validate UUID format before database query
+		if (!UUID_REGEX.test(canvasId)) {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 

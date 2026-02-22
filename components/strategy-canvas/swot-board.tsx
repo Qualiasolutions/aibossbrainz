@@ -1,6 +1,5 @@
 "use client";
 
-import DOMPurify from "dompurify";
 import { AnimatePresence, motion } from "framer-motion";
 import {
 	Check,
@@ -126,9 +125,10 @@ export function SwotBoard({ compact = false, refreshTrigger }: SwotBoardProps) {
 	};
 
 	const exportBoard = async () => {
-		// Import PDF libraries dynamically
+		// Import PDF and sanitization libraries dynamically
 		const { default: html2canvas } = await import("html2canvas");
 		const { default: jsPDF } = await import("jspdf");
+		const { default: DOMPurify } = await import("dompurify");
 
 		// Create a temporary container for rendering
 		const container = document.createElement("div");
