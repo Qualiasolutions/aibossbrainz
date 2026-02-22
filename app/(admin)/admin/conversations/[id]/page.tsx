@@ -76,9 +76,9 @@ export default async function ConversationDetailPage({
 	const { chat, messages } = data;
 
 	return (
-		<div className="p-8">
+		<div className="p-4 md:p-6 lg:p-8">
 			{/* Header */}
-			<div className="mb-8">
+			<div className="mb-6 lg:mb-8">
 				<Link href="/admin/conversations">
 					<Button
 						variant="ghost"

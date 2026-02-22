@@ -47,25 +47,26 @@ export function ConversationsTable({ conversations }: ConversationsTableProps) {
 
 			{/* Table */}
 			<div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+				<div className="overflow-x-auto">
 				<table className="w-full">
 					<thead>
 						<tr className="border-b border-neutral-100 bg-neutral-50">
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Conversation
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								User
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Topic
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Messages
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Created
 							</th>
-							<th className="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Actions
 							</th>
 						</tr>
@@ -86,13 +87,13 @@ export function ConversationsTable({ conversations }: ConversationsTableProps) {
 									key={conv.id}
 									className="hover:bg-neutral-50 transition-colors"
 								>
-									<td className="px-6 py-4">
-										<div className="flex items-start gap-3">
-											<div className="rounded-lg bg-neutral-100 p-2">
+									<td className="px-3 sm:px-6 py-4">
+										<div className="flex items-start gap-2 sm:gap-3">
+											<div className="hidden sm:block rounded-lg bg-neutral-100 p-2">
 												<MessageSquare className="h-4 w-4 text-neutral-500" />
 											</div>
 											<div className="min-w-0">
-												<p className="text-sm font-medium text-neutral-900 truncate max-w-xs">
+												<p className="text-sm font-medium text-neutral-900 truncate max-w-[150px] sm:max-w-xs">
 													{conv.title || "Untitled"}
 												</p>
 												<p className="text-xs text-neutral-400 font-mono">
@@ -101,10 +102,10 @@ export function ConversationsTable({ conversations }: ConversationsTableProps) {
 											</div>
 										</div>
 									</td>
-									<td className="px-6 py-4">
-										<p className="text-sm text-neutral-700">{conv.userEmail}</p>
+									<td className="px-3 sm:px-6 py-4">
+										<p className="text-sm text-neutral-700 truncate max-w-[120px] sm:max-w-none">{conv.userEmail}</p>
 									</td>
-									<td className="px-6 py-4">
+									<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
 										{conv.topic ? (
 											<span
 												className={cn(
@@ -118,19 +119,19 @@ export function ConversationsTable({ conversations }: ConversationsTableProps) {
 											<span className="text-neutral-400 text-sm">-</span>
 										)}
 									</td>
-									<td className="px-6 py-4">
+									<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
 										<p className="text-sm text-neutral-700">
 											{conv.messageCount}
 										</p>
 									</td>
-									<td className="px-6 py-4">
+									<td className="hidden md:table-cell px-3 sm:px-6 py-4">
 										<p className="text-sm text-neutral-500">
 											{formatDistanceToNow(new Date(conv.createdAt), {
 												addSuffix: true,
 											})}
 										</p>
 									</td>
-									<td className="px-6 py-4 text-right">
+									<td className="px-3 sm:px-6 py-4 text-right">
 										<Link href={`/admin/conversations/${conv.id}`}>
 											<Button
 												variant="ghost"
@@ -147,6 +148,7 @@ export function ConversationsTable({ conversations }: ConversationsTableProps) {
 						)}
 					</tbody>
 				</table>
+				</div>
 			</div>
 		</div>
 	);

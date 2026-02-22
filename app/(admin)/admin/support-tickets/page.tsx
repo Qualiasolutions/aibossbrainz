@@ -58,16 +58,16 @@ export default async function SupportTicketsPage() {
 	]);
 
 	return (
-		<div className="p-8">
-			<div className="mb-8">
-				<h1 className="text-3xl font-bold text-neutral-900">Support Tickets</h1>
+		<div className="p-4 md:p-6 lg:p-8">
+			<div className="mb-6 lg:mb-8">
+				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">Support Tickets</h1>
 				<p className="mt-1 text-neutral-500">
 					Manage customer support requests. {stats.totalTickets} total tickets.
 				</p>
 			</div>
 
 			{/* Stats Overview */}
-			<div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div className="mb-6 lg:mb-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
 				<StatsCard
 					title="Open Tickets"
 					value={stats.openTickets}

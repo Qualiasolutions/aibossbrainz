@@ -158,14 +158,14 @@ export function SupportTicketsTable({
 				<table className="w-full">
 					<thead>
 						<tr className="border-b border-neutral-100 text-left text-sm text-neutral-500">
-							<th className="px-4 py-3 font-medium">Subject</th>
-							<th className="px-4 py-3 font-medium">User</th>
-							<th className="px-4 py-3 font-medium">Status</th>
-							<th className="px-4 py-3 font-medium">Priority</th>
-							<th className="px-4 py-3 font-medium">Messages</th>
-							<th className="px-4 py-3 font-medium">Time Spent</th>
-							<th className="px-4 py-3 font-medium">Created</th>
-							<th className="px-4 py-3 font-medium">Actions</th>
+							<th className="px-3 sm:px-4 py-3 font-medium">Subject</th>
+							<th className="hidden sm:table-cell px-3 sm:px-4 py-3 font-medium">User</th>
+							<th className="px-3 sm:px-4 py-3 font-medium">Status</th>
+							<th className="hidden md:table-cell px-3 sm:px-4 py-3 font-medium">Priority</th>
+							<th className="hidden lg:table-cell px-3 sm:px-4 py-3 font-medium">Messages</th>
+							<th className="hidden lg:table-cell px-3 sm:px-4 py-3 font-medium">Time Spent</th>
+							<th className="hidden md:table-cell px-3 sm:px-4 py-3 font-medium">Created</th>
+							<th className="px-3 sm:px-4 py-3 font-medium">Actions</th>
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-neutral-100">
@@ -188,7 +188,7 @@ export function SupportTicketsTable({
 										key={ticket.id}
 										className={`hover:bg-neutral-50 ${isPending ? "opacity-60" : ""}`}
 									>
-										<td className="px-4 py-3">
+										<td className="px-3 sm:px-4 py-3">
 											<Link
 												href={`/admin/support-tickets/${ticket.id}`}
 												className="font-medium text-neutral-900 hover:text-rose-600"
@@ -201,7 +201,7 @@ export function SupportTicketsTable({
 												</span>
 											)}
 										</td>
-										<td className="px-4 py-3">
+										<td className="hidden sm:table-cell px-3 sm:px-4 py-3">
 											<div>
 												<p className="text-sm text-neutral-900">
 													{ticket.userDisplayName || "—"}
@@ -211,7 +211,7 @@ export function SupportTicketsTable({
 												</p>
 											</div>
 										</td>
-										<td className="px-4 py-3">
+										<td className="px-3 sm:px-4 py-3">
 											<span
 												className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${statusConfig[ticket.status as keyof typeof statusConfig].color}`}
 											>
@@ -223,7 +223,7 @@ export function SupportTicketsTable({
 												}
 											</span>
 										</td>
-										<td className="px-4 py-3">
+										<td className="hidden md:table-cell px-3 sm:px-4 py-3">
 											<span
 												className={`text-sm font-medium ${priorityConfig[ticket.priority as keyof typeof priorityConfig].color}`}
 											>
@@ -234,10 +234,10 @@ export function SupportTicketsTable({
 												}
 											</span>
 										</td>
-										<td className="px-4 py-3 text-sm text-neutral-600">
+										<td className="hidden lg:table-cell px-3 sm:px-4 py-3 text-sm text-neutral-600">
 											{ticket.messageCount}
 										</td>
-										<td className="px-4 py-3">
+										<td className="hidden lg:table-cell px-3 sm:px-4 py-3">
 											{editingTimeId === ticket.id ? (
 												<div className="flex items-center gap-1">
 													<Input
@@ -282,12 +282,12 @@ export function SupportTicketsTable({
 												</button>
 											)}
 										</td>
-										<td className="px-4 py-3 text-sm text-neutral-500">
+										<td className="hidden md:table-cell px-3 sm:px-4 py-3 text-sm text-neutral-500">
 											{formatDistanceToNow(new Date(ticket.createdAt), {
 												addSuffix: true,
 											})}
 										</td>
-										<td className="px-4 py-3">
+										<td className="px-3 sm:px-4 py-3">
 											<DropdownMenu>
 												<DropdownMenuTrigger asChild>
 													<Button

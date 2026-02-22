@@ -162,20 +162,20 @@ export default function LandingPageCMSPage() {
 	return (
 		<div className="flex h-full flex-col">
 			{/* Header */}
-			<div className="flex items-center justify-between border-b border-neutral-200 bg-white p-4">
+			<div className="flex flex-col gap-3 border-b border-neutral-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-2xl font-bold text-neutral-900">
+					<h1 className="text-xl sm:text-2xl font-bold text-neutral-900">
 						Landing Page CMS
 					</h1>
 					<p className="text-sm text-neutral-500">
 						Edit landing page content. Changes apply immediately after saving.
 					</p>
 				</div>
-				<div className="flex items-center gap-3">
+				<div className="flex items-center gap-2 sm:gap-3">
 					<Link href="/" target="_blank">
 						<Button variant="outline" size="sm" className="gap-2">
 							<Eye className="h-4 w-4" />
-							Preview Site
+							<span className="hidden sm:inline">Preview Site</span>
 							<ExternalLink className="h-3 w-3" />
 						</Button>
 					</Link>
@@ -189,7 +189,7 @@ export default function LandingPageCMSPage() {
 						<RefreshCw
 							className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
 						/>
-						Refresh
+						<span className="hidden sm:inline">Refresh</span>
 					</Button>
 					<Button
 						size="sm"
@@ -202,7 +202,8 @@ export default function LandingPageCMSPage() {
 						) : (
 							<Save className="h-4 w-4" />
 						)}
-						Save Changes
+						<span className="hidden sm:inline">Save Changes</span>
+						<span className="sm:hidden">Save</span>
 						{hasChanges && (
 							<span className="rounded-full bg-white/20 px-1.5 py-0.5 text-xs">
 								{pendingChanges.size}
@@ -215,7 +216,7 @@ export default function LandingPageCMSPage() {
 			{/* Content */}
 			<div className="flex-1 overflow-auto p-6">
 				<Tabs defaultValue="hero" className="w-full">
-					<TabsList className="mb-6 grid w-full grid-cols-5 lg:w-auto lg:grid-cols-none lg:flex">
+					<TabsList className="mb-6 flex w-full overflow-x-auto no-scrollbar">
 						<TabsTrigger value="hero" className="gap-2">
 							<Type className="h-4 w-4" />
 							Hero

@@ -84,7 +84,7 @@ export default async function SupportTicketDetailPage(props: {
 	}
 
 	return (
-		<div className="p-8">
+		<div className="p-4 md:p-6 lg:p-8">
 			<SupportTicketDetail
 				ticket={data.ticket}
 				user={data.user}

@@ -185,7 +185,7 @@ export function DashboardGrid({ initialWidgets }: DashboardGridProps) {
 	if (!mounted) {
 		// SSR placeholder with same grid
 		return (
-			<div className="grid gap-6 grid-cols-1 lg:grid-cols-4">
+			<div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-2 lg:grid-cols-4">
 				{initialWidgets.map((widget) => (
 					<div key={widget.id} className={getWidgetClasses(widget.size)}>
 						{widget.component}
@@ -209,7 +209,7 @@ export function DashboardGrid({ initialWidgets }: DashboardGridProps) {
 						Reset layout
 					</button>
 				</div>
-				<div className="grid gap-6 grid-cols-1 lg:grid-cols-4">
+				<div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-2 lg:grid-cols-4">
 					{widgets.map((widget, index) => (
 						<DraggableWidget key={widget.id} widget={widget} index={index} />
 					))}

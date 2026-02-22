@@ -73,21 +73,21 @@ export default async function UserDetailsPage({
 	}
 
 	return (
-		<div className="p-8">
+		<div className="p-4 md:p-6 lg:p-8">
 			{/* Back Button */}
 			<Link href="/admin/users">
-				<Button variant="ghost" className="mb-6 gap-2">
+				<Button variant="ghost" className="mb-4 md:mb-6 gap-2">
 					<ArrowLeft className="h-4 w-4" />
 					Back to Users
 				</Button>
 			</Link>
 
 			{/* Header */}
-			<div className="mb-8">
-				<h1 className="text-3xl font-bold text-neutral-900">
+			<div className="mb-6 lg:mb-8">
+				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">
 					{user.displayName || "No Name"}
 				</h1>
-				<p className="text-neutral-500 mt-1">{user.email}</p>
+				<p className="text-neutral-500 mt-1 truncate">{user.email}</p>
 			</div>
 
 			{/* User Details Grid */}

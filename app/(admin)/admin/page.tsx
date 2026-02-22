@@ -110,9 +110,9 @@ export default async function AdminDashboard() {
 	// (redirecting to /admin would cause an infinite loop since this IS /admin)
 	if (!stats && activity.length === 0 && !subscriptionStats) {
 		return (
-			<div className="p-8">
-				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-neutral-900">Dashboard</h1>
+			<div className="p-4 md:p-6 lg:p-8">
+				<div className="mb-6 lg:mb-8">
+					<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">Dashboard</h1>
 					<p className="text-neutral-500 mt-1">Welcome back.</p>
 				</div>
 				<div className="flex flex-col items-center justify-center min-h-[400px] gap-4 rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
@@ -242,10 +242,10 @@ export default async function AdminDashboard() {
 	];
 
 	return (
-		<div className="p-8">
+		<div className="p-4 md:p-6 lg:p-8">
 			{/* Header */}
-			<div className="mb-8">
-				<h1 className="text-3xl font-bold text-neutral-900">Dashboard</h1>
+			<div className="mb-6 lg:mb-8">
+				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">Dashboard</h1>
 				<p className="text-neutral-500 mt-1">
 					Welcome back. Drag widgets to customize your view.
 				</p>

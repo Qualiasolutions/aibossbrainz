@@ -190,25 +190,26 @@ export function UsersTable({
 
 			{/* Table */}
 			<div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+				<div className="overflow-x-auto">
 				<table className="w-full">
 					<thead>
 						<tr className="border-b border-neutral-100 bg-neutral-50">
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								User
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Company
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Subscription
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Activity
 							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Status
 							</th>
-							<th className="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
+							<th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
 								Actions
 							</th>
 						</tr>
@@ -229,15 +230,15 @@ export function UsersTable({
 									key={user.id}
 									className="hover:bg-neutral-50 transition-colors"
 								>
-									<td className="px-6 py-4">
+									<td className="px-3 sm:px-6 py-4">
 										<div>
 											<p className="text-sm font-medium text-neutral-900">
 												{user.displayName || "No name"}
 											</p>
-											<p className="text-sm text-neutral-500">{user.email}</p>
+											<p className="text-sm text-neutral-500 truncate max-w-[150px] sm:max-w-none">{user.email}</p>
 										</div>
 									</td>
-									<td className="px-6 py-4">
+									<td className="hidden lg:table-cell px-3 sm:px-6 py-4">
 										<p className="text-sm text-neutral-700">
 											{user.companyName || "-"}
 										</p>
@@ -245,7 +246,7 @@ export function UsersTable({
 											{user.industry || "No industry"}
 										</p>
 									</td>
-									<td className="px-6 py-4">
+									<td className="px-3 sm:px-6 py-4">
 										{(() => {
 											const daysLeft = getDaysRemaining(
 												user.subscriptionEndDate,
@@ -299,7 +300,7 @@ export function UsersTable({
 											);
 										})()}
 									</td>
-									<td className="px-6 py-4">
+									<td className="hidden md:table-cell px-3 sm:px-6 py-4">
 										<div className="space-y-1">
 											<p className="text-sm text-neutral-700">
 												{user.chatCount} chats
@@ -309,7 +310,7 @@ export function UsersTable({
 											</p>
 										</div>
 									</td>
-									<td className="px-6 py-4">
+									<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
 										<div className="flex flex-col gap-1">
 											{user.userType === "team" ? (
 												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-indigo-50 text-indigo-600">
@@ -349,7 +350,7 @@ export function UsersTable({
 											)}
 										</div>
 									</td>
-									<td className="px-6 py-4 text-right">
+									<td className="px-3 sm:px-6 py-4 text-right">
 										<DropdownMenu>
 											<DropdownMenuTrigger asChild>
 												<Button
@@ -418,6 +419,7 @@ export function UsersTable({
 						)}
 					</tbody>
 				</table>
+				</div>
 			</div>
 
 			{/* Delete Confirmation Dialog */}

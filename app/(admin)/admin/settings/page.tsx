@@ -13,9 +13,9 @@ export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
 	return (
-		<div className="p-8">
-			<div className="mb-8">
-				<h1 className="text-3xl font-bold text-neutral-900">Settings</h1>
+		<div className="p-4 md:p-6 lg:p-8">
+			<div className="mb-6 lg:mb-8">
+				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">Settings</h1>
 				<p className="text-neutral-500 mt-1">
 					Manage platform configuration and preferences.
 				</p>

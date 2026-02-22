@@ -7,13 +7,16 @@ import {
 	Globe,
 	Headphones,
 	LayoutDashboard,
+	Menu,
 	MessageSquare,
 	Settings,
 	Sparkles,
 	Users,
+	X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -60,11 +63,11 @@ const navItems = [
 	},
 ];
 
-export function AdminSidebar() {
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 	const pathname = usePathname();
 
 	return (
-		<div className="flex h-full w-64 flex-col border-r border-neutral-200 bg-white">
+		<>
 			{/* Header */}
 			<div className="flex h-16 items-center gap-2 border-b border-neutral-200 px-4">
 				<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-red-600">
@@ -89,6 +92,7 @@ export function AdminSidebar() {
 						<Link
 							key={item.href}
 							href={item.href}
+							onClick={onNavigate}
 							className={cn(
 								"flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
 								isActive
@@ -105,7 +109,7 @@ export function AdminSidebar() {
 
 			{/* Footer */}
 			<div className="border-t border-neutral-200 p-4">
-				<Link href="/">
+				<Link href="/" onClick={onNavigate}>
 					<Button
 						variant="ghost"
 						className="w-full justify-start gap-2 text-neutral-600 hover:text-neutral-900"
@@ -115,6 +119,67 @@ export function AdminSidebar() {
 					</Button>
 				</Link>
 			</div>
-		</div>
+		</>
+	);
+}
+
+export function AdminSidebar() {
+	const [open, setOpen] = useState(false);
+	const pathname = usePathname();
+
+	// Close mobile sidebar on route change
+	useEffect(() => {
+		setOpen(false);
+	}, [pathname]);
+
+	return (
+		<>
+			{/* Mobile header bar */}
+			<div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-neutral-200 bg-white px-4 md:hidden">
+				<button
+					type="button"
+					onClick={() => setOpen(true)}
+					className="rounded-lg p-1.5 text-neutral-600 hover:bg-neutral-100"
+				>
+					<Menu className="h-5 w-5" />
+				</button>
+				<div className="flex items-center gap-2">
+					<div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-red-600">
+						<Sparkles className="h-3.5 w-3.5 text-white" />
+					</div>
+					<span className="text-sm font-semibold text-neutral-900">
+						Admin
+					</span>
+				</div>
+			</div>
+
+			{/* Mobile sidebar overlay */}
+			{open && (
+				<>
+					{/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop dismiss */}
+					<div
+						className="fixed inset-0 z-50 bg-black/50 md:hidden"
+						onClick={() => setOpen(false)}
+					/>
+					<div className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-white shadow-xl md:hidden">
+						<div className="absolute right-2 top-3">
+							<button
+								type="button"
+								onClick={() => setOpen(false)}
+								className="rounded-lg p-1.5 text-neutral-500 hover:bg-neutral-100"
+							>
+								<X className="h-5 w-5" />
+							</button>
+						</div>
+						<SidebarContent onNavigate={() => setOpen(false)} />
+					</div>
+				</>
+			)}
+
+			{/* Desktop sidebar */}
+			<div className="hidden md:flex h-full w-64 flex-col border-r border-neutral-200 bg-white">
+				<SidebarContent />
+			</div>
+		</>
 	);
 }

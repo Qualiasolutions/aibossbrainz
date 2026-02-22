@@ -5,22 +5,17 @@ import { StatsCard } from "@/components/admin/stats-card";
 import {
 	getAdminStats,
 	getAllUsers,
-	getClientOnlyStats,
 	getSubscriptionStats,
-	getUncategorizedStats,
 } from "@/lib/admin/queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
-	const [stats, users, allSubStats, clientSubStats, uncategorizedSubStats] =
-		await Promise.all([
-			getAdminStats(),
-			getAllUsers(),
-			getSubscriptionStats(),
-			getClientOnlyStats(),
-			getUncategorizedStats(),
-		]);
+	const [stats, users, subStats] = await Promise.all([
+		getAdminStats(),
+		getAllUsers(),
+		getSubscriptionStats(),
+	]);
 
 	// Calculate additional metrics
 	const avgMessagesPerUser =
@@ -45,16 +40,16 @@ export default async function AnalyticsPage() {
 	const usersWithManyMessages = users.filter((u) => u.messageCount > 10).length;
 
 	return (
-		<div className="p-8">
-			<div className="mb-8">
-				<h1 className="text-3xl font-bold text-neutral-900">Analytics</h1>
+		<div className="p-4 md:p-6 lg:p-8">
+			<div className="mb-6 lg:mb-8">
+				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">Analytics</h1>
 				<p className="text-neutral-500 mt-1">
 					Platform usage statistics and insights.
 				</p>
 			</div>
 
 			{/* Key Metrics */}
-			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+			<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 mb-6 lg:mb-8">
 				<StatsCard
 					title="Avg Messages/User"
 					value={avgMessagesPerUser}
@@ -82,15 +77,11 @@ export default async function AnalyticsPage() {
 			</div>
 
 			{/* Revenue Filter - Clients Only vs All Users */}
-			<div className="mb-8">
-				<RevenueFilter
-					allStats={allSubStats}
-					clientStats={clientSubStats}
-					uncategorizedStats={uncategorizedSubStats}
-				/>
+			<div className="mb-6 lg:mb-8">
+				<RevenueFilter stats={subStats} />
 			</div>
 
-			<div className="grid gap-6 lg:grid-cols-2 mb-8">
+			<div className="grid gap-4 md:gap-6 lg:grid-cols-2 mb-6 lg:mb-8">
 				{/* Executive Usage */}
 				<ExecutiveBreakdown
 					breakdown={stats.executiveBreakdown}
@@ -187,16 +178,16 @@ export default async function AnalyticsPage() {
 					<table className="w-full">
 						<thead>
 							<tr className="border-b border-neutral-100 bg-neutral-50">
-								<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
+								<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
 									User
 								</th>
-								<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
+								<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
 									Company
 								</th>
-								<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
+								<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
 									Chats
 								</th>
-								<th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
+								<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
 									Messages
 								</th>
 							</tr>
@@ -210,21 +201,21 @@ export default async function AnalyticsPage() {
 										key={user.id}
 										className="hover:bg-neutral-50 transition-colors"
 									>
-										<td className="px-6 py-4">
+										<td className="px-3 sm:px-6 py-4">
 											<div>
 												<p className="text-sm font-medium text-neutral-900">
 													{user.displayName || "No name"}
 												</p>
-												<p className="text-xs text-neutral-500">{user.email}</p>
+												<p className="text-xs text-neutral-500 truncate max-w-[150px] sm:max-w-none">{user.email}</p>
 											</div>
 										</td>
-										<td className="px-6 py-4 text-sm text-neutral-600">
+										<td className="hidden sm:table-cell px-3 sm:px-6 py-4 text-sm text-neutral-600">
 											{user.companyName || "-"}
 										</td>
-										<td className="px-6 py-4 text-sm text-neutral-600">
+										<td className="px-3 sm:px-6 py-4 text-sm text-neutral-600">
 											{user.chatCount}
 										</td>
-										<td className="px-6 py-4 text-sm text-neutral-600">
+										<td className="px-3 sm:px-6 py-4 text-sm text-neutral-600">
 											{user.messageCount}
 										</td>
 									</tr>
