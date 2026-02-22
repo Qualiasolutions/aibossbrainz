@@ -119,7 +119,9 @@ export function parseMarkdown(text: string): PDFBlock[] {
 		const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
 		if (headingMatch) {
 			const level = headingMatch[1].length as 1 | 2 | 3;
-			blocks.push({ type: "heading", level, text: headingMatch[2].trim() });
+			// Strip inline bold/italic markers since headings are already bold
+			const headingText = stripInlineMarkers(headingMatch[2].trim());
+			blocks.push({ type: "heading", level, text: headingText });
 			i++;
 			continue;
 		}
@@ -285,10 +287,32 @@ export function parseInline(text: string): InlineSegment[] {
 		segments.push({ type: "text", text });
 	}
 
+	// Post-process: strip any remaining unpaired ** markers from text segments.
+	// These appear when bold text spans paragraph boundaries (the AI splits
+	// bold across blank lines, leaving one half of the ** pair per paragraph).
+	for (let idx = 0; idx < segments.length; idx++) {
+		if (segments[idx].type === "text" && segments[idx].text.includes("**")) {
+			segments[idx] = {
+				type: "text",
+				text: segments[idx].text.replace(/\*\*/g, ""),
+			};
+		}
+	}
+
 	return segments;
 }
 
 // --- Helpers ---
+
+/**
+ * Strip markdown bold/italic markers (**, *, ***) from text.
+ * Used for headings (already bold) and cleaning up unpaired markers.
+ */
+function stripInlineMarkers(text: string): string {
+	return text
+		.replace(/\*{1,3}(.+?)\*{1,3}/g, "$1")
+		.replace(/\*{2,}/g, "");
+}
 
 function parseTableRow(row: string): string[] {
 	return row

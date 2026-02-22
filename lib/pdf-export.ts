@@ -42,10 +42,10 @@ export async function exportToPDF(
 			y += titleLines.length * 14 * 0.3528 * STYLES.lineHeight + 8;
 		}
 
-		// Header: Executive name
+		// Header: Executive name (red to match brand)
 		doc.setFont("helvetica", "bold");
 		doc.setFontSize(18);
-		doc.setTextColor(...STYLES.headingColor);
+		doc.setTextColor(185, 28, 28);
 		doc.text(executiveName, STYLES.marginLeft, y);
 		y += 7;
 
