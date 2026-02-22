@@ -60,6 +60,13 @@ function PureMultimodalInput({
 	selectedModelId,
 	onModelChange: _onModelChange,
 	usage: _usage,
+	isVoiceMode = false,
+	isVoiceListening = false,
+	isVoiceProcessing = false,
+	isVoiceSupported = true,
+	voiceTranscript = "",
+	onVoiceToggle,
+	onVoiceStop,
 }: {
 	chatId: string;
 	input: string;
@@ -76,6 +83,13 @@ function PureMultimodalInput({
 	selectedModelId: string;
 	onModelChange?: (modelId: string) => void;
 	usage?: AppUsage;
+	isVoiceMode?: boolean;
+	isVoiceListening?: boolean;
+	isVoiceProcessing?: boolean;
+	isVoiceSupported?: boolean;
+	voiceTranscript?: string;
+	onVoiceToggle?: () => void;
+	onVoiceStop?: () => void;
 }) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const { width } = useWindowSize();
@@ -125,31 +139,6 @@ function PureMultimodalInput({
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [uploadQueue, setUploadQueue] = useState<string[]>([]);
-	const handleVoiceTranscript = useCallback(
-		(transcript: string) => {
-			const sanitized = transcript.trim();
-			if (!sanitized) {
-				return;
-			}
-
-			startTransition(() => {
-				setInput((currentValue) => {
-					if (!currentValue) {
-						return sanitized;
-					}
-
-					const spacing = currentValue.endsWith(" ") ? "" : " ";
-					return `${currentValue}${spacing}${sanitized}`;
-				});
-			});
-
-			requestAnimationFrame(() => {
-				adjustHeight();
-				textareaRef.current?.focus();
-			});
-		},
-		[adjustHeight, setInput],
-	);
 
 	const submitForm = useCallback(() => {
 		const hasText = input.trim().length > 0;
@@ -319,31 +308,51 @@ function PureMultimodalInput({
 					</div>
 				)}
 				<div className="flex flex-row items-center gap-1.5">
-					<AttachmentsButton
-						fileInputRef={fileInputRef}
-						selectedModelId={selectedModelId}
-						status={status}
-					/>
+					{!isVoiceMode && (
+						<AttachmentsButton
+							fileInputRef={fileInputRef}
+							selectedModelId={selectedModelId}
+							status={status}
+						/>
+					)}
 					<VoiceInputButton
 						className="size-6 rounded text-muted-foreground/70 transition-colors duration-200 hover:text-red-400"
-						disabled={status !== "ready"}
-						onTranscript={handleVoiceTranscript}
+						disabled={status !== "ready" && !isVoiceMode}
+						isListening={isVoiceListening}
+						isProcessing={isVoiceProcessing}
+						isSupported={isVoiceSupported}
+						isVoiceMode={isVoiceMode}
+						onToggle={onVoiceToggle ?? (() => {})}
 						size="sm"
 					/>
 					<PromptInputTextarea
 						autoFocus
 						className="grow resize-none border-0! border-none! bg-transparent py-0.5 pl-0 text-xs leading-normal text-foreground caret-primary outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground placeholder:text-xs placeholder:pl-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden"
 						data-testid="multimodal-input"
+						disabled={isVoiceMode}
 						disableAutoResize={true}
 						maxHeight={28}
 						minHeight={20}
 						onChange={handleInput}
-						placeholder="Message your executive team..."
+						placeholder={
+							isVoiceMode
+								? voiceTranscript || (isVoiceListening ? "Listening..." : "Waiting for response...")
+								: "Message your executive team..."
+						}
 						ref={textareaRef}
 						rows={1}
-						value={input}
+						value={isVoiceMode ? "" : input}
 					/>
-					{status === "submitted" ? (
+					{isVoiceMode ? (
+						<button
+							className="flex shrink-0 items-center gap-1 rounded-full bg-red-500 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-600"
+							onClick={onVoiceStop}
+							type="button"
+						>
+							<StopIcon size={10} />
+							End
+						</button>
+					) : status === "submitted" ? (
 						<StopButton setMessages={setMessages} stop={stop} />
 					) : (
 						<PromptInputSubmit
@@ -363,22 +372,15 @@ function PureMultimodalInput({
 export const MultimodalInput = memo(
 	PureMultimodalInput,
 	(prevProps, nextProps) => {
-		if (prevProps.input !== nextProps.input) {
-			return false;
-		}
-		if (prevProps.status !== nextProps.status) {
-			return false;
-		}
-		if (!equal(prevProps.attachments, nextProps.attachments)) {
-			return false;
-		}
-		if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) {
-			return false;
-		}
-		if (prevProps.selectedModelId !== nextProps.selectedModelId) {
-			return false;
-		}
-
+		if (prevProps.input !== nextProps.input) return false;
+		if (prevProps.status !== nextProps.status) return false;
+		if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+		if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) return false;
+		if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
+		if (prevProps.isVoiceMode !== nextProps.isVoiceMode) return false;
+		if (prevProps.isVoiceListening !== nextProps.isVoiceListening) return false;
+		if (prevProps.isVoiceProcessing !== nextProps.isVoiceProcessing) return false;
+		if (prevProps.voiceTranscript !== nextProps.voiceTranscript) return false;
 		return true;
 	},
 );

@@ -178,7 +178,6 @@ export async function updateSession(request: NextRequest) {
 		"/strategy-canvas",
 		"/actionable",
 		"/clarifications",
-		"/call",
 		"/executives",
 	];
 
