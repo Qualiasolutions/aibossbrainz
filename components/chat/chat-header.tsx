@@ -62,7 +62,7 @@ export function ChatHeader({
 					{showNewButton && (
 						<Button
 							aria-label="Start new conversation"
-							className="h-8 gap-2 rounded-lg border-border bg-background px-2 font-medium text-xs text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:px-3"
+							className="h-11 gap-2 rounded-lg border-border bg-background px-2 font-medium text-xs text-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:h-8 sm:px-3"
 							onClick={onNewChat}
 							variant="outline"
 						>
@@ -83,7 +83,7 @@ export function ChatHeader({
 				{/* Right: Strategy Canvas, Menu & Support */}
 				<div className="flex shrink-0 items-center gap-1">
 					<Button
-						className="h-8 gap-1.5 rounded-lg border-border bg-background px-2 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:px-2.5"
+						className="h-11 gap-1.5 rounded-lg border-border bg-background px-2 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:h-8 sm:px-2.5"
 						variant="outline"
 						onClick={onOpenSwotPanel}
 					>
@@ -94,7 +94,7 @@ export function ChatHeader({
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
-								className="h-8 gap-1.5 rounded-lg border-border bg-background px-2 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:px-2.5"
+								className="h-11 gap-1.5 rounded-lg border-border bg-background px-2 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:h-8 sm:px-2.5"
 								variant="outline"
 							>
 								<MoreHorizontal className="size-3.5" />
@@ -147,7 +147,7 @@ export function ChatHeader({
 					</DropdownMenu>
 
 					<Button
-						className="h-8 gap-1.5 rounded-lg bg-gradient-to-r from-rose-500 to-red-600 px-2 font-medium text-xs text-white shadow-sm transition-all hover:from-rose-600 hover:to-red-700 sm:px-2.5"
+						className="h-11 gap-1.5 rounded-lg bg-gradient-to-r from-rose-500 to-red-600 px-2 font-medium text-xs text-white shadow-sm transition-all hover:from-rose-600 hover:to-red-700 sm:h-8 sm:px-2.5"
 						onClick={onOpenSupport}
 						title="Contact Support"
 						type="button"

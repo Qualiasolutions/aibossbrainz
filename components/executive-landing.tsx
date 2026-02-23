@@ -67,7 +67,7 @@ export function ExecutiveLanding({
 				{/* Executive Selection Cards */}
 				<motion.div
 					animate={{ opacity: 1, y: 0 }}
-					className="grid grid-cols-3 gap-3 sm:gap-4"
+					className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4"
 					initial={{ opacity: 0, y: 15 }}
 					transition={{ duration: 0.5, delay: 0.1 }}
 				>

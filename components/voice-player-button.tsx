@@ -148,7 +148,7 @@ export const VoicePlayerButton = ({
 										? "Resume"
 										: "Listen to response"
 							}
-							className={`${className} rounded-r-none`}
+							className={`size-11 sm:size-9 ${className} rounded-r-none`}
 							disabled={voicePlayer.isLoading}
 							onClick={handleClick}
 							onKeyDown={handleKeyDown}
@@ -185,7 +185,7 @@ export const VoicePlayerButton = ({
 					<PopoverTrigger asChild>
 						<Button
 							aria-label="Voice settings"
-							className="h-8 w-6 rounded-l-none border-border/40 border-l px-1 text-muted-foreground hover:text-foreground"
+							className="h-11 w-8 rounded-l-none border-border/40 border-l px-1 text-muted-foreground hover:text-foreground sm:h-8 sm:w-6"
 							type="button"
 							variant="ghost"
 						>
