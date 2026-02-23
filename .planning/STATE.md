@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 Phase: 26 (documentation-design-decisions) -- COMPLETE
 Plan: 1 of 1 (phase complete)
 Status: Phase complete
-Last activity: 2026-02-23 - Completed quick task 7: Fix 6 critical UX/UI issues (iOS auto-zoom, touch targets, dark mode contrast, virtual keyboard, scroll indicators, responsive grid)
+Last activity: 2026-02-23 - Completed quick task 8: Fix 8 audit findings (harmful content refusal, professional disclaimers, jsPDF, canary hash, web search sanitization, strategy canvas validation, voice analytics, voiceRequestCount)
 
 Progress: ████████████ 12/12 plans (100%)
 
@@ -89,6 +89,7 @@ Progress: ████████████ 12/12 plans (100%)
 - Dark mode muted-foreground at 65% lightness for WCAG AA (5.7:1 contrast ratio)
 - useKeyboardHeight hook with 100px threshold to distinguish keyboard from browser chrome changes
 - Gradient fade overlays replace chevron buttons for focus chip scroll indicators
+- Record<string, unknown> cast for voiceRequestCount access pre-migration (type-safe with fallback to voiceMinutes)
 
 ### Completed
 
@@ -96,7 +97,7 @@ Progress: ████████████ 12/12 plans (100%)
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 7 completed (chat animations, typewriter tuning, CSRF/index/KB fixes, PDF export filenames, frontend review fixes, inline voice mode, UX/UI mobile fixes)
+**Quick tasks:** 8 completed (chat animations, typewriter tuning, CSRF/index/KB fixes, PDF export filenames, frontend review fixes, inline voice mode, UX/UI mobile fixes, audit findings fix)
 
 ### Quick Tasks Completed
 
@@ -107,6 +108,7 @@ Progress: ████████████ 12/12 plans (100%)
 | 5 | Inline voice mode - replace /call page with ChatGPT-style in-chat voice | 2026-02-22 | a2025f9 | [5-inline-voice-mode-like-chatgpt-remove-si](./quick/5-inline-voice-mode-like-chatgpt-remove-si/) |
 | 6 | Fix 9 frontend issues: admin redirect loop, chat error boundary, auth defense-in-depth, performance, DOMPurify, UUID validation, dead embed | 2026-02-22 | 511c438 | [6-fix-critical-frontend-issues-from-review](./quick/6-fix-critical-frontend-issues-from-review/) |
 | 7 | Fix 6 critical UX/UI issues: iOS auto-zoom, touch targets, dark mode contrast, virtual keyboard, scroll indicators, responsive grid | 2026-02-23 | 075ef1c | [7-fix-6-critical-ux-ui-issues-ios-auto-zoo](./quick/7-fix-6-critical-ux-ui-issues-ios-auto-zoo/) |
+| 8 | Fix 8 audit findings: harmful content refusal, professional disclaimers, jsPDF, canary hash, web search sanitization, canvas validation, voice analytics, voiceRequestCount | 2026-02-23 | 4f068b0 | [8-fix-8-audit-findings-harmful-content-ref](./quick/8-fix-8-audit-findings-harmful-content-ref/) |
 
 ### Blockers
 
@@ -123,9 +125,10 @@ Progress: ████████████ 12/12 plans (100%)
 - GOOGLE_AI_API_KEY is optional env var -- set it in Vercel for provider fallback
 - AICostLog userId index migration (20260219000200) needs to be applied via Supabase Dashboard SQL Editor
 - StrategyCanvas composite index migration (20260222000100) needs to be applied via Supabase Dashboard SQL Editor
+- voiceRequestCount migration (20260223000100) needs to be applied via Supabase Dashboard SQL Editor
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed quick task 7 (6 UX/UI mobile fixes). Build verified clean, deployed to production.
-Resume: Deployed to Vercel
+Stopped at: Completed quick task 8 (8 audit findings fix). Build verified clean. Migration pending.
+Resume: Apply migration 20260223000100 via Supabase Dashboard, then deploy to Vercel
