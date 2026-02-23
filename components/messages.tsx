@@ -81,92 +81,93 @@ function PureMessages({
 	}, [votes]);
 
 	return (
-		<div
-			className={cn(
-				"overscroll-behavior-contain -webkit-overflow-scrolling-touch flex-1 touch-pan-y overflow-y-scroll",
-				className,
-			)}
-			ref={messagesContainerRef}
-			style={{ overflowAnchor: "none" }}
-		>
-			<Conversation className="flex h-full w-full min-w-0 flex-col gap-4 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8">
-				<ConversationContent className="flex flex-col gap-5 px-1 py-2 md:gap-7">
-					{messages.length === 0 && <Greeting botType={selectedBotType} />}
+		<div className={cn("relative flex-1 overflow-hidden", className)}>
+			{/* Scrollable messages area */}
+			<div
+				className="overscroll-behavior-contain -webkit-overflow-scrolling-touch h-full touch-pan-y overflow-y-scroll"
+				ref={messagesContainerRef}
+				style={{ overflowAnchor: "none" }}
+			>
+				<Conversation className="flex h-full w-full min-w-0 flex-col gap-4 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8">
+					<ConversationContent className="flex flex-col gap-5 px-1 py-2 md:gap-7">
+						{messages.length === 0 && <Greeting botType={selectedBotType} />}
 
-					{hasMoreMessages && onLoadOlder && (
-						<div className="flex justify-center pb-2">
-							<button
-								type="button"
-								className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/80 px-4 py-2 font-medium text-stone-600 text-xs shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md disabled:opacity-50 dark:border-stone-700 dark:bg-stone-800/80 dark:text-stone-300 dark:hover:bg-stone-800"
-								disabled={isLoadingOlder}
-								onClick={onLoadOlder}
-							>
-								{isLoadingOlder ? (
-									<>
-										<Loader2Icon className="size-3.5 animate-spin" />
-										Loading...
-									</>
-								) : (
-									"Load earlier messages"
-								)}
-							</button>
-						</div>
-					)}
-
-					{messages.map((message, index) => (
-						<PreviewMessage
-							chatId={chatId}
-							chatTitle={chatTopic}
-							isLoading={
-								status === "streaming" && messages.length - 1 === index
-							}
-							isReadonly={isReadonly}
-							key={message.id}
-							message={message}
-							onFullscreen={handleFullscreen}
-							onSuggestionSelect={onSuggestionSelect}
-							regenerate={regenerate}
-							requiresScrollPadding={
-								hasSentMessage && index === messages.length - 1
-							}
-							selectedBotType={selectedBotType}
-							setMessages={setMessages}
-							vote={voteMap.get(message.id)}
-						/>
-					))}
-
-					{/* Inline loading indicator before assistant message exists */}
-					{status === "submitted" &&
-						messages.length > 0 &&
-						messages[messages.length - 1]?.role === "user" && (
-							<div className="w-full assistant-enter">
-								{/* biome-ignore lint/a11y/useValidAriaRole: role is a component prop, not an ARIA role */}
-								<EnhancedChatMessage
-									botType={selectedBotType}
-									content=""
-									isTyping={true}
-									role="assistant"
-								/>
+						{hasMoreMessages && onLoadOlder && (
+							<div className="flex justify-center pb-2">
+								<button
+									type="button"
+									className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/80 px-4 py-2 font-medium text-stone-600 text-xs shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md disabled:opacity-50 dark:border-stone-700 dark:bg-stone-800/80 dark:text-stone-300 dark:hover:bg-stone-800"
+									disabled={isLoadingOlder}
+									onClick={onLoadOlder}
+								>
+									{isLoadingOlder ? (
+										<>
+											<Loader2Icon className="size-3.5 animate-spin" />
+											Loading...
+										</>
+									) : (
+										"Load earlier messages"
+									)}
+								</button>
 							</div>
 						)}
 
-					<div
-						className="min-h-[24px] min-w-[24px] shrink-0"
-						ref={messagesEndRef}
-					/>
-				</ConversationContent>
-			</Conversation>
+						{messages.map((message, index) => (
+							<PreviewMessage
+								chatId={chatId}
+								chatTitle={chatTopic}
+								isLoading={
+									status === "streaming" && messages.length - 1 === index
+								}
+								isReadonly={isReadonly}
+								key={message.id}
+								message={message}
+								onFullscreen={handleFullscreen}
+								onSuggestionSelect={onSuggestionSelect}
+								regenerate={regenerate}
+								requiresScrollPadding={
+									hasSentMessage && index === messages.length - 1
+								}
+								selectedBotType={selectedBotType}
+								setMessages={setMessages}
+								vote={voteMap.get(message.id)}
+							/>
+						))}
 
+						{/* Inline loading indicator before assistant message exists */}
+						{status === "submitted" &&
+							messages.length > 0 &&
+							messages[messages.length - 1]?.role === "user" && (
+								<div className="w-full assistant-enter">
+									{/* biome-ignore lint/a11y/useValidAriaRole: role is a component prop, not an ARIA role */}
+									<EnhancedChatMessage
+										botType={selectedBotType}
+										content=""
+										isTyping={true}
+										role="assistant"
+									/>
+								</div>
+							)}
+
+						<div
+							className="min-h-[24px] min-w-[24px] shrink-0"
+							ref={messagesEndRef}
+						/>
+					</ConversationContent>
+				</Conversation>
+			</div>
+
+			{/* Scroll-to-bottom button - outside scroll container so it stays visible */}
 			{!isAtBottom && (
-				<div className="pointer-events-none absolute right-0 bottom-20 left-0 z-10 flex justify-center sm:bottom-36">
+				<div className="pointer-events-none absolute right-0 bottom-4 left-0 z-10 flex justify-center">
 					<button
 						aria-label="Scroll to bottom"
-						className="hover:-translate-y-0.5 pointer-events-auto inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white/95 px-4 py-2 font-medium text-stone-700 text-xs shadow-md backdrop-blur-sm transition-all hover:bg-white hover:shadow-lg"
+						className="hover:-translate-y-0.5 pointer-events-auto inline-flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white/95 px-4 py-2 font-medium text-stone-700 text-xs shadow-md backdrop-blur-sm transition-all hover:bg-white hover:shadow-lg dark:border-stone-700 dark:bg-stone-800/95 dark:text-stone-300"
 						onClick={() => scrollToBottom("smooth")}
 						type="button"
 					>
 						<ArrowDownIcon className="size-4" />
-						New messages
+						Scroll to bottom
 					</button>
 				</div>
 			)}
