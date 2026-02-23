@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 Phase: 26 (documentation-design-decisions) -- COMPLETE
 Plan: 1 of 1 (phase complete)
 Status: Phase complete
-Last activity: 2026-02-22 - Completed quick task 6: Fix 9 frontend review findings
+Last activity: 2026-02-23 - Completed quick task 7: Fix 6 critical UX/UI issues (iOS auto-zoom, touch targets, dark mode contrast, virtual keyboard, scroll indicators, responsive grid)
 
 Progress: ████████████ 12/12 plans (100%)
 
@@ -84,6 +84,11 @@ Progress: ████████████ 12/12 plans (100%)
 - Inline fallback UI over redirect to prevent infinite loop when admin dashboard data queries all fail
 - DOMPurify dynamically imported in swot-board export function (not loaded until export triggered)
 - UUID validation on canvas GET and DELETE endpoints before database queries
+- text-base (16px) on mobile textarea prevents iOS Safari auto-zoom; sm:text-xs for desktop
+- 44px mobile touch targets via size-11 sm:size-{original} pattern across all interactive buttons
+- Dark mode muted-foreground at 65% lightness for WCAG AA (5.7:1 contrast ratio)
+- useKeyboardHeight hook with 100px threshold to distinguish keyboard from browser chrome changes
+- Gradient fade overlays replace chevron buttons for focus chip scroll indicators
 
 ### Completed
 
@@ -91,7 +96,7 @@ Progress: ████████████ 12/12 plans (100%)
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 6 completed (chat animations, typewriter tuning, CSRF/index/KB fixes, PDF export filenames, frontend review fixes, inline voice mode)
+**Quick tasks:** 7 completed (chat animations, typewriter tuning, CSRF/index/KB fixes, PDF export filenames, frontend review fixes, inline voice mode, UX/UI mobile fixes)
 
 ### Quick Tasks Completed
 
@@ -101,6 +106,7 @@ Progress: ████████████ 12/12 plans (100%)
 | 4 | Fix PDF export: proper filenames with conversation topic, title headers, suggestion stripping | 2026-02-22 | ba30095 | [4-fix-pdf-export-proper-filenames-with-con](./quick/4-fix-pdf-export-proper-filenames-with-con/) |
 | 5 | Inline voice mode - replace /call page with ChatGPT-style in-chat voice | 2026-02-22 | a2025f9 | [5-inline-voice-mode-like-chatgpt-remove-si](./quick/5-inline-voice-mode-like-chatgpt-remove-si/) |
 | 6 | Fix 9 frontend issues: admin redirect loop, chat error boundary, auth defense-in-depth, performance, DOMPurify, UUID validation, dead embed | 2026-02-22 | 511c438 | [6-fix-critical-frontend-issues-from-review](./quick/6-fix-critical-frontend-issues-from-review/) |
+| 7 | Fix 6 critical UX/UI issues: iOS auto-zoom, touch targets, dark mode contrast, virtual keyboard, scroll indicators, responsive grid | 2026-02-23 | 075ef1c | [7-fix-6-critical-ux-ui-issues-ios-auto-zoo](./quick/7-fix-6-critical-ux-ui-issues-ios-auto-zoo/) |
 
 ### Blockers
 
@@ -120,6 +126,6 @@ Progress: ████████████ 12/12 plans (100%)
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Completed quick task 6 (frontend review fixes). Build verified clean.
+Last session: 2026-02-23
+Stopped at: Completed quick task 7 (6 UX/UI mobile fixes). Build verified clean, deployed to production.
 Resume: Deployed to Vercel
