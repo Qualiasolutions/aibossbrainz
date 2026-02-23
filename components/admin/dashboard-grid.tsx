@@ -24,6 +24,7 @@ interface DashboardGridContextValue {
 	moveWidget: (dragIndex: number, hoverIndex: number) => void;
 	isDragging: boolean;
 	setIsDragging: (dragging: boolean) => void;
+	isTouch: boolean;
 }
 
 const DashboardGridContext = createContext<DashboardGridContextValue | null>(
@@ -59,57 +60,54 @@ function DraggableWidget({ widget, index }: DraggableWidgetProps) {
 
 	if (!context) return null;
 
-	const { moveWidget, isDragging, setIsDragging } = context;
+	const { moveWidget, isDragging, setIsDragging, isTouch } = context;
 
-	const handleDragStart = (e: React.DragEvent) => {
-		e.dataTransfer.setData("text/plain", index.toString());
-		e.dataTransfer.effectAllowed = "move";
-		setIsDragging(true);
-	};
-
-	const handleDragEnd = () => {
-		setIsDragging(false);
-		setIsDraggedOver(false);
-	};
-
-	const handleDragOver = (e: React.DragEvent) => {
-		e.preventDefault();
-		e.dataTransfer.dropEffect = "move";
-		setIsDraggedOver(true);
-	};
-
-	const handleDragLeave = () => {
-		setIsDraggedOver(false);
-	};
-
-	const handleDrop = (e: React.DragEvent) => {
-		e.preventDefault();
-		const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-		if (dragIndex !== index) {
-			moveWidget(dragIndex, index);
-		}
-		setIsDraggedOver(false);
-	};
+	// On touch devices, skip drag entirely (native drag API doesn't work on iOS)
+	if (isTouch) {
+		return (
+			<div className={getWidgetClasses(widget.size)}>{widget.component}</div>
+		);
+	}
 
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: drag-and-drop widget requires native drag events
 		<div
 			draggable
-			onDragStart={handleDragStart}
-			onDragEnd={handleDragEnd}
-			onDragOver={handleDragOver}
-			onDragLeave={handleDragLeave}
-			onDrop={handleDrop}
+			onDragStart={(e) => {
+				e.dataTransfer.setData("text/plain", index.toString());
+				e.dataTransfer.effectAllowed = "move";
+				setIsDragging(true);
+			}}
+			onDragEnd={() => {
+				setIsDragging(false);
+				setIsDraggedOver(false);
+			}}
+			onDragOver={(e) => {
+				e.preventDefault();
+				e.dataTransfer.dropEffect = "move";
+				setIsDraggedOver(true);
+			}}
+			onDragLeave={() => setIsDraggedOver(false)}
+			onDrop={(e) => {
+				e.preventDefault();
+				const dragIndex = parseInt(
+					e.dataTransfer.getData("text/plain"),
+					10,
+				);
+				if (dragIndex !== index) {
+					moveWidget(dragIndex, index);
+				}
+				setIsDraggedOver(false);
+			}}
 			className={cn(
 				getWidgetClasses(widget.size),
-				"group relative transition-all duration-200",
+				"group relative transition-opacity duration-200",
 				isDragging && "opacity-50",
 				isDraggedOver && "ring-2 ring-rose-500 ring-offset-2 rounded-xl",
 			)}
 		>
-			{/* Drag handle overlay */}
 			<div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-				<div className="flex items-center gap-1 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-md shadow-sm border border-neutral-200 cursor-grab active:cursor-grabbing">
+				<div className="flex items-center gap-1 px-2 py-1 bg-white rounded-md shadow-sm border border-neutral-200 cursor-grab active:cursor-grabbing">
 					<GripVertical className="h-4 w-4 text-neutral-400" />
 					<span className="text-xs text-neutral-500">Drag</span>
 				</div>
@@ -127,10 +125,12 @@ export function DashboardGrid({ initialWidgets }: DashboardGridProps) {
 	const [widgets, setWidgets] = useState<WidgetConfig[]>(initialWidgets);
 	const [isDragging, setIsDragging] = useState(false);
 	const [mounted, setMounted] = useState(false);
+	const [isTouch, setIsTouch] = useState(false);
 
-	// Load saved layout from localStorage
+	// Load saved layout from localStorage + detect touch
 	useEffect(() => {
 		setMounted(true);
+		setIsTouch("ontouchstart" in window || navigator.maxTouchPoints > 0);
 		try {
 			const saved = localStorage.getItem(STORAGE_KEY);
 			if (saved) {
@@ -197,18 +197,20 @@ export function DashboardGrid({ initialWidgets }: DashboardGridProps) {
 
 	return (
 		<DashboardGridContext.Provider
-			value={{ widgets, moveWidget, isDragging, setIsDragging }}
+			value={{ widgets, moveWidget, isDragging, setIsDragging, isTouch }}
 		>
 			<div className="space-y-4">
-				<div className="flex justify-end">
-					<button
-						type="button"
-						onClick={resetLayout}
-						className="text-xs text-neutral-500 hover:text-neutral-700 transition-colors"
-					>
-						Reset layout
-					</button>
-				</div>
+				{!isTouch && (
+					<div className="flex justify-end">
+						<button
+							type="button"
+							onClick={resetLayout}
+							className="text-xs text-neutral-500 hover:text-neutral-700 transition-colors"
+						>
+							Reset layout
+						</button>
+					</div>
+				)}
 				<div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-2 lg:grid-cols-4">
 					{widgets.map((widget, index) => (
 						<DraggableWidget key={widget.id} widget={widget} index={index} />

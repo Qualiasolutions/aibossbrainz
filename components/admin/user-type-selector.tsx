@@ -81,7 +81,7 @@ export function UserTypeSelector({
 							disabled={isPending}
 							onClick={() => handleChange(option.value)}
 							className={cn(
-								"flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all",
+								"flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors",
 								isActive
 									? `${option.bgColor} ${option.textColor} ${option.borderColor} ring-2 ${option.ringColor}`
 									: "bg-white text-neutral-500 border-neutral-200 hover:border-neutral-300",

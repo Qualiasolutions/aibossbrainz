@@ -114,7 +114,7 @@ export function SubscriptionStats({ stats }: SubscriptionStatsProps) {
 								<div className="h-2 overflow-hidden rounded-full bg-neutral-100">
 									<div
 										className={cn(
-											"h-full rounded-full bg-gradient-to-r transition-all",
+											"h-full rounded-full bg-gradient-to-r transition-[width]",
 											tier.color,
 										)}
 										style={{ width: `${percentage}%` }}

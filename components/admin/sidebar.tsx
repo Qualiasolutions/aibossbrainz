@@ -203,7 +203,7 @@ export function AdminSidebar() {
 			{/* Desktop sidebar */}
 			<div
 				className={cn(
-					"hidden md:flex h-full flex-col border-r border-neutral-200 bg-white transition-all duration-200 relative",
+					"hidden md:flex h-full flex-col border-r border-neutral-200 bg-white transition-[width] duration-200 relative",
 					collapsed ? "w-16" : "w-64",
 				)}
 			>
