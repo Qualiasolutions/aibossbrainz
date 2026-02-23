@@ -22,6 +22,12 @@ export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
 			kind: z.enum(artifactKinds),
 		}),
 		execute: async ({ title, kind }) => {
+			if (!session?.user?.id) {
+				return {
+					error: "You must be logged in to create documents.",
+				};
+			}
+
 			const id = generateUUID();
 
 			dataStream.write({

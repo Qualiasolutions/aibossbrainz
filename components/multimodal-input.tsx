@@ -124,17 +124,19 @@ function PureMultimodalInput({
 		"",
 	);
 
+	const hasHydratedRef = useRef(false);
+
 	useEffect(() => {
-		if (textareaRef.current) {
-			const domValue = textareaRef.current.value;
-			// Prefer DOM value over localStorage to handle hydration
-			const finalValue = domValue || localStorageInput || "";
-			setInput(finalValue);
-			adjustHeight();
-		}
-		// Only run once after hydration
+		if (hasHydratedRef.current || !textareaRef.current) return;
+
+		const domValue = textareaRef.current.value;
+		// Prefer DOM value over localStorage to handle hydration
+		const finalValue = domValue || localStorageInput || "";
+		setInput(finalValue);
+		adjustHeight();
+		hasHydratedRef.current = true;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [adjustHeight, localStorageInput, setInput]);
+	}, []);
 
 	useEffect(() => {
 		setLocalStorageInput(input);

@@ -79,8 +79,7 @@ export function useScrollToBottom() {
 		const mutationObserver = new MutationObserver(onContentChange);
 		mutationObserver.observe(container, {
 			childList: true,
-			subtree: true,
-			characterData: true,
+			subtree: false,
 		});
 
 		return () => {

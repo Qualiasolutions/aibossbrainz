@@ -35,23 +35,28 @@ async function geocodeCity(
 
 export const getWeather = tool({
 	description:
-		"Get the current weather at a location. You can provide either coordinates or a city name.",
-	inputSchema: z.union([
-		z.object({
-			latitude: z.number(),
-			longitude: z.number(),
-		}),
-		z.object({
-			city: z
-				.string()
-				.describe("City name (e.g., 'San Francisco', 'New York', 'London')"),
-		}),
-	]),
+		"Get the current weather at a location. Provide either a city name OR latitude/longitude coordinates.",
+	inputSchema: z.object({
+		city: z
+			.string()
+			.optional()
+			.describe(
+				"City name (e.g., 'San Francisco', 'New York', 'London'). Use this OR latitude/longitude.",
+			),
+		latitude: z
+			.number()
+			.optional()
+			.describe("Latitude coordinate. Must be provided together with longitude."),
+		longitude: z
+			.number()
+			.optional()
+			.describe("Longitude coordinate. Must be provided together with latitude."),
+	}),
 	execute: async (input) => {
 		let latitude: number;
 		let longitude: number;
 
-		if ("city" in input) {
+		if (input.city) {
 			const coords = await geocodeCity(input.city);
 			if (!coords) {
 				return {
@@ -60,9 +65,17 @@ export const getWeather = tool({
 			}
 			latitude = coords.latitude;
 			longitude = coords.longitude;
-		} else {
+		} else if (
+			input.latitude !== undefined &&
+			input.longitude !== undefined
+		) {
 			latitude = input.latitude;
 			longitude = input.longitude;
+		} else {
+			return {
+				error:
+					"Please provide either a city name or both latitude and longitude coordinates.",
+			};
 		}
 
 		const controller = new AbortController();
@@ -94,7 +107,7 @@ export const getWeather = tool({
 				};
 			}
 
-			if ("city" in input) {
+			if (input.city) {
 				weatherData.cityName = input.city;
 			}
 

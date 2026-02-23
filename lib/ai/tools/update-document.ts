@@ -22,11 +22,17 @@ export const updateDocument = ({ session, dataStream }: UpdateDocumentProps) =>
 				.describe("The description of changes that need to be made"),
 		}),
 		execute: async ({ id, description }) => {
+			if (!session?.user?.id) {
+				return {
+					error: "You must be logged in to update documents.",
+				};
+			}
+
 			const document = await getDocumentById({ id });
 
-			if (!document) {
+			if (!document || document.userId !== session.user.id) {
 				return {
-					error: "Document not found",
+					error: "Document not found or access denied.",
 				};
 			}
 

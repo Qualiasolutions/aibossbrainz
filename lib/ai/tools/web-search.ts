@@ -256,6 +256,31 @@ function decodeHTMLEntities(text: string): string {
 }
 
 /**
+ * Validate that a string is a safe HTTP(S) URL
+ */
+function isValidHttpUrl(str: string): boolean {
+	if (!str) return false;
+	try {
+		const url = new URL(str);
+		return url.protocol === "http:" || url.protocol === "https:";
+	} catch {
+		return false;
+	}
+}
+
+/**
+ * Strip potential prompt injection markers from external content
+ */
+function sanitizeSnippet(text: string): string {
+	if (!text) return "";
+	return text
+		.replace(/<\/?system[^>]*>/gi, "")
+		.replace(/<\/?user[^>]*>/gi, "")
+		.replace(/<\/?assistant[^>]*>/gi, "")
+		.replace(/<\/?instructions?[^>]*>/gi, "");
+}
+
+/**
  * Web search tool for AI to get real-time information
  */
 export const webSearch = tool({
@@ -282,9 +307,9 @@ export const webSearch = tool({
 			success: true,
 			message: `Found ${results.length} results for "${query}"`,
 			results: results.map((r) => ({
-				title: r.title,
-				url: r.url,
-				snippet: r.snippet.slice(0, 500), // Limit snippet length
+				title: sanitizeSnippet(r.title.slice(0, 200)),
+				url: isValidHttpUrl(r.url) ? r.url : "",
+				snippet: sanitizeSnippet(r.snippet.slice(0, 500)),
 			})),
 		};
 	},

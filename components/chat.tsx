@@ -259,6 +259,8 @@ export function Chat({
 		onFinish: () => {
 			// Clear stored message on successful completion
 			setLastSentMessage(null);
+			// Release accumulated data stream parts to free memory
+			setDataStream([]);
 			mutate(unstable_serialize(getChatHistoryPaginationKey));
 			// Note: isTruncated is NOT reset here -- it stays true so the banner
 			// remains visible until the user either clicks Continue or sends a new message

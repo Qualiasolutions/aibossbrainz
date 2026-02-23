@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import type { BotType } from "@/lib/bot-personalities";
 import { BOT_PERSONALITIES } from "@/lib/bot-personalities";
 import { Response } from "./elements/response";
@@ -26,17 +26,20 @@ const TypewriterContent = memo(
 		const displayedLengthRef = useRef(0);
 		const animationFrameRef = useRef<number | null>(null);
 		const lastUpdateTimeRef = useRef(0);
+		const isMountedRef = useRef(true);
 
 		// Keep refs in sync
 		contentRef.current = content;
 		isStreamingRef.current = isStreaming;
 
 		useEffect(() => {
+			isMountedRef.current = true;
+
 			// If not streaming and never started animation, show full content immediately
 			// This handles history loading or pre-streaming state
 			if (!isStreaming && !isStarted) {
-				setDisplayedContent(content);
-				displayedLengthRef.current = content.length;
+				setDisplayedContent(contentRef.current);
+				displayedLengthRef.current = contentRef.current.length;
 				return;
 			}
 
@@ -48,6 +51,8 @@ const TypewriterContent = memo(
 			// If we are animating (isStarted), run the loop
 			if (isStarted) {
 				const animate = (timestamp: number) => {
+					if (!isMountedRef.current) return;
+
 					// Throttle updates to ~60fps (16ms)
 					if (timestamp - lastUpdateTimeRef.current < 16) {
 						animationFrameRef.current = requestAnimationFrame(animate);
@@ -90,12 +95,13 @@ const TypewriterContent = memo(
 			}
 
 			return () => {
+				isMountedRef.current = false;
 				if (animationFrameRef.current) {
 					cancelAnimationFrame(animationFrameRef.current);
 					animationFrameRef.current = null;
 				}
 			};
-		}, [isStreaming, isStarted, content]); // Re-run if these change to ensure loop is active/checked
+		}, [isStreaming, isStarted]);
 
 		const isRevealing = displayedContent.length < content.length;
 
