@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { sanitizePromptContent } from "@/lib/ai/prompts";
 
 const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 const SERPER_API_KEY = process.env.SERPER_API_KEY;
@@ -269,18 +270,6 @@ function isValidHttpUrl(str: string): boolean {
 }
 
 /**
- * Strip potential prompt injection markers from external content
- */
-function sanitizeSnippet(text: string): string {
-	if (!text) return "";
-	return text
-		.replace(/<\/?system[^>]*>/gi, "")
-		.replace(/<\/?user[^>]*>/gi, "")
-		.replace(/<\/?assistant[^>]*>/gi, "")
-		.replace(/<\/?instructions?[^>]*>/gi, "");
-}
-
-/**
  * Web search tool for AI to get real-time information
  */
 export const webSearch = tool({
@@ -307,9 +296,9 @@ export const webSearch = tool({
 			success: true,
 			message: `Found ${results.length} results for "${query}"`,
 			results: results.map((r) => ({
-				title: sanitizeSnippet(r.title.slice(0, 200)),
+				title: sanitizePromptContent(r.title.slice(0, 200)),
 				url: isValidHttpUrl(r.url) ? r.url : "",
-				snippet: sanitizeSnippet(r.snippet.slice(0, 500)),
+				snippet: sanitizePromptContent(r.snippet.slice(0, 500)),
 			})),
 		};
 	},

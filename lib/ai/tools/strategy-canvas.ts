@@ -84,7 +84,8 @@ const strategyCanvasSchema = z.object({
 			"Section to add items to. SWOT: strengths/weaknesses/opportunities/threats. BMC: keyPartners/keyActivities/keyResources/valuePropositions/customerRelationships/channels/customerSegments/costStructure/revenueStreams. Journey: awareness/consideration/decision/purchase/retention/advocacy. Brainstorm: notes",
 		),
 	items: z
-		.array(z.string())
+		.array(z.string().max(500))
+		.max(10)
 		.describe(
 			"Items to add to the specified section (3-5 items per section recommended)",
 		),

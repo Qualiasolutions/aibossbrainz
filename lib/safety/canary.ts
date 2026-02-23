@@ -17,12 +17,12 @@ const CANARY_PREFIX = "ALECCI_CANARY_";
 
 /**
  * Returns a deployment-specific canary token string.
- * Format: ALECCI_CANARY_ + first 8 hex chars of SHA256(AUTH_SECRET).
+ * Format: ALECCI_CANARY_ + first 16 hex chars of SHA256(AUTH_SECRET).
  * Uses SHA256 instead of raw secret slice to prevent secret material leakage (PROMPT-08).
  */
 export function getCanaryToken(): string {
 	const secret = process.env.AUTH_SECRET || "default";
-	const hash = createHash("sha256").update(secret).digest("hex").slice(0, 8);
+	const hash = createHash("sha256").update(secret).digest("hex").slice(0, 16);
 	return `${CANARY_PREFIX}${hash}`;
 }
 
