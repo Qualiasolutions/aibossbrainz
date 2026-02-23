@@ -111,7 +111,7 @@ export default function RootLayout({
 			lang="en"
 			suppressHydrationWarning
 		>
-			<body className="min-h-screen bg-background text-foreground antialiased">
+			<body className="bg-background text-foreground antialiased">
 				<Script id="theme-color-init" strategy="beforeInteractive">
 					{THEME_COLOR_SCRIPT}
 				</Script>
