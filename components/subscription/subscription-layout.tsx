@@ -11,7 +11,7 @@ export function SubscriptionLayout({ children }: SubscriptionLayoutProps) {
 	return (
 		<div className="flex h-full flex-col">
 			<UpgradeBanner />
-			<div className="flex-1 overflow-hidden">{children}</div>
+			<div className="flex-1 overflow-auto">{children}</div>
 		</div>
 	);
 }

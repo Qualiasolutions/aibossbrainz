@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { CanvasType } from "@/components/strategy-canvas/types";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 // Lazy load strategy canvas components to reduce initial bundle (~200KB savings)
@@ -103,6 +104,7 @@ export function SwotSlidePanel({
 	refreshKey,
 }: SwotSlidePanelProps) {
 	const [activeCanvas, setActiveCanvas] = useState<CanvasType>("swot");
+	const isMobile = useIsMobile();
 
 	// Sync active tab when prop changes from parent (e.g., when AI tool populates a canvas)
 	// Only depend on activeTab - NOT activeCanvas - to avoid resetting user's tab selection
@@ -116,16 +118,19 @@ export function SwotSlidePanel({
 		<AnimatePresence>
 			{isOpen && (
 				<motion.div
-					initial={{ width: 0 }}
-					animate={{ width: 380 }}
-					exit={{ width: 0 }}
+					initial={isMobile ? { x: "100%" } : { width: 0 }}
+					animate={isMobile ? { x: 0 } : { width: 380 }}
+					exit={isMobile ? { x: "100%" } : { width: 0 }}
 					transition={{
 						type: "spring",
 						stiffness: 400,
 						damping: 40,
 					}}
-					style={{ width: 380 }}
-					className="h-full flex-shrink-0 overflow-hidden border-l border-border bg-background"
+					style={isMobile ? undefined : { width: 380 }}
+					className={cn(
+						"h-full flex-shrink-0 overflow-hidden border-l border-border bg-background",
+						isMobile && "fixed inset-0 z-50 border-l-0",
+					)}
 				>
 					{/* Header */}
 					<div className="flex items-center justify-between border-b border-border px-3 py-2.5">

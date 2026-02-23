@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { Suspense } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
-import { ChatViewportLock } from "@/components/chat-viewport-lock";
+
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { MobileSidebarProvider } from "@/components/mobile-sidebar-context";
 import { NetworkStatusBanner } from "@/components/network-status-banner";
@@ -44,7 +44,6 @@ export default async function Layout({
 
 	return (
 		<>
-			<ChatViewportLock />
 			{user && <SentryUser userId={user.id} email={user.email} />}
 			{/* Network status banner for offline detection */}
 			<NetworkStatusBanner />

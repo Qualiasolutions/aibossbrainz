@@ -35,6 +35,7 @@ import {
 	fetchWithErrorHandlers,
 	generateUUID,
 } from "@/lib/utils";
+import { ChatViewportLock } from "./chat-viewport-lock";
 import { ChatHeader } from "./chat/chat-header";
 import { useDataStream } from "./data-stream-provider";
 import { ExecutiveLanding } from "./executive-landing";
@@ -473,6 +474,7 @@ export function Chat({
 
 	return (
 		<>
+			<ChatViewportLock />
 			<div className="flex h-dvh w-full overflow-hidden bg-background">
 				{/* Chat Area - compresses when panel opens */}
 				<div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
