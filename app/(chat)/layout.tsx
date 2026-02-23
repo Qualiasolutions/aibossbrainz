@@ -54,7 +54,7 @@ export default async function Layout({
 					<MobileSidebarProvider>
 						<SidebarProvider defaultOpen={true} className="!min-h-0 h-dvh overflow-hidden">
 							<AppSidebar user={user || undefined} isAdmin={isAdmin} />
-							<SidebarInset>
+							<SidebarInset className="min-h-0">
 								<SubscriptionLayout>
 									<Suspense
 										fallback={

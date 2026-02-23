@@ -9,9 +9,9 @@ interface SubscriptionLayoutProps {
 
 export function SubscriptionLayout({ children }: SubscriptionLayoutProps) {
 	return (
-		<div className="flex h-full flex-col">
+		<div className="flex min-h-0 flex-1 flex-col">
 			<UpgradeBanner />
-			<div className="flex-1 overflow-auto">{children}</div>
+			<div className="min-h-0 flex-1 overflow-auto">{children}</div>
 		</div>
 	);
 }
