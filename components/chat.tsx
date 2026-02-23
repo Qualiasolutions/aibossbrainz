@@ -13,6 +13,7 @@ import {
 	useArtifactSelector,
 } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
+import { useKeyboardHeight } from "@/hooks/use-keyboard-height";
 import { useAutoSpeak } from "@/hooks/use-auto-speak";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -123,6 +124,7 @@ export function Chat({
 	const router = useRouter();
 	const { open } = useSidebar();
 	const isMobile = useIsMobile();
+	const keyboardHeight = useKeyboardHeight();
 	const { visibilityType } = useChatVisibility({
 		chatId: id,
 		initialVisibilityType,
@@ -564,7 +566,10 @@ export function Chat({
 
 						{/* Input Area - Clean minimalist */}
 						{!isReadonly && (
-							<div className="flex-shrink-0 border-t border-border bg-background/80 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl sm:px-6 sm:pt-4 sm:pb-6">
+							<div
+							className="flex-shrink-0 border-t border-border bg-background/80 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl transition-[padding] duration-150 sm:px-6 sm:pt-4 sm:pb-6"
+							style={keyboardHeight > 0 ? { paddingBottom: `${keyboardHeight}px` } : undefined}
+						>
 								<div className="w-full space-y-2">
 									{/* Focus Mode Chips */}
 									<FocusModeChips

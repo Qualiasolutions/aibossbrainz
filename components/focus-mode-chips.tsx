@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
 	AlertTriangle,
 	Briefcase,
-	ChevronLeft,
 	ChevronRight,
 	Globe,
 	Rocket,
@@ -65,16 +64,6 @@ export function FocusModeChips({
 		return () => window.removeEventListener("resize", checkScroll);
 	}, [checkScroll]);
 
-	const scroll = (direction: "left" | "right") => {
-		if (scrollRef.current) {
-			const scrollAmount = 150;
-			scrollRef.current.scrollBy({
-				left: direction === "left" ? -scrollAmount : scrollAmount,
-				behavior: "smooth",
-			});
-		}
-	};
-
 	// Don't show if only default mode
 	if (availableModes.length <= 1) {
 		return null;
@@ -82,21 +71,13 @@ export function FocusModeChips({
 
 	return (
 		<div className={cn("relative w-full", className)}>
-			{/* Left scroll arrow */}
-			<AnimatePresence>
-				{showLeftArrow && (
-					<motion.button
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						type="button"
-						onClick={() => scroll("left")}
-						className="absolute left-0 top-1/2 z-10 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-all hover:bg-white"
-					>
-						<ChevronLeft className="h-3.5 w-3.5 text-zinc-600" />
-					</motion.button>
-				)}
-			</AnimatePresence>
+			{/* Left fade indicator */}
+			{showLeftArrow && (
+				<div
+					className="pointer-events-none absolute left-0 top-0 z-10 h-full w-8 bg-gradient-to-r from-background to-transparent"
+					aria-hidden
+				/>
+			)}
 
 			{/* Scrollable chips container */}
 			<div
@@ -142,21 +123,13 @@ export function FocusModeChips({
 				})}
 			</div>
 
-			{/* Right scroll arrow */}
-			<AnimatePresence>
-				{showRightArrow && (
-					<motion.button
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						type="button"
-						onClick={() => scroll("right")}
-						className="absolute right-0 top-1/2 z-10 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 shadow-md backdrop-blur-sm transition-all hover:bg-white"
-					>
-						<ChevronRight className="h-3.5 w-3.5 text-zinc-600" />
-					</motion.button>
-				)}
-			</AnimatePresence>
+			{/* Right fade indicator */}
+			{showRightArrow && (
+				<div
+					className="pointer-events-none absolute right-0 top-0 z-10 h-full w-8 bg-gradient-to-l from-background to-transparent"
+					aria-hidden
+				/>
+			)}
 		</div>
 	);
 }
