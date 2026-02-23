@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { generateText } from "ai";
 import { z } from "zod";
 import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
@@ -8,6 +9,7 @@ import {
 	MAX_TTS_TEXT_LENGTH,
 	type VoiceConfig,
 } from "@/lib/ai/voice-config";
+import { recordAnalytics } from "@/lib/analytics/queries";
 import { apiRequestLogger } from "@/lib/api-logging";
 import { checkUserSubscription, saveMessages } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
@@ -166,7 +168,10 @@ export const POST = withCsrf(async (request: Request) => {
 				return new ChatSDKError("rate_limit:chat").toResponse();
 			}
 
-			if ((Number(data?.voiceMinutes) || 0) >= MAX_REALTIME_REQUESTS_PER_DAY) {
+			// MED-8: Use voiceRequestCount for rate limiting (added via migration).
+			// Falls back to voiceMinutes if column not yet migrated.
+			const voiceRequests = Number((data as Record<string, unknown>)?.voiceRequestCount ?? data?.voiceMinutes) || 0;
+			if (voiceRequests >= MAX_REALTIME_REQUESTS_PER_DAY) {
 				return new ChatSDKError("rate_limit:chat").toResponse();
 			}
 		}
@@ -451,6 +456,16 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 			audioDelivery: audioUrl ? "blob" : audioBase64 ? "base64" : "none",
 			chatId: savedChatId,
 		});
+
+		// Record voice analytics for realtime stream route (MED-7)
+		if (responseText) {
+			const cleanForEstimate = stripMarkdownForTTS(responseText);
+			const estimatedMinutes = Math.max(1, Math.ceil(cleanForEstimate.length / 750));
+			after(() => {
+				recordAnalytics(user.id, "voice", estimatedMinutes);
+				recordAnalytics(user.id, "voice_request", 1);
+			});
+		}
 
 		return Response.json({
 			text: responseText,

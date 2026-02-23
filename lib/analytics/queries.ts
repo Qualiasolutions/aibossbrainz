@@ -219,7 +219,7 @@ export async function getTopicBreakdown(
  */
 export async function recordAnalytics(
 	userId: string,
-	type: "message" | "token" | "voice" | "export",
+	type: "message" | "token" | "voice" | "export" | "voice_request",
 	value: number = 1,
 ): Promise<void> {
 	const today = new Date();
@@ -241,6 +241,7 @@ export async function recordAnalytics(
 			p_token_usage: type === "token" ? value : 0,
 			p_voice_minutes: type === "voice" ? value : 0,
 			p_export_count: type === "export" ? value : 0,
+			p_voice_request_count: type === "voice_request" ? value : 0,
 		});
 	} catch (error) {
 		logger.error(

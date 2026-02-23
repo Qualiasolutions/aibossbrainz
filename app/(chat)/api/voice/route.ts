@@ -92,7 +92,10 @@ export const POST = withCsrf(async (request: Request) => {
 				return new ChatSDKError("rate_limit:chat").toResponse();
 			}
 
-			if ((Number(data?.voiceMinutes) || 0) >= MAX_VOICE_REQUESTS_PER_DAY) {
+			// MED-8: Use voiceRequestCount for rate limiting (added via migration).
+			// Falls back to voiceMinutes if column not yet migrated.
+			const voiceRequests = Number((data as Record<string, unknown>)?.voiceRequestCount ?? data?.voiceMinutes) || 0;
+			if (voiceRequests >= MAX_VOICE_REQUESTS_PER_DAY) {
 				return new ChatSDKError("rate_limit:chat").toResponse();
 			}
 		}
@@ -221,7 +224,10 @@ export const POST = withCsrf(async (request: Request) => {
 				// ElevenLabs bills per character but actual costs are monitored via their dashboard.
 				// Character-level cost tracking with AICostLog integration deferred to v2.
 				const estimatedMinutes = Math.max(1, Math.ceil(totalTextLength / 750));
-				after(() => recordAnalytics(user.id, "voice", estimatedMinutes));
+				after(() => {
+					recordAnalytics(user.id, "voice", estimatedMinutes);
+					recordAnalytics(user.id, "voice_request", 1);
+				});
 
 				return new Response(combined, {
 					headers: {
@@ -249,7 +255,10 @@ export const POST = withCsrf(async (request: Request) => {
 		if (cachedUrl) {
 			apiLog.success({ botType, textLength: cleanText.length, cached: true });
 			const estimatedMinutes = Math.max(1, Math.ceil(cleanText.length / 750));
-			after(() => recordAnalytics(user.id, "voice", estimatedMinutes));
+			after(() => {
+				recordAnalytics(user.id, "voice", estimatedMinutes);
+				recordAnalytics(user.id, "voice_request", 1);
+			});
 
 			const cachedResponse = await fetch(cachedUrl);
 			return new Response(cachedResponse.body, {
@@ -320,7 +329,10 @@ export const POST = withCsrf(async (request: Request) => {
 		// Record voice analytics (estimate minutes from text length)
 		// Average speaking rate is ~150 words per minute, average word is 5 characters
 		const estimatedMinutes = Math.max(1, Math.ceil(cleanText.length / 750));
-		after(() => recordAnalytics(user.id, "voice", estimatedMinutes));
+		after(() => {
+			recordAnalytics(user.id, "voice", estimatedMinutes);
+			recordAnalytics(user.id, "voice_request", 1);
+		});
 
 		return new Response(audioBuffer, {
 			headers: {
