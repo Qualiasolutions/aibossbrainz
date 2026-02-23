@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SelectItem } from "@/components/ui/select";
+import { useCsrf } from "@/hooks/use-csrf";
 import { useWindowSize } from "@/hooks/use-window-size";
 import { chatModels } from "@/lib/ai/models";
 import type { Attachment, ChatMessage } from "@/lib/types";
@@ -146,6 +147,7 @@ function PureMultimodalInput({
 		setInput(event.target.value);
 	};
 
+	const { csrfFetch } = useCsrf();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [uploadQueue, setUploadQueue] = useState<string[]>([]);
 
@@ -198,7 +200,7 @@ function PureMultimodalInput({
 		formData.append("file", file);
 
 		try {
-			const response = await fetch("/api/files/upload", {
+			const response = await csrfFetch("/api/files/upload", {
 				method: "POST",
 				body: formData,
 			});
@@ -218,7 +220,7 @@ function PureMultimodalInput({
 		} catch (_error) {
 			toast.error("Failed to upload file, please try again!");
 		}
-	}, []);
+	}, [csrfFetch]);
 
 	// Slim single-line input styling
 	const promptContainerClass =
