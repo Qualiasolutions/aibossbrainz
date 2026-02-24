@@ -1,43 +1,32 @@
 "use client";
 
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { AnimatePresence, motion } from "framer-motion";
 import {
 	ArrowLeft,
 	ArrowRight,
-	Bookmark,
 	Brain,
-	Briefcase,
 	Building2,
-	Download,
-	Globe,
 	LayoutGrid,
-	Lightbulb,
 	Loader2,
-	Map,
 	MessageSquare,
-	Mic,
-	Rocket,
-	Search,
 	Sparkles,
-	Target,
 	Users,
-	Zap,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import {
+	type Dispatch,
+	type SetStateAction,
+	useCallback,
+	useEffect,
+	useState,
+} from "react";
+import { createPortal } from "react-dom";
 import { toast } from "@/components/toast";
 import { useCsrf } from "@/hooks/use-csrf";
-import { BOT_PERSONALITIES, FOCUS_MODES } from "@/lib/bot-personalities";
+import { BOT_PERSONALITIES } from "@/lib/bot-personalities";
 import { INDUSTRIES } from "@/lib/constants/business-profile";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogTitle,
-} from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import {
@@ -48,6 +37,8 @@ import {
 	SelectValue,
 } from "./ui/select";
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 interface UserProfile {
 	displayName: string | null;
 	companyName: string | null;
@@ -55,60 +46,177 @@ interface UserProfile {
 	onboardedAt: string | null;
 }
 
-type OnboardingStep =
-	| "welcome"
-	| "meet-team"
-	| "focus-modes"
-	| "strategy-canvas"
-	| "smart-features"
-	| "voice-power"
-	| "profile"
-	| "ready";
+interface TourStep {
+	id: string;
+	target?: string;
+	title: string;
+	description: string;
+	icon: typeof Sparkles;
+	placement?: "top" | "bottom";
+}
 
-const STEPS: OnboardingStep[] = [
-	"welcome",
-	"meet-team",
-	"focus-modes",
-	"strategy-canvas",
-	"smart-features",
-	"voice-power",
-	"profile",
-	"ready",
-];
+interface ProfileProps {
+	displayName: string;
+	setDisplayName: Dispatch<SetStateAction<string>>;
+	companyName: string;
+	setCompanyName: Dispatch<SetStateAction<string>>;
+	industry: string;
+	setIndustry: Dispatch<SetStateAction<string>>;
+	isSaving: boolean;
+}
+
+interface StepNavProps {
+	stepIndex: number;
+	totalSteps: number;
+	onNext: () => void;
+	onBack: () => void;
+	canGoBack: boolean;
+	isTourMode: boolean;
+	onSkip: () => void;
+}
+
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 const alexandria = BOT_PERSONALITIES.alexandria;
 const kim = BOT_PERSONALITIES.kim;
 
-// Tour-only steps (no profile collection)
-const TOUR_STEPS: OnboardingStep[] = [
-	"welcome",
-	"meet-team",
-	"focus-modes",
-	"strategy-canvas",
-	"smart-features",
-	"voice-power",
-	"ready",
+const ALL_STEPS: TourStep[] = [
+	{
+		id: "welcome",
+		title: "Welcome to Boss Brainz",
+		description:
+			"Meet your executive AI consulting team. Let's show you around.",
+		icon: Sparkles,
+	},
+	{
+		id: "executive-switch",
+		target: "executive-switch",
+		title: "Your Executive Team",
+		description:
+			"Switch between AI executives — Alexandria for marketing & branding, Kim for sales & strategy, or both together for comprehensive advice.",
+		icon: Users,
+		placement: "bottom",
+	},
+	{
+		id: "strategy-canvas",
+		target: "strategy-canvas",
+		title: "Strategy Canvas",
+		description:
+			"Your visual strategy toolkit — SWOT analysis, business model canvas, customer journey maps, and brainstorming boards.",
+		icon: LayoutGrid,
+		placement: "bottom",
+	},
+	{
+		id: "focus-modes",
+		target: "focus-modes",
+		title: "Focus Modes",
+		description:
+			"Steer conversations toward specific topics — pricing, messaging, customer journey, social media, or launch strategy.",
+		icon: Brain,
+		placement: "top",
+	},
+	{
+		id: "chat-input",
+		target: "chat-input",
+		title: "Start a Conversation",
+		description:
+			"Type your question, attach files, or use voice input. Export conversations as PDF from the menu anytime.",
+		icon: MessageSquare,
+		placement: "top",
+	},
+	{
+		id: "profile",
+		title: "Quick Setup",
+		description: "Personalize your experience (optional)",
+		icon: Building2,
+	},
+	{
+		id: "ready",
+		title: "You're all set!",
+		description:
+			"Your executive consulting team is ready to help you grow your business.",
+		icon: Sparkles,
+	},
 ];
+
+const TOUR_ONLY_STEPS = ALL_STEPS.filter((s) => s.id !== "profile");
+
+const SPOTLIGHT_PADDING = 8;
+const TOOLTIP_GAP = 16;
+const TOOLTIP_WIDTH = 360;
+const EDGE_MARGIN = 16;
+
+// ─── Hooks ───────────────────────────────────────────────────────────────────
+
+function useTargetRect(target?: string) {
+	const [rect, setRect] = useState<DOMRect | null>(null);
+
+	useEffect(() => {
+		if (!target) {
+			setRect(null);
+			return;
+		}
+
+		const updateRect = () => {
+			const el = document.querySelector(`[data-tour="${target}"]`);
+			if (el) {
+				setRect(el.getBoundingClientRect());
+			} else {
+				setRect(null);
+			}
+		};
+
+		const rafId = requestAnimationFrame(updateRect);
+		window.addEventListener("resize", updateRect);
+		window.addEventListener("scroll", updateRect, true);
+
+		return () => {
+			cancelAnimationFrame(rafId);
+			window.removeEventListener("resize", updateRect);
+			window.removeEventListener("scroll", updateRect, true);
+		};
+	}, [target]);
+
+	return rect;
+}
+
+// ─── Main Component ──────────────────────────────────────────────────────────
 
 export function OnboardingModal() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const [isTourMode, setIsTourMode] = useState(false);
-	const [step, setStep] = useState<OnboardingStep>("welcome");
-	// Profile fields
+	const [stepIndex, setStepIndex] = useState(0);
+	const [mounted, setMounted] = useState(false);
 	const [displayName, setDisplayName] = useState("");
 	const [companyName, setCompanyName] = useState("");
 	const [industry, setIndustry] = useState("");
 	const { csrfFetch, isLoading: csrfLoading } = useCsrf();
 
-	const activeSteps = isTourMode ? TOUR_STEPS : STEPS;
+	const activeSteps = isTourMode ? TOUR_ONLY_STEPS : ALL_STEPS;
+	const currentStep = activeSteps[stepIndex];
+
+	useEffect(() => {
+		setMounted(true);
+		return () => setMounted(false);
+	}, []);
+
+	// Lock body scroll while tour is active
+	useEffect(() => {
+		if (isOpen) {
+			document.body.style.overflow = "hidden";
+			return () => {
+				document.body.style.overflow = "";
+			};
+		}
+	}, [isOpen]);
 
 	// Listen for "start-product-tour" custom event from sidebar
 	useEffect(() => {
 		const handleStartTour = () => {
 			setIsTourMode(true);
-			setStep("welcome");
+			setStepIndex(0);
 			setIsOpen(true);
 			setIsLoading(false);
 		};
@@ -117,15 +225,14 @@ export function OnboardingModal() {
 			window.removeEventListener("start-product-tour", handleStartTour);
 	}, []);
 
+	// Check if user needs onboarding
 	useEffect(() => {
 		async function checkProfile() {
 			try {
 				const res = await fetch("/api/profile");
 				if (res.ok) {
 					const profile: UserProfile = await res.json();
-					if (!profile.onboardedAt) {
-						setIsOpen(true);
-					}
+					if (!profile.onboardedAt) setIsOpen(true);
 				}
 			} catch (error) {
 				console.error("Failed to fetch profile:", error);
@@ -133,31 +240,32 @@ export function OnboardingModal() {
 				setIsLoading(false);
 			}
 		}
-
 		checkProfile();
 	}, []);
 
-	const currentStepIndex = activeSteps.indexOf(step);
+	// Escape to skip (tour mode only)
+	useEffect(() => {
+		if (!isTourMode || !isOpen) return;
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") closeTour();
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isTourMode, isOpen]);
 
-	const goNext = () => {
-		const nextIndex = currentStepIndex + 1;
-		if (nextIndex < activeSteps.length) {
-			setStep(activeSteps[nextIndex]);
-		}
-	};
+	const goNext = useCallback(() => {
+		setStepIndex((prev) => Math.min(prev + 1, activeSteps.length - 1));
+	}, [activeSteps.length]);
 
-	const goBack = () => {
-		const prevIndex = currentStepIndex - 1;
-		if (prevIndex >= 0) {
-			setStep(activeSteps[prevIndex]);
-		}
-	};
+	const goBack = useCallback(() => {
+		setStepIndex((prev) => Math.max(prev - 1, 0));
+	}, []);
 
-	const closeTour = () => {
+	const closeTour = useCallback(() => {
 		setIsOpen(false);
-		setStep("welcome");
+		setStepIndex(0);
 		setIsTourMode(false);
-	};
+	}, []);
 
 	const saveAndFinish = async () => {
 		if (csrfLoading) {
@@ -182,21 +290,18 @@ export function OnboardingModal() {
 			});
 
 			if (res.ok) {
-				setStep("ready");
+				goNext(); // moves to "ready"
 				setTimeout(() => {
 					setIsOpen(false);
 					setIsTourMode(false);
 				}, 3000);
 			} else {
-				const errorData = await res.json().catch(() => ({}));
-				console.error("Failed to save profile:", errorData);
 				toast({
 					type: "error",
 					description: "Failed to save your profile. Please try again.",
 				});
 			}
-		} catch (error) {
-			console.error("Failed to save profile:", error);
+		} catch {
 			toast({
 				type: "error",
 				description: "Something went wrong. Please try again.",
@@ -206,189 +311,373 @@ export function OnboardingModal() {
 		}
 	};
 
-	// Don't render anything until we know whether to show the modal
-	if (isLoading || !isOpen) return null;
+	if (isLoading || !isOpen || !mounted || !currentStep) return null;
 
-	return (
-		<Dialog
-			open={isOpen}
-			onOpenChange={(open) => {
-				if (!open && isTourMode) closeTour();
-			}}
+	const navProps: StepNavProps = {
+		stepIndex,
+		totalSteps: activeSteps.length,
+		onNext:
+			currentStep.id === "profile" ? saveAndFinish : goNext,
+		onBack: goBack,
+		canGoBack: stepIndex > 0,
+		isTourMode,
+		onSkip: closeTour,
+	};
+
+	return createPortal(
+		<div
+			className="fixed inset-0 z-[100000]"
+			aria-modal="true"
+			role="dialog"
+			aria-label={currentStep.title}
 		>
-			<DialogContent
-				className="max-w-xl overflow-hidden border-0 bg-white p-0 shadow-2xl sm:rounded-2xl"
-				onPointerDownOutside={(e) => {
-					if (!isTourMode) e.preventDefault();
-				}}
-				onEscapeKeyDown={(e) => {
-					if (!isTourMode) e.preventDefault();
-				}}
-			>
-				{/* Step progress indicator */}
-				<div className="flex items-center justify-center gap-1.5 bg-stone-50 py-3">
-					{activeSteps.map((s, i) => (
-						<motion.div
-							key={s}
-							className={cn(
-								"h-1.5 rounded-full transition-all duration-300",
-								i <= currentStepIndex
-									? "w-6 bg-gradient-to-r from-rose-500 to-red-500"
-									: "w-1.5 bg-stone-200",
-							)}
-							initial={false}
-							animate={{
-								width: i <= currentStepIndex ? 24 : 6,
-							}}
-						/>
-					))}
-				</div>
-
-				<AnimatePresence mode="wait">
-					{step === "welcome" && (
-						<WelcomeStep key="welcome" onNext={goNext} />
-					)}
-					{step === "meet-team" && (
-						<MeetTeamStep key="meet-team" onNext={goNext} onBack={goBack} />
-					)}
-					{step === "focus-modes" && (
-						<FocusModesStep
-							key="focus-modes"
-							onNext={goNext}
-							onBack={goBack}
-						/>
-					)}
-					{step === "strategy-canvas" && (
-						<StrategyCanvasStep
-							key="strategy-canvas"
-							onNext={goNext}
-							onBack={goBack}
-						/>
-					)}
-					{step === "smart-features" && (
-						<SmartFeaturesStep
-							key="smart-features"
-							onNext={goNext}
-							onBack={goBack}
-						/>
-					)}
-					{step === "voice-power" && (
-						<VoicePowerStep
-							key="voice-power"
-							onNext={goNext}
-							onBack={goBack}
-						/>
-					)}
-					{!isTourMode && step === "profile" && (
-						<ProfileStep
-							key="profile"
-							displayName={displayName}
-							setDisplayName={setDisplayName}
-							companyName={companyName}
-							setCompanyName={setCompanyName}
-							industry={industry}
-							setIndustry={setIndustry}
-							onSubmit={saveAndFinish}
-							onBack={goBack}
-							isSaving={isSaving}
-						/>
-					)}
-					{step === "ready" && (
-						<ReadyStep
-							key="ready"
-							displayName={displayName || "there"}
-							tourMode={isTourMode}
-							onClose={closeTour}
-						/>
-					)}
-				</AnimatePresence>
-			</DialogContent>
-		</Dialog>
+			<AnimatePresence mode="wait">
+				{currentStep.target ? (
+					<TargetedStep
+						key={currentStep.id}
+						step={currentStep}
+						nav={navProps}
+					/>
+				) : (
+					<CenteredStep
+						key={currentStep.id}
+						step={currentStep}
+						nav={navProps}
+						profileProps={{
+							displayName,
+							setDisplayName,
+							companyName,
+							setCompanyName,
+							industry,
+							setIndustry,
+							isSaving,
+						}}
+						displayName={displayName}
+					/>
+				)}
+			</AnimatePresence>
+		</div>,
+		document.body,
 	);
 }
 
-// Step wrapper with consistent animation
-function StepWrapper({
-	children,
-	className,
+// ─── Targeted Step (spotlight + tooltip) ─────────────────────────────────────
+
+function TargetedStep({
+	step,
+	nav,
 }: {
-	children: React.ReactNode;
-	className?: string;
+	step: TourStep;
+	nav: StepNavProps;
 }) {
+	const rect = useTargetRect(step.target);
+
+	// Fallback: if target element not found, show as centered card
+	if (!rect) {
+		return (
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				transition={{ duration: 0.2 }}
+			>
+				<div
+					className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+					onClick={nav.isTourMode ? nav.onSkip : undefined}
+					aria-hidden
+				/>
+				<div className="fixed inset-0 flex items-center justify-center p-4">
+					<motion.div
+						className="w-full max-w-sm overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-2xl"
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ type: "spring", stiffness: 300, damping: 30 }}
+					>
+						<div className="h-1 w-full bg-gradient-to-r from-rose-500 to-red-500" />
+						<TooltipContent step={step} nav={nav} />
+					</motion.div>
+				</div>
+			</motion.div>
+		);
+	}
+
+	const placement = step.placement || "bottom";
+	const isMobile = window.innerWidth < 640;
+	const tooltipWidth = isMobile
+		? window.innerWidth - EDGE_MARGIN * 2
+		: TOOLTIP_WIDTH;
+
+	const targetCenterX = rect.left + rect.width / 2;
+
+	let tooltipStyle: React.CSSProperties;
+	let arrowStyle: React.CSSProperties;
+	let arrowDirection: "up" | "down";
+
+	if (placement === "bottom") {
+		const top = rect.bottom + SPOTLIGHT_PADDING + TOOLTIP_GAP;
+		let left = targetCenterX - tooltipWidth / 2;
+		left = Math.max(
+			EDGE_MARGIN,
+			Math.min(window.innerWidth - tooltipWidth - EDGE_MARGIN, left),
+		);
+		const arrowLeft = Math.max(
+			24,
+			Math.min(tooltipWidth - 24, targetCenterX - left),
+		);
+		tooltipStyle = { top, left, width: tooltipWidth };
+		arrowStyle = { left: arrowLeft, top: -6 };
+		arrowDirection = "up";
+	} else {
+		const bottom =
+			window.innerHeight - rect.top + SPOTLIGHT_PADDING + TOOLTIP_GAP;
+		let left = targetCenterX - tooltipWidth / 2;
+		left = Math.max(
+			EDGE_MARGIN,
+			Math.min(window.innerWidth - tooltipWidth - EDGE_MARGIN, left),
+		);
+		const arrowLeft = Math.max(
+			24,
+			Math.min(tooltipWidth - 24, targetCenterX - left),
+		);
+		tooltipStyle = { bottom, left, width: tooltipWidth };
+		arrowStyle = { left: arrowLeft, bottom: -6 };
+		arrowDirection = "down";
+	}
+
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: 10 }}
-			animate={{ opacity: 1, y: 0 }}
-			exit={{ opacity: 0, y: -10 }}
-			transition={{ duration: 0.25 }}
-			className={cn("relative flex flex-col px-8 pt-6 pb-8", className)}
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			exit={{ opacity: 0 }}
+			transition={{ duration: 0.2 }}
 		>
-			{children}
+			{/* Backdrop click handler */}
+			<div
+				className="fixed inset-0"
+				onClick={nav.isTourMode ? nav.onSkip : undefined}
+				aria-hidden
+			/>
+
+			{/* Spotlight cutout */}
+			<motion.div
+				className="pointer-events-none fixed rounded-xl"
+				initial={{ opacity: 0 }}
+				animate={{
+					opacity: 1,
+					left: rect.left - SPOTLIGHT_PADDING,
+					top: rect.top - SPOTLIGHT_PADDING,
+					width: rect.width + SPOTLIGHT_PADDING * 2,
+					height: rect.height + SPOTLIGHT_PADDING * 2,
+				}}
+				transition={{ type: "spring", stiffness: 300, damping: 30 }}
+				style={{
+					boxShadow:
+						"0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 20px 4px rgba(0, 0, 0, 0.1)",
+				}}
+			/>
+
+			{/* Accent glow around target */}
+			<motion.div
+				className="pointer-events-none fixed rounded-xl"
+				initial={{ opacity: 0 }}
+				animate={{
+					opacity: 1,
+					left: rect.left - SPOTLIGHT_PADDING - 2,
+					top: rect.top - SPOTLIGHT_PADDING - 2,
+					width: rect.width + SPOTLIGHT_PADDING * 2 + 4,
+					height: rect.height + SPOTLIGHT_PADDING * 2 + 4,
+				}}
+				transition={{ type: "spring", stiffness: 300, damping: 30 }}
+				style={{
+					border: "2px solid rgba(244, 63, 94, 0.4)",
+					boxShadow: "0 0 16px 2px rgba(244, 63, 94, 0.15)",
+				}}
+			/>
+
+			{/* Tooltip */}
+			<motion.div
+				className="fixed z-10"
+				initial={{ opacity: 0, y: arrowDirection === "up" ? 10 : -10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.15, duration: 0.25 }}
+				style={tooltipStyle}
+			>
+				{/* Arrow */}
+				<div className="absolute z-20" style={arrowStyle}>
+					<div
+						className={cn(
+							"size-3 rotate-45 border bg-white",
+							arrowDirection === "up"
+								? "border-b-0 border-r-0 border-stone-200"
+								: "border-t-0 border-l-0 border-stone-200",
+						)}
+					/>
+				</div>
+
+				{/* Card */}
+				<div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-2xl">
+					<div className="h-1 w-full bg-gradient-to-r from-rose-500 to-red-500" />
+					<TooltipContent step={step} nav={nav} />
+				</div>
+			</motion.div>
 		</motion.div>
 	);
 }
 
-// Navigation buttons component
-function StepNav({
-	onNext,
-	onBack,
-	nextLabel = "Continue",
-	showBack = true,
-	disabled = false,
-	loading = false,
+// ─── Tooltip Content (shared) ────────────────────────────────────────────────
+
+function TooltipContent({
+	step,
+	nav,
 }: {
-	onNext: () => void;
-	onBack?: () => void;
-	nextLabel?: string;
-	showBack?: boolean;
-	disabled?: boolean;
-	loading?: boolean;
+	step: TourStep;
+	nav: StepNavProps;
 }) {
+	const Icon = step.icon;
+
 	return (
-		<div className="mt-6 flex items-center gap-3">
-			{showBack && onBack && (
-				<Button
-					variant="ghost"
-					onClick={onBack}
-					className="h-11 px-4 text-stone-500 hover:bg-stone-100 hover:text-stone-700"
-				>
-					<ArrowLeft className="mr-1.5 size-4" />
-					Back
-				</Button>
-			)}
-			<Button
-				onClick={onNext}
-				disabled={disabled || loading}
-				className="group h-11 flex-1 bg-stone-900 font-semibold text-white transition-all hover:bg-stone-800 disabled:opacity-50"
-			>
-				{loading ? (
-					<>
-						<Loader2 className="mr-2 size-4 animate-spin" />
-						Setting up...
-					</>
-				) : (
-					<>
-						{nextLabel}
-						<ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-0.5" />
-					</>
-				)}
-			</Button>
+		<div className="p-5">
+			<div className="mb-3 flex items-start gap-3">
+				<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-red-500 shadow-sm">
+					<Icon className="size-5 text-white" />
+				</div>
+				<div className="flex-1">
+					<h3 className="font-bold text-sm text-stone-900 leading-tight">
+						{step.title}
+					</h3>
+					<p className="mt-1 text-xs text-stone-500 leading-relaxed">
+						{step.description}
+					</p>
+				</div>
+			</div>
+			<div className="flex items-center justify-between">
+				<StepDots
+					current={nav.stepIndex}
+					total={nav.totalSteps}
+				/>
+				<div className="flex items-center gap-2">
+					{nav.isTourMode && (
+						<button
+							type="button"
+							onClick={nav.onSkip}
+							className="text-xs text-stone-400 transition-colors hover:text-stone-600"
+						>
+							Skip
+						</button>
+					)}
+					{nav.canGoBack && (
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={nav.onBack}
+							className="h-8 px-2 text-stone-500 hover:bg-stone-100"
+						>
+							<ArrowLeft className="size-3.5" />
+						</Button>
+					)}
+					<Button
+						size="sm"
+						onClick={nav.onNext}
+						className="h-8 gap-1.5 bg-stone-900 px-3 font-medium text-xs text-white hover:bg-stone-800"
+					>
+						Next
+						<ArrowRight className="size-3" />
+					</Button>
+				</div>
+			</div>
 		</div>
 	);
 }
 
-// Step 1: Welcome
-function WelcomeStep({ onNext }: { onNext: () => void }) {
-	return (
-		<StepWrapper className="items-center pt-10 pb-10">
-			<VisuallyHidden.Root>
-				<DialogTitle>Welcome to Boss Brainz</DialogTitle>
-				<DialogDescription>
-					Your executive AI consulting team awaits
-				</DialogDescription>
-			</VisuallyHidden.Root>
+// ─── Centered Step (backdrop + card) ─────────────────────────────────────────
 
-			{/* Animated logo/brand mark */}
+function CenteredStep({
+	step,
+	nav,
+	profileProps,
+	displayName,
+}: {
+	step: TourStep;
+	nav: StepNavProps;
+	profileProps: ProfileProps;
+	displayName: string;
+}) {
+	return (
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			exit={{ opacity: 0 }}
+			transition={{ duration: 0.2 }}
+		>
+			{/* Backdrop */}
+			<div
+				className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+				onClick={nav.isTourMode ? nav.onSkip : undefined}
+				aria-hidden
+			/>
+
+			{/* Card */}
+			<div className="fixed inset-0 flex items-center justify-center p-4">
+				<motion.div
+					className="w-full max-w-md overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-2xl"
+					initial={{ opacity: 0, scale: 0.95, y: 20 }}
+					animate={{ opacity: 1, scale: 1, y: 0 }}
+					transition={{ type: "spring", stiffness: 300, damping: 30 }}
+				>
+					{/* Progress bar */}
+					<div className="flex items-center justify-center gap-1.5 bg-stone-50 py-3">
+						{Array.from({ length: nav.totalSteps }).map((_, i) => (
+							<motion.div
+								key={i}
+								className={cn(
+									"h-1.5 rounded-full transition-all",
+									i <= nav.stepIndex
+										? "w-6 bg-gradient-to-r from-rose-500 to-red-500"
+										: "w-1.5 bg-stone-200",
+								)}
+								animate={{ width: i <= nav.stepIndex ? 24 : 6 }}
+							/>
+						))}
+					</div>
+
+					<AnimatePresence mode="wait">
+						{step.id === "welcome" && (
+							<WelcomeContent key="welcome" onNext={nav.onNext} />
+						)}
+						{step.id === "profile" && (
+							<ProfileContent
+								key="profile"
+								{...profileProps}
+								onSubmit={nav.onNext}
+								onBack={nav.onBack}
+							/>
+						)}
+						{step.id === "ready" && (
+							<ReadyContent
+								key="ready"
+								displayName={displayName || "there"}
+								tourMode={nav.isTourMode}
+								onClose={nav.onSkip}
+							/>
+						)}
+					</AnimatePresence>
+				</motion.div>
+			</div>
+		</motion.div>
+	);
+}
+
+// ─── Welcome Content ─────────────────────────────────────────────────────────
+
+function WelcomeContent({ onNext }: { onNext: () => void }) {
+	return (
+		<motion.div
+			className="flex flex-col items-center px-8 pt-10 pb-10"
+			initial={{ opacity: 0, y: 10 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: -10 }}
+			transition={{ duration: 0.25 }}
+		>
 			<motion.div
 				initial={{ scale: 0.8, opacity: 0 }}
 				animate={{ scale: 1, opacity: 1 }}
@@ -400,7 +689,11 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 						<motion.div
 							initial={{ x: 20, opacity: 0 }}
 							animate={{ x: 0, opacity: 1 }}
-							transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+							transition={{
+								delay: 0.2,
+								type: "spring",
+								stiffness: 200,
+							}}
 							className="relative z-10 size-20 overflow-hidden rounded-full border-4 border-white shadow-xl"
 						>
 							<Image
@@ -416,7 +709,11 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 						<motion.div
 							initial={{ x: -20, opacity: 0 }}
 							animate={{ x: 0, opacity: 1 }}
-							transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+							transition={{
+								delay: 0.3,
+								type: "spring",
+								stiffness: 200,
+							}}
 							className="relative size-20 overflow-hidden rounded-full border-4 border-white shadow-xl"
 						>
 							<Image
@@ -447,8 +744,8 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 				transition={{ delay: 0.45 }}
 				className="mb-8 max-w-sm text-center text-base leading-relaxed text-stone-500"
 			>
-				Meet your executive AI consulting team. Let's show you around in about
-				2 minutes.
+				Meet your executive AI consulting team. Let&apos;s show you
+				around.
 			</motion.p>
 
 			<motion.div
@@ -462,587 +759,35 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 					onClick={onNext}
 					className="group h-12 w-full bg-gradient-to-r from-rose-500 to-red-500 font-semibold text-white shadow-lg shadow-rose-500/25 transition-all hover:from-rose-600 hover:to-red-600 hover:shadow-xl hover:shadow-rose-500/30"
 				>
-					Let's Get Started
+					Let&apos;s Get Started
 					<Sparkles className="ml-2 size-4" />
 				</Button>
 			</motion.div>
-		</StepWrapper>
+		</motion.div>
 	);
 }
 
-// Step 2: Meet Your Team
-function MeetTeamStep({
-	onNext,
-	onBack,
-}: {
-	onNext: () => void;
-	onBack: () => void;
-}) {
-	return (
-		<StepWrapper>
-			<VisuallyHidden.Root>
-				<DialogTitle>Meet Your Executive Team</DialogTitle>
-				<DialogDescription>Alexandria and Kim are ready to help</DialogDescription>
-			</VisuallyHidden.Root>
+// ─── Profile Content ─────────────────────────────────────────────────────────
 
-			<div className="mb-5 text-center">
-				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
-					Your Executive Team
-				</h2>
-				<p className="text-sm text-stone-500">
-					Two AI experts with complementary skills
-				</p>
-			</div>
-
-			{/* Executive cards - side by side */}
-			<div className="mb-2 grid grid-cols-2 gap-3">
-				{/* Alexandria */}
-				<motion.div
-					initial={{ opacity: 0, x: -20 }}
-					animate={{ opacity: 1, x: 0 }}
-					transition={{ delay: 0.1 }}
-					className="overflow-hidden rounded-xl border border-stone-200 bg-gradient-to-b from-white to-rose-50/30"
-				>
-					<div className="bg-gradient-to-r from-rose-500 to-rose-600 p-3">
-						<div className="flex items-center gap-2.5">
-							{alexandria.avatar && (
-								<div className="relative size-10 overflow-hidden rounded-full border-2 border-white/30 shadow-lg">
-									<Image
-										src={alexandria.avatar}
-										alt={alexandria.name}
-										fill
-										className="object-cover"
-										sizes="40px"
-									/>
-								</div>
-							)}
-							<div>
-								<p className="font-semibold text-sm text-white">Alexandria</p>
-								<p className="text-[11px] text-white/70">Chief Marketing Officer</p>
-							</div>
-						</div>
-					</div>
-					<div className="p-3">
-						<p className="mb-2 text-xs leading-relaxed text-stone-600">
-							Brand strategist & creative director. Expert in positioning,
-							messaging, and customer experience.
-						</p>
-						<div className="flex flex-wrap gap-1">
-							{["Branding", "Content", "Social"].map((skill) => (
-								<span
-									key={skill}
-									className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-medium text-rose-700"
-								>
-									{skill}
-								</span>
-							))}
-						</div>
-					</div>
-				</motion.div>
-
-				{/* Kim */}
-				<motion.div
-					initial={{ opacity: 0, x: 20 }}
-					animate={{ opacity: 1, x: 0 }}
-					transition={{ delay: 0.2 }}
-					className="overflow-hidden rounded-xl border border-stone-200 bg-gradient-to-b from-white to-red-50/30"
-				>
-					<div className="bg-gradient-to-r from-red-500 to-red-600 p-3">
-						<div className="flex items-center gap-2.5">
-							{kim.avatar && (
-								<div className="relative size-10 overflow-hidden rounded-full border-2 border-white/30 shadow-lg">
-									<Image
-										src={kim.avatar}
-										alt={kim.name}
-										fill
-										className="object-cover"
-										sizes="40px"
-									/>
-								</div>
-							)}
-							<div>
-								<p className="font-semibold text-sm text-white">Kim</p>
-								<p className="text-[11px] text-white/70">Chief Strategy Officer</p>
-							</div>
-						</div>
-					</div>
-					<div className="p-3">
-						<p className="mb-2 text-xs leading-relaxed text-stone-600">
-							Sales strategist & business analyst. Expert in pricing, revenue,
-							and market expansion.
-						</p>
-						<div className="flex flex-wrap gap-1">
-							{["Sales", "Pricing", "Growth"].map((skill) => (
-								<span
-									key={skill}
-									className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-medium text-red-700"
-								>
-									{skill}
-								</span>
-							))}
-						</div>
-					</div>
-				</motion.div>
-			</div>
-
-			{/* Collaborative hint */}
-			<motion.div
-				initial={{ opacity: 0, y: 10 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.3 }}
-				className="flex items-center gap-3 rounded-lg bg-stone-100 p-3"
-			>
-				<div className="flex -space-x-2">
-					{alexandria.avatar && (
-						<div className="relative size-6 overflow-hidden rounded-full border border-white">
-							<Image
-								src={alexandria.avatar}
-								alt=""
-								fill
-								className="object-cover"
-								sizes="24px"
-							/>
-						</div>
-					)}
-					{kim.avatar && (
-						<div className="relative size-6 overflow-hidden rounded-full border border-white">
-							<Image src={kim.avatar} alt="" fill className="object-cover" sizes="24px" />
-						</div>
-					)}
-				</div>
-				<p className="text-xs text-stone-600">
-					<span className="font-medium">Collaborative mode</span> — Get both
-					perspectives at once for comprehensive advice
-				</p>
-			</motion.div>
-
-			<StepNav onNext={onNext} onBack={onBack} showBack={false} />
-		</StepWrapper>
-	);
-}
-
-// Step 3: Focus Modes
-function FocusModesStep({
-	onNext,
-	onBack,
-}: {
-	onNext: () => void;
-	onBack: () => void;
-}) {
-	const focusModesList = [
-		{ mode: FOCUS_MODES.business_analysis, icon: Search },
-		{ mode: FOCUS_MODES.pricing, icon: Target },
-		{ mode: FOCUS_MODES.key_messaging, icon: MessageSquare },
-		{ mode: FOCUS_MODES.customer_journey, icon: Users },
-		{ mode: FOCUS_MODES.social_media, icon: Globe },
-		{ mode: FOCUS_MODES.launch_strategy, icon: Rocket },
-	];
-
-	return (
-		<StepWrapper>
-			<VisuallyHidden.Root>
-				<DialogTitle>Focus Modes</DialogTitle>
-				<DialogDescription>
-					Specialized conversation modes for different business needs
-				</DialogDescription>
-			</VisuallyHidden.Root>
-
-			<div className="mb-5 text-center">
-				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
-					<Brain className="size-6 text-white" />
-				</div>
-				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
-					Focus Modes
-				</h2>
-				<p className="text-sm text-stone-500">
-					Switch modes to steer the conversation toward specific business topics
-				</p>
-			</div>
-
-			{/* Focus mode chips preview */}
-			<motion.div
-				initial={{ opacity: 0, y: 10 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.1 }}
-				className="mb-4 rounded-xl border border-stone-200 bg-stone-50 p-4"
-			>
-				<p className="mb-3 text-center text-xs font-medium uppercase tracking-wide text-stone-400">
-					Available Focus Modes
-				</p>
-				<div className="grid grid-cols-3 gap-2">
-					{focusModesList.map(({ mode, icon: Icon }, index) => (
-						<motion.div
-							key={mode.id}
-							initial={{ opacity: 0, scale: 0.9 }}
-							animate={{ opacity: 1, scale: 1 }}
-							transition={{ delay: 0.15 + index * 0.05 }}
-							className={cn(
-								"flex flex-col items-center gap-1.5 rounded-lg border bg-white p-2.5 transition-all",
-								index === 1
-									? "border-red-300 ring-2 ring-red-100"
-									: "border-stone-200",
-							)}
-						>
-							<Icon
-								className={cn(
-									"size-4",
-									index === 1 ? "text-red-500" : "text-stone-400",
-								)}
-							/>
-							<span
-								className={cn(
-									"text-[10px] font-medium",
-									index === 1 ? "text-red-600" : "text-stone-600",
-								)}
-							>
-								{mode.name}
-							</span>
-						</motion.div>
-					))}
-				</div>
-			</motion.div>
-
-			{/* How it works */}
-			<motion.div
-				initial={{ opacity: 0, y: 10 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.4 }}
-				className="flex items-start gap-3 rounded-lg bg-blue-50 p-3"
-			>
-				<Zap className="mt-0.5 size-4 shrink-0 text-blue-500" />
-				<p className="text-xs leading-relaxed text-blue-800">
-					<span className="font-medium">How it works:</span> Select a focus mode
-					before asking your question. The AI will tailor its response to that
-					specific business area.
-				</p>
-			</motion.div>
-
-			<StepNav onNext={onNext} onBack={onBack} />
-		</StepWrapper>
-	);
-}
-
-// Step 4: Strategy Canvas
-function StrategyCanvasStep({
-	onNext,
-	onBack,
-}: {
-	onNext: () => void;
-	onBack: () => void;
-}) {
-	const canvasTools = [
-		{
-			name: "SWOT Analysis",
-			description: "Strengths, Weaknesses, Opportunities, Threats",
-			icon: LayoutGrid,
-			color: "from-emerald-500 to-teal-600",
-			bgColor: "bg-emerald-50",
-			textColor: "text-emerald-700",
-		},
-		{
-			name: "Business Model",
-			description: "Map your business model canvas",
-			icon: Briefcase,
-			color: "from-violet-500 to-purple-600",
-			bgColor: "bg-violet-50",
-			textColor: "text-violet-700",
-		},
-		{
-			name: "Customer Journey",
-			description: "Visualize the customer experience",
-			icon: Map,
-			color: "from-orange-500 to-amber-600",
-			bgColor: "bg-orange-50",
-			textColor: "text-orange-700",
-		},
-		{
-			name: "Brainstorm",
-			description: "Capture ideas and insights",
-			icon: Lightbulb,
-			color: "from-pink-500 to-rose-600",
-			bgColor: "bg-pink-50",
-			textColor: "text-pink-700",
-		},
-	];
-
-	return (
-		<StepWrapper>
-			<VisuallyHidden.Root>
-				<DialogTitle>Strategy Canvas</DialogTitle>
-				<DialogDescription>
-					Interactive strategy tools to visualize your business
-				</DialogDescription>
-			</VisuallyHidden.Root>
-
-			<div className="mb-5 text-center">
-				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg">
-					<LayoutGrid className="size-6 text-white" />
-				</div>
-				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
-					Strategy Canvas
-				</h2>
-				<p className="text-sm text-stone-500">
-					Visual tools to map and organize your business strategy
-				</p>
-			</div>
-
-			{/* Canvas tools grid */}
-			<div className="mb-4 grid grid-cols-2 gap-2.5">
-				{canvasTools.map((tool, index) => (
-					<motion.div
-						key={tool.name}
-						initial={{ opacity: 0, y: 10 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.1 + index * 0.08 }}
-						className={cn(
-							"group rounded-xl border border-stone-200 p-3 transition-all hover:border-stone-300 hover:shadow-sm",
-							tool.bgColor,
-						)}
-					>
-						<div
-							className={cn(
-								"mb-2 flex size-8 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm",
-								tool.color,
-							)}
-						>
-							<tool.icon className="size-4 text-white" />
-						</div>
-						<p className={cn("mb-0.5 font-semibold text-xs", tool.textColor)}>
-							{tool.name}
-						</p>
-						<p className="text-[10px] leading-relaxed text-stone-500">
-							{tool.description}
-						</p>
-					</motion.div>
-				))}
-			</div>
-
-			{/* Tip */}
-			<motion.div
-				initial={{ opacity: 0, y: 10 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.5 }}
-				className="flex items-start gap-3 rounded-lg bg-emerald-50 p-3"
-			>
-				<Sparkles className="mt-0.5 size-4 shrink-0 text-emerald-500" />
-				<p className="text-xs leading-relaxed text-emerald-800">
-					<span className="font-medium">Pro tip:</span> The AI can automatically
-					populate your canvas tools during conversation. Just ask to "fill out
-					my SWOT" or "create a business model."
-				</p>
-			</motion.div>
-
-			<StepNav onNext={onNext} onBack={onBack} />
-		</StepWrapper>
-	);
-}
-
-// Step 5: Smart Features
-function SmartFeaturesStep({
-	onNext,
-	onBack,
-}: {
-	onNext: () => void;
-	onBack: () => void;
-}) {
-	const features = [
-		{
-			icon: Globe,
-			title: "Web Search",
-			description: "AI searches the web for real-time market data and research",
-			color: "text-blue-500",
-			bgColor: "bg-blue-50",
-		},
-		{
-			icon: Bookmark,
-			title: "Save & React",
-			description: "Mark messages as actionable, save for later, or flag for clarity",
-			color: "text-amber-500",
-			bgColor: "bg-amber-50",
-		},
-		{
-			icon: Download,
-			title: "Export PDF",
-			description: "Download your conversations as professional PDF reports",
-			color: "text-violet-500",
-			bgColor: "bg-violet-50",
-		},
-		{
-			icon: Lightbulb,
-			title: "Action Items",
-			description: "Track tasks and insights from your consulting sessions",
-			color: "text-emerald-500",
-			bgColor: "bg-emerald-50",
-		},
-	];
-
-	return (
-		<StepWrapper>
-			<VisuallyHidden.Root>
-				<DialogTitle>Smart Features</DialogTitle>
-				<DialogDescription>
-					Powerful tools to enhance your consulting experience
-				</DialogDescription>
-			</VisuallyHidden.Root>
-
-			<div className="mb-5 text-center">
-				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
-					<Sparkles className="size-6 text-white" />
-				</div>
-				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
-					Smart Features
-				</h2>
-				<p className="text-sm text-stone-500">
-					Tools to capture, organize, and act on insights
-				</p>
-			</div>
-
-			{/* Features list */}
-			<div className="space-y-2.5">
-				{features.map((feature, index) => (
-					<motion.div
-						key={feature.title}
-						initial={{ opacity: 0, x: -10 }}
-						animate={{ opacity: 1, x: 0 }}
-						transition={{ delay: 0.1 + index * 0.08 }}
-						className="flex items-start gap-3 rounded-xl border border-stone-200 bg-white p-3 transition-all hover:border-stone-300"
-					>
-						<div
-							className={cn(
-								"flex size-9 shrink-0 items-center justify-center rounded-lg",
-								feature.bgColor,
-							)}
-						>
-							<feature.icon className={cn("size-4", feature.color)} />
-						</div>
-						<div>
-							<p className="mb-0.5 font-semibold text-sm text-stone-900">
-								{feature.title}
-							</p>
-							<p className="text-xs leading-relaxed text-stone-500">
-								{feature.description}
-							</p>
-						</div>
-					</motion.div>
-				))}
-			</div>
-
-			<StepNav onNext={onNext} onBack={onBack} />
-		</StepWrapper>
-	);
-}
-
-// Step 6: Voice Power
-function VoicePowerStep({
-	onNext,
-	onBack,
-}: {
-	onNext: () => void;
-	onBack: () => void;
-}) {
-	return (
-		<StepWrapper>
-			<VisuallyHidden.Root>
-				<DialogTitle>Voice Features</DialogTitle>
-				<DialogDescription>Listen to AI responses in natural voice</DialogDescription>
-			</VisuallyHidden.Root>
-
-			<div className="mb-5 text-center">
-				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg">
-					<Mic className="size-6 text-white" />
-				</div>
-				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
-					Voice Playback
-				</h2>
-				<p className="text-sm text-stone-500">
-					Listen to responses with natural text-to-speech
-				</p>
-			</div>
-
-			{/* Voice demo visual */}
-			<motion.div
-				initial={{ opacity: 0, y: 10 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.1 }}
-				className="mb-4 rounded-xl border border-violet-200 bg-gradient-to-b from-violet-50 to-white p-5"
-			>
-				<div className="flex items-center justify-center gap-3">
-					{/* Sound wave animation */}
-					<div className="flex items-center gap-1">
-						{[3, 5, 7, 5, 3, 6, 4, 7, 5, 3].map((height, i) => (
-							<motion.div
-								key={i}
-								className="w-1 rounded-full bg-violet-400"
-								initial={{ height: 8 }}
-								animate={{ height: [8, height * 4, 8] }}
-								transition={{
-									duration: 0.8,
-									repeat: Number.POSITIVE_INFINITY,
-									delay: i * 0.1,
-								}}
-							/>
-						))}
-					</div>
-				</div>
-				<p className="mt-4 text-center text-sm text-violet-700">
-					"Click the speaker icon on any message to hear it read aloud."
-				</p>
-			</motion.div>
-
-			{/* Benefits */}
-			<div className="space-y-2">
-				{[
-					"Perfect for multitasking while getting advice",
-					"Natural-sounding voice powered by ElevenLabs",
-					"Works on all AI responses",
-				].map((benefit, index) => (
-					<motion.div
-						key={benefit}
-						initial={{ opacity: 0, x: -10 }}
-						animate={{ opacity: 1, x: 0 }}
-						transition={{ delay: 0.2 + index * 0.08 }}
-						className="flex items-center gap-2 text-sm text-stone-600"
-					>
-						<div className="size-1.5 rounded-full bg-violet-400" />
-						{benefit}
-					</motion.div>
-				))}
-			</div>
-
-			<StepNav onNext={onNext} onBack={onBack} />
-		</StepWrapper>
-	);
-}
-
-// Step 7: Profile
-function ProfileStep({
+function ProfileContent({
 	displayName,
 	setDisplayName,
 	companyName,
 	setCompanyName,
 	industry,
 	setIndustry,
+	isSaving,
 	onSubmit,
 	onBack,
-	isSaving,
-}: {
-	displayName: string;
-	setDisplayName: (value: string) => void;
-	companyName: string;
-	setCompanyName: (value: string) => void;
-	industry: string;
-	setIndustry: (value: string) => void;
-	onSubmit: () => void;
-	onBack: () => void;
-	isSaving: boolean;
-}) {
+}: ProfileProps & { onSubmit: () => void; onBack: () => void }) {
 	return (
-		<StepWrapper>
-			<VisuallyHidden.Root>
-				<DialogTitle>Quick Setup</DialogTitle>
-				<DialogDescription>Tell us a bit about yourself</DialogDescription>
-			</VisuallyHidden.Root>
-
+		<motion.div
+			className="flex flex-col px-8 pt-6 pb-8"
+			initial={{ opacity: 0, y: 10 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: -10 }}
+			transition={{ duration: 0.25 }}
+		>
 			<div className="mb-5 text-center">
 				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-stone-700 to-stone-900 shadow-lg">
 					<Building2 className="size-6 text-white" />
@@ -1056,7 +801,6 @@ function ProfileStep({
 			</div>
 
 			<div className="space-y-4">
-				{/* Name */}
 				<motion.div
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -1079,7 +823,6 @@ function ProfileStep({
 					/>
 				</motion.div>
 
-				{/* Company */}
 				<motion.div
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -1091,7 +834,9 @@ function ProfileStep({
 						className="font-medium text-sm text-stone-700"
 					>
 						Company{" "}
-						<span className="font-normal text-stone-400 text-xs">(optional)</span>
+						<span className="font-normal text-stone-400 text-xs">
+							(optional)
+						</span>
 					</Label>
 					<Input
 						id="companyName"
@@ -1102,7 +847,6 @@ function ProfileStep({
 					/>
 				</motion.div>
 
-				{/* Industry */}
 				<motion.div
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -1114,7 +858,9 @@ function ProfileStep({
 						className="font-medium text-sm text-stone-700"
 					>
 						Industry{" "}
-						<span className="font-normal text-stone-400 text-xs">(optional)</span>
+						<span className="font-normal text-stone-400 text-xs">
+							(optional)
+						</span>
 					</Label>
 					<Select value={industry} onValueChange={setIndustry}>
 						<SelectTrigger
@@ -1138,18 +884,40 @@ function ProfileStep({
 				</motion.div>
 			</div>
 
-			<StepNav
-				onNext={onSubmit}
-				onBack={onBack}
-				nextLabel="Finish Setup"
-				loading={isSaving}
-			/>
-		</StepWrapper>
+			<div className="mt-6 flex items-center gap-3">
+				<Button
+					variant="ghost"
+					onClick={onBack}
+					className="h-11 px-4 text-stone-500 hover:bg-stone-100 hover:text-stone-700"
+				>
+					<ArrowLeft className="mr-1.5 size-4" />
+					Back
+				</Button>
+				<Button
+					onClick={onSubmit}
+					disabled={isSaving}
+					className="group h-11 flex-1 bg-stone-900 font-semibold text-white transition-all hover:bg-stone-800 disabled:opacity-50"
+				>
+					{isSaving ? (
+						<>
+							<Loader2 className="mr-2 size-4 animate-spin" />
+							Setting up...
+						</>
+					) : (
+						<>
+							Finish Setup
+							<ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-0.5" />
+						</>
+					)}
+				</Button>
+			</div>
+		</motion.div>
 	);
 }
 
-// Step 8: Ready
-function ReadyStep({
+// ─── Ready Content ───────────────────────────────────────────────────────────
+
+function ReadyContent({
 	displayName,
 	tourMode = false,
 	onClose,
@@ -1159,15 +927,13 @@ function ReadyStep({
 	onClose?: () => void;
 }) {
 	return (
-		<StepWrapper className="items-center py-12">
-			<VisuallyHidden.Root>
-				<DialogTitle>You're All Set</DialogTitle>
-				<DialogDescription>
-					Start chatting with your executive team
-				</DialogDescription>
-			</VisuallyHidden.Root>
-
-			{/* Success animation */}
+		<motion.div
+			className="flex flex-col items-center px-8 py-12"
+			initial={{ opacity: 0, y: 10 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: -10 }}
+			transition={{ duration: 0.25 }}
+		>
 			<motion.div
 				initial={{ scale: 0 }}
 				animate={{ scale: 1 }}
@@ -1210,10 +976,10 @@ function ReadyStep({
 				transition={{ delay: 0.35 }}
 				className="mb-6 max-w-xs text-center text-base text-stone-500"
 			>
-				Your executive consulting team is ready to help you grow your business.
+				Your executive consulting team is ready to help you grow your
+				business.
 			</motion.p>
 
-			{/* Executive avatars with checkmarks */}
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -1282,6 +1048,34 @@ function ReadyStep({
 					Starting your first session...
 				</motion.p>
 			)}
-		</StepWrapper>
+		</motion.div>
+	);
+}
+
+// ─── Step Dots ───────────────────────────────────────────────────────────────
+
+function StepDots({
+	current,
+	total,
+}: {
+	current: number;
+	total: number;
+}) {
+	return (
+		<div className="flex items-center gap-1">
+			{Array.from({ length: total }).map((_, i) => (
+				<div
+					key={i}
+					className={cn(
+						"rounded-full transition-all duration-300",
+						i === current
+							? "h-2 w-4 bg-rose-500"
+							: i < current
+								? "size-2 bg-rose-300"
+								: "size-2 bg-stone-200",
+					)}
+				/>
+			))}
+		</div>
 	);
 }

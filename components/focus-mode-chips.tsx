@@ -70,7 +70,7 @@ export function FocusModeChips({
 	}
 
 	return (
-		<div className={cn("relative w-full", className)}>
+		<div className={cn("relative w-full", className)} data-tour="focus-modes">
 			{/* Left fade indicator */}
 			{showLeftArrow && (
 				<div

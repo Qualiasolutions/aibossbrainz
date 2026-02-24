@@ -570,6 +570,7 @@ export function Chat({
 						{!isReadonly && (
 							<div
 							className="flex-shrink-0 border-t border-border bg-background/80 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl transition-[padding] duration-150 sm:px-6 sm:pt-4 sm:pb-6"
+							data-tour="chat-input"
 							style={keyboardHeight > 0 ? { paddingBottom: `${keyboardHeight}px` } : undefined}
 						>
 								<div className="w-full space-y-2">

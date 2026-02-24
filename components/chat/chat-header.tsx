@@ -84,6 +84,7 @@ export function ChatHeader({
 				<div className="flex shrink-0 items-center gap-1">
 					<Button
 						className="h-11 gap-1.5 rounded-lg border-border bg-background px-2 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:h-8 sm:px-2.5"
+						data-tour="strategy-canvas"
 						variant="outline"
 						onClick={onOpenSwotPanel}
 					>

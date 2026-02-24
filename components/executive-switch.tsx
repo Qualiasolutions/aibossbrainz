@@ -230,7 +230,7 @@ export function ExecutiveSwitch({
 	}, []);
 
 	return (
-		<div className="relative">
+		<div className="relative" data-tour="executive-switch">
 			<Button
 				className={cn(
 					"group relative flex min-h-[44px] items-center gap-2.5 rounded-md border border-neutral-200 bg-white px-3 text-left shadow-sm transition-all duration-200 sm:h-10 sm:gap-3 sm:px-4",
