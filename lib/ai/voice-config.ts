@@ -33,8 +33,8 @@ export const VOICE_CONFIGS: Record<BotType, VoiceConfig> = {
 		modelId: "eleven_turbo_v2_5",
 		settings: {
 			stability: 0.7,
-			similarityBoost: 0.8,
-			style: 0.2,
+			similarityBoost: 0.55,
+			style: 0.1,
 			useSpeakerBoost: false,
 		},
 	},
