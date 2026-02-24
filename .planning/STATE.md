@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 Phase: 26 (documentation-design-decisions) -- COMPLETE
 Plan: 1 of 1 (phase complete)
 Status: Phase complete
-Last activity: 2026-02-23 - Completed quick task 8: Fix 8 audit findings (harmful content refusal, professional disclaimers, jsPDF, canary hash, web search sanitization, strategy canvas validation, voice analytics, voiceRequestCount)
+Last activity: 2026-02-25 - Completed quick task 9: Fix 11 audit findings (PII prompt hardening, content moderation, tool safety, abort signals, minimatch)
 
 Progress: ████████████ 12/12 plans (100%)
 
@@ -90,6 +90,9 @@ Progress: ████████████ 12/12 plans (100%)
 - useKeyboardHeight hook with 100px threshold to distinguish keyboard from browser chrome changes
 - Gradient fade overlays replace chevron buttons for focus chip scroll indicators
 - Record<string, unknown> cast for voiceRequestCount access pre-migration (type-safe with fallback to voiceMinutes)
+- Regex-based content moderation as first-pass defense (not a replacement for AI-level guardrails)
+- In-process hourly counter for deep research rate limiting (resets on deploy, primary limiting at chat route level)
+- AbortSignal.timeout set just under each route's maxDuration for clean shutdown
 
 ### Completed
 
@@ -97,7 +100,7 @@ Progress: ████████████ 12/12 plans (100%)
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 8 completed (chat animations, typewriter tuning, CSRF/index/KB fixes, PDF export filenames, frontend review fixes, inline voice mode, UX/UI mobile fixes, audit findings fix)
+**Quick tasks:** 9 completed (chat animations, typewriter tuning, CSRF/index/KB fixes, PDF export filenames, frontend review fixes, inline voice mode, UX/UI mobile fixes, audit findings fix, audit findings fix #2)
 
 ### Quick Tasks Completed
 
@@ -109,6 +112,7 @@ Progress: ████████████ 12/12 plans (100%)
 | 6 | Fix 9 frontend issues: admin redirect loop, chat error boundary, auth defense-in-depth, performance, DOMPurify, UUID validation, dead embed | 2026-02-22 | 511c438 | [6-fix-critical-frontend-issues-from-review](./quick/6-fix-critical-frontend-issues-from-review/) |
 | 7 | Fix 6 critical UX/UI issues: iOS auto-zoom, touch targets, dark mode contrast, virtual keyboard, scroll indicators, responsive grid | 2026-02-23 | 075ef1c | [7-fix-6-critical-ux-ui-issues-ios-auto-zoo](./quick/7-fix-6-critical-ux-ui-issues-ios-auto-zoo/) |
 | 8 | Fix 8 audit findings: harmful content refusal, professional disclaimers, jsPDF, canary hash, web search sanitization, canvas validation, voice analytics, voiceRequestCount | 2026-02-23 | 4f068b0 | [8-fix-8-audit-findings-harmful-content-ref](./quick/8-fix-8-audit-findings-harmful-content-ref/) |
+| 9 | Fix 11 audit findings: PII prompt hardening, content moderation, tool safety, abort signals, minimatch | 2026-02-25 | 8b30cf1 | [9-fix-11-audit-findings-pii-prompt-content](./quick/9-fix-11-audit-findings-pii-prompt-content/) |
 
 ### Blockers
 
@@ -129,6 +133,6 @@ Progress: ████████████ 12/12 plans (100%)
 
 ## Session Continuity
 
-Last session: 2026-02-23
-Stopped at: Completed quick task 8 (8 audit findings fix). Build verified clean. Migration pending.
-Resume: Apply migration 20260223000100 via Supabase Dashboard, then deploy to Vercel
+Last session: 2026-02-25
+Stopped at: Completed quick task 9 (11 audit findings fix). Build verified clean.
+Resume: Deploy to Vercel. Pending migrations from previous tasks still need to be applied.
