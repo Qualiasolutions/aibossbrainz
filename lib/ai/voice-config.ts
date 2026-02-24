@@ -35,7 +35,7 @@ export const VOICE_CONFIGS: Record<BotType, VoiceConfig> = {
 			stability: 0.7,
 			similarityBoost: 0.8,
 			style: 0.2,
-			useSpeakerBoost: true,
+			useSpeakerBoost: false,
 		},
 	},
 	collaborative: {
