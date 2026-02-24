@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { ArrowRight, Mic, Target, TrendingUp, Users, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,7 +45,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	return (
 		<section
 			ref={ref}
-			className="relative flex min-h-[90svh] max-h-[90svh] overflow-hidden bg-white"
+			className="relative flex min-h-svh lg:min-h-[90svh] lg:max-h-[90svh] bg-white overflow-x-hidden"
 		>
 			{/* Background texture */}
 			<div className="absolute inset-0 z-0 pointer-events-none">
@@ -55,7 +55,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 			</div>
 
 			{/* Split container */}
-			<div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col lg:flex-row lg:items-center lg:gap-8 xl:gap-12 px-6 pt-28 pb-8 sm:pt-32 lg:pt-24 lg:px-10 xl:px-16">
+			<div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col lg:flex-row lg:items-center lg:gap-8 xl:gap-12 px-4 sm:px-6 pt-24 pb-12 sm:pt-32 sm:pb-8 lg:pt-24 lg:px-10 xl:px-16">
 				{/* LEFT — Text content */}
 				<div className="flex flex-col justify-center lg:w-[48%] xl:w-[45%] shrink-0">
 					{/* Pill Badge */}

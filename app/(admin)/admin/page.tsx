@@ -50,7 +50,7 @@ async function safeGetRecentActivity(
 
 async function safeGetSubscriptionStats(): Promise<SubscriptionStatsType | null> {
 	try {
-		return await getSubscriptionStats();
+		return await getSubscriptionStats({ excludeTeam: true });
 	} catch (error) {
 		console.error("Failed to fetch subscription stats:", error);
 		return null;

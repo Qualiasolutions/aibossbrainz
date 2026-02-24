@@ -14,7 +14,7 @@ export default async function AnalyticsPage() {
 	const [stats, users, subStats] = await Promise.all([
 		getAdminStats(),
 		getAllUsers(),
-		getSubscriptionStats(),
+		getSubscriptionStats({ excludeTeam: true }),
 	]);
 
 	// Calculate additional metrics

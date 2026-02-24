@@ -208,7 +208,7 @@ export async function updateUserSubscription(
 	return data;
 }
 
-// Expire all subscriptions that have passed their end date
+// Expire all subscriptions (including trials) that have passed their end date
 export async function expireSubscriptions() {
 	const supabase = createServiceClient();
 
@@ -218,7 +218,7 @@ export async function expireSubscriptions() {
 			subscriptionStatus: "expired" as SubscriptionStatus,
 		})
 		.lt("subscriptionEndDate", new Date().toISOString())
-		.eq("subscriptionStatus", "active")
+		.in("subscriptionStatus", ["active", "trialing"])
 		.is("deletedAt", null)
 		.select();
 
@@ -568,6 +568,7 @@ export interface SubscriptionStats {
 
 export async function getSubscriptionStats(options?: {
 	userTypeFilter?: string;
+	excludeTeam?: boolean;
 }): Promise<SubscriptionStats> {
 	const supabase = createServiceClient();
 
@@ -576,6 +577,11 @@ export async function getSubscriptionStats(options?: {
 		.from("User")
 		.select("subscriptionType, subscriptionStatus")
 		.is("deletedAt", null);
+
+	// Exclude internal team accounts from revenue/subscriber metrics
+	if (options?.excludeTeam) {
+		query = query.neq("userType", "team");
+	}
 
 	// Filter by user type when specified (e.g., 'client' to exclude team users from revenue)
 	if (options?.userTypeFilter === "none") {
