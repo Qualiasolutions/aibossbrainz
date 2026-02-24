@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { sanitizePromptContent } from "@/lib/ai/prompts";
 import type { Session } from "@/lib/artifacts/server";
 import {
 	getStrategyCanvas,
@@ -148,17 +149,22 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 				const storageKey =
 					sectionToStorageKey[normalizedSection] || normalizedSection;
 
+				// H-3: Sanitize user-provided canvas items to prevent prompt injection
+				const sanitizedItems = items.map((item) =>
+					sanitizePromptContent(item),
+				);
+
 				// Build new items
 				let newItems: unknown[];
 				if (canvasType === "journey") {
-					newItems = items.map((content) => ({
+					newItems = sanitizedItems.map((content) => ({
 						id: generateUUID(),
 						stage: normalizedSection,
 						content,
 						type: "touchpoint",
 					}));
 				} else if (canvasType === "brainstorm") {
-					newItems = items.map((content, idx) => ({
+					newItems = sanitizedItems.map((content, idx) => ({
 						id: generateUUID(),
 						content,
 						color: "slate",
@@ -167,7 +173,7 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 						y: Math.random() * 40 + 10 + idx * 10,
 					}));
 				} else {
-					newItems = items.map((content) => ({
+					newItems = sanitizedItems.map((content) => ({
 						id: generateUUID(),
 						content,
 						color: "slate",

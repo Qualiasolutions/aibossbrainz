@@ -12,6 +12,7 @@ export type UserType =
 
 type Entitlements = {
 	maxMessagesPerDay: number;
+	maxDeepResearchPerDay: number;
 	availableChatModelIds: ChatModel["id"][];
 };
 
@@ -21,6 +22,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
 	 */
 	guest: {
 		maxMessagesPerDay: 50,
+		maxDeepResearchPerDay: 5,
 		availableChatModelIds: ["chat-model", "chat-model-reasoning"],
 	},
 
@@ -30,6 +32,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
 	 */
 	pending: {
 		maxMessagesPerDay: 0,
+		maxDeepResearchPerDay: 0,
 		availableChatModelIds: [],
 	},
 
@@ -38,6 +41,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
 	 */
 	trial: {
 		maxMessagesPerDay: 100,
+		maxDeepResearchPerDay: 10,
 		availableChatModelIds: ["chat-model", "chat-model-reasoning"],
 	},
 
@@ -46,6 +50,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
 	 */
 	monthly: {
 		maxMessagesPerDay: 2000,
+		maxDeepResearchPerDay: 50,
 		availableChatModelIds: ["chat-model", "chat-model-reasoning"],
 	},
 
@@ -54,6 +59,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
 	 */
 	annual: {
 		maxMessagesPerDay: 5000,
+		maxDeepResearchPerDay: 100,
 		availableChatModelIds: ["chat-model", "chat-model-reasoning"],
 	},
 
@@ -62,6 +68,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
 	 */
 	lifetime: {
 		maxMessagesPerDay: 10000,
+		maxDeepResearchPerDay: 200,
 		availableChatModelIds: ["chat-model", "chat-model-reasoning"],
 	},
 };

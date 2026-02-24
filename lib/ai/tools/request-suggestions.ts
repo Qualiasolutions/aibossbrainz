@@ -51,6 +51,14 @@ export const requestSuggestions = ({
 				};
 			}
 
+			// H-5: Reject documents over 100K characters to prevent context overflow
+			if (document.content.length > 100_000) {
+				return {
+					error:
+						"Document is too large for analysis. Please reduce it to under 100,000 characters.",
+				};
+			}
+
 			const suggestions: SuggestionDraft[] = [];
 
 			const { elementStream } = streamObject({

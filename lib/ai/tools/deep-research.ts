@@ -3,6 +3,22 @@ import { z } from "zod";
 import { sanitizePromptContent } from "@/lib/ai/prompts";
 import { isValidHttpUrl, performWebSearch } from "./web-search";
 
+// H-4: In-process deep research execution counter (resets on deploy)
+// Primary rate limiting happens at the chat route level; this is a cost safety net
+const DEEP_RESEARCH_MAX_PER_HOUR = 100;
+let deepResearchCounter = 0;
+let deepResearchWindowStart = Date.now();
+
+function checkDeepResearchLimit(): boolean {
+	const now = Date.now();
+	if (now - deepResearchWindowStart > 60 * 60 * 1000) {
+		deepResearchCounter = 0;
+		deepResearchWindowStart = now;
+	}
+	deepResearchCounter++;
+	return deepResearchCounter <= DEEP_RESEARCH_MAX_PER_HOUR;
+}
+
 /**
  * Deep research tool that runs multiple search queries in parallel
  * for comprehensive topic coverage from different angles.
@@ -30,6 +46,16 @@ export const deepResearch = tool({
 			.describe("2-4 search queries, each targeting a different angle."),
 	}),
 	execute: async ({ topic, queries }) => {
+		if (!checkDeepResearchLimit()) {
+			return {
+				success: false,
+				topic,
+				message:
+					"Deep research is temporarily rate limited. Please try again in a few minutes.",
+				searches: [],
+			};
+		}
+
 		const searchPromises = queries.map(async ({ angle, query }) => {
 			const results = await performWebSearch(query);
 			return {
