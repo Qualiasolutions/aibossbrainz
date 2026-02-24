@@ -20,7 +20,7 @@ export function SidebarToggle({
 			<TooltipTrigger asChild>
 				<Button
 					className={cn(
-						"h-9 px-3 md:h-9 md:px-3",
+						"h-8 px-2.5 md:h-9 md:px-3",
 						"bg-white border-2 border-red-400 hover:border-red-500",
 						"hover:bg-red-50 transition-all duration-200",
 						"shadow-md shadow-red-100/50",
