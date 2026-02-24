@@ -24,7 +24,7 @@ export function ExecutiveLanding({
 	return (
 		<section
 			className={cn(
-				"relative flex h-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-6 sm:px-6 sm:py-8",
+				"relative flex min-h-full flex-col items-center justify-center bg-background px-4 py-6 sm:px-6 sm:py-8",
 				className,
 			)}
 		>

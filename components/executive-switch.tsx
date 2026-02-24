@@ -233,7 +233,7 @@ export function ExecutiveSwitch({
 		<div className="relative" data-tour="executive-switch">
 			<Button
 				className={cn(
-					"group relative flex min-h-[44px] items-center gap-2.5 rounded-md border border-neutral-200 bg-white px-3 text-left shadow-sm transition-all duration-200 sm:h-10 sm:gap-3 sm:px-4",
+					"group relative flex h-8 items-center gap-2 rounded-md border border-neutral-200 bg-white px-2.5 text-left shadow-sm transition-all duration-200 sm:h-10 sm:gap-3 sm:px-4",
 					"hover:border-red-200 hover:shadow hover:bg-red-50/30",
 					"focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:ring-offset-1",
 					disabled && "cursor-not-allowed opacity-60",
