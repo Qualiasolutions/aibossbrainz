@@ -280,6 +280,25 @@ export const POST = withCsrf(async (request: Request) => {
 			.map((part) => (part as { type: "text"; text: string }).text)
 			.join(" ");
 
+		// H-1: Basic content moderation - reject obvious abuse before AI processing
+		const ABUSE_PATTERNS = [
+			/ignore\s+(all\s+)?(previous|above|prior)\s+(instructions?|rules?|prompts?)/i,
+			/you\s+are\s+now\s+(in\s+)?DAN/i,
+			/jailbreak/i,
+			/\bdo\s+anything\s+now\b/i,
+			/disregard\s+(your|all|the)\s+(rules?|instructions?|guidelines?)/i,
+			/pretend\s+you\s+(have\s+)?no\s+(restrictions?|rules?|limits?)/i,
+		];
+
+		const hasAbuse = ABUSE_PATTERNS.some((pattern) => pattern.test(messageText));
+		if (hasAbuse) {
+			logger.warn(
+				{ chatId: id, userId: user.id },
+				"Content moderation: prompt injection attempt blocked",
+			);
+			return new ChatSDKError("bad_request:api").toResponse();
+		}
+
 		// PERF: Detect simple messages to skip heavy context loading
 		const isSimple =
 			messagesFromDb.length <= 1 && messageText.trim().length < 30;
