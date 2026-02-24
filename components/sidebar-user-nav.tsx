@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import {
 	ChevronUp,
 	CreditCard,
+	GraduationCap,
 	Home,
 	LogIn,
 	LogOut,
@@ -112,6 +113,15 @@ export function SidebarUserNav({
 								<Mail className="mr-2.5 h-4 w-4 text-rose-500" />
 								<span className="text-sm font-medium">Contact</span>
 							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							className="rounded-lg px-3 py-2.5 cursor-pointer focus:bg-rose-50 focus:text-rose-600"
+							onClick={() => {
+								window.dispatchEvent(new CustomEvent("start-product-tour"));
+							}}
+						>
+							<GraduationCap className="mr-2.5 h-4 w-4 text-rose-500" />
+							<span className="text-sm font-medium">Product Tour</span>
 						</DropdownMenuItem>
 						{isAdmin && (
 							<>

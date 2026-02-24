@@ -40,6 +40,13 @@ export const POST = withCsrf(async (request: Request) => {
 		return new Response("Request body is empty", { status: 400 });
 	}
 
+	if (!process.env.BLOB_READ_WRITE_TOKEN) {
+		return NextResponse.json(
+			{ error: "File uploads are not configured" },
+			{ status: 503 },
+		);
+	}
+
 	try {
 		const formData = await request.formData();
 		const file = formData.get("file") as Blob;

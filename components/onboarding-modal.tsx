@@ -2,18 +2,35 @@
 
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Briefcase, Building2, Loader2 } from "lucide-react";
+import {
+	ArrowLeft,
+	ArrowRight,
+	Bookmark,
+	Brain,
+	Briefcase,
+	Building2,
+	Download,
+	Globe,
+	LayoutGrid,
+	Lightbulb,
+	Loader2,
+	Map,
+	MessageSquare,
+	Mic,
+	Rocket,
+	Search,
+	Sparkles,
+	Target,
+	Users,
+	Zap,
+} from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "@/components/toast";
 import { useCsrf } from "@/hooks/use-csrf";
-import { BOT_PERSONALITIES } from "@/lib/bot-personalities";
-import {
-	EMPLOYEE_COUNT_RANGES,
-	INDUSTRIES,
-	REVENUE_RANGES,
-	YEARS_IN_BUSINESS_RANGES,
-} from "@/lib/constants/business-profile";
+import { BOT_PERSONALITIES, FOCUS_MODES } from "@/lib/bot-personalities";
+import { INDUSTRIES } from "@/lib/constants/business-profile";
+import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import {
 	Dialog,
@@ -30,7 +47,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "./ui/select";
-import { Textarea } from "./ui/textarea";
 
 interface UserProfile {
 	displayName: string | null;
@@ -42,40 +58,64 @@ interface UserProfile {
 type OnboardingStep =
 	| "welcome"
 	| "meet-team"
+	| "focus-modes"
+	| "strategy-canvas"
+	| "smart-features"
+	| "voice-power"
 	| "profile"
-	| "business"
-	| "success";
+	| "ready";
 
 const STEPS: OnboardingStep[] = [
 	"welcome",
 	"meet-team",
+	"focus-modes",
+	"strategy-canvas",
+	"smart-features",
+	"voice-power",
 	"profile",
-	"business",
-	"success",
+	"ready",
 ];
 
 const alexandria = BOT_PERSONALITIES.alexandria;
 const kim = BOT_PERSONALITIES.kim;
 
+// Tour-only steps (no profile collection)
+const TOUR_STEPS: OnboardingStep[] = [
+	"welcome",
+	"meet-team",
+	"focus-modes",
+	"strategy-canvas",
+	"smart-features",
+	"voice-power",
+	"ready",
+];
+
 export function OnboardingModal() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
+	const [isTourMode, setIsTourMode] = useState(false);
 	const [step, setStep] = useState<OnboardingStep>("welcome");
 	// Profile fields
 	const [displayName, setDisplayName] = useState("");
 	const [companyName, setCompanyName] = useState("");
 	const [industry, setIndustry] = useState("");
-	// Business profile fields
-	const [productsServices, setProductsServices] = useState("");
-	const [websiteUrl, setWebsiteUrl] = useState("");
-	const [targetMarket, setTargetMarket] = useState("");
-	const [competitors, setCompetitors] = useState("");
-	const [businessGoals, setBusinessGoals] = useState("");
-	const [annualRevenue, setAnnualRevenue] = useState("");
-	const [yearsInBusiness, setYearsInBusiness] = useState("");
-	const [employeeCount, setEmployeeCount] = useState("");
 	const { csrfFetch, isLoading: csrfLoading } = useCsrf();
+
+	const activeSteps = isTourMode ? TOUR_STEPS : STEPS;
+
+	// Listen for "start-product-tour" custom event from sidebar
+	useEffect(() => {
+		const handleStartTour = () => {
+			setIsTourMode(true);
+			setStep("welcome");
+			setIsOpen(true);
+			setIsLoading(false);
+		};
+		window.addEventListener("start-product-tour", handleStartTour);
+		return () =>
+			window.removeEventListener("start-product-tour", handleStartTour);
+	}, []);
 
 	useEffect(() => {
 		async function checkProfile() {
@@ -97,20 +137,27 @@ export function OnboardingModal() {
 		checkProfile();
 	}, []);
 
-	const buildPayload = () => ({
-		displayName: displayName.trim() || null,
-		companyName: companyName.trim() || null,
-		industry: industry || null,
-		productsServices: productsServices.trim() || null,
-		websiteUrl: websiteUrl.trim() || null,
-		targetMarket: targetMarket.trim() || null,
-		competitors: competitors.trim() || null,
-		businessGoals: businessGoals.trim() || null,
-		annualRevenue: annualRevenue || null,
-		yearsInBusiness: yearsInBusiness || null,
-		employeeCount: employeeCount || null,
-		completeOnboarding: true,
-	});
+	const currentStepIndex = activeSteps.indexOf(step);
+
+	const goNext = () => {
+		const nextIndex = currentStepIndex + 1;
+		if (nextIndex < activeSteps.length) {
+			setStep(activeSteps[nextIndex]);
+		}
+	};
+
+	const goBack = () => {
+		const prevIndex = currentStepIndex - 1;
+		if (prevIndex >= 0) {
+			setStep(activeSteps[prevIndex]);
+		}
+	};
+
+	const closeTour = () => {
+		setIsOpen(false);
+		setStep("welcome");
+		setIsTourMode(false);
+	};
 
 	const saveAndFinish = async () => {
 		if (csrfLoading) {
@@ -126,19 +173,20 @@ export function OnboardingModal() {
 			const res = await csrfFetch("/api/profile", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(buildPayload()),
+				body: JSON.stringify({
+					displayName: displayName.trim() || null,
+					companyName: companyName.trim() || null,
+					industry: industry || null,
+					completeOnboarding: true,
+				}),
 			});
 
 			if (res.ok) {
-				setStep("success");
-				const name = displayName.trim() || "there";
-				toast({
-					type: "success",
-					description: `Welcome aboard, ${name}!`,
-				});
+				setStep("ready");
 				setTimeout(() => {
 					setIsOpen(false);
-				}, 2500);
+					setIsTourMode(false);
+				}, 3000);
 			} else {
 				const errorData = await res.json().catch(() => ({}));
 				console.error("Failed to save profile:", errorData);
@@ -158,58 +206,80 @@ export function OnboardingModal() {
 		}
 	};
 
-	const handleSkip = () => {
-		saveAndFinish();
-	};
-
-	const handleProfileContinue = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!displayName.trim()) return;
-		setStep("business");
-	};
-
-	const handleBusinessSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		saveAndFinish();
-	};
-
 	// Don't render anything until we know whether to show the modal
 	if (isLoading || !isOpen) return null;
 
-	const currentStepIndex = STEPS.indexOf(step);
-
 	return (
-		<Dialog open={isOpen} onOpenChange={() => {}}>
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open && isTourMode) closeTour();
+			}}
+		>
 			<DialogContent
-				className="max-w-lg overflow-hidden border-0 bg-white p-0 shadow-2xl sm:rounded-2xl"
-				onPointerDownOutside={(e) => e.preventDefault()}
-				onEscapeKeyDown={(e) => e.preventDefault()}
+				className="max-w-xl overflow-hidden border-0 bg-white p-0 shadow-2xl sm:rounded-2xl"
+				onPointerDownOutside={(e) => {
+					if (!isTourMode) e.preventDefault();
+				}}
+				onEscapeKeyDown={(e) => {
+					if (!isTourMode) e.preventDefault();
+				}}
 			>
-				{/* Step progress bar */}
-				<div className="h-1 w-full bg-stone-100">
-					<motion.div
-						className="h-full bg-gradient-to-r from-rose-500 to-red-500"
-						initial={{ width: "0%" }}
-						animate={{
-							width: `${((currentStepIndex + 1) / STEPS.length) * 100}%`,
-						}}
-						transition={{ duration: 0.4, ease: "easeInOut" }}
-					/>
+				{/* Step progress indicator */}
+				<div className="flex items-center justify-center gap-1.5 bg-stone-50 py-3">
+					{activeSteps.map((s, i) => (
+						<motion.div
+							key={s}
+							className={cn(
+								"h-1.5 rounded-full transition-all duration-300",
+								i <= currentStepIndex
+									? "w-6 bg-gradient-to-r from-rose-500 to-red-500"
+									: "w-1.5 bg-stone-200",
+							)}
+							initial={false}
+							animate={{
+								width: i <= currentStepIndex ? 24 : 6,
+							}}
+						/>
+					))}
 				</div>
 
 				<AnimatePresence mode="wait">
 					{step === "welcome" && (
-						<WelcomeStep key="welcome" onNext={() => setStep("meet-team")} />
+						<WelcomeStep key="welcome" onNext={goNext} />
 					)}
 					{step === "meet-team" && (
-						<MeetTeamStep
-							key="meet-team"
-							onNext={() => setStep("profile")}
-							onSkip={handleSkip}
-							isSaving={isSaving}
+						<MeetTeamStep key="meet-team" onNext={goNext} onBack={goBack} />
+					)}
+					{step === "focus-modes" && (
+						<FocusModesStep
+							key="focus-modes"
+							onNext={goNext}
+							onBack={goBack}
 						/>
 					)}
-					{step === "profile" && (
+					{step === "strategy-canvas" && (
+						<StrategyCanvasStep
+							key="strategy-canvas"
+							onNext={goNext}
+							onBack={goBack}
+						/>
+					)}
+					{step === "smart-features" && (
+						<SmartFeaturesStep
+							key="smart-features"
+							onNext={goNext}
+							onBack={goBack}
+						/>
+					)}
+					{step === "voice-power" && (
+						<VoicePowerStep
+							key="voice-power"
+							onNext={goNext}
+							onBack={goBack}
+						/>
+					)}
+					{!isTourMode && step === "profile" && (
 						<ProfileStep
 							key="profile"
 							displayName={displayName}
@@ -218,37 +288,18 @@ export function OnboardingModal() {
 							setCompanyName={setCompanyName}
 							industry={industry}
 							setIndustry={setIndustry}
-							onSubmit={handleProfileContinue}
-							onSkip={handleSkip}
+							onSubmit={saveAndFinish}
+							onBack={goBack}
 							isSaving={isSaving}
 						/>
 					)}
-					{step === "business" && (
-						<BusinessProfileStep
-							key="business"
-							productsServices={productsServices}
-							setProductsServices={setProductsServices}
-							websiteUrl={websiteUrl}
-							setWebsiteUrl={setWebsiteUrl}
-							targetMarket={targetMarket}
-							setTargetMarket={setTargetMarket}
-							competitors={competitors}
-							setCompetitors={setCompetitors}
-							businessGoals={businessGoals}
-							setBusinessGoals={setBusinessGoals}
-							annualRevenue={annualRevenue}
-							setAnnualRevenue={setAnnualRevenue}
-							yearsInBusiness={yearsInBusiness}
-							setYearsInBusiness={setYearsInBusiness}
-							employeeCount={employeeCount}
-							setEmployeeCount={setEmployeeCount}
-							onSubmit={handleBusinessSubmit}
-							onSkip={handleSkip}
-							isSaving={isSaving}
+					{step === "ready" && (
+						<ReadyStep
+							key="ready"
+							displayName={displayName || "there"}
+							tourMode={isTourMode}
+							onClose={closeTour}
 						/>
-					)}
-					{step === "success" && (
-						<SuccessStep key="success" displayName={displayName || "there"} />
 					)}
 				</AnimatePresence>
 			</DialogContent>
@@ -256,28 +307,93 @@ export function OnboardingModal() {
 	);
 }
 
-function WelcomeStep({ onNext }: { onNext: () => void }) {
+// Step wrapper with consistent animation
+function StepWrapper({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
 	return (
 		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0, x: -20 }}
-			transition={{ duration: 0.3 }}
-			className="relative flex flex-col items-center px-8 pt-8 pb-10"
+			initial={{ opacity: 0, y: 10 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: -10 }}
+			transition={{ duration: 0.25 }}
+			className={cn("relative flex flex-col px-8 pt-6 pb-8", className)}
 		>
+			{children}
+		</motion.div>
+	);
+}
+
+// Navigation buttons component
+function StepNav({
+	onNext,
+	onBack,
+	nextLabel = "Continue",
+	showBack = true,
+	disabled = false,
+	loading = false,
+}: {
+	onNext: () => void;
+	onBack?: () => void;
+	nextLabel?: string;
+	showBack?: boolean;
+	disabled?: boolean;
+	loading?: boolean;
+}) {
+	return (
+		<div className="mt-6 flex items-center gap-3">
+			{showBack && onBack && (
+				<Button
+					variant="ghost"
+					onClick={onBack}
+					className="h-11 px-4 text-stone-500 hover:bg-stone-100 hover:text-stone-700"
+				>
+					<ArrowLeft className="mr-1.5 size-4" />
+					Back
+				</Button>
+			)}
+			<Button
+				onClick={onNext}
+				disabled={disabled || loading}
+				className="group h-11 flex-1 bg-stone-900 font-semibold text-white transition-all hover:bg-stone-800 disabled:opacity-50"
+			>
+				{loading ? (
+					<>
+						<Loader2 className="mr-2 size-4 animate-spin" />
+						Setting up...
+					</>
+				) : (
+					<>
+						{nextLabel}
+						<ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-0.5" />
+					</>
+				)}
+			</Button>
+		</div>
+	);
+}
+
+// Step 1: Welcome
+function WelcomeStep({ onNext }: { onNext: () => void }) {
+	return (
+		<StepWrapper className="items-center pt-10 pb-10">
 			<VisuallyHidden.Root>
-				<DialogTitle>Welcome to AI Boss Brainz</DialogTitle>
+				<DialogTitle>Welcome to Boss Brainz</DialogTitle>
 				<DialogDescription>
 					Your executive AI consulting team awaits
 				</DialogDescription>
 			</VisuallyHidden.Root>
 
-			{/* Executive avatars - overlapping */}
+			{/* Animated logo/brand mark */}
 			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.1, type: "spring", stiffness: 180 }}
-				className="relative mb-8"
+				initial={{ scale: 0.8, opacity: 0 }}
+				animate={{ scale: 1, opacity: 1 }}
+				transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+				className="relative mb-6"
 			>
 				<div className="flex -space-x-5">
 					{alexandria.avatar && (
@@ -285,14 +401,14 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 							initial={{ x: 20, opacity: 0 }}
 							animate={{ x: 0, opacity: 1 }}
 							transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-							className="relative z-10 size-[72px] overflow-hidden rounded-full border-[3px] border-white shadow-lg"
+							className="relative z-10 size-20 overflow-hidden rounded-full border-4 border-white shadow-xl"
 						>
 							<Image
 								src={alexandria.avatar}
 								alt={alexandria.name}
 								fill
 								className="object-cover"
-								sizes="72px"
+								sizes="80px"
 							/>
 						</motion.div>
 					)}
@@ -301,27 +417,25 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 							initial={{ x: -20, opacity: 0 }}
 							animate={{ x: 0, opacity: 1 }}
 							transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-							className="relative size-[72px] overflow-hidden rounded-full border-[3px] border-white shadow-lg"
+							className="relative size-20 overflow-hidden rounded-full border-4 border-white shadow-xl"
 						>
 							<Image
 								src={kim.avatar}
 								alt={kim.name}
 								fill
 								className="object-cover"
-								sizes="72px"
+								sizes="80px"
 							/>
 						</motion.div>
 					)}
 				</div>
-				{/* Glow behind avatars */}
-				<div className="absolute inset-0 -z-10 scale-150 rounded-full bg-gradient-to-br from-rose-200/40 to-red-200/40 blur-2xl" />
+				<div className="absolute inset-0 -z-10 scale-150 rounded-full bg-gradient-to-br from-rose-200/50 to-red-200/50 blur-3xl" />
 			</motion.div>
 
-			{/* Welcome text */}
 			<motion.h2
 				initial={{ opacity: 0, y: 10 }}
 				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.3 }}
+				transition={{ delay: 0.35 }}
 				className="mb-2 text-center font-bold text-2xl tracking-tight text-stone-900"
 			>
 				Welcome to Boss Brainz
@@ -330,177 +444,94 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 			<motion.p
 				initial={{ opacity: 0, y: 10 }}
 				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.4 }}
-				className="mb-2 max-w-xs text-center text-[15px] leading-relaxed text-stone-500"
+				transition={{ delay: 0.45 }}
+				className="mb-8 max-w-sm text-center text-base leading-relaxed text-stone-500"
 			>
-				Your personal executive consulting team is ready to help you grow your
-				business.
+				Meet your executive AI consulting team. Let's show you around in about
+				2 minutes.
 			</motion.p>
 
-			{/* Executive names */}
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ delay: 0.5 }}
-				className="mb-8 flex items-center gap-6"
-			>
-				<div className="text-center">
-					<p className="font-semibold text-sm text-stone-800">Alexandria</p>
-					<p className="text-xs text-rose-500">CMO</p>
-				</div>
-				<div className="h-4 w-px bg-stone-200" />
-				<div className="text-center">
-					<p className="font-semibold text-sm text-stone-800">Kim</p>
-					<p className="text-xs text-red-500">CSO</p>
-				</div>
-			</motion.div>
-
-			{/* CTA */}
 			<motion.div
 				initial={{ opacity: 0, y: 10 }}
 				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.6 }}
+				transition={{ delay: 0.55 }}
 				className="w-full max-w-xs"
 			>
 				<Button
 					autoFocus
 					onClick={onNext}
-					className="group h-11 w-full bg-stone-900 font-semibold text-white transition-all hover:bg-stone-800"
+					className="group h-12 w-full bg-gradient-to-r from-rose-500 to-red-500 font-semibold text-white shadow-lg shadow-rose-500/25 transition-all hover:from-rose-600 hover:to-red-600 hover:shadow-xl hover:shadow-rose-500/30"
 				>
-					Meet Your Team
-					<ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-0.5" />
+					Let's Get Started
+					<Sparkles className="ml-2 size-4" />
 				</Button>
 			</motion.div>
-		</motion.div>
+		</StepWrapper>
 	);
 }
 
+// Step 2: Meet Your Team
 function MeetTeamStep({
 	onNext,
-	onSkip,
-	isSaving,
+	onBack,
 }: {
 	onNext: () => void;
-	onSkip: () => void;
-	isSaving: boolean;
+	onBack: () => void;
 }) {
-	const [activeExec, setActiveExec] = useState<"alexandria" | "kim">(
-		"alexandria",
-	);
-
-	const executives = [
-		{ key: "alexandria" as const, data: alexandria },
-		{ key: "kim" as const, data: kim },
-	];
-
-	const currentExec = activeExec === "alexandria" ? alexandria : kim;
-
 	return (
-		<motion.div
-			initial={{ opacity: 0, x: 20 }}
-			animate={{ opacity: 1, x: 0 }}
-			exit={{ opacity: 0, x: -20 }}
-			transition={{ duration: 0.3 }}
-			className="relative flex flex-col px-8 pt-6 pb-8"
-		>
+		<StepWrapper>
 			<VisuallyHidden.Root>
 				<DialogTitle>Meet Your Executive Team</DialogTitle>
-				<DialogDescription>
-					Alexandria and Kim are ready to help
-				</DialogDescription>
+				<DialogDescription>Alexandria and Kim are ready to help</DialogDescription>
 			</VisuallyHidden.Root>
 
-			{/* Header */}
-			<motion.div
-				initial={{ opacity: 0, y: -10 }}
-				animate={{ opacity: 1, y: 0 }}
-				className="mb-5 text-center"
-			>
-				<h2 className="mb-1 font-bold text-lg tracking-tight text-stone-900">
+			<div className="mb-5 text-center">
+				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
 					Your Executive Team
 				</h2>
 				<p className="text-sm text-stone-500">
-					Two experts, one mission: your success
+					Two AI experts with complementary skills
 				</p>
-			</motion.div>
-
-			{/* Executive tabs */}
-			<div className="mb-4 flex gap-2">
-				{executives.map(({ key, data }) => (
-					<button
-						key={key}
-						type="button"
-						onClick={() => setActiveExec(key)}
-						className={`flex flex-1 items-center gap-3 rounded-xl border-2 p-3 transition-all duration-200 ${
-							activeExec === key
-								? "border-stone-900 bg-stone-50"
-								: "border-transparent bg-stone-50 hover:bg-stone-100"
-						}`}
-					>
-						{data.avatar && (
-							<div className="relative size-10 overflow-hidden rounded-full">
-								<Image
-									src={data.avatar}
-									alt={data.name}
-									fill
-									className="object-cover"
-									sizes="40px"
-								/>
-							</div>
-						)}
-						<div className="text-left">
-							<p className="font-semibold text-sm text-stone-900">
-								{data.name.split(" ")[0]}
-							</p>
-							<p className="text-xs text-stone-400">
-								{data.role.split(" ")[0]}
-							</p>
-						</div>
-					</button>
-				))}
 			</div>
 
-			{/* Executive detail card */}
-			<AnimatePresence mode="wait">
+			{/* Executive cards - side by side */}
+			<div className="mb-2 grid grid-cols-2 gap-3">
+				{/* Alexandria */}
 				<motion.div
-					key={activeExec}
-					initial={{ opacity: 0, y: 8 }}
-					animate={{ opacity: 1, y: 0 }}
-					exit={{ opacity: 0, y: -8 }}
-					transition={{ duration: 0.2 }}
-					className="mb-6 overflow-hidden rounded-xl border border-stone-200"
+					initial={{ opacity: 0, x: -20 }}
+					animate={{ opacity: 1, x: 0 }}
+					transition={{ delay: 0.1 }}
+					className="overflow-hidden rounded-xl border border-stone-200 bg-gradient-to-b from-white to-rose-50/30"
 				>
-					{/* Executive header with gradient */}
-					<div className={`bg-gradient-to-r ${currentExec.color} px-5 py-4`}>
-						<div className="flex items-center gap-4">
-							{currentExec.avatar && (
-								<div className="relative size-14 overflow-hidden rounded-xl border-2 border-white/20 shadow-lg">
+					<div className="bg-gradient-to-r from-rose-500 to-rose-600 p-3">
+						<div className="flex items-center gap-2.5">
+							{alexandria.avatar && (
+								<div className="relative size-10 overflow-hidden rounded-full border-2 border-white/30 shadow-lg">
 									<Image
-										src={currentExec.avatar}
-										alt={currentExec.name}
+										src={alexandria.avatar}
+										alt={alexandria.name}
 										fill
 										className="object-cover"
-										sizes="56px"
+										sizes="40px"
 									/>
 								</div>
 							)}
 							<div>
-								<h3 className="font-bold text-white">{currentExec.name}</h3>
-								<p className="text-sm text-white/70">{currentExec.role}</p>
+								<p className="font-semibold text-sm text-white">Alexandria</p>
+								<p className="text-[11px] text-white/70">Chief Marketing Officer</p>
 							</div>
 						</div>
 					</div>
-
-					{/* Executive info */}
-					<div className="bg-white p-4">
-						<p className="mb-3 text-sm leading-relaxed text-stone-600">
-							{currentExec.personality}
+					<div className="p-3">
+						<p className="mb-2 text-xs leading-relaxed text-stone-600">
+							Brand strategist & creative director. Expert in positioning,
+							messaging, and customer experience.
 						</p>
-						<div className="flex flex-wrap gap-1.5">
-							{currentExec.expertise.slice(0, 3).map((skill) => (
+						<div className="flex flex-wrap gap-1">
+							{["Branding", "Content", "Social"].map((skill) => (
 								<span
 									key={skill}
-									className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs text-stone-600"
+									className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-medium text-rose-700"
 								>
 									{skill}
 								</span>
@@ -508,30 +539,482 @@ function MeetTeamStep({
 						</div>
 					</div>
 				</motion.div>
-			</AnimatePresence>
 
-			{/* CTA */}
-			<Button
-				onClick={onNext}
-				className="group h-11 w-full bg-stone-900 font-semibold text-white transition-all hover:bg-stone-800"
-			>
-				Continue
-				<ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-0.5" />
-			</Button>
+				{/* Kim */}
+				<motion.div
+					initial={{ opacity: 0, x: 20 }}
+					animate={{ opacity: 1, x: 0 }}
+					transition={{ delay: 0.2 }}
+					className="overflow-hidden rounded-xl border border-stone-200 bg-gradient-to-b from-white to-red-50/30"
+				>
+					<div className="bg-gradient-to-r from-red-500 to-red-600 p-3">
+						<div className="flex items-center gap-2.5">
+							{kim.avatar && (
+								<div className="relative size-10 overflow-hidden rounded-full border-2 border-white/30 shadow-lg">
+									<Image
+										src={kim.avatar}
+										alt={kim.name}
+										fill
+										className="object-cover"
+										sizes="40px"
+									/>
+								</div>
+							)}
+							<div>
+								<p className="font-semibold text-sm text-white">Kim</p>
+								<p className="text-[11px] text-white/70">Chief Strategy Officer</p>
+							</div>
+						</div>
+					</div>
+					<div className="p-3">
+						<p className="mb-2 text-xs leading-relaxed text-stone-600">
+							Sales strategist & business analyst. Expert in pricing, revenue,
+							and market expansion.
+						</p>
+						<div className="flex flex-wrap gap-1">
+							{["Sales", "Pricing", "Growth"].map((skill) => (
+								<span
+									key={skill}
+									className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-medium text-red-700"
+								>
+									{skill}
+								</span>
+							))}
+						</div>
+					</div>
+				</motion.div>
+			</div>
 
-			{/* Skip */}
-			<button
-				type="button"
-				onClick={onSkip}
-				disabled={isSaving}
-				className="mt-3 text-center text-sm text-stone-400 transition-colors hover:text-stone-600 disabled:opacity-50"
+			{/* Collaborative hint */}
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.3 }}
+				className="flex items-center gap-3 rounded-lg bg-stone-100 p-3"
 			>
-				{isSaving ? "Saving..." : "Skip for now"}
-			</button>
-		</motion.div>
+				<div className="flex -space-x-2">
+					{alexandria.avatar && (
+						<div className="relative size-6 overflow-hidden rounded-full border border-white">
+							<Image
+								src={alexandria.avatar}
+								alt=""
+								fill
+								className="object-cover"
+								sizes="24px"
+							/>
+						</div>
+					)}
+					{kim.avatar && (
+						<div className="relative size-6 overflow-hidden rounded-full border border-white">
+							<Image src={kim.avatar} alt="" fill className="object-cover" sizes="24px" />
+						</div>
+					)}
+				</div>
+				<p className="text-xs text-stone-600">
+					<span className="font-medium">Collaborative mode</span> — Get both
+					perspectives at once for comprehensive advice
+				</p>
+			</motion.div>
+
+			<StepNav onNext={onNext} onBack={onBack} showBack={false} />
+		</StepWrapper>
 	);
 }
 
+// Step 3: Focus Modes
+function FocusModesStep({
+	onNext,
+	onBack,
+}: {
+	onNext: () => void;
+	onBack: () => void;
+}) {
+	const focusModesList = [
+		{ mode: FOCUS_MODES.business_analysis, icon: Search },
+		{ mode: FOCUS_MODES.pricing, icon: Target },
+		{ mode: FOCUS_MODES.key_messaging, icon: MessageSquare },
+		{ mode: FOCUS_MODES.customer_journey, icon: Users },
+		{ mode: FOCUS_MODES.social_media, icon: Globe },
+		{ mode: FOCUS_MODES.launch_strategy, icon: Rocket },
+	];
+
+	return (
+		<StepWrapper>
+			<VisuallyHidden.Root>
+				<DialogTitle>Focus Modes</DialogTitle>
+				<DialogDescription>
+					Specialized conversation modes for different business needs
+				</DialogDescription>
+			</VisuallyHidden.Root>
+
+			<div className="mb-5 text-center">
+				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
+					<Brain className="size-6 text-white" />
+				</div>
+				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
+					Focus Modes
+				</h2>
+				<p className="text-sm text-stone-500">
+					Switch modes to steer the conversation toward specific business topics
+				</p>
+			</div>
+
+			{/* Focus mode chips preview */}
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.1 }}
+				className="mb-4 rounded-xl border border-stone-200 bg-stone-50 p-4"
+			>
+				<p className="mb-3 text-center text-xs font-medium uppercase tracking-wide text-stone-400">
+					Available Focus Modes
+				</p>
+				<div className="grid grid-cols-3 gap-2">
+					{focusModesList.map(({ mode, icon: Icon }, index) => (
+						<motion.div
+							key={mode.id}
+							initial={{ opacity: 0, scale: 0.9 }}
+							animate={{ opacity: 1, scale: 1 }}
+							transition={{ delay: 0.15 + index * 0.05 }}
+							className={cn(
+								"flex flex-col items-center gap-1.5 rounded-lg border bg-white p-2.5 transition-all",
+								index === 1
+									? "border-red-300 ring-2 ring-red-100"
+									: "border-stone-200",
+							)}
+						>
+							<Icon
+								className={cn(
+									"size-4",
+									index === 1 ? "text-red-500" : "text-stone-400",
+								)}
+							/>
+							<span
+								className={cn(
+									"text-[10px] font-medium",
+									index === 1 ? "text-red-600" : "text-stone-600",
+								)}
+							>
+								{mode.name}
+							</span>
+						</motion.div>
+					))}
+				</div>
+			</motion.div>
+
+			{/* How it works */}
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.4 }}
+				className="flex items-start gap-3 rounded-lg bg-blue-50 p-3"
+			>
+				<Zap className="mt-0.5 size-4 shrink-0 text-blue-500" />
+				<p className="text-xs leading-relaxed text-blue-800">
+					<span className="font-medium">How it works:</span> Select a focus mode
+					before asking your question. The AI will tailor its response to that
+					specific business area.
+				</p>
+			</motion.div>
+
+			<StepNav onNext={onNext} onBack={onBack} />
+		</StepWrapper>
+	);
+}
+
+// Step 4: Strategy Canvas
+function StrategyCanvasStep({
+	onNext,
+	onBack,
+}: {
+	onNext: () => void;
+	onBack: () => void;
+}) {
+	const canvasTools = [
+		{
+			name: "SWOT Analysis",
+			description: "Strengths, Weaknesses, Opportunities, Threats",
+			icon: LayoutGrid,
+			color: "from-emerald-500 to-teal-600",
+			bgColor: "bg-emerald-50",
+			textColor: "text-emerald-700",
+		},
+		{
+			name: "Business Model",
+			description: "Map your business model canvas",
+			icon: Briefcase,
+			color: "from-violet-500 to-purple-600",
+			bgColor: "bg-violet-50",
+			textColor: "text-violet-700",
+		},
+		{
+			name: "Customer Journey",
+			description: "Visualize the customer experience",
+			icon: Map,
+			color: "from-orange-500 to-amber-600",
+			bgColor: "bg-orange-50",
+			textColor: "text-orange-700",
+		},
+		{
+			name: "Brainstorm",
+			description: "Capture ideas and insights",
+			icon: Lightbulb,
+			color: "from-pink-500 to-rose-600",
+			bgColor: "bg-pink-50",
+			textColor: "text-pink-700",
+		},
+	];
+
+	return (
+		<StepWrapper>
+			<VisuallyHidden.Root>
+				<DialogTitle>Strategy Canvas</DialogTitle>
+				<DialogDescription>
+					Interactive strategy tools to visualize your business
+				</DialogDescription>
+			</VisuallyHidden.Root>
+
+			<div className="mb-5 text-center">
+				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg">
+					<LayoutGrid className="size-6 text-white" />
+				</div>
+				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
+					Strategy Canvas
+				</h2>
+				<p className="text-sm text-stone-500">
+					Visual tools to map and organize your business strategy
+				</p>
+			</div>
+
+			{/* Canvas tools grid */}
+			<div className="mb-4 grid grid-cols-2 gap-2.5">
+				{canvasTools.map((tool, index) => (
+					<motion.div
+						key={tool.name}
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ delay: 0.1 + index * 0.08 }}
+						className={cn(
+							"group rounded-xl border border-stone-200 p-3 transition-all hover:border-stone-300 hover:shadow-sm",
+							tool.bgColor,
+						)}
+					>
+						<div
+							className={cn(
+								"mb-2 flex size-8 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm",
+								tool.color,
+							)}
+						>
+							<tool.icon className="size-4 text-white" />
+						</div>
+						<p className={cn("mb-0.5 font-semibold text-xs", tool.textColor)}>
+							{tool.name}
+						</p>
+						<p className="text-[10px] leading-relaxed text-stone-500">
+							{tool.description}
+						</p>
+					</motion.div>
+				))}
+			</div>
+
+			{/* Tip */}
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.5 }}
+				className="flex items-start gap-3 rounded-lg bg-emerald-50 p-3"
+			>
+				<Sparkles className="mt-0.5 size-4 shrink-0 text-emerald-500" />
+				<p className="text-xs leading-relaxed text-emerald-800">
+					<span className="font-medium">Pro tip:</span> The AI can automatically
+					populate your canvas tools during conversation. Just ask to "fill out
+					my SWOT" or "create a business model."
+				</p>
+			</motion.div>
+
+			<StepNav onNext={onNext} onBack={onBack} />
+		</StepWrapper>
+	);
+}
+
+// Step 5: Smart Features
+function SmartFeaturesStep({
+	onNext,
+	onBack,
+}: {
+	onNext: () => void;
+	onBack: () => void;
+}) {
+	const features = [
+		{
+			icon: Globe,
+			title: "Web Search",
+			description: "AI searches the web for real-time market data and research",
+			color: "text-blue-500",
+			bgColor: "bg-blue-50",
+		},
+		{
+			icon: Bookmark,
+			title: "Save & React",
+			description: "Mark messages as actionable, save for later, or flag for clarity",
+			color: "text-amber-500",
+			bgColor: "bg-amber-50",
+		},
+		{
+			icon: Download,
+			title: "Export PDF",
+			description: "Download your conversations as professional PDF reports",
+			color: "text-violet-500",
+			bgColor: "bg-violet-50",
+		},
+		{
+			icon: Lightbulb,
+			title: "Action Items",
+			description: "Track tasks and insights from your consulting sessions",
+			color: "text-emerald-500",
+			bgColor: "bg-emerald-50",
+		},
+	];
+
+	return (
+		<StepWrapper>
+			<VisuallyHidden.Root>
+				<DialogTitle>Smart Features</DialogTitle>
+				<DialogDescription>
+					Powerful tools to enhance your consulting experience
+				</DialogDescription>
+			</VisuallyHidden.Root>
+
+			<div className="mb-5 text-center">
+				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
+					<Sparkles className="size-6 text-white" />
+				</div>
+				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
+					Smart Features
+				</h2>
+				<p className="text-sm text-stone-500">
+					Tools to capture, organize, and act on insights
+				</p>
+			</div>
+
+			{/* Features list */}
+			<div className="space-y-2.5">
+				{features.map((feature, index) => (
+					<motion.div
+						key={feature.title}
+						initial={{ opacity: 0, x: -10 }}
+						animate={{ opacity: 1, x: 0 }}
+						transition={{ delay: 0.1 + index * 0.08 }}
+						className="flex items-start gap-3 rounded-xl border border-stone-200 bg-white p-3 transition-all hover:border-stone-300"
+					>
+						<div
+							className={cn(
+								"flex size-9 shrink-0 items-center justify-center rounded-lg",
+								feature.bgColor,
+							)}
+						>
+							<feature.icon className={cn("size-4", feature.color)} />
+						</div>
+						<div>
+							<p className="mb-0.5 font-semibold text-sm text-stone-900">
+								{feature.title}
+							</p>
+							<p className="text-xs leading-relaxed text-stone-500">
+								{feature.description}
+							</p>
+						</div>
+					</motion.div>
+				))}
+			</div>
+
+			<StepNav onNext={onNext} onBack={onBack} />
+		</StepWrapper>
+	);
+}
+
+// Step 6: Voice Power
+function VoicePowerStep({
+	onNext,
+	onBack,
+}: {
+	onNext: () => void;
+	onBack: () => void;
+}) {
+	return (
+		<StepWrapper>
+			<VisuallyHidden.Root>
+				<DialogTitle>Voice Features</DialogTitle>
+				<DialogDescription>Listen to AI responses in natural voice</DialogDescription>
+			</VisuallyHidden.Root>
+
+			<div className="mb-5 text-center">
+				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg">
+					<Mic className="size-6 text-white" />
+				</div>
+				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
+					Voice Playback
+				</h2>
+				<p className="text-sm text-stone-500">
+					Listen to responses with natural text-to-speech
+				</p>
+			</div>
+
+			{/* Voice demo visual */}
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.1 }}
+				className="mb-4 rounded-xl border border-violet-200 bg-gradient-to-b from-violet-50 to-white p-5"
+			>
+				<div className="flex items-center justify-center gap-3">
+					{/* Sound wave animation */}
+					<div className="flex items-center gap-1">
+						{[3, 5, 7, 5, 3, 6, 4, 7, 5, 3].map((height, i) => (
+							<motion.div
+								key={i}
+								className="w-1 rounded-full bg-violet-400"
+								initial={{ height: 8 }}
+								animate={{ height: [8, height * 4, 8] }}
+								transition={{
+									duration: 0.8,
+									repeat: Number.POSITIVE_INFINITY,
+									delay: i * 0.1,
+								}}
+							/>
+						))}
+					</div>
+				</div>
+				<p className="mt-4 text-center text-sm text-violet-700">
+					"Click the speaker icon on any message to hear it read aloud."
+				</p>
+			</motion.div>
+
+			{/* Benefits */}
+			<div className="space-y-2">
+				{[
+					"Perfect for multitasking while getting advice",
+					"Natural-sounding voice powered by ElevenLabs",
+					"Works on all AI responses",
+				].map((benefit, index) => (
+					<motion.div
+						key={benefit}
+						initial={{ opacity: 0, x: -10 }}
+						animate={{ opacity: 1, x: 0 }}
+						transition={{ delay: 0.2 + index * 0.08 }}
+						className="flex items-center gap-2 text-sm text-stone-600"
+					>
+						<div className="size-1.5 rounded-full bg-violet-400" />
+						{benefit}
+					</motion.div>
+				))}
+			</div>
+
+			<StepNav onNext={onNext} onBack={onBack} />
+		</StepWrapper>
+	);
+}
+
+// Step 7: Profile
 function ProfileStep({
 	displayName,
 	setDisplayName,
@@ -540,7 +1023,7 @@ function ProfileStep({
 	industry,
 	setIndustry,
 	onSubmit,
-	onSkip,
+	onBack,
 	isSaving,
 }: {
 	displayName: string;
@@ -549,45 +1032,30 @@ function ProfileStep({
 	setCompanyName: (value: string) => void;
 	industry: string;
 	setIndustry: (value: string) => void;
-	onSubmit: (e: React.FormEvent) => void;
-	onSkip: () => void;
+	onSubmit: () => void;
+	onBack: () => void;
 	isSaving: boolean;
 }) {
 	return (
-		<motion.div
-			initial={{ opacity: 0, x: 20 }}
-			animate={{ opacity: 1, x: 0 }}
-			exit={{ opacity: 0, x: -20 }}
-			transition={{ duration: 0.3 }}
-			className="relative flex flex-col px-8 pt-6 pb-8"
-		>
+		<StepWrapper>
 			<VisuallyHidden.Root>
-				<DialogTitle>Tell Us About Yourself</DialogTitle>
-				<DialogDescription>
-					Help us personalize your experience
-				</DialogDescription>
+				<DialogTitle>Quick Setup</DialogTitle>
+				<DialogDescription>Tell us a bit about yourself</DialogDescription>
 			</VisuallyHidden.Root>
 
-			{/* Header with icon */}
-			<motion.div
-				initial={{ opacity: 0, y: -10 }}
-				animate={{ opacity: 1, y: 0 }}
-				className="mb-6 flex items-center gap-4"
-			>
-				<div className="flex size-11 items-center justify-center rounded-xl bg-stone-100">
-					<Briefcase className="size-5 text-stone-600" />
+			<div className="mb-5 text-center">
+				<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-stone-700 to-stone-900 shadow-lg">
+					<Building2 className="size-6 text-white" />
 				</div>
-				<div>
-					<h2 className="font-bold text-lg tracking-tight text-stone-900">
-						About you
-					</h2>
-					<p className="text-sm text-stone-500">
-						So we can personalize your experience
-					</p>
-				</div>
-			</motion.div>
+				<h2 className="mb-1 font-bold text-xl tracking-tight text-stone-900">
+					Quick Setup
+				</h2>
+				<p className="text-sm text-stone-500">
+					Personalize your experience (optional)
+				</p>
+			</div>
 
-			<form onSubmit={onSubmit} className="space-y-4">
+			<div className="space-y-4">
 				{/* Name */}
 				<motion.div
 					initial={{ opacity: 0, y: 10 }}
@@ -599,7 +1067,7 @@ function ProfileStep({
 						htmlFor="displayName"
 						className="font-medium text-sm text-stone-700"
 					>
-						Your Name <span className="text-rose-500">*</span>
+						Your Name
 					</Label>
 					<Input
 						id="displayName"
@@ -608,7 +1076,6 @@ function ProfileStep({
 						onChange={(e) => setDisplayName(e.target.value)}
 						className="h-11 border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:border-stone-400 focus:ring-stone-400/20"
 						autoFocus
-						required
 					/>
 				</motion.div>
 
@@ -624,9 +1091,7 @@ function ProfileStep({
 						className="font-medium text-sm text-stone-700"
 					>
 						Company{" "}
-						<span className="font-normal text-stone-400 text-xs">
-							(optional)
-						</span>
+						<span className="font-normal text-stone-400 text-xs">(optional)</span>
 					</Label>
 					<Input
 						id="companyName"
@@ -649,9 +1114,7 @@ function ProfileStep({
 						className="font-medium text-sm text-stone-700"
 					>
 						Industry{" "}
-						<span className="font-normal text-stone-400 text-xs">
-							(optional)
-						</span>
+						<span className="font-normal text-stone-400 text-xs">(optional)</span>
 					</Label>
 					<Select value={industry} onValueChange={setIndustry}>
 						<SelectTrigger
@@ -673,335 +1136,35 @@ function ProfileStep({
 						</SelectContent>
 					</Select>
 				</motion.div>
+			</div>
 
-				{/* Continue */}
-				<motion.div
-					initial={{ opacity: 0, y: 10 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.25 }}
-					className="pt-2"
-				>
-					<Button
-						type="submit"
-						className="group h-11 w-full bg-stone-900 font-semibold text-white transition-all hover:bg-stone-800 disabled:opacity-50"
-						disabled={!displayName.trim()}
-					>
-						Continue
-						<ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-0.5" />
-					</Button>
-				</motion.div>
-			</form>
-
-			{/* Skip */}
-			<button
-				type="button"
-				onClick={onSkip}
-				disabled={isSaving}
-				className="mt-3 text-center text-sm text-stone-400 transition-colors hover:text-stone-600 disabled:opacity-50"
-			>
-				{isSaving ? "Saving..." : "Skip for now"}
-			</button>
-		</motion.div>
+			<StepNav
+				onNext={onSubmit}
+				onBack={onBack}
+				nextLabel="Finish Setup"
+				loading={isSaving}
+			/>
+		</StepWrapper>
 	);
 }
 
-function BusinessProfileStep({
-	productsServices,
-	setProductsServices,
-	websiteUrl,
-	setWebsiteUrl,
-	targetMarket,
-	setTargetMarket,
-	competitors,
-	setCompetitors,
-	businessGoals,
-	setBusinessGoals,
-	annualRevenue,
-	setAnnualRevenue,
-	yearsInBusiness,
-	setYearsInBusiness,
-	employeeCount,
-	setEmployeeCount,
-	onSubmit,
-	onSkip,
-	isSaving,
+// Step 8: Ready
+function ReadyStep({
+	displayName,
+	tourMode = false,
+	onClose,
 }: {
-	productsServices: string;
-	setProductsServices: (value: string) => void;
-	websiteUrl: string;
-	setWebsiteUrl: (value: string) => void;
-	targetMarket: string;
-	setTargetMarket: (value: string) => void;
-	competitors: string;
-	setCompetitors: (value: string) => void;
-	businessGoals: string;
-	setBusinessGoals: (value: string) => void;
-	annualRevenue: string;
-	setAnnualRevenue: (value: string) => void;
-	yearsInBusiness: string;
-	setYearsInBusiness: (value: string) => void;
-	employeeCount: string;
-	setEmployeeCount: (value: string) => void;
-	onSubmit: (e: React.FormEvent) => void;
-	onSkip: () => void;
-	isSaving: boolean;
+	displayName: string;
+	tourMode?: boolean;
+	onClose?: () => void;
 }) {
-	const inputClass =
-		"h-11 border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:border-stone-400 focus:ring-stone-400/20";
-
 	return (
-		<motion.div
-			initial={{ opacity: 0, x: 20 }}
-			animate={{ opacity: 1, x: 0 }}
-			exit={{ opacity: 0, x: -20 }}
-			transition={{ duration: 0.3 }}
-			className="relative flex flex-col px-8 pt-6 pb-8"
-		>
+		<StepWrapper className="items-center py-12">
 			<VisuallyHidden.Root>
-				<DialogTitle>Tell Us About Your Business</DialogTitle>
+				<DialogTitle>You're All Set</DialogTitle>
 				<DialogDescription>
-					Help your executives understand your business
+					Start chatting with your executive team
 				</DialogDescription>
-			</VisuallyHidden.Root>
-
-			{/* Header with icon */}
-			<motion.div
-				initial={{ opacity: 0, y: -10 }}
-				animate={{ opacity: 1, y: 0 }}
-				className="mb-4 flex items-center gap-4"
-			>
-				<div className="flex size-11 items-center justify-center rounded-xl bg-rose-100">
-					<Building2 className="size-5 text-rose-600" />
-				</div>
-				<div>
-					<h2 className="font-bold text-lg tracking-tight text-stone-900">
-						Your business
-					</h2>
-					<p className="text-sm text-stone-500">
-						The more we know, the better we advise
-					</p>
-				</div>
-			</motion.div>
-
-			<form onSubmit={onSubmit} className="flex flex-col">
-				<div className="max-h-[55vh] space-y-4 overflow-y-auto pr-1">
-					{/* Products/Services */}
-					<div className="space-y-1.5">
-						<Label
-							htmlFor="productsServices"
-							className="font-medium text-sm text-stone-700"
-						>
-							Products / Services{" "}
-							<span className="font-normal text-stone-400 text-xs">
-								(optional)
-							</span>
-						</Label>
-						<Textarea
-							id="productsServices"
-							placeholder="What does your business offer?"
-							value={productsServices}
-							onChange={(e) => setProductsServices(e.target.value)}
-							className="min-h-[72px] resize-none border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:border-stone-400 focus:ring-stone-400/20"
-						/>
-					</div>
-
-					{/* Website */}
-					<div className="space-y-1.5">
-						<Label
-							htmlFor="websiteUrl"
-							className="font-medium text-sm text-stone-700"
-						>
-							Website{" "}
-							<span className="font-normal text-stone-400 text-xs">
-								(optional)
-							</span>
-						</Label>
-						<Input
-							id="websiteUrl"
-							type="url"
-							placeholder="https://yourcompany.com"
-							value={websiteUrl}
-							onChange={(e) => setWebsiteUrl(e.target.value)}
-							className={inputClass}
-						/>
-					</div>
-
-					{/* Target Market */}
-					<div className="space-y-1.5">
-						<Label
-							htmlFor="targetMarket"
-							className="font-medium text-sm text-stone-700"
-						>
-							Target Market{" "}
-							<span className="font-normal text-stone-400 text-xs">
-								(optional)
-							</span>
-						</Label>
-						<Input
-							id="targetMarket"
-							placeholder="Who are your ideal customers?"
-							value={targetMarket}
-							onChange={(e) => setTargetMarket(e.target.value)}
-							className={inputClass}
-						/>
-					</div>
-
-					{/* Competitors */}
-					<div className="space-y-1.5">
-						<Label
-							htmlFor="competitors"
-							className="font-medium text-sm text-stone-700"
-						>
-							Competitors{" "}
-							<span className="font-normal text-stone-400 text-xs">
-								(optional)
-							</span>
-						</Label>
-						<Input
-							id="competitors"
-							placeholder="Key competitors or alternatives"
-							value={competitors}
-							onChange={(e) => setCompetitors(e.target.value)}
-							className={inputClass}
-						/>
-					</div>
-
-					{/* Business Goals */}
-					<div className="space-y-1.5">
-						<Label
-							htmlFor="businessGoals"
-							className="font-medium text-sm text-stone-700"
-						>
-							Business Goals{" "}
-							<span className="font-normal text-stone-400 text-xs">
-								(optional)
-							</span>
-						</Label>
-						<Textarea
-							id="businessGoals"
-							placeholder="What are you trying to achieve?"
-							value={businessGoals}
-							onChange={(e) => setBusinessGoals(e.target.value)}
-							className="min-h-[72px] resize-none border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:border-stone-400 focus:ring-stone-400/20"
-						/>
-					</div>
-
-					{/* Dropdowns row */}
-					<div className="grid grid-cols-3 gap-3">
-						{/* Annual Revenue */}
-						<div className="space-y-1.5">
-							<Label className="font-medium text-xs text-stone-700">
-								Revenue
-							</Label>
-							<Select value={annualRevenue} onValueChange={setAnnualRevenue}>
-								<SelectTrigger className="h-10 border-stone-200 bg-white text-sm text-stone-900 focus:border-stone-400 focus:ring-stone-400/20">
-									<SelectValue placeholder="Select" />
-								</SelectTrigger>
-								<SelectContent className="border-stone-200 bg-white">
-									{REVENUE_RANGES.map((range) => (
-										<SelectItem
-											key={range}
-											value={range}
-											className="text-stone-700 focus:bg-stone-50 focus:text-stone-900"
-										>
-											{range}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						{/* Years in Business */}
-						<div className="space-y-1.5">
-							<Label className="font-medium text-xs text-stone-700">
-								Years
-							</Label>
-							<Select
-								value={yearsInBusiness}
-								onValueChange={setYearsInBusiness}
-							>
-								<SelectTrigger className="h-10 border-stone-200 bg-white text-sm text-stone-900 focus:border-stone-400 focus:ring-stone-400/20">
-									<SelectValue placeholder="Select" />
-								</SelectTrigger>
-								<SelectContent className="border-stone-200 bg-white">
-									{YEARS_IN_BUSINESS_RANGES.map((range) => (
-										<SelectItem
-											key={range}
-											value={range}
-											className="text-stone-700 focus:bg-stone-50 focus:text-stone-900"
-										>
-											{range}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						{/* Employee Count */}
-						<div className="space-y-1.5">
-							<Label className="font-medium text-xs text-stone-700">Team</Label>
-							<Select value={employeeCount} onValueChange={setEmployeeCount}>
-								<SelectTrigger className="h-10 border-stone-200 bg-white text-sm text-stone-900 focus:border-stone-400 focus:ring-stone-400/20">
-									<SelectValue placeholder="Select" />
-								</SelectTrigger>
-								<SelectContent className="border-stone-200 bg-white">
-									{EMPLOYEE_COUNT_RANGES.map((range) => (
-										<SelectItem
-											key={range}
-											value={range}
-											className="text-stone-700 focus:bg-stone-50 focus:text-stone-900"
-										>
-											{range}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-					</div>
-				</div>
-
-				{/* Submit */}
-				<div className="mt-5">
-					<Button
-						type="submit"
-						className="h-11 w-full bg-stone-900 font-semibold text-white transition-all hover:bg-stone-800 disabled:opacity-50"
-						disabled={isSaving}
-					>
-						{isSaving ? (
-							<>
-								<Loader2 className="mr-2 size-4 animate-spin" />
-								Setting up...
-							</>
-						) : (
-							"Get Started"
-						)}
-					</Button>
-				</div>
-			</form>
-
-			{/* Skip */}
-			<button
-				type="button"
-				onClick={onSkip}
-				disabled={isSaving}
-				className="mt-3 text-center text-sm text-stone-400 transition-colors hover:text-stone-600 disabled:opacity-50"
-			>
-				{isSaving ? "Saving..." : "Skip for now"}
-			</button>
-		</motion.div>
-	);
-}
-
-function SuccessStep({ displayName }: { displayName: string }) {
-	return (
-		<motion.div
-			initial={{ opacity: 0, scale: 0.95 }}
-			animate={{ opacity: 1, scale: 1 }}
-			className="relative flex flex-col items-center px-8 py-12"
-		>
-			<VisuallyHidden.Root>
-				<DialogTitle>Welcome Complete</DialogTitle>
-				<DialogDescription>Your executive team is ready</DialogDescription>
 			</VisuallyHidden.Root>
 
 			{/* Success animation */}
@@ -1011,7 +1174,7 @@ function SuccessStep({ displayName }: { displayName: string }) {
 				transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
 				className="relative mb-6"
 			>
-				<div className="flex size-20 items-center justify-center rounded-full bg-emerald-500 shadow-lg">
+				<div className="flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-xl">
 					<motion.svg
 						className="size-10 text-white"
 						fill="none"
@@ -1029,34 +1192,33 @@ function SuccessStep({ displayName }: { displayName: string }) {
 						/>
 					</motion.svg>
 				</div>
-				<div className="absolute -inset-3 -z-10 rounded-full bg-emerald-500/10 blur-xl" />
+				<div className="absolute -inset-4 -z-10 rounded-full bg-emerald-400/20 blur-2xl" />
 			</motion.div>
 
-			{/* Welcome message */}
 			<motion.h3
 				initial={{ opacity: 0, y: 10 }}
 				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.2 }}
-				className="mb-2 text-center font-bold text-xl tracking-tight text-stone-900"
+				transition={{ delay: 0.25 }}
+				className="mb-2 text-center font-bold text-2xl tracking-tight text-stone-900"
 			>
-				Welcome, {displayName}!
+				{tourMode ? "Tour Complete!" : `You're all set, ${displayName}!`}
 			</motion.h3>
 
 			<motion.p
 				initial={{ opacity: 0, y: 10 }}
 				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.3 }}
-				className="mb-6 text-center text-stone-500"
+				transition={{ delay: 0.35 }}
+				className="mb-6 max-w-xs text-center text-base text-stone-500"
 			>
-				Your executive advisors are ready.
+				Your executive consulting team is ready to help you grow your business.
 			</motion.p>
 
-			{/* Executive avatars with check badges */}
+			{/* Executive avatars with checkmarks */}
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.4 }}
-				className="flex items-center justify-center gap-4"
+				transition={{ delay: 0.45 }}
+				className="flex items-center justify-center gap-5"
 			>
 				{[
 					{ exec: alexandria, delay: 0.5 },
@@ -1064,23 +1226,23 @@ function SuccessStep({ displayName }: { displayName: string }) {
 				].map(({ exec, delay }) =>
 					exec.avatar ? (
 						<div key={exec.name} className="relative">
-							<div className="relative size-14 overflow-hidden rounded-full border-2 border-white shadow-lg ring-2 ring-stone-100">
+							<div className="relative size-16 overflow-hidden rounded-full border-3 border-white shadow-xl ring-2 ring-stone-100">
 								<Image
 									src={exec.avatar}
 									alt={exec.name}
 									fill
 									className="object-cover"
-									sizes="56px"
+									sizes="64px"
 								/>
 							</div>
 							<motion.div
 								initial={{ scale: 0 }}
 								animate={{ scale: 1 }}
 								transition={{ delay }}
-								className="absolute -bottom-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-white"
+								className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-white"
 							>
 								<svg
-									className="size-3 text-white"
+									className="size-3.5 text-white"
 									fill="currentColor"
 									viewBox="0 0 20 20"
 								>
@@ -1095,6 +1257,31 @@ function SuccessStep({ displayName }: { displayName: string }) {
 					) : null,
 				)}
 			</motion.div>
-		</motion.div>
+
+			{tourMode ? (
+				<motion.div
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.7 }}
+					className="mt-8 w-full max-w-xs"
+				>
+					<Button
+						onClick={onClose}
+						className="h-11 w-full bg-stone-900 font-semibold text-white transition-all hover:bg-stone-800"
+					>
+						Start Chatting
+					</Button>
+				</motion.div>
+			) : (
+				<motion.p
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ delay: 0.7 }}
+					className="mt-8 text-sm text-stone-400"
+				>
+					Starting your first session...
+				</motion.p>
+			)}
+		</StepWrapper>
 	);
 }
