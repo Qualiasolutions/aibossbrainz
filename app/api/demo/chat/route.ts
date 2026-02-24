@@ -15,6 +15,7 @@ import { recordAICost } from "@/lib/cost/tracker";
 import { logger } from "@/lib/logger";
 import {
 	isCircuitOpen,
+	isTransientError,
 	recordCircuitFailure,
 	recordCircuitSuccess,
 } from "@/lib/resilience";
@@ -134,6 +135,7 @@ export const POST = withCsrf(async (request: Request) => {
 					system: systemPromptText,
 					messages: convertToModelMessages(recentMessages),
 					maxOutputTokens: 1024, // Shorter responses for demo
+					abortSignal: AbortSignal.timeout(25_000), // M-13: Just under maxDuration=30
 					experimental_telemetry: {
 						isEnabled: isProductionEnvironment,
 						functionId: "demo-stream-text",
@@ -206,8 +208,11 @@ export const POST = withCsrf(async (request: Request) => {
 					logger.warn({ err: scanErr }, "Post-hoc demo safety scan failed");
 				}
 			},
-			onError: () => {
-				recordCircuitFailure("ai-gateway");
+			onError: (error) => {
+				// M-12: Only record transient errors as circuit failures (not client errors)
+				if (isTransientError(error)) {
+					recordCircuitFailure("ai-gateway");
+				}
 				return "Oops, something went wrong! Please try again.";
 			},
 		});

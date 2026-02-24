@@ -15,6 +15,8 @@ import {
 	withAIGatewayResilience,
 	withElevenLabsResilience,
 } from "@/lib/resilience";
+import { containsCanary } from "@/lib/safety/canary";
+import { redactPII } from "@/lib/safety/pii-redactor";
 import {
 	checkRateLimit,
 	getRateLimitHeaders,
@@ -143,10 +145,39 @@ export const POST = withCsrf(async (request: Request) => {
 					},
 				],
 				maxOutputTokens: 500, // Keep responses concise for voice
+				abortSignal: AbortSignal.timeout(25_000), // M-13: Just under maxDuration=30
 			}),
 		);
 
 		const responseText = result.text;
+
+		// M-3: Post-hoc safety scan for realtime responses
+		if (responseText) {
+			try {
+				const piiResult = redactPII(responseText);
+				if (piiResult.redactedCount > 0) {
+					logger.warn(
+						{
+							userId: user.id,
+							redactedCount: piiResult.redactedCount,
+							redactedTypes: piiResult.redactedTypes,
+						},
+						"PII detected in realtime AI response (post-hoc scan)",
+					);
+				}
+				if (containsCanary(responseText)) {
+					logger.error(
+						{ userId: user.id },
+						"CANARY LEAK: Realtime response contains system prompt fragment",
+					);
+				}
+			} catch (scanErr) {
+				logger.warn(
+					{ err: scanErr },
+					"Post-hoc realtime safety scan failed (non-blocking)",
+				);
+			}
+		}
 
 		// Generate audio using ElevenLabs with TTS cache
 		let audioUrl: string | null = null;
