@@ -24,6 +24,7 @@ import { MessageEditor } from "./message-editor";
 import { MessageReasoning } from "./message-reasoning";
 import { MessageSuggestions } from "./message-suggestions";
 import { PreviewAttachment } from "./preview-attachment";
+import { DeepResearchResults, WebSearchResults } from "./search-results";
 import { Weather } from "./weather";
 
 const PurePreviewMessage = ({
@@ -311,6 +312,79 @@ const PurePreviewMessage = ({
 										)}
 									</ToolContent>
 								</Tool>
+							);
+						}
+
+						if (type === "tool-webSearch") {
+							const { toolCallId, state } = part;
+							const input = (part as any).input as
+								| { query: string }
+								| undefined;
+							const output = (part as any).output as
+								| {
+										query?: string;
+										results?: Array<{
+											title: string;
+											url: string;
+											snippet: string;
+										}>;
+								  }
+								| undefined;
+
+							return (
+								<WebSearchResults
+									key={toolCallId}
+									query={
+										output?.query || input?.query || "..."
+									}
+									results={output?.results ?? []}
+									isLoading={state !== "output-available"}
+								/>
+							);
+						}
+
+						if (type === "tool-deepResearch") {
+							const { toolCallId, state } = part;
+							const input = (part as any).input as
+								| {
+										topic: string;
+										queries: Array<{
+											angle: string;
+											query: string;
+										}>;
+								  }
+								| undefined;
+							const output = (part as any).output as
+								| {
+										topic?: string;
+										searches?: Array<{
+											angle: string;
+											query: string;
+											results: Array<{
+												title: string;
+												url: string;
+												snippet: string;
+											}>;
+										}>;
+								  }
+								| undefined;
+
+							return (
+								<DeepResearchResults
+									key={toolCallId}
+									topic={
+										output?.topic || input?.topic || "..."
+									}
+									searches={
+										output?.searches ??
+										input?.queries?.map((q) => ({
+											...q,
+											results: [],
+										})) ??
+										[]
+									}
+									isLoading={state !== "output-available"}
+								/>
 							);
 						}
 

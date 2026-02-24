@@ -44,34 +44,34 @@ export function sanitizePromptContent(content: string): string {
 }
 
 export const webSearchPrompt = `
-## WEB SEARCH TOOL (MANDATORY)
-You have a \`webSearch\` tool that searches the internet. You MUST use it. You CAN search the web.
+## RESEARCH & WEB SEARCH (MANDATORY)
+You have two research tools. You CAN and MUST search the web when needed.
 
-**CRITICAL RULE:** NEVER say you "can't browse the internet", "can't access websites", "don't have the ability to look things up", or anything similar. You HAVE web search. USE IT. If a user asks you to look something up, research something, find information online, or check a website, IMMEDIATELY call the webSearch tool. Do NOT ask the user for information you could search for yourself.
+### Tools Available
+- **webSearch** — Single search query. Use for quick lookups, fact checks, or specific URLs.
+- **deepResearch** — 2-4 parallel searches from different angles. Use for competitor analysis, market research, multi-faceted topics, or anything that benefits from cross-referencing.
 
-**WHEN TO USE webSearch (NON-EXHAUSTIVE):**
+### When to Use
 1. User asks you to look up, research, or find information about ANYTHING
-2. User mentions a website, company, product, or brand and wants your analysis
-3. User asks "look up my website" or "check out [URL]" or "research [company]"
-4. Current events, news, trends, or recent developments
-5. Real-time data like prices, statistics, or market information
-6. Any facts, numbers, or claims you want to verify
-7. Competitor analysis, market research, or industry information
-8. When you need context about a business before giving advice
+2. User mentions a website, company, product, or brand
+3. Current events, news, trends, prices, statistics
+4. Competitor analysis, market research, industry information
+5. Any facts or claims worth verifying
+6. When you need context about a business before giving advice
 
-**HOW TO USE:**
-1. Call the webSearch tool with a specific query
-2. If searching for a website, use the URL or company name as the query
-3. Summarize the results naturally in your response
-4. Cite sources when providing specific facts
-5. If results are insufficient, search again with a refined query
+### Research Strategy
+- **Simple lookup** (company website, single fact): Use \`webSearch\` with a specific query
+- **Deep research** (competitors, pricing, market analysis): Use \`deepResearch\` with 2-4 queries from different angles
+- **If first search is thin**: Try a refined query or switch to \`deepResearch\` for broader coverage
+- **Always synthesize**: Combine search results with your knowledge. Partial results + your expertise = valuable answer
+- **Cite sources**: Mention where specific facts came from when relevant
 
-**ABSOLUTELY FORBIDDEN RESPONSES:**
-- "I can't browse the internet"
-- "I don't have the ability to look up websites"
-- "Could you tell me your website URL so I can give advice?" (SEARCH FOR IT INSTEAD)
-- "I'm not able to access external websites"
-- Any variation of claiming you cannot search the web
+### NEVER-DO List (CRITICAL)
+- NEVER say "I can't browse the internet" or "I don't have the ability to look things up"
+- NEVER say "no results found" or "the search didn't yield results" to the user
+- NEVER ask the user for info you could search for yourself
+- NEVER give up because search results were sparse — synthesize from what you have + your training knowledge
+- If search returns nothing useful, provide your best analysis anyway and note that live data was limited
 `;
 
 export const artifactsPrompt = `

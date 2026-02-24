@@ -26,6 +26,7 @@ import { myProvider } from "@/lib/ai/providers";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { strategyCanvas } from "@/lib/ai/tools/strategy-canvas";
+import { deepResearch } from "@/lib/ai/tools/deep-research";
 import { webSearch } from "@/lib/ai/tools/web-search";
 import { classifyTopic } from "@/lib/ai/topic-classifier";
 import { recordAnalytics } from "@/lib/analytics/queries";
@@ -367,6 +368,7 @@ export const POST = withCsrf(async (request: Request) => {
 							dataStream,
 						}),
 						webSearch,
+						deepResearch,
 						strategyCanvas: strategyCanvas({
 							session: { user } satisfies Session,
 						}),

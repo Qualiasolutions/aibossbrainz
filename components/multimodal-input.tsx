@@ -325,7 +325,7 @@ function PureMultimodalInput({
 								status={status}
 							/>
 							<VoiceInputButton
-								className="size-11 rounded text-muted-foreground/70 transition-colors duration-200 hover:text-red-400 sm:size-6"
+								className="size-8 rounded text-muted-foreground/70 transition-colors duration-200 hover:text-red-400 sm:size-6"
 								disabled={status !== "ready" || isVoiceMode}
 								isRecording={isDictating}
 								isSupported={isDictationSupported}
@@ -335,7 +335,7 @@ function PureMultimodalInput({
 					)}
 					<PromptInputTextarea
 						autoFocus
-						className="grow resize-none border-0! border-none! bg-transparent py-0.5 pl-0 text-base leading-normal text-foreground caret-primary outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground placeholder:text-base placeholder:pl-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-xs sm:placeholder:text-xs [&::-webkit-scrollbar]:hidden"
+						className="grow resize-none border-0! border-none! bg-transparent py-0.5 pl-0 text-base leading-normal text-foreground caret-primary outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground placeholder:text-base placeholder:pl-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-sm sm:placeholder:text-sm [&::-webkit-scrollbar]:hidden"
 						data-testid="multimodal-input"
 						disabled={isVoiceMode}
 						disableAutoResize={true}
@@ -377,7 +377,7 @@ function PureMultimodalInput({
 								<StopButton setMessages={setMessages} stop={stop} />
 							) : (
 								<PromptInputSubmit
-									className="size-11 rounded bg-gradient-to-br from-red-500 to-red-600 text-white shadow-sm transition-all hover:from-red-400 hover:to-red-500 disabled:from-white/10 disabled:to-white/5 disabled:text-muted-foreground disabled:shadow-none shrink-0 sm:size-6"
+									className="size-8 rounded bg-gradient-to-br from-red-500 to-red-600 text-white shadow-sm transition-all hover:from-red-400 hover:to-red-500 disabled:from-white/10 disabled:to-white/5 disabled:text-muted-foreground disabled:shadow-none shrink-0 sm:size-6"
 									disabled={!input.trim() || uploadQueue.length > 0}
 									status={status}
 								>
@@ -425,7 +425,7 @@ function PureAttachmentsButton({
 	return (
 		<Button
 			aria-label="Upload files"
-			className="size-11 rounded p-0 text-muted-foreground/70 transition-colors duration-200 hover:bg-transparent hover:text-red-400 sm:size-6"
+			className="size-8 rounded p-0 text-muted-foreground/70 transition-colors duration-200 hover:bg-transparent hover:text-red-400 sm:size-6"
 			data-testid="attachments-button"
 			disabled={status !== "ready" || isReasoningModel}
 			onClick={(event) => {

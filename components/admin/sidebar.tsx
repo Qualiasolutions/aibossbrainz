@@ -107,10 +107,10 @@ function SidebarContent({
 							onClick={onNavigate}
 							title={collapsed ? item.title : undefined}
 							className={cn(
-								"flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+								"flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors active:bg-neutral-200",
 								collapsed && "justify-center px-2",
 								isActive
-									? "bg-rose-50 text-rose-600"
+									? "bg-rose-50 text-rose-600 active:bg-rose-100"
 									: "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
 							)}
 						>
@@ -163,7 +163,7 @@ export function AdminSidebar() {
 				<button
 					type="button"
 					onClick={() => setMobileOpen(true)}
-					className="rounded-lg p-1.5 text-neutral-600 hover:bg-neutral-100"
+					className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-600 hover:bg-neutral-100 active:bg-neutral-200"
 				>
 					<Menu className="h-5 w-5" />
 				</button>
@@ -190,7 +190,7 @@ export function AdminSidebar() {
 							<button
 								type="button"
 								onClick={() => setMobileOpen(false)}
-								className="rounded-lg p-1.5 text-neutral-500 hover:bg-neutral-100"
+								className="flex h-10 w-10 items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100 active:bg-neutral-200"
 							>
 								<X className="h-5 w-5" />
 							</button>

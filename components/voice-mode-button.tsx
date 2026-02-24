@@ -46,7 +46,7 @@ export function VoiceModeButton({
 			<TooltipTrigger asChild>
 				<Button
 					className={cn(
-						"relative size-11 shrink-0 overflow-hidden rounded-lg border border-transparent transition-all duration-300 sm:size-8",
+						"relative size-8 shrink-0 overflow-hidden rounded-lg border border-transparent transition-all duration-300",
 						isVoiceMode &&
 							isListening &&
 							"border-rose-400/60 bg-rose-500/10 text-rose-600 shadow-[0_0_0_2px_rgba(244,114,182,0.12)]",

@@ -5,7 +5,7 @@ import { sanitizePromptContent } from "@/lib/ai/prompts";
 const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 const SERPER_API_KEY = process.env.SERPER_API_KEY;
 
-interface SearchResult {
+export interface SearchResult {
 	title: string;
 	url: string;
 	snippet: string;
@@ -14,7 +14,7 @@ interface SearchResult {
 /**
  * Searches the web using Tavily API (if key available) or DuckDuckGo
  */
-async function performWebSearch(query: string): Promise<SearchResult[]> {
+export async function performWebSearch(query: string): Promise<SearchResult[]> {
 	// Try Tavily first if API key is available (better for AI)
 	if (TAVILY_API_KEY) {
 		try {
@@ -221,20 +221,28 @@ async function scrapeWebSearch(query: string): Promise<SearchResult[]> {
 		const results: SearchResult[] = [];
 
 		// Simple regex-based extraction (avoid heavy HTML parser dependency)
-		const resultPattern =
-			/<a class="result__a"[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>[\s\S]*?<a class="result__snippet"[^>]*>([^<]*)/g;
-		let match: RegExpExecArray | null = resultPattern.exec(html);
+		// Try multiple patterns for resilience against DDG HTML changes
+		const patterns = [
+			/<a class="result__a"[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g,
+			/<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?class="result__snippet"[^>]*>([\s\S]*?)</g,
+		];
 
-		while (match !== null && results.length < 5) {
-			const [, url, title, snippet] = match;
-			if (url && title) {
-				results.push({
-					title: decodeHTMLEntities(title.trim()),
-					url: url.startsWith("//") ? `https:${url}` : url,
-					snippet: decodeHTMLEntities(snippet?.trim() || ""),
-				});
+		for (const pattern of patterns) {
+			let match: RegExpExecArray | null = pattern.exec(html);
+			while (match !== null && results.length < 5) {
+				const [, url, rawTitle, rawSnippet] = match;
+				const title = rawTitle?.replace(/<[^>]*>/g, "").trim();
+				const snippet = rawSnippet?.replace(/<[^>]*>/g, "").trim();
+				if (url && title) {
+					results.push({
+						title: decodeHTMLEntities(title),
+						url: url.startsWith("//") ? `https:${url}` : url,
+						snippet: decodeHTMLEntities(snippet || ""),
+					});
+				}
+				match = pattern.exec(html);
 			}
-			match = resultPattern.exec(html);
+			if (results.length > 0) break;
 		}
 
 		return results;
@@ -259,7 +267,7 @@ function decodeHTMLEntities(text: string): string {
 /**
  * Validate that a string is a safe HTTP(S) URL
  */
-function isValidHttpUrl(str: string): boolean {
+export function isValidHttpUrl(str: string): boolean {
 	if (!str) return false;
 	try {
 		const url = new URL(str);
@@ -286,14 +294,16 @@ export const webSearch = tool({
 		if (results.length === 0) {
 			return {
 				success: false,
+				query,
 				message:
-					"No search results found. Try rephrasing your query or providing more context.",
+					"Search returned no results for this specific query. IMPORTANT: Do NOT tell the user 'no results found' or 'search didn't yield results'. Instead, synthesize a helpful answer from your training knowledge. If the topic is obscure, be upfront that live sources were unavailable but still provide your best analysis.",
 				results: [],
 			};
 		}
 
 		return {
 			success: true,
+			query,
 			message: `Found ${results.length} results for "${query}"`,
 			results: results.map((r) => ({
 				title: sanitizePromptContent(r.title.slice(0, 200)),
