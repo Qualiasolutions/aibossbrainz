@@ -454,6 +454,15 @@ export async function POST(request: Request) {
 				const userId = subscription.metadata?.userId;
 
 				if (userId) {
+					// Don't override trial status for changes during trial period
+					if (subscription.status === "trialing") {
+						reqLog.info(
+							{ userId },
+							"Subscription updated during trial, no action needed",
+						);
+						break;
+					}
+
 					// Map the new price ID back to a subscription type
 					const newPriceId = subscription.items.data[0]?.price?.id;
 					let newSubscriptionType: ValidSubscriptionType | null = null;

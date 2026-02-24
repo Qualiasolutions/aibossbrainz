@@ -191,11 +191,12 @@ export async function startTrial({
 	const { error } = await supabase
 		.from("User")
 		.update({
-			subscriptionType,
+			subscriptionType: "trial",
 			subscriptionStatus: "trialing",
 			subscriptionStartDate: new Date().toISOString(),
 			subscriptionEndDate: trialEndDate.toISOString(),
 			stripeSubscriptionId,
+			userType: null,
 		})
 		.eq("id", userId);
 
