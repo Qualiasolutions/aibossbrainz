@@ -580,7 +580,7 @@ export async function getSubscriptionStats(options?: {
 
 	// Exclude internal team accounts from revenue/subscriber metrics
 	if (options?.excludeTeam) {
-		query = query.neq("userType", "team");
+		query = query.or("userType.is.null,userType.neq.team");
 	}
 
 	// Filter by user type when specified (e.g., 'client' to exclude team users from revenue)
