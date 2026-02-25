@@ -371,47 +371,56 @@ export async function POST(request: Request) {
 						const userId = subscription.metadata?.userId;
 
 						if (userId && subscriptionType) {
-							await activateSubscription({
-								userId,
-								subscriptionType,
-								stripeSubscriptionId: subscription.id,
-							});
-							reqLog.info(
-								{ userId, subscriptionType },
-								"Payment received, subscription activated",
-							);
-
-							// Apply Mailchimp paid tag (non-blocking)
-							after(async () => {
-								try {
-									const profile = await getUserFullProfile({ userId });
-									if (profile?.email) {
-										await applyMailchimpTags(
-											profile.email,
-											"paid",
-											subscriptionType,
-										);
-									}
-								} catch (err) {
-									logger.error(
-										{ err, phase: "after", userId },
-										"Invoice paid after() error",
-									);
-								}
-							});
-
-							// For annual and lifetime plans, cancel after first payment
-							if (
-								subscriptionType === "annual" ||
-								subscriptionType === "lifetime"
-							) {
-								await getStripe().subscriptions.update(subscription.id, {
-									cancel_at_period_end: true,
+							// Skip activation if subscription is still in trial period
+							// (invoice.paid fires for $0 trial invoices too)
+							if (subscription.status === "trialing") {
+								reqLog.info(
+									{ userId, subscriptionType },
+									"Skipping activation — subscription still trialing",
+								);
+							} else {
+								await activateSubscription({
+									userId,
+									subscriptionType,
+									stripeSubscriptionId: subscription.id,
 								});
 								reqLog.info(
-									{ subscriptionType, subscriptionId: subscription.id },
-									"Set subscription to cancel at period end",
+									{ userId, subscriptionType },
+									"Payment received, subscription activated",
 								);
+
+								// Apply Mailchimp paid tag (non-blocking)
+								after(async () => {
+									try {
+										const profile = await getUserFullProfile({ userId });
+										if (profile?.email) {
+											await applyMailchimpTags(
+												profile.email,
+												"paid",
+												subscriptionType,
+											);
+										}
+									} catch (err) {
+										logger.error(
+											{ err, phase: "after", userId },
+											"Invoice paid after() error",
+										);
+									}
+								});
+
+								// For annual and lifetime plans, cancel after first payment
+								if (
+									subscriptionType === "annual" ||
+									subscriptionType === "lifetime"
+								) {
+									await getStripe().subscriptions.update(subscription.id, {
+										cancel_at_period_end: true,
+									});
+									reqLog.info(
+										{ subscriptionType, subscriptionId: subscription.id },
+										"Set subscription to cancel at period end",
+									);
+								}
 							}
 						} else if (invoice.period_end) {
 							const periodEndMs = invoice.period_end * 1000;
