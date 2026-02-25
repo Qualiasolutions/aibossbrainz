@@ -604,7 +604,7 @@ export async function getSubscriptionStats(options?: {
 	for (const user of users || []) {
 		if (user.subscriptionStatus === "expired") {
 			stats.expired++;
-		} else if (user.subscriptionStatus === "active") {
+		} else if (user.subscriptionStatus === "active" || user.subscriptionStatus === "trialing") {
 			stats.activeSubscribers++;
 			switch (user.subscriptionType) {
 				case "trial":
