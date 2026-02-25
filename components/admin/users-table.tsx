@@ -191,234 +191,238 @@ export function UsersTable({
 			{/* Table */}
 			<div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
 				<div className="overflow-x-auto">
-				<table className="w-full">
-					<thead>
-						<tr className="border-b border-neutral-100 bg-neutral-50">
-							<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								User
-							</th>
-							<th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Company
-							</th>
-							<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Subscription
-							</th>
-							<th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Activity
-							</th>
-							<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Status
-							</th>
-							<th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-neutral-100">
-						{filteredUsers.length === 0 ? (
-							<tr>
-								<td
-									colSpan={6}
-									className="px-6 py-8 text-center text-neutral-500"
-								>
-									No users found
-								</td>
+					<table className="w-full">
+						<thead>
+							<tr className="border-b border-neutral-100 bg-neutral-50">
+								<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									User
+								</th>
+								<th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Company
+								</th>
+								<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Subscription
+								</th>
+								<th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Activity
+								</th>
+								<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Status
+								</th>
+								<th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Actions
+								</th>
 							</tr>
-						) : (
-							filteredUsers.map((user) => (
-								<tr
-									key={user.id}
-									className="hover:bg-neutral-50 transition-colors"
-								>
-									<td className="px-3 sm:px-6 py-4">
-										<div>
-											<p className="text-sm font-medium text-neutral-900">
-												{user.displayName || "No name"}
-											</p>
-											<p className="text-sm text-neutral-500 truncate max-w-[150px] sm:max-w-none">{user.email}</p>
-										</div>
-									</td>
-									<td className="hidden lg:table-cell px-3 sm:px-6 py-4">
-										<p className="text-sm text-neutral-700">
-											{user.companyName || "-"}
-										</p>
-										<p className="text-xs text-neutral-500">
-											{user.industry || "No industry"}
-										</p>
-									</td>
-									<td className="px-3 sm:px-6 py-4">
-										{(() => {
-											const daysLeft = getDaysRemaining(
-												user.subscriptionEndDate,
-											);
-											const isExpired =
-												user.subscriptionStatus === "expired" ||
-												(daysLeft !== null && daysLeft <= 0);
-											return (
-												<div className="space-y-1">
-													<div className="flex items-center gap-1">
-														<span
-															className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${
-																user.subscriptionType === "trial"
-																	? "bg-amber-50 text-amber-700"
-																	: user.subscriptionType === "monthly"
-																		? "bg-blue-50 text-blue-700"
-																		: user.subscriptionType === "annual"
-																			? "bg-purple-50 text-purple-700"
-																			: user.subscriptionType === "lifetime"
-																				? "bg-rose-50 text-rose-700"
-																				: "bg-neutral-100 text-neutral-500"
-															}`}
-														>
-															{user.subscriptionType === "trial" && (
-																<Clock className="h-3 w-3" />
-															)}
-															{(user.subscriptionType === "monthly" ||
-																user.subscriptionType === "annual" ||
-																user.subscriptionType === "lifetime") && (
-																<CreditCard className="h-3 w-3" />
-															)}
-															{formatSubscriptionType(
-																user.subscriptionType as SubscriptionType | null,
-															)}
-														</span>
-													</div>
-													{isExpired ? (
-														<p className="text-xs text-rose-600 font-medium">
-															Expired
-														</p>
-													) : daysLeft !== null ? (
-														<p className="text-xs text-neutral-500 flex items-center gap-1">
-															<Calendar className="h-3 w-3" />
-															{daysLeft} days left
-														</p>
-													) : null}
-													<p className="text-xs text-neutral-400">
-														{formatDate(user.subscriptionEndDate)}
-													</p>
-												</div>
-											);
-										})()}
-									</td>
-									<td className="hidden md:table-cell px-3 sm:px-6 py-4">
-										<div className="space-y-1">
-											<p className="text-sm text-neutral-700">
-												{user.chatCount} chats
-											</p>
-											<p className="text-xs text-neutral-500">
-												{user.messageCount} messages
-											</p>
-										</div>
-									</td>
-									<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
-										<div className="flex flex-col gap-1">
-											{user.userType === "team" ? (
-												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-indigo-50 text-indigo-600">
-													Team
-												</span>
-											) : user.userType === "client" ? (
-												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-sky-50 text-sky-600">
-													Client
-												</span>
-											) : (
-												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-teal-50 text-teal-600">
-													Subscriber
-												</span>
-											)}
-											{user.isAdmin && (
-												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-rose-50 text-rose-600">
-													<Shield className="h-3 w-3" />
-													Admin
-												</span>
-											)}
-											{(user.subscriptionStatus === "expired" ||
-												user.subscriptionStatus === "cancelled" ||
-												(getDaysRemaining(user.subscriptionEndDate) !== null &&
-													(getDaysRemaining(user.subscriptionEndDate) ?? 0) <= 0)) && (
-												<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-50 text-orange-600">
-													Unsubscribed
-												</span>
-											)}
-											{user.onboardedAt ? (
-												<span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-600">
-													Onboarded
-												</span>
-											) : (
-												<span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-neutral-100 text-neutral-500">
-													Pending
-												</span>
-											)}
-										</div>
-									</td>
-									<td className="px-3 sm:px-6 py-4 text-right">
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="ghost"
-													size="sm"
-													className="h-8 w-8 p-0 text-neutral-500 hover:text-neutral-900"
-												>
-													<MoreHorizontal className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end">
-												<DropdownMenuItem
-													onClick={() =>
-														window.open(`/admin/users/${user.id}`, "_self")
-													}
-													className="cursor-pointer"
-												>
-													<Eye className="h-4 w-4 mr-2" />
-													View Details
-												</DropdownMenuItem>
-												<DropdownMenuItem
-													onClick={() =>
-														handleToggleAdmin(user.id, user.isAdmin || false)
-													}
-													className="cursor-pointer"
-												>
-													{user.isAdmin ? (
-														<>
-															<ShieldOff className="h-4 w-4 mr-2" />
-															Remove Admin
-														</>
-													) : (
-														<>
-															<Shield className="h-4 w-4 mr-2" />
-															Make Admin
-														</>
-													)}
-												</DropdownMenuItem>
-												<DropdownMenuSeparator />
-												<DropdownMenuItem
-													onClick={() => {
-														setSubscriptionUserId(user.id);
-														setSelectedSubscription(
-															(user.subscriptionType as SubscriptionType) ||
-																"trial",
-														);
-													}}
-													className="cursor-pointer"
-												>
-													<CreditCard className="h-4 w-4 mr-2" />
-													Change Subscription
-												</DropdownMenuItem>
-												<DropdownMenuSeparator />
-												<DropdownMenuItem
-													onClick={() => setDeleteUserId(user.id)}
-													className="text-rose-600 focus:text-rose-600 cursor-pointer"
-												>
-													<Trash2 className="h-4 w-4 mr-2" />
-													Delete User
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
+						</thead>
+						<tbody className="divide-y divide-neutral-100">
+							{filteredUsers.length === 0 ? (
+								<tr>
+									<td
+										colSpan={6}
+										className="px-6 py-8 text-center text-neutral-500"
+									>
+										No users found
 									</td>
 								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+							) : (
+								filteredUsers.map((user) => (
+									<tr
+										key={user.id}
+										className="hover:bg-neutral-50 transition-colors"
+									>
+										<td className="px-3 sm:px-6 py-4">
+											<div>
+												<p className="text-sm font-medium text-neutral-900">
+													{user.displayName || "No name"}
+												</p>
+												<p className="text-sm text-neutral-500 truncate max-w-[150px] sm:max-w-none">
+													{user.email}
+												</p>
+											</div>
+										</td>
+										<td className="hidden lg:table-cell px-3 sm:px-6 py-4">
+											<p className="text-sm text-neutral-700">
+												{user.companyName || "-"}
+											</p>
+											<p className="text-xs text-neutral-500">
+												{user.industry || "No industry"}
+											</p>
+										</td>
+										<td className="px-3 sm:px-6 py-4">
+											{(() => {
+												const daysLeft = getDaysRemaining(
+													user.subscriptionEndDate,
+												);
+												const isExpired =
+													user.subscriptionStatus === "expired" ||
+													(daysLeft !== null && daysLeft <= 0);
+												return (
+													<div className="space-y-1">
+														<div className="flex items-center gap-1">
+															<span
+																className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${
+																	user.subscriptionType === "trial"
+																		? "bg-amber-50 text-amber-700"
+																		: user.subscriptionType === "monthly"
+																			? "bg-blue-50 text-blue-700"
+																			: user.subscriptionType === "annual"
+																				? "bg-purple-50 text-purple-700"
+																				: user.subscriptionType === "lifetime"
+																					? "bg-rose-50 text-rose-700"
+																					: "bg-neutral-100 text-neutral-500"
+																}`}
+															>
+																{user.subscriptionType === "trial" && (
+																	<Clock className="h-3 w-3" />
+																)}
+																{(user.subscriptionType === "monthly" ||
+																	user.subscriptionType === "annual" ||
+																	user.subscriptionType === "lifetime") && (
+																	<CreditCard className="h-3 w-3" />
+																)}
+																{formatSubscriptionType(
+																	user.subscriptionType as SubscriptionType | null,
+																)}
+															</span>
+														</div>
+														{isExpired ? (
+															<p className="text-xs text-rose-600 font-medium">
+																Expired
+															</p>
+														) : daysLeft !== null ? (
+															<p className="text-xs text-neutral-500 flex items-center gap-1">
+																<Calendar className="h-3 w-3" />
+																{daysLeft} days left
+															</p>
+														) : null}
+														<p className="text-xs text-neutral-400">
+															{formatDate(user.subscriptionEndDate)}
+														</p>
+													</div>
+												);
+											})()}
+										</td>
+										<td className="hidden md:table-cell px-3 sm:px-6 py-4">
+											<div className="space-y-1">
+												<p className="text-sm text-neutral-700">
+													{user.chatCount} chats
+												</p>
+												<p className="text-xs text-neutral-500">
+													{user.messageCount} messages
+												</p>
+											</div>
+										</td>
+										<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
+											<div className="flex flex-col gap-1">
+												{user.userType === "team" ? (
+													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-indigo-50 text-indigo-600">
+														Team
+													</span>
+												) : user.userType === "client" ? (
+													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-sky-50 text-sky-600">
+														Client
+													</span>
+												) : (
+													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-teal-50 text-teal-600">
+														Subscriber
+													</span>
+												)}
+												{user.isAdmin && (
+													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-rose-50 text-rose-600">
+														<Shield className="h-3 w-3" />
+														Admin
+													</span>
+												)}
+												{(user.subscriptionStatus === "expired" ||
+													user.subscriptionStatus === "cancelled" ||
+													(getDaysRemaining(user.subscriptionEndDate) !==
+														null &&
+														(getDaysRemaining(user.subscriptionEndDate) ?? 0) <=
+															0)) && (
+													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-50 text-orange-600">
+														Unsubscribed
+													</span>
+												)}
+												{user.onboardedAt ? (
+													<span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-600">
+														Onboarded
+													</span>
+												) : (
+													<span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-neutral-100 text-neutral-500">
+														Pending
+													</span>
+												)}
+											</div>
+										</td>
+										<td className="px-3 sm:px-6 py-4 text-right">
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button
+														variant="ghost"
+														size="sm"
+														className="h-8 w-8 p-0 text-neutral-500 hover:text-neutral-900"
+													>
+														<MoreHorizontal className="h-4 w-4" />
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align="end">
+													<DropdownMenuItem
+														onClick={() =>
+															window.open(`/admin/users/${user.id}`, "_self")
+														}
+														className="cursor-pointer"
+													>
+														<Eye className="h-4 w-4 mr-2" />
+														View Details
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														onClick={() =>
+															handleToggleAdmin(user.id, user.isAdmin || false)
+														}
+														className="cursor-pointer"
+													>
+														{user.isAdmin ? (
+															<>
+																<ShieldOff className="h-4 w-4 mr-2" />
+																Remove Admin
+															</>
+														) : (
+															<>
+																<Shield className="h-4 w-4 mr-2" />
+																Make Admin
+															</>
+														)}
+													</DropdownMenuItem>
+													<DropdownMenuSeparator />
+													<DropdownMenuItem
+														onClick={() => {
+															setSubscriptionUserId(user.id);
+															setSelectedSubscription(
+																(user.subscriptionType as SubscriptionType) ||
+																	"trial",
+															);
+														}}
+														className="cursor-pointer"
+													>
+														<CreditCard className="h-4 w-4 mr-2" />
+														Change Subscription
+													</DropdownMenuItem>
+													<DropdownMenuSeparator />
+													<DropdownMenuItem
+														onClick={() => setDeleteUserId(user.id)}
+														className="text-rose-600 focus:text-rose-600 cursor-pointer"
+													>
+														<Trash2 className="h-4 w-4 mr-2" />
+														Delete User
+													</DropdownMenuItem>
+												</DropdownMenuContent>
+											</DropdownMenu>
+										</td>
+									</tr>
+								))
+							)}
+						</tbody>
+					</table>
 				</div>
 			</div>
 

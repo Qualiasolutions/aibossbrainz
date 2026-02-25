@@ -2,10 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import { sanitizePromptContent } from "@/lib/ai/prompts";
 import type { Session } from "@/lib/artifacts/server";
-import {
-	getStrategyCanvas,
-	saveStrategyCanvas,
-} from "@/lib/db/queries/canvas";
+import { getStrategyCanvas, saveStrategyCanvas } from "@/lib/db/queries/canvas";
 import { logger } from "@/lib/logger";
 import type { Json } from "@/lib/supabase/database.types";
 import type { CanvasType } from "@/lib/supabase/types";
@@ -150,9 +147,7 @@ After populating, tell the user to visit /strategy-canvas to see and edit their 
 					sectionToStorageKey[normalizedSection] || normalizedSection;
 
 				// H-3: Sanitize user-provided canvas items to prevent prompt injection
-				const sanitizedItems = items.map((item) =>
-					sanitizePromptContent(item),
-				);
+				const sanitizedItems = items.map((item) => sanitizePromptContent(item));
 
 				// Build new items
 				let newItems: unknown[];

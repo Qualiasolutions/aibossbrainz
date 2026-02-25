@@ -161,7 +161,12 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 		color: string;
 	}[] = [
 		{ value: "team", label: "Team", icon: Users, color: "bg-blue-500" },
-		{ value: "client", label: "Client", icon: Briefcase, color: "bg-green-500" },
+		{
+			value: "client",
+			label: "Client",
+			icon: Briefcase,
+			color: "bg-green-500",
+		},
 		{ value: "none", label: "General", icon: UserIcon, color: "bg-gray-400" },
 	];
 

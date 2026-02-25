@@ -52,7 +52,10 @@ export default async function Layout({
 			<SubscriptionProvider>
 				<DataStreamProvider>
 					<MobileSidebarProvider>
-						<SidebarProvider defaultOpen={true} className="!min-h-0 h-dvh overflow-hidden">
+						<SidebarProvider
+							defaultOpen={true}
+							className="!min-h-0 h-dvh overflow-hidden"
+						>
 							<AppSidebar user={user || undefined} isAdmin={isAdmin} />
 							<SidebarInset className="min-h-0">
 								<SubscriptionLayout>

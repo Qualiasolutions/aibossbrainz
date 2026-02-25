@@ -23,10 +23,10 @@ import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
+import { deepResearch } from "@/lib/ai/tools/deep-research";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { strategyCanvas } from "@/lib/ai/tools/strategy-canvas";
-import { deepResearch } from "@/lib/ai/tools/deep-research";
 import { webSearch } from "@/lib/ai/tools/web-search";
 import { classifyTopic } from "@/lib/ai/topic-classifier";
 import { recordAnalytics } from "@/lib/analytics/queries";
@@ -54,7 +54,6 @@ import {
 	updateChatTitle,
 	updateChatTopic,
 } from "@/lib/db/queries";
-import type { UserCategory } from "@/lib/supabase/types";
 import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import {
@@ -72,7 +71,7 @@ import {
 import { withCsrf } from "@/lib/security/with-csrf";
 import { chatBreadcrumb } from "@/lib/sentry";
 import { createClient } from "@/lib/supabase/server";
-import type { Json } from "@/lib/supabase/types";
+import type { Json, UserCategory } from "@/lib/supabase/types";
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
@@ -290,7 +289,9 @@ export const POST = withCsrf(async (request: Request) => {
 			/pretend\s+you\s+(have\s+)?no\s+(restrictions?|rules?|limits?)/i,
 		];
 
-		const hasAbuse = ABUSE_PATTERNS.some((pattern) => pattern.test(messageText));
+		const hasAbuse = ABUSE_PATTERNS.some((pattern) =>
+			pattern.test(messageText),
+		);
 		if (hasAbuse) {
 			logger.warn(
 				{ chatId: id, userId: user.id },
@@ -629,10 +630,10 @@ export const POST = withCsrf(async (request: Request) => {
 							{ messageId: message.id },
 						);
 					} catch (cleanupErr) {
-						apiLog.warn(
-							"Failed to clean up dangling message",
-							{ err: cleanupErr, messageId: message.id },
-						);
+						apiLog.warn("Failed to clean up dangling message", {
+							err: cleanupErr,
+							messageId: message.id,
+						});
 					}
 				});
 

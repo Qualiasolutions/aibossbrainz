@@ -164,7 +164,9 @@ const PureChatItem = ({
 											}}
 										>
 											<Icon className={cn("size-4", config.color)} />
-											<span className="font-medium text-sm">{config.label}</span>
+											<span className="font-medium text-sm">
+												{config.label}
+											</span>
 											{isSelected && (
 												<svg
 													className="ml-auto size-4 text-green-500"

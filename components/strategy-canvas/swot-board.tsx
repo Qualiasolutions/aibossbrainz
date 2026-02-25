@@ -241,9 +241,7 @@ export function SwotBoard({ compact = false, refreshTrigger }: SwotBoardProps) {
 		});
 	};
 
-	const totalNotes = Object.values(data)
-		.filter(Array.isArray)
-		.flat().length;
+	const totalNotes = Object.values(data).filter(Array.isArray).flat().length;
 
 	// Compact Layout for Side Panel
 	if (compact) {

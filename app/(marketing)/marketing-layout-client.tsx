@@ -270,8 +270,7 @@ function Footer({ content }: { content: LandingPageCMSContent }) {
 				{/* Bottom section - Enhanced */}
 				<div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-stone-200 pt-8 sm:flex-row">
 					<p className="text-sm text-stone-500">
-						&copy; {new Date().getFullYear()}{" "}
-						AI Boss Brainz &{" "}
+						&copy; {new Date().getFullYear()} AI Boss Brainz &{" "}
 						<a
 							href="https://aleccimedia.com"
 							target="_blank"

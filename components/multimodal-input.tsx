@@ -195,32 +195,35 @@ function PureMultimodalInput({
 		resetHeight,
 	]);
 
-	const uploadFile = useCallback(async (file: File) => {
-		const formData = new FormData();
-		formData.append("file", file);
+	const uploadFile = useCallback(
+		async (file: File) => {
+			const formData = new FormData();
+			formData.append("file", file);
 
-		try {
-			const response = await csrfFetch("/api/files/upload", {
-				method: "POST",
-				body: formData,
-			});
+			try {
+				const response = await csrfFetch("/api/files/upload", {
+					method: "POST",
+					body: formData,
+				});
 
-			if (response.ok) {
-				const data = await response.json();
-				const { url, pathname, contentType } = data;
+				if (response.ok) {
+					const data = await response.json();
+					const { url, pathname, contentType } = data;
 
-				return {
-					url,
-					name: pathname,
-					contentType,
-				};
+					return {
+						url,
+						name: pathname,
+						contentType,
+					};
+				}
+				const { error } = await response.json();
+				toast.error(error);
+			} catch (_error) {
+				toast.error("Failed to upload file, please try again!");
 			}
-			const { error } = await response.json();
-			toast.error(error);
-		} catch (_error) {
-			toast.error("Failed to upload file, please try again!");
-		}
-	}, [csrfFetch]);
+		},
+		[csrfFetch],
+	);
 
 	// Slim single-line input styling
 	const promptContainerClass =

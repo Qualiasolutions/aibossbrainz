@@ -134,8 +134,7 @@ export function AppSidebar({
 									<span className="text-xs font-medium">New Chat</span>
 								</Button>
 							</div>
-
-							</div>
+						</div>
 					</SidebarMenu>
 				</SidebarHeader>
 
@@ -215,8 +214,7 @@ export function AppSidebar({
 										<span className="text-xs">New</span>
 									</Button>
 								</div>
-
-								</div>
+							</div>
 						</SheetHeader>
 
 						<div className="flex-1 overflow-hidden px-3 py-4">

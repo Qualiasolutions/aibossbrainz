@@ -48,106 +48,108 @@ export function ConversationsTable({ conversations }: ConversationsTableProps) {
 			{/* Table */}
 			<div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
 				<div className="overflow-x-auto">
-				<table className="w-full">
-					<thead>
-						<tr className="border-b border-neutral-100 bg-neutral-50">
-							<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Conversation
-							</th>
-							<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								User
-							</th>
-							<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Topic
-							</th>
-							<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Messages
-							</th>
-							<th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Created
-							</th>
-							<th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-neutral-100">
-						{filteredConversations.length === 0 ? (
-							<tr>
-								<td
-									colSpan={6}
-									className="px-6 py-8 text-center text-neutral-500"
-								>
-									No conversations found
-								</td>
+					<table className="w-full">
+						<thead>
+							<tr className="border-b border-neutral-100 bg-neutral-50">
+								<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Conversation
+								</th>
+								<th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									User
+								</th>
+								<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Topic
+								</th>
+								<th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Messages
+								</th>
+								<th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Created
+								</th>
+								<th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
+									Actions
+								</th>
 							</tr>
-						) : (
-							filteredConversations.map((conv) => (
-								<tr
-									key={conv.id}
-									className="hover:bg-neutral-50 transition-colors"
-								>
-									<td className="px-3 sm:px-6 py-4">
-										<div className="flex items-start gap-2 sm:gap-3">
-											<div className="hidden sm:block rounded-lg bg-neutral-100 p-2">
-												<MessageSquare className="h-4 w-4 text-neutral-500" />
-											</div>
-											<div className="min-w-0">
-												<p className="text-sm font-medium text-neutral-900 truncate max-w-[150px] sm:max-w-xs">
-													{conv.title || "Untitled"}
-												</p>
-												<p className="text-xs text-neutral-400 font-mono">
-													{conv.id.slice(0, 8)}...
-												</p>
-											</div>
-										</div>
-									</td>
-									<td className="px-3 sm:px-6 py-4">
-										<p className="text-sm text-neutral-700 truncate max-w-[120px] sm:max-w-none">{conv.userEmail}</p>
-									</td>
-									<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
-										{conv.topic ? (
-											<span
-												className={cn(
-													"inline-flex px-2 py-0.5 text-xs font-medium rounded-full",
-													topicColors[conv.topic] || topicColors.default,
-												)}
-											>
-												{conv.topic}
-											</span>
-										) : (
-											<span className="text-neutral-400 text-sm">-</span>
-										)}
-									</td>
-									<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
-										<p className="text-sm text-neutral-700">
-											{conv.messageCount}
-										</p>
-									</td>
-									<td className="hidden md:table-cell px-3 sm:px-6 py-4">
-										<p className="text-sm text-neutral-500">
-											{formatDistanceToNow(new Date(conv.createdAt), {
-												addSuffix: true,
-											})}
-										</p>
-									</td>
-									<td className="px-3 sm:px-6 py-4 text-right">
-										<Link href={`/admin/conversations/${conv.id}`}>
-											<Button
-												variant="ghost"
-												size="sm"
-												className="text-neutral-500 hover:text-neutral-900"
-											>
-												<Eye className="h-4 w-4 mr-1" />
-												View
-											</Button>
-										</Link>
+						</thead>
+						<tbody className="divide-y divide-neutral-100">
+							{filteredConversations.length === 0 ? (
+								<tr>
+									<td
+										colSpan={6}
+										className="px-6 py-8 text-center text-neutral-500"
+									>
+										No conversations found
 									</td>
 								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+							) : (
+								filteredConversations.map((conv) => (
+									<tr
+										key={conv.id}
+										className="hover:bg-neutral-50 transition-colors"
+									>
+										<td className="px-3 sm:px-6 py-4">
+											<div className="flex items-start gap-2 sm:gap-3">
+												<div className="hidden sm:block rounded-lg bg-neutral-100 p-2">
+													<MessageSquare className="h-4 w-4 text-neutral-500" />
+												</div>
+												<div className="min-w-0">
+													<p className="text-sm font-medium text-neutral-900 truncate max-w-[150px] sm:max-w-xs">
+														{conv.title || "Untitled"}
+													</p>
+													<p className="text-xs text-neutral-400 font-mono">
+														{conv.id.slice(0, 8)}...
+													</p>
+												</div>
+											</div>
+										</td>
+										<td className="px-3 sm:px-6 py-4">
+											<p className="text-sm text-neutral-700 truncate max-w-[120px] sm:max-w-none">
+												{conv.userEmail}
+											</p>
+										</td>
+										<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
+											{conv.topic ? (
+												<span
+													className={cn(
+														"inline-flex px-2 py-0.5 text-xs font-medium rounded-full",
+														topicColors[conv.topic] || topicColors.default,
+													)}
+												>
+													{conv.topic}
+												</span>
+											) : (
+												<span className="text-neutral-400 text-sm">-</span>
+											)}
+										</td>
+										<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
+											<p className="text-sm text-neutral-700">
+												{conv.messageCount}
+											</p>
+										</td>
+										<td className="hidden md:table-cell px-3 sm:px-6 py-4">
+											<p className="text-sm text-neutral-500">
+												{formatDistanceToNow(new Date(conv.createdAt), {
+													addSuffix: true,
+												})}
+											</p>
+										</td>
+										<td className="px-3 sm:px-6 py-4 text-right">
+											<Link href={`/admin/conversations/${conv.id}`}>
+												<Button
+													variant="ghost"
+													size="sm"
+													className="text-neutral-500 hover:text-neutral-900"
+												>
+													<Eye className="h-4 w-4 mr-1" />
+													View
+												</Button>
+											</Link>
+										</td>
+									</tr>
+								))
+							)}
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>

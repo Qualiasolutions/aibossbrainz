@@ -90,10 +90,7 @@ function DraggableWidget({ widget, index }: DraggableWidgetProps) {
 			onDragLeave={() => setIsDraggedOver(false)}
 			onDrop={(e) => {
 				e.preventDefault();
-				const dragIndex = parseInt(
-					e.dataTransfer.getData("text/plain"),
-					10,
-				);
+				const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
 				if (dragIndex !== index) {
 					moveWidget(dragIndex, index);
 				}

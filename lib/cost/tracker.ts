@@ -214,10 +214,7 @@ export async function getUserDailyCost(
 	};
 
 	if (error) {
-		logger.error(
-			{ err: error, userId },
-			"Failed to query user daily AI cost",
-		);
+		logger.error({ err: error, userId }, "Failed to query user daily AI cost");
 		throw error;
 	}
 
@@ -268,7 +265,12 @@ export async function getTopUserCosts(
 	// Aggregate per user
 	const userMap = new Map<
 		string,
-		{ totalCostUSD: number; requestCount: number; totalInputTokens: number; totalOutputTokens: number }
+		{
+			totalCostUSD: number;
+			requestCount: number;
+			totalInputTokens: number;
+			totalOutputTokens: number;
+		}
 	>();
 	for (const row of rows) {
 		const existing = userMap.get(row.userId) ?? {

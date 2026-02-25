@@ -30,6 +30,8 @@ export function NetworkStatusBanner() {
 		// Initialize online status
 		setIsOnline(navigator.onLine);
 
+		let dismissTimer: ReturnType<typeof setTimeout>;
+
 		const handleOnline = () => {
 			setIsOnline(true);
 			if (!isOnline) {
@@ -37,7 +39,7 @@ export function NetworkStatusBanner() {
 				setShowRestored(true);
 				setDismissed(false);
 				// Auto-dismiss the restored message after 5 seconds
-				setTimeout(() => {
+				dismissTimer = setTimeout(() => {
 					setShowRestored(false);
 					setWasOffline(false);
 				}, 5000);
@@ -55,6 +57,7 @@ export function NetworkStatusBanner() {
 
 		// Cleanup
 		return () => {
+			clearTimeout(dismissTimer);
 			window.removeEventListener("online", handleOnline);
 			window.removeEventListener("offline", handleOffline);
 		};

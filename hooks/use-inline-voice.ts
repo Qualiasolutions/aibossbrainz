@@ -1,10 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-	isAudioPlaying,
-	subscribeToAudioChanges,
-} from "@/lib/audio-manager";
+import { isAudioPlaying, subscribeToAudioChanges } from "@/lib/audio-manager";
 
 type SpeechRecognitionConstructor = typeof window.SpeechRecognition;
 

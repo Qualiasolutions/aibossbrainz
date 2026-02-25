@@ -137,9 +137,7 @@ const PurePreviewMessage = ({
 					{/* Loading state for assistant messages */}
 					{message.role === "assistant" &&
 						isLoading &&
-						!parts.some(
-							(p) => p.type === "text" && p.text?.trim(),
-						) && (
+						!parts.some((p) => p.type === "text" && p.text?.trim()) && (
 							<div className="w-full">
 								{/* biome-ignore lint/a11y/useValidAriaRole: role is a component prop, not an ARIA role */}
 								<EnhancedChatMessage
@@ -334,9 +332,7 @@ const PurePreviewMessage = ({
 							return (
 								<WebSearchResults
 									key={toolCallId}
-									query={
-										output?.query || input?.query || "..."
-									}
+									query={output?.query || input?.query || "..."}
 									results={output?.results ?? []}
 									isLoading={state !== "output-available"}
 								/>
@@ -372,9 +368,7 @@ const PurePreviewMessage = ({
 							return (
 								<DeepResearchResults
 									key={toolCallId}
-									topic={
-										output?.topic || input?.topic || "..."
-									}
+									topic={output?.topic || input?.topic || "..."}
 									searches={
 										output?.searches ??
 										input?.queries?.map((q) => ({
@@ -400,8 +394,7 @@ const PurePreviewMessage = ({
 									(p as any).type === "tool-strategyCanvas" &&
 									(p as any).state === "output-available",
 							);
-							const isLast =
-								allCanvasParts[allCanvasParts.length - 1] === part;
+							const isLast = allCanvasParts[allCanvasParts.length - 1] === part;
 							if (!isLast) return null;
 
 							// Summarize all sections that were updated
@@ -448,8 +441,7 @@ const PurePreviewMessage = ({
 										Strategy Canvas Updated
 									</div>
 									<div className="mt-1 ml-7 text-emerald-700/90 dark:text-emerald-300/90">
-										Added {totalItems} items across{" "}
-										{sections.join(", ")}
+										Added {totalItems} items across {sections.join(", ")}
 									</div>
 								</div>
 							);

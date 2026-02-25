@@ -309,9 +309,7 @@ export function parseInline(text: string): InlineSegment[] {
  * Used for headings (already bold) and cleaning up unpaired markers.
  */
 function stripInlineMarkers(text: string): string {
-	return text
-		.replace(/\*{1,3}(.+?)\*{1,3}/g, "$1")
-		.replace(/\*{2,}/g, "");
+	return text.replace(/\*{1,3}(.+?)\*{1,3}/g, "$1").replace(/\*{2,}/g, "");
 }
 
 function parseTableRow(row: string): string[] {

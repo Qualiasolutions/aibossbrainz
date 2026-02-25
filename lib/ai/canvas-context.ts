@@ -80,15 +80,24 @@ function formatBmc(data: BusinessModelData): string {
 		{ label: "Key Partners", items: asArray<StickyNote>(data.keyPartners) },
 		{ label: "Key Activities", items: asArray<StickyNote>(data.keyActivities) },
 		{ label: "Key Resources", items: asArray<StickyNote>(data.keyResources) },
-		{ label: "Value Propositions", items: asArray<StickyNote>(data.valuePropositions) },
+		{
+			label: "Value Propositions",
+			items: asArray<StickyNote>(data.valuePropositions),
+		},
 		{
 			label: "Customer Relationships",
 			items: asArray<StickyNote>(data.customerRelationships),
 		},
 		{ label: "Channels", items: asArray<StickyNote>(data.channels) },
-		{ label: "Customer Segments", items: asArray<StickyNote>(data.customerSegments) },
+		{
+			label: "Customer Segments",
+			items: asArray<StickyNote>(data.customerSegments),
+		},
 		{ label: "Cost Structure", items: asArray<StickyNote>(data.costStructure) },
-		{ label: "Revenue Streams", items: asArray<StickyNote>(data.revenueStreams) },
+		{
+			label: "Revenue Streams",
+			items: asArray<StickyNote>(data.revenueStreams),
+		},
 	];
 
 	const hasContent = sections.some((s) =>

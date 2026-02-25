@@ -46,11 +46,15 @@ export const getWeather = tool({
 		latitude: z
 			.number()
 			.optional()
-			.describe("Latitude coordinate. Must be provided together with longitude."),
+			.describe(
+				"Latitude coordinate. Must be provided together with longitude.",
+			),
 		longitude: z
 			.number()
 			.optional()
-			.describe("Longitude coordinate. Must be provided together with latitude."),
+			.describe(
+				"Longitude coordinate. Must be provided together with latitude.",
+			),
 	}),
 	execute: async (input) => {
 		let latitude: number;
@@ -65,10 +69,7 @@ export const getWeather = tool({
 			}
 			latitude = coords.latitude;
 			longitude = coords.longitude;
-		} else if (
-			input.latitude !== undefined &&
-			input.longitude !== undefined
-		) {
+		} else if (input.latitude !== undefined && input.longitude !== undefined) {
 			latitude = input.latitude;
 			longitude = input.longitude;
 		} else {

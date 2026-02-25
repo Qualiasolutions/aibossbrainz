@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-	getChatById,
-	getMessagesByChatIdPaginated,
-} from "@/lib/db/queries";
+import { getChatById, getMessagesByChatIdPaginated } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";

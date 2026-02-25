@@ -316,8 +316,7 @@ export function OnboardingModal() {
 	const navProps: StepNavProps = {
 		stepIndex,
 		totalSteps: activeSteps.length,
-		onNext:
-			currentStep.id === "profile" ? saveAndFinish : goNext,
+		onNext: currentStep.id === "profile" ? saveAndFinish : goNext,
 		onBack: goBack,
 		canGoBack: stepIndex > 0,
 		isTourMode,
@@ -363,13 +362,7 @@ export function OnboardingModal() {
 
 // ─── Targeted Step (spotlight + tooltip) ─────────────────────────────────────
 
-function TargetedStep({
-	step,
-	nav,
-}: {
-	step: TourStep;
-	nav: StepNavProps;
-}) {
+function TargetedStep({ step, nav }: { step: TourStep; nav: StepNavProps }) {
 	const rect = useTargetRect(step.target);
 
 	// Fallback: if target element not found, show as centered card
@@ -526,13 +519,7 @@ function TargetedStep({
 
 // ─── Tooltip Content (shared) ────────────────────────────────────────────────
 
-function TooltipContent({
-	step,
-	nav,
-}: {
-	step: TourStep;
-	nav: StepNavProps;
-}) {
+function TooltipContent({ step, nav }: { step: TourStep; nav: StepNavProps }) {
 	const Icon = step.icon;
 
 	return (
@@ -551,10 +538,7 @@ function TooltipContent({
 				</div>
 			</div>
 			<div className="flex items-center justify-between">
-				<StepDots
-					current={nav.stepIndex}
-					total={nav.totalSteps}
-				/>
+				<StepDots current={nav.stepIndex} total={nav.totalSteps} />
 				<div className="flex items-center gap-2">
 					{nav.isTourMode && (
 						<button
@@ -744,8 +728,7 @@ function WelcomeContent({ onNext }: { onNext: () => void }) {
 				transition={{ delay: 0.45 }}
 				className="mb-8 max-w-sm text-center text-base leading-relaxed text-stone-500"
 			>
-				Meet your executive AI consulting team. Let&apos;s show you
-				around.
+				Meet your executive AI consulting team. Let&apos;s show you around.
 			</motion.p>
 
 			<motion.div
@@ -976,8 +959,7 @@ function ReadyContent({
 				transition={{ delay: 0.35 }}
 				className="mb-6 max-w-xs text-center text-base text-stone-500"
 			>
-				Your executive consulting team is ready to help you grow your
-				business.
+				Your executive consulting team is ready to help you grow your business.
 			</motion.p>
 
 			<motion.div
@@ -1054,13 +1036,7 @@ function ReadyContent({
 
 // ─── Step Dots ───────────────────────────────────────────────────────────────
 
-function StepDots({
-	current,
-	total,
-}: {
-	current: number;
-	total: number;
-}) {
+function StepDots({ current, total }: { current: number; total: number }) {
 	return (
 		<div className="flex items-center gap-1">
 			{Array.from({ length: total }).map((_, i) => (

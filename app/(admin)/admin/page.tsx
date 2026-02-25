@@ -20,10 +20,23 @@ import {
 	getRecentSupportTickets,
 	getRecentUsers,
 	getSubscriptionStats,
+	isUserAdmin,
 	type SubscriptionStats as SubscriptionStatsType,
 	type SupportTicketPreview,
 	type UserPreview,
 } from "@/lib/admin/queries";
+import { createClient } from "@/lib/supabase/server";
+
+async function requireAdmin() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) throw new Error("Unauthorized");
+	const admin = await isUserAdmin(user.id);
+	if (!admin) throw new Error("Forbidden");
+	return user;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +102,9 @@ async function safeGetRecentSupportTickets(
 }
 
 export default async function AdminDashboard() {
+	// Defense-in-depth: verify admin access before loading sensitive data
+	await requireAdmin();
+
 	// Fetch all data in parallel for performance with error handling
 	const [
 		stats,
@@ -112,13 +128,22 @@ export default async function AdminDashboard() {
 		return (
 			<div className="p-4 md:p-6 lg:p-8">
 				<div className="mb-6 lg:mb-8">
-					<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">Dashboard</h1>
+					<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">
+						Dashboard
+					</h1>
 					<p className="text-neutral-500 mt-1">Welcome back.</p>
 				</div>
 				<div className="flex flex-col items-center justify-center min-h-[400px] gap-4 rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
-					<p className="text-lg font-medium text-neutral-700">Unable to load dashboard data</p>
-					<p className="text-sm text-neutral-500">There may be a temporary database issue. Please try refreshing.</p>
-					<a href="/admin" className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90">
+					<p className="text-lg font-medium text-neutral-700">
+						Unable to load dashboard data
+					</p>
+					<p className="text-sm text-neutral-500">
+						There may be a temporary database issue. Please try refreshing.
+					</p>
+					<a
+						href="/admin"
+						className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90"
+					>
 						Refresh Dashboard
 					</a>
 				</div>
@@ -245,7 +270,9 @@ export default async function AdminDashboard() {
 		<div className="p-4 md:p-6 lg:p-8">
 			{/* Header */}
 			<div className="mb-6 lg:mb-8">
-				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">Dashboard</h1>
+				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">
+					Dashboard
+				</h1>
 				<p className="text-neutral-500 mt-1">
 					Welcome back. Drag widgets to customize your view.
 				</p>

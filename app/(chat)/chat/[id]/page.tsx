@@ -12,6 +12,7 @@ import {
 } from "@/lib/db/queries";
 
 const INITIAL_MESSAGE_LIMIT = 50;
+
 import { createClient } from "@/lib/supabase/server";
 import { convertToUIMessages } from "@/lib/utils";
 

@@ -6,11 +6,27 @@ import {
 	getAdminStats,
 	getAllUsers,
 	getSubscriptionStats,
+	isUserAdmin,
 } from "@/lib/admin/queries";
+import { createClient } from "@/lib/supabase/server";
+
+async function requireAdmin() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) throw new Error("Unauthorized");
+	const admin = await isUserAdmin(user.id);
+	if (!admin) throw new Error("Forbidden");
+	return user;
+}
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
+	// Defense-in-depth: verify admin access before loading sensitive data
+	await requireAdmin();
+
 	const [stats, users, subStats] = await Promise.all([
 		getAdminStats(),
 		getAllUsers(),
@@ -42,7 +58,9 @@ export default async function AnalyticsPage() {
 	return (
 		<div className="p-4 md:p-6 lg:p-8">
 			<div className="mb-6 lg:mb-8">
-				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">Analytics</h1>
+				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">
+					Analytics
+				</h1>
 				<p className="text-neutral-500 mt-1">
 					Platform usage statistics and insights.
 				</p>
@@ -206,7 +224,9 @@ export default async function AnalyticsPage() {
 												<p className="text-sm font-medium text-neutral-900">
 													{user.displayName || "No name"}
 												</p>
-												<p className="text-xs text-neutral-500 truncate max-w-[150px] sm:max-w-none">{user.email}</p>
+												<p className="text-xs text-neutral-500 truncate max-w-[150px] sm:max-w-none">
+													{user.email}
+												</p>
 											</div>
 										</td>
 										<td className="hidden sm:table-cell px-3 sm:px-6 py-4 text-sm text-neutral-600">

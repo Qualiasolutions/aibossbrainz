@@ -127,7 +127,8 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
 			"'Live' call feature. Hear our voices in real-time. Feel like you're talking to Alexandria and Kim.",
 		benefit_2_icon: "Mic",
 		benefit_3_title: "Plug-and-Play Plans",
-		benefit_3_desc: "Sales and marketing plans built to convert. No generic BS.",
+		benefit_3_desc:
+			"Sales and marketing plans built to convert. No generic BS.",
 		benefit_3_icon: "Target",
 		benefit_4_title: "40+ Years of Proof",
 		benefit_4_desc:

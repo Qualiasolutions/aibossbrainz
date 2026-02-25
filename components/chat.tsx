@@ -13,11 +13,11 @@ import {
 	useArtifactSelector,
 } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
-import { useKeyboardHeight } from "@/hooks/use-keyboard-height";
 import { useAutoSpeak } from "@/hooks/use-auto-speak";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useInlineVoice } from "@/hooks/use-inline-voice";
+import { useKeyboardHeight } from "@/hooks/use-keyboard-height";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useVoiceToText } from "@/hooks/use-voice-to-text";
 import {
 	BOT_PERSONALITIES,
@@ -26,18 +26,17 @@ import {
 } from "@/lib/bot-personalities";
 import { exportConversationToPDF } from "@/lib/conversation-export";
 import { ChatSDKError } from "@/lib/errors";
-import type { CanvasType, Vote } from "@/lib/supabase/types";
+import type { CanvasType, DBMessage, Vote } from "@/lib/supabase/types";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
-import type { DBMessage } from "@/lib/supabase/types";
 import {
 	convertToUIMessages,
 	fetcher,
 	fetchWithErrorHandlers,
 	generateUUID,
 } from "@/lib/utils";
-import { ChatViewportLock } from "./chat-viewport-lock";
 import { ChatHeader } from "./chat/chat-header";
+import { ChatViewportLock } from "./chat-viewport-lock";
 import { useDataStream } from "./data-stream-provider";
 import { ExecutiveLanding } from "./executive-landing";
 import { FocusModeChips } from "./focus-mode-chips";
@@ -268,7 +267,9 @@ export function Chat({
 		onError: (error) => {
 			// Restore last sent message to input for retry
 			if (lastSentMessage) {
-				const text = (Array.isArray(lastSentMessage.parts) ? lastSentMessage.parts : [])
+				const text = (
+					Array.isArray(lastSentMessage.parts) ? lastSentMessage.parts : []
+				)
 					.filter((p) => p.type === "text")
 					.map((p) => p.text)
 					.join("");
@@ -316,11 +317,10 @@ export function Chat({
 			if (!res.ok) {
 				throw new Error("Failed to load older messages");
 			}
-			const { messages: olderDbMessages, hasMore } =
-				(await res.json()) as {
-					messages: DBMessage[];
-					hasMore: boolean;
-				};
+			const { messages: olderDbMessages, hasMore } = (await res.json()) as {
+				messages: DBMessage[];
+				hasMore: boolean;
+			};
 
 			if (olderDbMessages.length > 0) {
 				const olderUIMessages = convertToUIMessages(olderDbMessages);
@@ -343,7 +343,9 @@ export function Chat({
 		const lastMessage = messages.at(-1);
 		if (!lastMessage || lastMessage.role !== "assistant") return;
 
-		for (const part of (Array.isArray(lastMessage.parts) ? lastMessage.parts : [])) {
+		for (const part of Array.isArray(lastMessage.parts)
+			? lastMessage.parts
+			: []) {
 			const partType = (part as any).type as string;
 			if (
 				partType === "tool-strategyCanvas" &&
@@ -569,10 +571,14 @@ export function Chat({
 						{/* Input Area - Clean minimalist */}
 						{!isReadonly && (
 							<div
-							className="flex-shrink-0 border-t border-border bg-background/80 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl transition-[padding] duration-150 sm:px-6 sm:pt-4 sm:pb-6"
-							data-tour="chat-input"
-							style={keyboardHeight > 0 ? { paddingBottom: `${keyboardHeight}px` } : undefined}
-						>
+								className="flex-shrink-0 border-t border-border bg-background/80 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl transition-[padding] duration-150 sm:px-6 sm:pt-4 sm:pb-6"
+								data-tour="chat-input"
+								style={
+									keyboardHeight > 0
+										? { paddingBottom: `${keyboardHeight}px` }
+										: undefined
+								}
+							>
 								<div className="w-full space-y-2">
 									{/* Focus Mode Chips */}
 									<FocusModeChips

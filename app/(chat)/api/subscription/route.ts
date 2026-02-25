@@ -195,7 +195,10 @@ export const POST = withCsrf(async (request: Request) => {
 			.object({ action: z.enum(["portal", "cancel"]) })
 			.safeParse(body);
 		if (!parsed.success) {
-			logger.warn({ errors: parsed.error.flatten() }, "Subscription action validation failed");
+			logger.warn(
+				{ errors: parsed.error.flatten() },
+				"Subscription action validation failed",
+			);
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 		const { action } = parsed.data;

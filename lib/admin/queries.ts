@@ -264,37 +264,35 @@ export async function deleteUserByAdmin(userId: string) {
 
 	const chatIds = userChats?.map((c) => c.id) || [];
 
-	if (chatIds.length > 0) {
-		// Soft delete messages
-		await supabase
-			.from("Message_v2")
+	// Soft delete all user data in parallel
+	const deleteOps: PromiseLike<unknown>[] = [
+		supabase.from("Document").update({ deletedAt }).eq("userId", userId),
+		supabase
+			.from("ConversationSummary")
 			.update({ deletedAt })
-			.in("chatId", chatIds);
+			.eq("userId", userId),
+		supabase
+			.from("StrategyCanvas")
+			.update({ deletedAt })
+			.eq("userId", userId),
+	];
 
-		// Soft delete votes
-		await supabase.from("Vote_v2").update({ deletedAt }).in("chatId", chatIds);
-
-		// Soft delete streams
-		await supabase.from("Stream").update({ deletedAt }).in("chatId", chatIds);
-
-		// Soft delete chats
-		await supabase.from("Chat").update({ deletedAt }).in("id", chatIds);
+	if (chatIds.length > 0) {
+		deleteOps.push(
+			supabase
+				.from("Message_v2")
+				.update({ deletedAt })
+				.in("chatId", chatIds),
+			supabase
+				.from("Vote_v2")
+				.update({ deletedAt })
+				.in("chatId", chatIds),
+			supabase.from("Stream").update({ deletedAt }).in("chatId", chatIds),
+			supabase.from("Chat").update({ deletedAt }).in("id", chatIds),
+		);
 	}
 
-	// Soft delete documents
-	await supabase.from("Document").update({ deletedAt }).eq("userId", userId);
-
-	// Soft delete conversation summaries
-	await supabase
-		.from("ConversationSummary")
-		.update({ deletedAt })
-		.eq("userId", userId);
-
-	// Soft delete strategy canvases
-	await supabase
-		.from("StrategyCanvas")
-		.update({ deletedAt })
-		.eq("userId", userId);
+	await Promise.all(deleteOps);
 
 	// Soft delete the user record
 	const { error } = await supabase
@@ -335,47 +333,46 @@ export async function getAdminStats(): Promise<AdminStats> {
 		now.getTime() - 7 * 24 * 60 * 60 * 1000,
 	).toISOString();
 
-	// Get user counts
-	const { count: totalUsers } = await supabase
-		.from("User")
-		.select("*", { count: "exact", head: true })
-		.is("deletedAt", null);
-
-	// Active users (onboarded)
-	const { count: activeUsers } = await supabase
-		.from("User")
-		.select("*", { count: "exact", head: true })
-		.is("deletedAt", null)
-		.not("onboardedAt", "is", null);
-
-	// Chat counts
-	const { count: totalChats } = await supabase
-		.from("Chat")
-		.select("*", { count: "exact", head: true })
-		.is("deletedAt", null);
-
-	// Message counts
-	const { count: totalMessages } = await supabase
-		.from("Message_v2")
-		.select("*", { count: "exact", head: true })
-		.is("deletedAt", null);
-
-	const { count: messagesLast24h } = await supabase
-		.from("Message_v2")
-		.select("*", { count: "exact", head: true })
-		.is("deletedAt", null)
-		.gte("createdAt", last24h);
-
-	const { count: messagesLast7d } = await supabase
-		.from("Message_v2")
-		.select("*", { count: "exact", head: true })
-		.is("deletedAt", null)
-		.gte("createdAt", last7d);
-
-	// Executive breakdown - count-only queries instead of fetching all rows
+	// Run all independent count queries in parallel
 	const botTypes = ["alexandria", "kim", "collaborative"] as const;
-	const botCountResults = await Promise.all(
-		botTypes.map(async (bot) => {
+
+	const [
+		{ count: totalUsers },
+		{ count: activeUsers },
+		{ count: totalChats },
+		{ count: totalMessages },
+		{ count: messagesLast24h },
+		{ count: messagesLast7d },
+		...botCountResults
+	] = await Promise.all([
+		supabase
+			.from("User")
+			.select("*", { count: "exact", head: true })
+			.is("deletedAt", null),
+		supabase
+			.from("User")
+			.select("*", { count: "exact", head: true })
+			.is("deletedAt", null)
+			.not("onboardedAt", "is", null),
+		supabase
+			.from("Chat")
+			.select("*", { count: "exact", head: true })
+			.is("deletedAt", null),
+		supabase
+			.from("Message_v2")
+			.select("*", { count: "exact", head: true })
+			.is("deletedAt", null),
+		supabase
+			.from("Message_v2")
+			.select("*", { count: "exact", head: true })
+			.is("deletedAt", null)
+			.gte("createdAt", last24h),
+		supabase
+			.from("Message_v2")
+			.select("*", { count: "exact", head: true })
+			.is("deletedAt", null)
+			.gte("createdAt", last7d),
+		...botTypes.map(async (bot) => {
 			const { count } = await supabase
 				.from("Message_v2")
 				.select("*", { count: "exact", head: true })
@@ -383,7 +380,7 @@ export async function getAdminStats(): Promise<AdminStats> {
 				.is("deletedAt", null);
 			return { executive: bot, count: count || 0 };
 		}),
-	);
+	]);
 
 	const executiveBreakdown = botCountResults
 		.filter((b) => b.count > 0)
@@ -604,20 +601,27 @@ export async function getSubscriptionStats(options?: {
 	for (const user of users || []) {
 		if (user.subscriptionStatus === "expired") {
 			stats.expired++;
-		} else if (user.subscriptionStatus === "active" || user.subscriptionStatus === "trialing") {
-			stats.activeSubscribers++;
+		} else if (user.subscriptionStatus === "trialing") {
+			// Trial users: count separately, NOT as active (paying) subscribers
+			stats.trial++;
+		} else if (user.subscriptionStatus === "active") {
+			// Only paying users count as active subscribers
 			switch (user.subscriptionType) {
 				case "trial":
+					// Active trial (shouldn't normally happen, but handle gracefully)
 					stats.trial++;
 					break;
 				case "monthly":
 					stats.monthly++;
+					stats.activeSubscribers++;
 					break;
 				case "annual":
 					stats.annual++;
+					stats.activeSubscribers++;
 					break;
 				case "lifetime":
 					stats.lifetime++;
+					stats.activeSubscribers++;
 					break;
 			}
 		}

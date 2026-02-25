@@ -17,7 +17,9 @@ export default function ChatError({
 	return (
 		<div className="flex flex-col items-center justify-center h-dvh gap-4 p-4">
 			<div className="text-center max-w-md">
-				<h2 className="text-xl font-semibold text-neutral-900">Something went wrong</h2>
+				<h2 className="text-xl font-semibold text-neutral-900">
+					Something went wrong
+				</h2>
 				<p className="mt-2 text-sm text-muted-foreground">
 					An unexpected error occurred. Your conversations are safe.
 				</p>

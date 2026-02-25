@@ -1,5 +1,5 @@
-import { after } from "next/server";
 import { generateText } from "ai";
+import { after } from "next/server";
 import { z } from "zod";
 import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import { systemPrompt } from "@/lib/ai/prompts";
@@ -172,7 +172,11 @@ export const POST = withCsrf(async (request: Request) => {
 
 			// MED-8: Use voiceRequestCount for rate limiting (added via migration).
 			// Falls back to voiceMinutes if column not yet migrated.
-			const voiceRequests = Number((data as Record<string, unknown>)?.voiceRequestCount ?? data?.voiceMinutes) || 0;
+			const voiceRequests =
+				Number(
+					(data as Record<string, unknown>)?.voiceRequestCount ??
+						data?.voiceMinutes,
+				) || 0;
 			if (voiceRequests >= MAX_REALTIME_REQUESTS_PER_DAY) {
 				return new ChatSDKError("rate_limit:chat").toResponse();
 			}
@@ -491,7 +495,10 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 		// Record voice analytics for realtime stream route (MED-7)
 		if (responseText) {
 			const cleanForEstimate = stripMarkdownForTTS(responseText);
-			const estimatedMinutes = Math.max(1, Math.ceil(cleanForEstimate.length / 750));
+			const estimatedMinutes = Math.max(
+				1,
+				Math.ceil(cleanForEstimate.length / 750),
+			);
 			after(() => {
 				recordAnalytics(user.id, "voice", estimatedMinutes);
 				recordAnalytics(user.id, "voice_request", 1);

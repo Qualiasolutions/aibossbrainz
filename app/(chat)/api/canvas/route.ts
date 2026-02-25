@@ -13,7 +13,8 @@ import { createClient } from "@/lib/supabase/server";
 
 const CANVAS_TYPES = ["swot", "bmc", "journey", "brainstorm"] as const;
 const MAX_DATA_SIZE = 100_000; // ~100KB
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_REGEX =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const canvasPostSchema = z.object({
 	canvasType: z.enum(CANVAS_TYPES),
@@ -90,7 +91,10 @@ export const POST = withCsrf(async (request: Request) => {
 
 		const parseResult = canvasPostSchema.safeParse(body);
 		if (!parseResult.success) {
-			logger.warn({ errors: parseResult.error.flatten() }, "Canvas validation failed");
+			logger.warn(
+				{ errors: parseResult.error.flatten() },
+				"Canvas validation failed",
+			);
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 

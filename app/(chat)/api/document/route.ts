@@ -87,7 +87,10 @@ export const POST = withCsrf(async (request: Request) => {
 		const body = await request.json();
 		const parsed = documentSchema.safeParse(body);
 		if (!parsed.success) {
-			logger.warn({ errors: parsed.error.flatten() }, "Document validation failed");
+			logger.warn(
+				{ errors: parsed.error.flatten() },
+				"Document validation failed",
+			);
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 

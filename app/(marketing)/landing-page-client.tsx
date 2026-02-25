@@ -148,7 +148,11 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 									key={`avatar-${i}`}
 									initial={{ opacity: 0, scale: 0, x: -10 }}
 									animate={isInView ? { opacity: 1, scale: 1, x: 0 } : {}}
-									transition={{ duration: 0.4, delay: 0.5 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+									transition={{
+										duration: 0.4,
+										delay: 0.5 + i * 0.08,
+										ease: [0.16, 1, 0.3, 1],
+									}}
 									className="h-6 w-6 rounded-full border-2 border-white bg-stone-100 ring-1 ring-stone-100"
 								>
 									<div className="w-full h-full rounded-full bg-gradient-to-br from-stone-200 to-stone-300" />
@@ -195,7 +199,8 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 								className="relative rounded-xl shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5"
 								priority
 							/>
-						) : content.hero.media_type === "video" && content.hero.media_url ? (
+						) : content.hero.media_type === "video" &&
+							content.hero.media_url ? (
 							<div className="relative aspect-video rounded-xl overflow-hidden shadow-lg shadow-stone-900/5 ring-1 ring-stone-900/5">
 								{content.hero.media_url.includes("youtube.com") ||
 								content.hero.media_url.includes("youtu.be") ||
@@ -231,7 +236,12 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 					<motion.div
 						className="absolute -bottom-2 -left-2 size-12 rounded-full bg-red-500/[0.07] pointer-events-none"
 						animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-						transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+						transition={{
+							duration: 3,
+							repeat: Infinity,
+							ease: "easeInOut",
+							delay: 1,
+						}}
 					/>
 				</motion.div>
 			</div>

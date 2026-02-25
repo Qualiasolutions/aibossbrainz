@@ -34,10 +34,7 @@ export async function exportToPDF(
 			doc.setFont("helvetica", "bold");
 			doc.setFontSize(14);
 			doc.setTextColor(...STYLES.headingColor);
-			const titleLines = doc.splitTextToSize(
-				chatTitle,
-				STYLES.contentWidth,
-			);
+			const titleLines = doc.splitTextToSize(chatTitle, STYLES.contentWidth);
 			doc.text(titleLines, STYLES.marginLeft, y);
 			y += titleLines.length * 14 * 0.3528 * STYLES.lineHeight + 8;
 		}

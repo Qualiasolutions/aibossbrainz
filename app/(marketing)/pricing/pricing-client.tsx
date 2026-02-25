@@ -197,7 +197,9 @@ function PricingCard({
 					</div>
 					<div>
 						<h3 className="font-bold text-xl text-stone-900">{plan.name}</h3>
-						{plan.description && <p className="text-sm text-stone-500">{plan.description}</p>}
+						{plan.description && (
+							<p className="text-sm text-stone-500">{plan.description}</p>
+						)}
 					</div>
 				</div>
 
@@ -406,8 +408,8 @@ function GuaranteeSection() {
 						<p className="mx-auto mt-4 max-w-lg text-stone-300">
 							Your membership is completely flexible. Cancel anytime with no
 							penalties or hidden fees. We're confident you'll love working with
-							our AI executive team, and we'll keep earning your business
-							every month.
+							our AI executive team, and we'll keep earning your business every
+							month.
 						</p>
 					</div>
 				</motion.div>

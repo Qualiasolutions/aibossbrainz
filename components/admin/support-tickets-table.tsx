@@ -159,12 +159,22 @@ export function SupportTicketsTable({
 					<thead>
 						<tr className="border-b border-neutral-100 text-left text-sm text-neutral-500">
 							<th className="px-3 sm:px-4 py-3 font-medium">Subject</th>
-							<th className="hidden sm:table-cell px-3 sm:px-4 py-3 font-medium">User</th>
+							<th className="hidden sm:table-cell px-3 sm:px-4 py-3 font-medium">
+								User
+							</th>
 							<th className="px-3 sm:px-4 py-3 font-medium">Status</th>
-							<th className="hidden md:table-cell px-3 sm:px-4 py-3 font-medium">Priority</th>
-							<th className="hidden lg:table-cell px-3 sm:px-4 py-3 font-medium">Messages</th>
-							<th className="hidden lg:table-cell px-3 sm:px-4 py-3 font-medium">Time Spent</th>
-							<th className="hidden md:table-cell px-3 sm:px-4 py-3 font-medium">Created</th>
+							<th className="hidden md:table-cell px-3 sm:px-4 py-3 font-medium">
+								Priority
+							</th>
+							<th className="hidden lg:table-cell px-3 sm:px-4 py-3 font-medium">
+								Messages
+							</th>
+							<th className="hidden lg:table-cell px-3 sm:px-4 py-3 font-medium">
+								Time Spent
+							</th>
+							<th className="hidden md:table-cell px-3 sm:px-4 py-3 font-medium">
+								Created
+							</th>
 							<th className="px-3 sm:px-4 py-3 font-medium">Actions</th>
 						</tr>
 					</thead>

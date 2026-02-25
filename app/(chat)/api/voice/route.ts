@@ -94,7 +94,11 @@ export const POST = withCsrf(async (request: Request) => {
 
 			// MED-8: Use voiceRequestCount for rate limiting (added via migration).
 			// Falls back to voiceMinutes if column not yet migrated.
-			const voiceRequests = Number((data as Record<string, unknown>)?.voiceRequestCount ?? data?.voiceMinutes) || 0;
+			const voiceRequests =
+				Number(
+					(data as Record<string, unknown>)?.voiceRequestCount ??
+						data?.voiceMinutes,
+				) || 0;
 			if (voiceRequests >= MAX_VOICE_REQUESTS_PER_DAY) {
 				return new ChatSDKError("rate_limit:chat").toResponse();
 			}

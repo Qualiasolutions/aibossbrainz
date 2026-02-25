@@ -235,17 +235,17 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 									Track Record
 								</p>
 								<div className="space-y-2.5">
-									{parseExpertise(
-										content.executives.alex_expertise,
-									).map((achievement) => (
-										<div
-											key={achievement}
-											className="flex items-start gap-2.5 text-sm text-stone-700 leading-relaxed"
-										>
-											<span className="size-1.5 rounded-full bg-red-400 shrink-0 mt-1.5" />
-											{achievement}
-										</div>
-									))}
+									{parseExpertise(content.executives.alex_expertise).map(
+										(achievement) => (
+											<div
+												key={achievement}
+												className="flex items-start gap-2.5 text-sm text-stone-700 leading-relaxed"
+											>
+												<span className="size-1.5 rounded-full bg-red-400 shrink-0 mt-1.5" />
+												{achievement}
+											</div>
+										),
+									)}
 								</div>
 							</div>
 						</motion.div>
@@ -286,17 +286,17 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 									Track Record
 								</p>
 								<div className="space-y-2.5">
-									{parseExpertise(
-										content.executives.kim_expertise,
-									).map((achievement) => (
-										<div
-											key={achievement}
-											className="flex items-start gap-2.5 text-sm text-stone-700 leading-relaxed"
-										>
-											<span className="size-1.5 rounded-full bg-stone-400 shrink-0 mt-1.5" />
-											{achievement}
-										</div>
-									))}
+									{parseExpertise(content.executives.kim_expertise).map(
+										(achievement) => (
+											<div
+												key={achievement}
+												className="flex items-start gap-2.5 text-sm text-stone-700 leading-relaxed"
+											>
+												<span className="size-1.5 rounded-full bg-stone-400 shrink-0 mt-1.5" />
+												{achievement}
+											</div>
+										),
+									)}
 								</div>
 							</div>
 						</motion.div>

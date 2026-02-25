@@ -68,7 +68,10 @@ const navItems = [
 function SidebarContent({
 	onNavigate,
 	collapsed,
-}: { onNavigate?: () => void; collapsed?: boolean }) {
+}: {
+	onNavigate?: () => void;
+	collapsed?: boolean;
+}) {
 	const pathname = usePathname();
 
 	return (
@@ -123,10 +126,7 @@ function SidebarContent({
 
 			{/* Footer */}
 			<div
-				className={cn(
-					"border-t border-neutral-200 p-4",
-					collapsed && "p-2",
-				)}
+				className={cn("border-t border-neutral-200 p-4", collapsed && "p-2")}
 			>
 				<Link href="/" onClick={onNavigate}>
 					<Button
@@ -171,9 +171,7 @@ export function AdminSidebar() {
 					<div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-red-600">
 						<Sparkles className="h-3.5 w-3.5 text-white" />
 					</div>
-					<span className="text-sm font-semibold text-neutral-900">
-						Admin
-					</span>
+					<span className="text-sm font-semibold text-neutral-900">Admin</span>
 				</div>
 			</div>
 

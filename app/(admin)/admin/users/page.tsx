@@ -95,12 +95,17 @@ async function changeSubscription(
 }
 
 export default async function UsersPage() {
+	// Defense-in-depth: verify admin access before loading sensitive data
+	await requireAdmin();
+
 	const users = await getAllUsers();
 
 	return (
 		<div className="p-4 md:p-6 lg:p-8">
 			<div className="mb-6 lg:mb-8">
-				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">User Management</h1>
+				<h1 className="text-2xl md:text-3xl font-bold text-neutral-900">
+					User Management
+				</h1>
 				<p className="text-neutral-500 mt-1">
 					View and manage all users on the platform. {users.length} total users.
 				</p>

@@ -159,10 +159,7 @@ export async function getMessageCountByChatId({ id }: { id: string }) {
 		return count ?? 0;
 	} catch (error) {
 		logger.error({ err: error }, "Failed to count messages");
-		throw new ChatSDKError(
-			"bad_request:database",
-			"Failed to count messages",
-		);
+		throw new ChatSDKError("bad_request:database", "Failed to count messages");
 	}
 }
 
@@ -246,7 +243,10 @@ export async function deleteMessagesByChatIdAfterTimestamp({
 			}
 		}, dbRetryOptions);
 	} catch (error) {
-		logger.error({ err: error }, "Failed to delete messages by chat id after timestamp");
+		logger.error(
+			{ err: error },
+			"Failed to delete messages by chat id after timestamp",
+		);
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to delete messages by chat id after timestamp",

@@ -76,6 +76,9 @@ async function sendReply(
 export default async function SupportTicketDetailPage(props: {
 	params: Promise<{ ticketId: string }>;
 }) {
+	// Defense-in-depth: verify admin access before loading sensitive data
+	await requireAdmin();
+
 	const params = await props.params;
 	const data = await getTicketWithMessagesAdmin({ ticketId: params.ticketId });
 

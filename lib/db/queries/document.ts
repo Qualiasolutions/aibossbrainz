@@ -160,7 +160,10 @@ export async function deleteDocumentsByIdAfterTimestamp({
 			return data;
 		}, dbRetryOptions);
 	} catch (error) {
-		logger.error({ err: error }, "Failed to delete documents by id after timestamp");
+		logger.error(
+			{ err: error },
+			"Failed to delete documents by id after timestamp",
+		);
 		throw new ChatSDKError(
 			"bad_request:database",
 			"Failed to delete documents by id after timestamp",

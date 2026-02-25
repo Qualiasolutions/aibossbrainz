@@ -6,11 +6,7 @@ import { cn } from "@/lib/utils";
 export type ConversationProps = ComponentProps<"div">;
 
 export const Conversation = ({ className, ...props }: ConversationProps) => (
-	<div
-		className={cn("relative flex-1", className)}
-		role="log"
-		{...props}
-	/>
+	<div className={cn("relative flex-1", className)} role="log" {...props} />
 );
 
 export type ConversationContentProps = ComponentProps<"div">;
