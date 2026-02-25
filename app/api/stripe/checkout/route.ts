@@ -7,7 +7,7 @@ import { getValidAppUrl } from "@/lib/stripe/url";
 import { createClient } from "@/lib/supabase/server";
 
 const checkoutSchema = z.object({
-	planId: z.enum(["monthly", "annual", "lifetime"]),
+	planId: z.enum(["free", "starter", "growth", "pro", "enterprise"]),
 });
 
 export const POST = withCsrf(async (request: Request) => {

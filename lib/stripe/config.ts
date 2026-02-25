@@ -41,12 +41,11 @@ export const stripe = {
 // Price IDs from Stripe Dashboard
 // These should be created in Stripe Dashboard first
 export const STRIPE_PRICES = {
-	// Monthly plan: $297/month
-	monthly: env.STRIPE_PRICE_MONTHLY || "price_monthly_placeholder",
-	// Annual plan: $2,500 one-time for 12 months
-	annual: env.STRIPE_PRICE_ANNUAL || "price_annual_placeholder",
-	// Lifetime plan: $3,500 one-time forever
-	lifetime: env.STRIPE_PRICE_LIFETIME || "price_lifetime_placeholder",
+	free: env.STRIPE_PRICE_FREE || "price_free_placeholder",
+	starter: env.STRIPE_PRICE_STARTER || "price_starter_placeholder",
+	growth: env.STRIPE_PRICE_GROWTH || "price_growth_placeholder",
+	pro: env.STRIPE_PRICE_PRO || "price_pro_placeholder",
+	enterprise: env.STRIPE_PRICE_ENTERPRISE || "price_enterprise_placeholder",
 } as const;
 
 export type StripePlanId = keyof typeof STRIPE_PRICES;
@@ -57,29 +56,43 @@ export const PLAN_DETAILS: Record<
 		name: string;
 		price: number;
 		period: string;
-		subscriptionType: "monthly" | "annual" | "lifetime";
-		durationMonths: number;
+		subscriptionType: "free" | "starter" | "growth" | "pro" | "enterprise";
+		durationMonths: number; // 0 for forever/lifetime, 1 for monthly
 	}
 > = {
-	monthly: {
-		name: "Most Flexible",
-		price: 297,
+	free: {
+		name: "Free",
+		price: 0,
+		period: "Forever",
+		subscriptionType: "free",
+		durationMonths: 0,
+	},
+	starter: {
+		name: "Starter",
+		price: 89,
 		period: "Monthly",
-		subscriptionType: "monthly",
+		subscriptionType: "starter",
 		durationMonths: 1,
 	},
-	annual: {
-		name: "Best Value",
-		price: 2500,
-		period: "Annual",
-		subscriptionType: "annual",
-		durationMonths: 12,
+	growth: {
+		name: "Growth",
+		price: 179,
+		period: "Monthly",
+		subscriptionType: "growth",
+		durationMonths: 1,
 	},
-	lifetime: {
-		name: "Exclusive Lifetime",
-		price: 3500,
-		period: "One-Time",
-		subscriptionType: "lifetime",
-		durationMonths: 9999, // Effectively forever
+	pro: {
+		name: "Pro",
+		price: 349,
+		period: "Monthly",
+		subscriptionType: "pro",
+		durationMonths: 1,
+	},
+	enterprise: {
+		name: "Enterprise",
+		price: 799,
+		period: "Monthly",
+		subscriptionType: "enterprise",
+		durationMonths: 1,
 	},
 };
