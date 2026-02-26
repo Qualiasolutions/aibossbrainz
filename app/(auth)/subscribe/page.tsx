@@ -1,14 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-	Check,
-	ChevronRight,
-	Loader2,
-	Shield,
-	Sparkles,
-	Users,
-} from "lucide-react";
+import { ChevronRight, Loader2, Shield } from "lucide-react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -25,6 +19,24 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
+
+const PaymentSuccess = dynamic(
+	() => import("./components/payment-success"),
+	{
+		loading: () => (
+			<div className="flex min-h-screen items-center justify-center bg-stone-50">
+				<div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
+			</div>
+		),
+	},
+);
+const WelcomeStep = dynamic(() => import("./components/welcome-step"), {
+	loading: () => (
+		<div className="flex min-h-screen items-center justify-center bg-stone-50">
+			<div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
+		</div>
+	),
+});
 
 const ALECCI_LOGO_URL = "/images/alecci-media-logo.webp";
 
@@ -78,246 +90,6 @@ const industries = [
 	"Other",
 ];
 
-// Success component shown after payment
-function PaymentSuccess({ redirectPath }: { redirectPath: string }) {
-	const [countdown, setCountdown] = useState(3);
-
-	useEffect(() => {
-		const timer = setInterval(() => {
-			setCountdown((prev) => {
-				if (prev <= 1) {
-					clearInterval(timer);
-					// Use window.location for a clean redirect
-					window.location.href = redirectPath;
-					return 0;
-				}
-				return prev - 1;
-			});
-		}, 1000);
-
-		return () => clearInterval(timer);
-	}, [redirectPath]);
-
-	const handleStartNow = () => {
-		window.location.href = redirectPath;
-	};
-
-	return (
-		<div className="relative min-h-screen bg-stone-50">
-			<div aria-hidden className="pointer-events-none absolute inset-0">
-				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-stone-100 via-stone-50 to-white" />
-			</div>
-
-			<div className="relative z-10 mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-6 py-16">
-				{/* Logo */}
-				<motion.div
-					initial={{ opacity: 0, y: -10 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5 }}
-					className="mb-12"
-				>
-					<Image
-						src={ALECCI_LOGO_URL}
-						alt="Alecci Media"
-						width={160}
-						height={40}
-						className="h-9 w-auto object-contain"
-						priority
-						unoptimized
-					/>
-				</motion.div>
-
-				{/* Success card */}
-				<motion.div
-					initial={{ opacity: 0, scale: 0.95 }}
-					animate={{ opacity: 1, scale: 1 }}
-					transition={{ duration: 0.5, delay: 0.1 }}
-					className="w-full"
-				>
-					<div className="rounded-2xl border border-stone-200/60 bg-white p-10 text-center shadow-xl shadow-stone-200/20">
-						{/* Success icon */}
-						<motion.div
-							initial={{ scale: 0 }}
-							animate={{ scale: 1 }}
-							transition={{
-								duration: 0.4,
-								delay: 0.2,
-								type: "spring",
-								stiffness: 200,
-							}}
-							className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-600"
-						>
-							<Check className="h-8 w-8 text-white" strokeWidth={3} />
-						</motion.div>
-
-						<motion.h1
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: 0.3 }}
-							className="text-2xl font-light text-stone-900 tracking-tight sm:text-3xl"
-						>
-							Welcome to Boss Brainz!
-						</motion.h1>
-
-						<motion.p
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: 0.35 }}
-							className="mt-3 text-stone-500"
-						>
-							Thank you for subscribing! Your 14-day free trial has started. You
-							now have full access to your AI executive team.
-						</motion.p>
-
-						<motion.div
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ delay: 0.4 }}
-							className="mt-8"
-						>
-							<Button
-								size="lg"
-								onClick={handleStartNow}
-								className="h-12 w-full bg-stone-900 text-white shadow-lg shadow-stone-900/10 transition-all hover:bg-stone-800"
-							>
-								Start Your First Conversation
-							</Button>
-						</motion.div>
-
-						<motion.p
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ delay: 0.45 }}
-							className="mt-4 text-sm text-stone-400"
-						>
-							Redirecting in {countdown} seconds...
-						</motion.p>
-					</div>
-				</motion.div>
-			</div>
-		</div>
-	);
-}
-
-const valueProps = [
-	{ icon: Users, text: "AI executive team at your command" },
-	{ icon: Sparkles, text: "Personalized strategy & insights" },
-	{ icon: Shield, text: "14-day free trial, cancel anytime" },
-];
-
-function WelcomeStep({ onContinue }: { onContinue: () => void }) {
-	return (
-		<div className="relative min-h-screen bg-stone-50">
-			<div aria-hidden className="pointer-events-none absolute inset-0">
-				<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-stone-100 via-stone-50 to-white" />
-			</div>
-
-			<div className="relative z-10 mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-6 py-16">
-				{/* Logo */}
-				<motion.div
-					initial={{ opacity: 0, y: -10 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5 }}
-					className="mb-12"
-				>
-					<Image
-						src={ALECCI_LOGO_URL}
-						alt="Alecci Media"
-						width={160}
-						height={40}
-						className="h-9 w-auto object-contain"
-						priority
-						unoptimized
-					/>
-				</motion.div>
-
-				{/* Welcome card */}
-				<motion.div
-					initial={{ opacity: 0, scale: 0.95 }}
-					animate={{ opacity: 1, scale: 1 }}
-					transition={{ duration: 0.5, delay: 0.1 }}
-					className="w-full"
-				>
-					<div className="rounded-2xl border border-stone-200/60 bg-white p-10 text-center shadow-xl shadow-stone-200/20">
-						{/* Checkmark icon */}
-						<motion.div
-							initial={{ scale: 0 }}
-							animate={{ scale: 1 }}
-							transition={{
-								duration: 0.4,
-								delay: 0.2,
-								type: "spring",
-								stiffness: 200,
-							}}
-							className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-600"
-						>
-							<Check className="h-8 w-8 text-white" strokeWidth={3} />
-						</motion.div>
-
-						<motion.h1
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: 0.3 }}
-							className="text-2xl font-light text-stone-900 tracking-tight sm:text-3xl"
-						>
-							Welcome!
-						</motion.h1>
-
-						<motion.p
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: 0.35 }}
-							className="mt-2 text-stone-500"
-						>
-							Your email has been confirmed
-						</motion.p>
-
-						{/* Value props */}
-						<motion.ul
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ delay: 0.4 }}
-							className="mt-8 space-y-4 text-left"
-						>
-							{valueProps.map(({ icon: Icon, text }, i) => (
-								<motion.li
-									key={text}
-									initial={{ opacity: 0, x: -10 }}
-									animate={{ opacity: 1, x: 0 }}
-									transition={{ delay: 0.45 + i * 0.08 }}
-									className="flex items-center gap-3"
-								>
-									<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-stone-100">
-										<Icon className="h-4 w-4 text-stone-700" />
-									</div>
-									<span className="text-sm text-stone-600">{text}</span>
-								</motion.li>
-							))}
-						</motion.ul>
-
-						{/* CTA */}
-						<motion.div
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ delay: 0.7 }}
-							className="mt-8"
-						>
-							<Button
-								size="lg"
-								onClick={onContinue}
-								className="h-12 w-full bg-stone-900 text-white shadow-lg shadow-stone-900/10 transition-all hover:bg-stone-800"
-							>
-								Start 14-Day Free Trial
-								<ChevronRight className="ml-1 h-4 w-4" />
-							</Button>
-						</motion.div>
-					</div>
-				</motion.div>
-			</div>
-		</div>
-	);
-}
-
 function isInternalPath(path: string): boolean {
 	return path.startsWith("/") && !path.startsWith("//");
 }
@@ -348,7 +120,7 @@ function SubscribeContent() {
 	useEffect(() => {
 		let pollInterval: NodeJS.Timeout | null = null;
 		let pollCount = 0;
-		const maxPolls = 30; // 60 seconds max (30 * 2s)
+		const maxPolls = 15; // 60 seconds max (15 * 4s)
 		let isMounted = true;
 		let consecutiveUnauthCount = 0;
 
@@ -419,7 +191,7 @@ function SubscribeContent() {
 					return;
 				}
 				checkSubscription();
-			}, 2000);
+			}, 4000);
 		}
 
 		return () => {
@@ -565,8 +337,8 @@ function SubscribeContent() {
 	if (payment === "success") {
 		const handleRetryCheck = async () => {
 			setRetryLoading(true);
-			// Poll multiple times (10 attempts, 2s apart) to handle slow webhooks
-			for (let i = 0; i < 10; i++) {
+			// Poll multiple times (5 attempts, 4s apart) to handle slow webhooks
+			for (let i = 0; i < 5; i++) {
 				try {
 					const res = await fetch("/api/subscription");
 					const data = await res.json();
@@ -584,9 +356,9 @@ function SubscribeContent() {
 				} catch (error) {
 					console.error("Retry check failed:", error);
 				}
-				// Wait 2 seconds between attempts (except on last attempt)
-				if (i < 9) {
-					await new Promise((r) => setTimeout(r, 2000));
+				// Wait 4 seconds between attempts (except on last attempt)
+				if (i < 4) {
+					await new Promise((r) => setTimeout(r, 4000));
 				}
 			}
 			setRetryLoading(false);
@@ -680,7 +452,6 @@ function SubscribeContent() {
 						height={40}
 						className="h-9 w-auto object-contain"
 						priority
-						unoptimized
 					/>
 				</motion.div>
 
@@ -822,9 +593,9 @@ function SubscribeContent() {
 									<span className="font-medium text-stone-900">
 										14 days free
 									</span>
-									{" · "}
+									{" \u00b7 "}
 									Cancel anytime
-									{" · "}
+									{" \u00b7 "}
 									Secure checkout
 								</p>
 							</motion.div>

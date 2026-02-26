@@ -1,65 +1,20 @@
 "use client";
 
-import {
-	Building2,
-	Download,
-	Loader2,
-	Mail,
-	Save,
-	Shield,
-	Target,
-	Trash2,
-	User,
-} from "lucide-react";
+import { Loader2, Save } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import {
-	EMPLOYEE_COUNT_RANGES,
-	INDUSTRIES,
-	REVENUE_RANGES,
-	YEARS_IN_BUSINESS_RANGES,
-} from "@/lib/constants/business-profile";
 import { getCsrfToken, initCsrfToken } from "@/lib/utils";
+import type { ProfileData } from "./components/profile-section";
 
-interface ProfileData {
-	id: string;
-	email: string;
-	displayName: string | null;
-	companyName: string | null;
-	industry: string | null;
-	businessGoals: string | null;
-	preferredBotType: string | null;
-	onboardedAt: string | null;
-	productsServices: string | null;
-	websiteUrl: string | null;
-	targetMarket: string | null;
-	competitors: string | null;
-	annualRevenue: string | null;
-	yearsInBusiness: string | null;
-	employeeCount: string | null;
-}
+const ProfileSection = dynamic(() => import("./components/profile-section"));
+const BusinessProfileSection = dynamic(
+	() => import("./components/business-profile-section"),
+);
+const DataPrivacySection = dynamic(
+	() => import("./components/data-privacy-section"),
+);
 
 export default function AccountPage() {
 	const [loading, setLoading] = useState(true);
@@ -221,265 +176,34 @@ export default function AccountPage() {
 			</div>
 
 			<div className="space-y-6">
-				{/* Profile Section */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-					<div className="mb-6 flex items-center gap-3">
-						<div className="flex size-10 items-center justify-center rounded-xl bg-blue-100">
-							<User className="size-5 text-blue-600" />
-						</div>
-						<div>
-							<h2 className="text-lg font-semibold text-stone-900">Profile</h2>
-							<p className="text-sm text-stone-500">
-								Your personal information
-							</p>
-						</div>
-					</div>
+				<ProfileSection
+					profile={profile}
+					displayName={displayName}
+					setDisplayName={setDisplayName}
+					companyName={companyName}
+					setCompanyName={setCompanyName}
+					industry={industry}
+					setIndustry={setIndustry}
+				/>
 
-					<div className="space-y-5">
-						{/* Email (read-only) */}
-						<div>
-							<Label className="text-sm font-medium text-stone-700">
-								<Mail className="mr-1.5 inline size-4" />
-								Email Address
-							</Label>
-							<Input
-								value={profile?.email || ""}
-								disabled
-								className="mt-1.5 bg-stone-50 text-stone-500"
-							/>
-							<p className="mt-1 text-xs text-stone-400">
-								Contact support to change your email
-							</p>
-						</div>
-
-						{/* Display Name */}
-						<div>
-							<Label
-								htmlFor="displayName"
-								className="text-sm font-medium text-stone-700"
-							>
-								<User className="mr-1.5 inline size-4" />
-								Display Name
-							</Label>
-							<Input
-								id="displayName"
-								value={displayName}
-								onChange={(e) => setDisplayName(e.target.value)}
-								placeholder="Your name"
-								className="mt-1.5"
-							/>
-						</div>
-
-						{/* Company Name */}
-						<div>
-							<Label
-								htmlFor="companyName"
-								className="text-sm font-medium text-stone-700"
-							>
-								<Building2 className="mr-1.5 inline size-4" />
-								Company Name
-							</Label>
-							<Input
-								id="companyName"
-								value={companyName}
-								onChange={(e) => setCompanyName(e.target.value)}
-								placeholder="Your company"
-								className="mt-1.5"
-							/>
-						</div>
-
-						{/* Industry */}
-						<div>
-							<Label
-								htmlFor="industry"
-								className="text-sm font-medium text-stone-700"
-							>
-								Industry
-							</Label>
-							<Select value={industry} onValueChange={setIndustry}>
-								<SelectTrigger className="mt-1.5">
-									<SelectValue placeholder="Select your industry" />
-								</SelectTrigger>
-								<SelectContent>
-									{INDUSTRIES.map((ind) => (
-										<SelectItem key={ind} value={ind}>
-											{ind}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-					</div>
-				</div>
-
-				{/* Business Profile Section */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-					<div className="mb-6 flex items-center gap-3">
-						<div className="flex size-10 items-center justify-center rounded-xl bg-rose-100">
-							<Building2 className="size-5 text-rose-600" />
-						</div>
-						<div>
-							<h2 className="text-lg font-semibold text-stone-900">
-								Business Profile
-							</h2>
-							<p className="text-sm text-stone-500">
-								Help Alexandria and Kim understand your business
-							</p>
-						</div>
-					</div>
-
-					<div className="space-y-5">
-						{/* Products/Services */}
-						<div>
-							<Label
-								htmlFor="productsServices"
-								className="text-sm font-medium text-stone-700"
-							>
-								Products / Services
-							</Label>
-							<Textarea
-								id="productsServices"
-								value={productsServices}
-								onChange={(e) => setProductsServices(e.target.value)}
-								placeholder="What does your business offer?"
-								className="mt-1.5 min-h-[80px]"
-							/>
-						</div>
-
-						{/* Website URL */}
-						<div>
-							<Label
-								htmlFor="websiteUrl"
-								className="text-sm font-medium text-stone-700"
-							>
-								Website
-							</Label>
-							<Input
-								id="websiteUrl"
-								type="url"
-								value={websiteUrl}
-								onChange={(e) => setWebsiteUrl(e.target.value)}
-								placeholder="https://yourcompany.com"
-								className="mt-1.5"
-							/>
-						</div>
-
-						{/* Target Market */}
-						<div>
-							<Label
-								htmlFor="targetMarket"
-								className="text-sm font-medium text-stone-700"
-							>
-								Target Market
-							</Label>
-							<Input
-								id="targetMarket"
-								value={targetMarket}
-								onChange={(e) => setTargetMarket(e.target.value)}
-								placeholder="Who are your ideal customers?"
-								className="mt-1.5"
-							/>
-						</div>
-
-						{/* Competitors */}
-						<div>
-							<Label
-								htmlFor="competitors"
-								className="text-sm font-medium text-stone-700"
-							>
-								Competitors
-							</Label>
-							<Input
-								id="competitors"
-								value={competitors}
-								onChange={(e) => setCompetitors(e.target.value)}
-								placeholder="Key competitors or alternatives"
-								className="mt-1.5"
-							/>
-						</div>
-
-						{/* Business Goals */}
-						<div>
-							<Label
-								htmlFor="businessGoals"
-								className="text-sm font-medium text-stone-700"
-							>
-								<Target className="mr-1.5 inline size-4" />
-								Business Goals
-							</Label>
-							<Textarea
-								id="businessGoals"
-								value={businessGoals}
-								onChange={(e) => setBusinessGoals(e.target.value)}
-								placeholder="What are you trying to achieve?"
-								className="mt-1.5 min-h-[100px]"
-							/>
-						</div>
-
-						{/* Dropdowns row */}
-						<div className="grid gap-4 sm:grid-cols-3">
-							{/* Annual Revenue */}
-							<div>
-								<Label className="text-sm font-medium text-stone-700">
-									Annual Revenue
-								</Label>
-								<Select value={annualRevenue} onValueChange={setAnnualRevenue}>
-									<SelectTrigger className="mt-1.5">
-										<SelectValue placeholder="Select range" />
-									</SelectTrigger>
-									<SelectContent>
-										{REVENUE_RANGES.map((range) => (
-											<SelectItem key={range} value={range}>
-												{range}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-
-							{/* Years in Business */}
-							<div>
-								<Label className="text-sm font-medium text-stone-700">
-									Years in Business
-								</Label>
-								<Select
-									value={yearsInBusiness}
-									onValueChange={setYearsInBusiness}
-								>
-									<SelectTrigger className="mt-1.5">
-										<SelectValue placeholder="Select range" />
-									</SelectTrigger>
-									<SelectContent>
-										{YEARS_IN_BUSINESS_RANGES.map((range) => (
-											<SelectItem key={range} value={range}>
-												{range}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-
-							{/* Employee Count */}
-							<div>
-								<Label className="text-sm font-medium text-stone-700">
-									Team Size
-								</Label>
-								<Select value={employeeCount} onValueChange={setEmployeeCount}>
-									<SelectTrigger className="mt-1.5">
-										<SelectValue placeholder="Select range" />
-									</SelectTrigger>
-									<SelectContent>
-										{EMPLOYEE_COUNT_RANGES.map((range) => (
-											<SelectItem key={range} value={range}>
-												{range}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-					</div>
-				</div>
+				<BusinessProfileSection
+					productsServices={productsServices}
+					setProductsServices={setProductsServices}
+					websiteUrl={websiteUrl}
+					setWebsiteUrl={setWebsiteUrl}
+					targetMarket={targetMarket}
+					setTargetMarket={setTargetMarket}
+					competitors={competitors}
+					setCompetitors={setCompetitors}
+					businessGoals={businessGoals}
+					setBusinessGoals={setBusinessGoals}
+					annualRevenue={annualRevenue}
+					setAnnualRevenue={setAnnualRevenue}
+					yearsInBusiness={yearsInBusiness}
+					setYearsInBusiness={setYearsInBusiness}
+					employeeCount={employeeCount}
+					setEmployeeCount={setEmployeeCount}
+				/>
 
 				{/* Save Button */}
 				<div className="flex justify-end">
@@ -493,110 +217,14 @@ export default function AccountPage() {
 					</Button>
 				</div>
 
-				{/* Data & Privacy Section */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-					<div className="mb-6 flex items-center gap-3">
-						<div className="flex size-10 items-center justify-center rounded-xl bg-emerald-100">
-							<Shield className="size-5 text-emerald-600" />
-						</div>
-						<div>
-							<h2 className="text-lg font-semibold text-stone-900">
-								Data & Privacy
-							</h2>
-							<p className="text-sm text-stone-500">
-								Export or delete your data
-							</p>
-						</div>
-					</div>
-
-					<div className="space-y-4">
-						{/* Export Data */}
-						<div className="flex items-center justify-between rounded-xl border border-stone-100 bg-stone-50 p-4">
-							<div>
-								<p className="font-medium text-stone-900">Export Your Data</p>
-								<p className="text-sm text-stone-500">
-									Download all your data as a JSON file
-								</p>
-							</div>
-							<Button
-								variant="outline"
-								onClick={handleExport}
-								disabled={exporting}
-								className="gap-2"
-							>
-								{exporting ? (
-									<Loader2 className="size-4 animate-spin" />
-								) : (
-									<Download className="size-4" />
-								)}
-								Export
-							</Button>
-						</div>
-
-						{/* Delete Account */}
-						<div className="flex items-center justify-between rounded-xl border border-red-100 bg-red-50/50 p-4">
-							<div>
-								<p className="font-medium text-stone-900">
-									Delete Your Account
-								</p>
-								<p className="text-sm text-stone-500">
-									Permanently delete your account and all data
-								</p>
-							</div>
-							<AlertDialog
-								onOpenChange={(open) => {
-									if (!open) setDeleteConfirmText("");
-								}}
-							>
-								<AlertDialogTrigger asChild>
-									<Button variant="destructive" className="gap-2">
-										<Trash2 className="size-4" />
-										Delete
-									</Button>
-								</AlertDialogTrigger>
-								<AlertDialogContent>
-									<AlertDialogHeader>
-										<AlertDialogTitle>
-											Are you absolutely sure?
-										</AlertDialogTitle>
-										<AlertDialogDescription>
-											This action cannot be undone. All your chats, documents,
-											and account data will be permanently deleted.
-										</AlertDialogDescription>
-									</AlertDialogHeader>
-									<div className="py-2">
-										<Label
-											htmlFor="delete-confirm"
-											className="text-sm text-stone-600"
-										>
-											Type <span className="font-bold">DELETE</span> to confirm
-										</Label>
-										<Input
-											id="delete-confirm"
-											value={deleteConfirmText}
-											onChange={(e) => setDeleteConfirmText(e.target.value)}
-											placeholder="DELETE"
-											className="mt-1.5"
-										/>
-									</div>
-									<AlertDialogFooter>
-										<AlertDialogCancel>Cancel</AlertDialogCancel>
-										<AlertDialogAction
-											onClick={handleDeleteAccount}
-											disabled={deleteConfirmText !== "DELETE" || deleting}
-											className="bg-red-600 hover:bg-red-700"
-										>
-											{deleting ? (
-												<Loader2 className="mr-2 size-4 animate-spin" />
-											) : null}
-											Delete Account
-										</AlertDialogAction>
-									</AlertDialogFooter>
-								</AlertDialogContent>
-							</AlertDialog>
-						</div>
-					</div>
-				</div>
+				<DataPrivacySection
+					exporting={exporting}
+					deleting={deleting}
+					deleteConfirmText={deleteConfirmText}
+					setDeleteConfirmText={setDeleteConfirmText}
+					handleExport={handleExport}
+					handleDeleteAccount={handleDeleteAccount}
+				/>
 			</div>
 		</div>
 	);
