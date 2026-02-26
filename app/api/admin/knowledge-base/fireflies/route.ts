@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { isUserAdmin } from "@/lib/admin/queries";
 import { clearKnowledgeBaseCache } from "@/lib/ai/knowledge-base";
+import {
+	AuditActions,
+	AuditResources,
+	logAuditWithRequest,
+} from "@/lib/audit/logger";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { withCsrf } from "@/lib/security/with-csrf";
@@ -218,6 +223,14 @@ export const POST = withCsrf(async (request: Request) => {
   // Transform to markdown
   const markdownContent = transformToMarkdown(transcript);
 
+  // HIGH-2: Validate content size before insertion
+  if (markdownContent.length > 50000) {
+    return Response.json(
+      { error: "Transcript content exceeds maximum size (50,000 characters)" },
+      { status: 400 },
+    );
+  }
+
   // Store in Supabase
   const serviceClient = createServiceClient();
 
@@ -264,6 +277,18 @@ export const POST = withCsrf(async (request: Request) => {
 
   // Clear knowledge base cache so new content is immediately available
   clearKnowledgeBaseCache();
+
+  // MED-12: Audit log for KB content ingestion
+  await logAuditWithRequest(request, {
+    userId: user.id,
+    action: AuditActions.KB_CONTENT_INGEST,
+    resource: AuditResources.KNOWLEDGE_BASE,
+    resourceId: inserted.id,
+    details: {
+      source: "fireflies",
+      title: (inserted.title || "").slice(0, 100),
+    },
+  });
 
   return NextResponse.json({
     success: true,

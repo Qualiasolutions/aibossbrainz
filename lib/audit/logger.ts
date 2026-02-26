@@ -30,6 +30,9 @@ export const AuditActions = {
 	LOGIN_FAILED: "LOGIN_FAILED",
 	LOGOUT: "LOGOUT",
 
+	// Knowledge base operations
+	KB_CONTENT_INGEST: "KB_CONTENT_INGEST",
+
 	// Canvas operations
 	CANVAS_DELETE: "CANVAS_DELETE",
 
@@ -51,6 +54,7 @@ export const AuditResources = {
 	SUMMARY: "summary",
 	AUTH: "auth",
 	DATA: "data",
+	KNOWLEDGE_BASE: "knowledge_base",
 } as const;
 
 export type AuditResource =

@@ -1,5 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { sanitizePromptContent } from "@/lib/ai/prompts";
+import { logger } from "@/lib/logger";
 import { requestCoalescer } from "@/lib/request-coalescer";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -7,7 +9,7 @@ const KNOWLEDGE_BASE_PATH = path.join(process.cwd(), "knowledge-base");
 
 // Memory cache for knowledge base content with longer TTL
 const cache = new Map<string, { content: string; timestamp: number }>();
-const CACHE_TTL = 60 * 60 * 1000; // 60 minutes (increased from 30 - KB rarely changes)
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes (shorter TTL allows filesystem changes to be picked up without manual cache invalidation)
 
 // Maximum file size to parse (10MB)
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -17,6 +19,13 @@ const MAX_CACHE_ENTRIES = 10;
 
 // Timeout for knowledge base loading to prevent blocking requests
 const KB_LOAD_TIMEOUT = 10000; // 10 seconds
+
+// CRIT-1: Maximum aggregate characters for all knowledge base content injected into system prompt
+// ~25K tokens at ~4 chars/token. Prevents context overflow and inflated costs.
+const MAX_KB_CONTENT_CHARS = 100_000;
+
+// MED-14: Maximum directory recursion depth to prevent symlink loops or deep nesting
+const MAX_DIRECTORY_DEPTH = 3;
 
 // Track if knowledge base has been preloaded
 let preloaded = false;
@@ -207,7 +216,7 @@ async function parseFile(filePath: string, fileName: string): Promise<string> {
 	}
 }
 
-async function readDirectoryContent(dirPath: string): Promise<string> {
+async function readDirectoryContent(dirPath: string, depth = 0): Promise<string> {
 	try {
 		await fs.access(dirPath);
 	} catch {
@@ -224,22 +233,24 @@ async function readDirectoryContent(dirPath: string): Promise<string> {
 			const filePath = path.join(dirPath, file.name);
 			try {
 				const fileContent = await parseFile(filePath, file.name);
-				return `\n\n--- ${file.name} ---\n${fileContent}`;
+				return `\n\n[FILE: ${file.name}]\n${fileContent}`;
 			} catch {
-				return `\n\n--- ${file.name} ---\n[Error reading file]`;
+				return `\n\n[FILE: ${file.name}]\n[Error reading file]`;
 			}
 		});
 
 	const results = await Promise.all(filePromises);
 	contentParts.push(...results);
 
-	// Check for subdirectories
-	for (const item of files) {
-		if (item.isDirectory()) {
-			const subDirPath = path.join(dirPath, item.name);
-			const subContent = await readDirectoryContent(subDirPath);
-			if (subContent) {
-				contentParts.push(`\n\n=== Folder: ${item.name} ===\n${subContent}`);
+	// MED-14: Check for subdirectories with bounded depth
+	if (depth < MAX_DIRECTORY_DEPTH) {
+		for (const item of files) {
+			if (item.isDirectory()) {
+				const subDirPath = path.join(dirPath, item.name);
+				const subContent = await readDirectoryContent(subDirPath, depth + 1);
+				if (subContent) {
+					contentParts.push(`\n\n[FOLDER: ${item.name}]\n${subContent}`);
+				}
 			}
 		}
 	}
@@ -294,7 +305,7 @@ async function getSupabaseKnowledgeContent(botType: string): Promise<string> {
 			.select("title, content, source, created_at")
 			.in("bot_type", botTypes)
 			.order("created_at", { ascending: false })
-			.limit(100);
+			.limit(20);
 
 		if (error) {
 			// Table might not exist yet -- degrade gracefully
@@ -305,10 +316,11 @@ async function getSupabaseKnowledgeContent(botType: string): Promise<string> {
 			return "";
 		}
 
+		// MED-3: Defense-in-depth sanitization at retrieval point
 		return data
 			.map(
 				(row) =>
-					`\n\n--- ${row.title} (from ${row.source}) ---\n${row.content}`,
+					`\n\n[FILE: ${row.title} (from ${row.source})]\n${sanitizePromptContent(row.content)}`,
 			)
 			.join("");
 	} catch {
@@ -376,6 +388,15 @@ export async function getKnowledgeBaseContent(
 				const dbContent = await getSupabaseKnowledgeContent(botType);
 				if (dbContent) {
 					content += `\n\n=== Ingested Knowledge ===\n${dbContent}`;
+				}
+
+				// CRIT-1: Enforce aggregate size limit to prevent context overflow
+				if (content.length > MAX_KB_CONTENT_CHARS) {
+					logger.warn(
+						{ botType, originalLength: content.length, limit: MAX_KB_CONTENT_CHARS },
+						"Knowledge base content truncated to aggregate limit",
+					);
+					content = content.slice(0, MAX_KB_CONTENT_CHARS);
 				}
 
 				// Evict old entries before adding new one

@@ -23,7 +23,7 @@ import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
-import { deepResearch } from "@/lib/ai/tools/deep-research";
+import { createDeepResearch } from "@/lib/ai/tools/deep-research";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { strategyCanvas } from "@/lib/ai/tools/strategy-canvas";
@@ -68,6 +68,7 @@ import {
 	checkRateLimit,
 	getRateLimitHeaders,
 } from "@/lib/security/rate-limiter";
+import { containsAbusePatterns } from "@/lib/security/input-moderation";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { chatBreadcrumb } from "@/lib/sentry";
 import { createClient } from "@/lib/supabase/server";
@@ -136,7 +137,8 @@ export const POST = withCsrf(async (request: Request) => {
 
 	try {
 		const json = await request.json();
-		apiLog.logger().debug({ body: json }, "Chat API request received");
+		// MED-5: Redact message content before debug logging to prevent PII in logs
+		apiLog.logger().debug({ body: { ...json, message: json?.message ? { ...json.message, parts: "[redacted]" } : undefined } }, "Chat API request received");
 		requestBody = postRequestBodySchema.parse(json);
 	} catch (error) {
 		apiLog.error(error, { phase: "validation" });
@@ -279,24 +281,8 @@ export const POST = withCsrf(async (request: Request) => {
 			.map((part) => (part as { type: "text"; text: string }).text)
 			.join(" ");
 
-		// H-1: Basic content moderation - reject obvious abuse before AI processing
-		const ABUSE_PATTERNS = [
-			/ignore\s+(all\s+)?(previous|above|prior)\s+(instructions?|rules?|prompts?)/i,
-			/you\s+are\s+now\s+(in\s+)?DAN/i,
-			/jailbreak/i,
-			/\bdo\s+anything\s+now\b/i,
-			/disregard\s+(your|all|the)\s+(rules?|instructions?|guidelines?)/i,
-			/pretend\s+you\s+(have\s+)?no\s+(restrictions?|rules?|limits?)/i,
-		];
-
-		const hasAbuse = ABUSE_PATTERNS.some((pattern) =>
-			pattern.test(messageText),
-		);
-		if (hasAbuse) {
-			logger.warn(
-				{ chatId: id, userId: user.id },
-				"Content moderation: prompt injection attempt blocked",
-			);
+		// MED-1: Shared content moderation - reject obvious abuse before AI processing
+		if (containsAbusePatterns(messageText, { chatId: id, userId: user.id, route: "/api/chat" })) {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 
@@ -388,7 +374,7 @@ export const POST = withCsrf(async (request: Request) => {
 							dataStream,
 						}),
 						webSearch,
-						deepResearch,
+						deepResearch: createDeepResearch({ userId: user.id, userType }),
 						strategyCanvas: strategyCanvas({
 							session: { user } satisfies Session,
 						}),
