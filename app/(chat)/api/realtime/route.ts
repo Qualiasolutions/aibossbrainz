@@ -7,6 +7,7 @@ import { myProvider } from "@/lib/ai/providers";
 import { getVoiceConfig } from "@/lib/ai/voice-config";
 import { recordAnalytics } from "@/lib/analytics/queries";
 import { apiRequestLogger } from "@/lib/api-logging";
+import { recordAICost } from "@/lib/cost/tracker";
 import { checkUserSubscription } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
@@ -17,6 +18,7 @@ import {
 } from "@/lib/resilience";
 import { containsCanary } from "@/lib/safety/canary";
 import { redactPII } from "@/lib/safety/pii-redactor";
+import { containsAbusePatterns } from "@/lib/security/input-moderation";
 import {
 	checkRateLimit,
 	getRateLimitHeaders,
@@ -120,6 +122,11 @@ export const POST = withCsrf(async (request: Request) => {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 		const { message, botType } = parseResult.data;
+
+		// MED-1: Check for abuse patterns before AI processing
+		if (containsAbusePatterns(message, { userId: user.id, route: "/api/realtime" })) {
+			return new ChatSDKError("bad_request:api").toResponse();
+		}
 
 		// Get knowledge base content for the bot
 		const knowledgeBaseContent = await getKnowledgeBaseContent(botType);
@@ -269,6 +276,18 @@ export const POST = withCsrf(async (request: Request) => {
 				recordAnalytics(user.id, "voice_request", 1);
 			});
 		}
+
+		// MED-21: Record AI cost for tracking
+		after(() => {
+			recordAICost({
+				userId: user.id,
+				chatId: null,
+				modelId: "chat-model",
+				inputTokens: result.usage.promptTokens,
+				outputTokens: result.usage.completionTokens,
+				costUSD: 0, // Actual cost tracked via OpenRouter billing
+			});
+		});
 
 		return Response.json({
 			text: responseText,
