@@ -19,6 +19,7 @@ export const updateDocument = ({ session, dataStream }: UpdateDocumentProps) =>
 			id: z.string().describe("The ID of the document to update"),
 			description: z
 				.string()
+				.max(2000)
 				.describe("The description of changes that need to be made"),
 		}),
 		execute: async ({ id, description }) => {

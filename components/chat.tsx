@@ -22,6 +22,7 @@ import { useVoiceToText } from "@/hooks/use-voice-to-text";
 import {
 	BOT_PERSONALITIES,
 	type BotType,
+	FOCUS_MODES,
 	type FocusMode,
 } from "@/lib/bot-personalities";
 import { exportConversationToPDF } from "@/lib/conversation-export";
@@ -188,6 +189,10 @@ export function Chat({
 		if (newBot !== selectedBot) {
 			const personality = BOT_PERSONALITIES[newBot];
 			setSelectedBot(newBot);
+			// MED-17: Reset focus mode if incompatible with new executive
+			if (focusMode !== "default" && !FOCUS_MODES[focusMode].applicableTo.includes(newBot)) {
+				setFocusMode("default");
+			}
 			toast({
 				type: "success",
 				description: `Now consulting with ${personality.name} - ${personality.role}`,

@@ -50,6 +50,17 @@ export const postRequestBodySchema = z
 			])
 			.default("default"),
 	})
-	.passthrough();
+	.passthrough()
+	// MED-18: Server-side validation of focusMode/botType compatibility
+	// social_media is only available for alexandria and collaborative
+	.refine(
+		(data) => {
+			if (data.focusMode === "social_media") {
+				return data.selectedBotType !== "kim";
+			}
+			return true;
+		},
+		{ message: "Focus mode not compatible with selected executive" },
+	);
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

@@ -108,6 +108,19 @@ export const getWeather = tool({
 				};
 			}
 
+			// MED-10: Trim response to reduce AI context bloat
+			// Keep only first 24 hourly entries (today) instead of all 168
+			if (weatherData.hourly?.time) {
+				weatherData.hourly.time = weatherData.hourly.time.slice(0, 24);
+				weatherData.hourly.temperature_2m = weatherData.hourly.temperature_2m.slice(0, 24);
+			}
+			// Keep only first 2 days of daily data
+			if (weatherData.daily?.time) {
+				weatherData.daily.time = weatherData.daily.time.slice(0, 2);
+				weatherData.daily.sunrise = weatherData.daily.sunrise.slice(0, 2);
+				weatherData.daily.sunset = weatherData.daily.sunset.slice(0, 2);
+			}
+
 			if (input.city) {
 				weatherData.cityName = input.city;
 			}

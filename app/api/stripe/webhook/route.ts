@@ -208,7 +208,7 @@ export async function POST(request: Request) {
 										const profile = await getUserFullProfile({ userId });
 										if (!profile?.email) return;
 										await applyMailchimpTags(profile.email, "trial");
-										const planDetails = PLAN_DETAILS[subscriptionType];
+										const planDetails = (PLAN_DETAILS as Record<string, { name: string }>)[subscriptionType];
 										await sendTrialStartedEmail({
 											email: profile.email,
 											displayName: profile.displayName,
@@ -300,7 +300,7 @@ export async function POST(request: Request) {
 								const profile = await getUserFullProfile({ userId });
 								if (!profile?.email) return;
 								await applyMailchimpTags(profile.email, "trial");
-								const planDetails = PLAN_DETAILS[subscriptionType];
+								const planDetails = (PLAN_DETAILS as Record<string, { name: string }>)[subscriptionType];
 								await sendTrialStartedEmail({
 									email: profile.email,
 									displayName: profile.displayName,

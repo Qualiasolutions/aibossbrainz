@@ -19,6 +19,7 @@ import {
 	recordCircuitFailure,
 	recordCircuitSuccess,
 } from "@/lib/resilience";
+import { containsAbusePatterns } from "@/lib/security/input-moderation";
 import { containsCanary, getCanaryToken } from "@/lib/safety/canary";
 import { redactPII } from "@/lib/safety/pii-redactor";
 import { withCsrf } from "@/lib/security/with-csrf";
@@ -112,6 +113,18 @@ export const POST = withCsrf(async (request: Request) => {
 		// Parse request
 		const json = await request.json();
 		const { messages, botType } = demoRequestSchema.parse(json);
+
+		// MED-1: Check for abuse patterns in the latest user message
+		const lastUserMessage = messages.filter((m) => m.role === "user").pop();
+		if (lastUserMessage) {
+			const msgText = lastUserMessage.parts
+				.filter((p): p is { type: "text"; text: string } => p.type === "text")
+				.map((p) => p.text)
+				.join(" ");
+			if (containsAbusePatterns(msgText, { route: "/api/demo/chat" })) {
+				return Response.json({ error: "Invalid request" }, { status: 400 });
+			}
+		}
 
 		// Limit conversation history for demo (max 6 messages)
 		const recentMessages = messages.slice(-6);

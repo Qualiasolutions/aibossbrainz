@@ -40,6 +40,8 @@ export function mapRpcRowToAdminUser(row: AdminUserRow): AdminUser {
 		annualRevenue: null,
 		yearsInBusiness: null,
 		employeeCount: null,
+		creditsBalance: null,
+		signalsBalance: null,
 		chatCount: Number(row.chatCount) || 0,
 		messageCount: Number(row.messageCount) || 0,
 		lastActiveAt: row.lastActiveAt,

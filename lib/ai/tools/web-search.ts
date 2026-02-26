@@ -286,6 +286,7 @@ export const webSearch = tool({
 	inputSchema: z.object({
 		query: z
 			.string()
+			.max(500)
 			.describe("The search query. Be specific and include relevant context."),
 	}),
 	execute: async ({ query }) => {
