@@ -1,6 +1,12 @@
 import { unstable_cache } from "next/cache";
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
-import { AppSidebar } from "@/components/app-sidebar";
+
+const AppSidebar = dynamic(() =>
+	import("@/components/app-sidebar").then((mod) => ({
+		default: mod.AppSidebar,
+	})),
+);
 
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { MobileSidebarProvider } from "@/components/mobile-sidebar-context";

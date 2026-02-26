@@ -71,26 +71,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 	const cookieStore = await cookies();
 	const chatModelFromCookie = cookieStore.get("chat-model");
 
-	if (!chatModelFromCookie) {
-		return (
-			<>
-				<ChatWithErrorBoundary
-					autoResume={true}
-					chatTopic={chat.topic || chat.title}
-					hasMoreMessages={hasMoreMessages}
-					id={chat.id}
-					initialBotType={initialBotType}
-					initialChatModel={DEFAULT_CHAT_MODEL}
-					initialLastContext={(chat.lastContext as any) ?? undefined}
-					initialMessages={uiMessages}
-					initialVisibilityType={chat.visibility as VisibilityType}
-					isReadonly={sessionUser?.id !== chat.userId}
-				/>
-				<DataStreamHandler />
-			</>
-		);
-	}
-
 	return (
 		<>
 			<ChatWithErrorBoundary
@@ -99,7 +79,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 				hasMoreMessages={hasMoreMessages}
 				id={chat.id}
 				initialBotType={initialBotType}
-				initialChatModel={chatModelFromCookie.value}
+				initialChatModel={chatModelFromCookie?.value ?? DEFAULT_CHAT_MODEL}
 				initialLastContext={(chat.lastContext as any) ?? undefined}
 				initialMessages={uiMessages}
 				initialVisibilityType={chat.visibility as VisibilityType}
