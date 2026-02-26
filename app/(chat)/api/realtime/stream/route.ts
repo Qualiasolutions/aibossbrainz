@@ -518,8 +518,8 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 				userId: user.id,
 				chatId: savedChatId,
 				modelId: "chat-model",
-				inputTokens: result.usage.promptTokens,
-				outputTokens: result.usage.completionTokens,
+				inputTokens: result.usage.inputTokens ?? 0,
+				outputTokens: result.usage.outputTokens ?? 0,
 				costUSD: 0, // Actual cost tracked via OpenRouter billing
 			});
 		});

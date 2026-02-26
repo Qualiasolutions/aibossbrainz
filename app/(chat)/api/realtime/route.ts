@@ -283,8 +283,8 @@ export const POST = withCsrf(async (request: Request) => {
 				userId: user.id,
 				chatId: null,
 				modelId: "chat-model",
-				inputTokens: result.usage.promptTokens,
-				outputTokens: result.usage.completionTokens,
+				inputTokens: result.usage.inputTokens ?? 0,
+				outputTokens: result.usage.outputTokens ?? 0,
 				costUSD: 0, // Actual cost tracked via OpenRouter billing
 			});
 		});
