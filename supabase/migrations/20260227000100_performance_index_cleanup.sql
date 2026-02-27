@@ -1,5 +1,5 @@
 -- Performance cleanup: add FK index for AICostLog.chatId (JOIN performance),
--- drop 8 unused indexes identified via pg_stat_user_indexes (zero scans, write overhead only).
+-- drop 7 unused indexes identified via pg_stat_user_indexes (zero scans, write overhead only).
 -- Auth connection strategy: switch to percentage-based in Supabase Dashboard
 -- (Project Settings > Database > Connection Pooling), not SQL-actionable.
 
@@ -13,5 +13,7 @@ DROP INDEX IF EXISTS idx_stripe_webhook_event_processed;
 DROP INDEX IF EXISTS idx_webhook_dead_letter_resolved;
 DROP INDEX IF EXISTS idx_webhook_dead_letter_created;
 DROP INDEX IF EXISTS idx_stream_chatid_createdat;
-DROP INDEX IF EXISTS idx_support_ticket_message_sender_id;
+-- idx_support_ticket_message_sender_id: KEPT — needed as FK covering index for
+-- SupportTicketMessage_senderId_fkey (cascading deletes on parent table).
+-- Was initially dropped as "unused" but Supabase advisor correctly flags unindexed FKs.
 DROP INDEX IF EXISTS "Chat_userCategory_idx";
