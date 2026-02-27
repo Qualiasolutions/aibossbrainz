@@ -2,7 +2,7 @@
 
 import type { User } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
-import { Plus, Trash2 } from "lucide-react";
+import { AudioLines, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -82,6 +82,10 @@ export function AppSidebar({
 		router.refresh();
 	};
 
+	const handleVoiceToggle = () => {
+		window.dispatchEvent(new CustomEvent("toggle-voice-mode"));
+	};
+
 	return (
 		<>
 			<Sidebar className="w-72 border-r border-border bg-background">
@@ -113,17 +117,28 @@ export function AppSidebar({
 							</Link>
 
 							{/* Action buttons - consistent height */}
-							<div className="flex gap-2">
+							<div className="flex gap-1.5">
 								{user && (
-									<Button
-										className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
-										onClick={() => setShowDeleteAllDialog(true)}
-										variant="ghost"
-										size="sm"
-									>
-										<Trash2 className="mr-1.5 h-3.5 w-3.5" />
-										<span className="text-xs font-medium">Clear</span>
-									</Button>
+									<>
+										<Button
+											className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+											onClick={() => setShowDeleteAllDialog(true)}
+											variant="ghost"
+											size="sm"
+										>
+											<Trash2 className="mr-1.5 h-3.5 w-3.5" />
+											<span className="text-xs font-medium">Clear</span>
+										</Button>
+										<Button
+											className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
+											onClick={handleVoiceToggle}
+											variant="ghost"
+											size="sm"
+										>
+											<AudioLines className="mr-1.5 h-3.5 w-3.5" />
+											<span className="text-xs font-medium">Voice</span>
+										</Button>
+									</>
 								)}
 								<Button
 									className="h-9 flex-1 rounded-lg"
@@ -193,17 +208,28 @@ export function AppSidebar({
 									</span>
 								</Link>
 
-								<div className="flex gap-2">
+								<div className="flex gap-1.5">
 									{user && (
-										<Button
-											className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
-											onClick={() => setShowDeleteAllDialog(true)}
-											variant="ghost"
-											size="sm"
-										>
-											<Trash2 className="mr-1 h-3.5 w-3.5" />
-											<span className="text-xs">Clear</span>
-										</Button>
+										<>
+											<Button
+												className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+												onClick={() => setShowDeleteAllDialog(true)}
+												variant="ghost"
+												size="sm"
+											>
+												<Trash2 className="mr-1 h-3.5 w-3.5" />
+												<span className="text-xs">Clear</span>
+											</Button>
+											<Button
+												className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
+												onClick={handleVoiceToggle}
+												variant="ghost"
+												size="sm"
+											>
+												<AudioLines className="mr-1 h-3.5 w-3.5" />
+												<span className="text-xs">Voice</span>
+											</Button>
+										</>
 									)}
 									<Button
 										className="h-9 flex-1 rounded-lg"

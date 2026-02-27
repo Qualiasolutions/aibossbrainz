@@ -524,6 +524,18 @@ export function Chat({
 		toggleRecording: onDictationToggle,
 	} = useVoiceToText({ setInput });
 
+	// Listen for voice mode toggle from sidebar
+	useEffect(() => {
+		const handleVoiceToggle = () => {
+			toggleVoiceMode();
+		};
+
+		window.addEventListener("toggle-voice-mode", handleVoiceToggle);
+		return () => {
+			window.removeEventListener("toggle-voice-mode", handleVoiceToggle);
+		};
+	}, [toggleVoiceMode]);
+
 	return (
 		<>
 			<ChatViewportLock />
