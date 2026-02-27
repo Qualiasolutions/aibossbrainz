@@ -178,11 +178,11 @@ export const EnhancedChatMessage = memo(
 									isStreaming={isTyping ?? false}
 								/>
 							) : (
-								<div className="thinking-dots" aria-label="Thinking...">
+								<output className="thinking-dots" aria-label="Thinking...">
 									<span />
 									<span />
 									<span />
-								</div>
+								</output>
 							)}
 						</div>
 					</div>

@@ -100,9 +100,7 @@ export default async function HistoryPage() {
 	);
 
 	return (
-		<main
-			className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"
-		>
+		<main className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
 			{/* Header */}
 			<header className="border-white/20 border-b bg-white/80 dark:bg-slate-900/80 dark:border-slate-700 backdrop-blur-xl">
 				<div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">

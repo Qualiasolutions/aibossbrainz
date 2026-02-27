@@ -335,7 +335,7 @@ export function Chat({
 				setMessages((prev) => [...olderUIMessages, ...prev]);
 			}
 			setHasMoreMessages(hasMore);
-		} catch (err) {
+		} catch {
 			toast({
 				type: "error",
 				description: "Failed to load older messages. Please try again.",

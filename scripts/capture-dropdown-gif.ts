@@ -1,11 +1,6 @@
-import { mkdirSync, writeFileSync } from "fs";
-import { join } from "path";
-import {
-	type Browser,
-	type BrowserContext,
-	chromium,
-	type Page,
-} from "playwright";
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
+import { type Browser, type BrowserContext, chromium } from "playwright";
 
 const OUTPUT_DIR =
 	"/home/qualia/Desktop/Projects/aiagents/aibossbrainz/docs/demo/gifs";

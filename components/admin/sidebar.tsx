@@ -152,6 +152,7 @@ export function AdminSidebar() {
 	const pathname = usePathname();
 
 	// Close mobile sidebar on route change
+	// biome-ignore lint/correctness/useExhaustiveDependencies: intentionally close sidebar when pathname changes
 	useEffect(() => {
 		setMobileOpen(false);
 	}, [pathname]);
@@ -179,6 +180,7 @@ export function AdminSidebar() {
 			{mobileOpen && (
 				<>
 					{/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop dismiss */}
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop dismiss overlay */}
 					<div
 						className="fixed inset-0 z-50 bg-black/50 md:hidden"
 						onClick={() => setMobileOpen(false)}

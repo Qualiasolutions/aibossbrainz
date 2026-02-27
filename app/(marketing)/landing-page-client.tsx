@@ -145,6 +145,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						<div className="flex -space-x-1.5">
 							{[...Array(4)].map((_, i) => (
 								<motion.div
+									// biome-ignore lint/suspicious/noArrayIndexKey: static decorative avatars
 									key={`avatar-${i}`}
 									initial={{ opacity: 0, scale: 0, x: -10 }}
 									animate={isInView ? { opacity: 1, scale: 1, x: 0 } : {}}
@@ -163,6 +164,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							<div className="flex text-amber-500/80">
 								{[...Array(5)].map((_, i) => (
 									<motion.svg
+										// biome-ignore lint/suspicious/noArrayIndexKey: static star icons
 										key={`star-${i}`}
 										className="w-3 h-3 fill-current"
 										viewBox="0 0 20 20"

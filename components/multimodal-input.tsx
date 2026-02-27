@@ -127,6 +127,7 @@ function PureMultimodalInput({
 
 	const hasHydratedRef = useRef(false);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only effect
 	useEffect(() => {
 		if (hasHydratedRef.current || !textareaRef.current) return;
 

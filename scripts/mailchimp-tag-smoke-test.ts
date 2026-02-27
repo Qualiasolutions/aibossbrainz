@@ -128,7 +128,7 @@ async function main() {
 
 	// Minimal, machine-readable output (don’t print secrets).
 	process.stdout.write(
-		JSON.stringify(
+		`${JSON.stringify(
 			{
 				email,
 				plan,
@@ -138,7 +138,7 @@ async function main() {
 			},
 			null,
 			2,
-		) + "\n",
+		)}\n`,
 	);
 }
 

@@ -20,7 +20,7 @@ interface AICostRecord {
 export async function recordAICost(record: AICostRecord): Promise<void> {
 	try {
 		const supabase = createServiceClient();
-		// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
+
 		const { error } = await (supabase.from as any)("AICostLog").insert({
 			userId: record.userId,
 			chatId: record.chatId,
@@ -72,7 +72,7 @@ export async function getDailyAICostTotal(
 	const dateStr = targetDate.toISOString().split("T")[0]; // YYYY-MM-DD
 
 	const supabase = createServiceClient();
-	// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
+
 	const { data, error } = (await (supabase.from as any)("AICostLog")
 		.select("userId, inputTokens, outputTokens, costUSD")
 		.gte("createdAt", `${dateStr}T00:00:00.000Z`)
@@ -124,7 +124,7 @@ export async function getMonthlyCostSummary(
 	const endDate = new Date(Date.UTC(year, month, 1)); // First day of next month
 
 	const supabase = createServiceClient();
-	// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
+
 	const { data, error } = (await (supabase.from as any)("AICostLog")
 		.select("userId, modelId, inputTokens, outputTokens, costUSD")
 		.gte("createdAt", startDate.toISOString())
@@ -199,7 +199,7 @@ export async function getUserDailyCost(
 	const dateStr = targetDate.toISOString().split("T")[0];
 
 	const supabase = createServiceClient();
-	// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
+
 	const { data, error } = (await (supabase.from as any)("AICostLog")
 		.select("inputTokens, outputTokens, costUSD")
 		.eq("userId", userId)
@@ -240,7 +240,7 @@ export async function getTopUserCosts(
 	const dateStr = targetDate.toISOString().split("T")[0];
 
 	const supabase = createServiceClient();
-	// biome-ignore lint: AICostLog not in generated types until pnpm gen:types
+
 	const { data, error } = (await (supabase.from as any)("AICostLog")
 		.select("userId, inputTokens, outputTokens, costUSD")
 		.not("userId", "is", null)

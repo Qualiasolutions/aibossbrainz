@@ -19,7 +19,6 @@ export async function shouldProcessEvent(
 	const supabase = createServiceClient();
 
 	try {
-		// biome-ignore lint/suspicious/noExplicitAny: RPC not yet in generated types
 		const { data, error } = await (supabase as any).rpc(
 			"process_webhook_event",
 			{
@@ -70,7 +69,6 @@ export async function persistFailedEvent(
 	const supabase = createServiceClient();
 
 	try {
-		// biome-ignore lint/suspicious/noExplicitAny: table not yet in generated types
 		await (supabase as any).from("WebhookDeadLetter").insert({
 			eventId,
 			eventType,

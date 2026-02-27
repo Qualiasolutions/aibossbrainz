@@ -243,16 +243,6 @@ export function OnboardingModal() {
 		checkProfile();
 	}, []);
 
-	// Escape to skip (tour mode only)
-	useEffect(() => {
-		if (!isTourMode || !isOpen) return;
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape") closeTour();
-		};
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [isTourMode, isOpen]);
-
 	const goNext = useCallback(() => {
 		setStepIndex((prev) => Math.min(prev + 1, activeSteps.length - 1));
 	}, [activeSteps.length]);
@@ -266,6 +256,16 @@ export function OnboardingModal() {
 		setStepIndex(0);
 		setIsTourMode(false);
 	}, []);
+
+	// Escape to skip (tour mode only)
+	useEffect(() => {
+		if (!isTourMode || !isOpen) return;
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") closeTour();
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isTourMode, isOpen, closeTour]);
 
 	const saveAndFinish = async () => {
 		if (csrfLoading) {
@@ -612,6 +612,7 @@ function CenteredStep({
 					<div className="flex items-center justify-center gap-1.5 bg-stone-50 py-3">
 						{Array.from({ length: nav.totalSteps }).map((_, i) => (
 							<motion.div
+								// biome-ignore lint/suspicious/noArrayIndexKey: static step indicators
 								key={i}
 								className={cn(
 									"h-1.5 rounded-full transition-all",
@@ -1041,6 +1042,7 @@ function StepDots({ current, total }: { current: number; total: number }) {
 		<div className="flex items-center gap-1">
 			{Array.from({ length: total }).map((_, i) => (
 				<div
+					// biome-ignore lint/suspicious/noArrayIndexKey: static dot indicators
 					key={i}
 					className={cn(
 						"rounded-full transition-all duration-300",

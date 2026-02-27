@@ -146,7 +146,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [topicFilter, setTopicFilter] = useState<string | null>(null);
-	const [categoryFilter, setCategoryFilter] = useState<UserCategory | null>(
+	const [categoryFilter, _setCategoryFilter] = useState<UserCategory | null>(
 		null,
 	);
 	const [showTopicDropdown, setShowTopicDropdown] = useState(false);
@@ -154,21 +154,31 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 	const topicCategories = useMemo(() => getTopicCategories(), []);
 
 	// Category options for user-assigned categories
-	const userCategories: {
-		value: UserCategory;
-		label: string;
-		icon: typeof Users;
-		color: string;
-	}[] = [
-		{ value: "team", label: "Team", icon: Users, color: "bg-blue-500" },
+	const userCategories = useMemo<
 		{
-			value: "client",
-			label: "Client",
-			icon: Briefcase,
-			color: "bg-green-500",
-		},
-		{ value: "none", label: "General", icon: UserIcon, color: "bg-gray-400" },
-	];
+			value: UserCategory;
+			label: string;
+			icon: typeof Users;
+			color: string;
+		}[]
+	>(
+		() => [
+			{ value: "team", label: "Team", icon: Users, color: "bg-blue-500" },
+			{
+				value: "client",
+				label: "Client",
+				icon: Briefcase,
+				color: "bg-green-500",
+			},
+			{
+				value: "none",
+				label: "General",
+				icon: UserIcon,
+				color: "bg-gray-400",
+			},
+		],
+		[],
+	);
 
 	const hasReachedEnd = paginatedChatHistories
 		? paginatedChatHistories.some((page) => page.hasMore === false)

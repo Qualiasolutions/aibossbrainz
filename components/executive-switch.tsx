@@ -295,7 +295,6 @@ export function ExecutiveSwitch({
 				isOpen &&
 				createPortal(
 					<AnimatePresence>
-						{/* biome-ignore lint/a11y/noNoninteractiveElementToKeyboardEvent: focus trap requires onKeyDown on the modal container */}
 						<div
 							className="fixed inset-0 z-[99999]"
 							onKeyDown={handleModalKeyDown}
