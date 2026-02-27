@@ -130,13 +130,13 @@ export function AppSidebar({
 											<span className="text-xs font-medium">Clear</span>
 										</Button>
 										<Button
-											className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
+											className="h-9 w-9 shrink-0 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
 											onClick={handleVoiceToggle}
 											variant="ghost"
-											size="sm"
+											size="icon"
+											title="Start voice conversation"
 										>
-											<AudioLines className="mr-1.5 h-3.5 w-3.5" />
-											<span className="text-xs font-medium">Voice</span>
+											<AudioLines className="h-4 w-4" />
 										</Button>
 									</>
 								)}
@@ -221,13 +221,13 @@ export function AppSidebar({
 												<span className="text-xs">Clear</span>
 											</Button>
 											<Button
-												className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
+												className="h-9 w-9 shrink-0 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
 												onClick={handleVoiceToggle}
 												variant="ghost"
-												size="sm"
+												size="icon"
+												title="Start voice conversation"
 											>
-												<AudioLines className="mr-1 h-3.5 w-3.5" />
-												<span className="text-xs">Voice</span>
+												<AudioLines className="h-4 w-4" />
 											</Button>
 										</>
 									)}
