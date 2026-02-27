@@ -25,7 +25,17 @@ import {
 	FOCUS_MODES,
 	type FocusMode,
 } from "@/lib/bot-personalities";
-import { exportConversationToPDF } from "@/lib/conversation-export";
+
+// Lazy-loaded — pulls in jsPDF (~200KB), only needed when user exports
+const exportConversationToPDF = (
+	...args: Parameters<
+		typeof import("@/lib/conversation-export").exportConversationToPDF
+	>
+) =>
+	import("@/lib/conversation-export").then((mod) =>
+		mod.exportConversationToPDF(...args),
+	);
+
 import { ChatSDKError } from "@/lib/errors";
 import type { CanvasType, DBMessage, Vote } from "@/lib/supabase/types";
 import type { Attachment, ChatMessage } from "@/lib/types";
@@ -39,12 +49,40 @@ import {
 import { ChatHeader } from "./chat/chat-header";
 import { ChatViewportLock } from "./chat-viewport-lock";
 import { useDataStream } from "./data-stream-provider";
-import { ExecutiveLanding } from "./executive-landing";
-import { FocusModeChips } from "./focus-mode-chips";
+
+const ExecutiveLanding = dynamic(
+	() =>
+		import("./executive-landing").then((mod) => ({
+			default: mod.ExecutiveLanding,
+		})),
+	{ ssr: false, loading: () => null },
+);
+const FocusModeChips = dynamic(
+	() =>
+		import("./focus-mode-chips").then((mod) => ({
+			default: mod.FocusModeChips,
+		})),
+	{ ssr: false, loading: () => null },
+);
+
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
-import { OnboardingModal } from "./onboarding-modal";
-import { ReactionItemsPopup } from "./reaction-items-popup";
+
+const OnboardingModal = dynamic(
+	() =>
+		import("./onboarding-modal").then((mod) => ({
+			default: mod.OnboardingModal,
+		})),
+	{ ssr: false, loading: () => null },
+);
+const ReactionItemsPopup = dynamic(
+	() =>
+		import("./reaction-items-popup").then((mod) => ({
+			default: mod.ReactionItemsPopup,
+		})),
+	{ ssr: false, loading: () => null },
+);
+
 import { getChatHistoryPaginationKey } from "./sidebar-history";
 import { toast } from "./toast";
 import { useSidebar } from "./ui/sidebar";

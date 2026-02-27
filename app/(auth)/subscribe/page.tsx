@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ChevronRight, Loader2, Shield } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -257,13 +256,9 @@ function SubscribeContent() {
 	if (checkingSubscription) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-stone-50">
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					className="flex flex-col items-center gap-4"
-				>
+				<div className="animate-fade-in flex flex-col items-center gap-4">
 					<div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
-				</motion.div>
+				</div>
 			</div>
 		);
 	}
@@ -279,11 +274,7 @@ function SubscribeContent() {
 
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-stone-50">
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					className="flex flex-col items-center gap-4 text-center px-6"
-				>
+				<div className="animate-fade-in flex flex-col items-center gap-4 text-center px-6">
 					<div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
 						<Shield className="h-8 w-8 text-amber-600" />
 					</div>
@@ -312,7 +303,7 @@ function SubscribeContent() {
 							contact support
 						</Link>
 					</p>
-				</motion.div>
+				</div>
 			</div>
 		);
 	}
@@ -352,11 +343,7 @@ function SubscribeContent() {
 
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-stone-50">
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					className="flex flex-col items-center gap-4 text-center px-6"
-				>
+				<div className="animate-fade-in flex flex-col items-center gap-4 text-center px-6">
 					{retryLoading ? (
 						<>
 							<div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
@@ -403,7 +390,7 @@ function SubscribeContent() {
 							</p>
 						</>
 					)}
-				</motion.div>
+				</div>
 			</div>
 		);
 	}
@@ -424,12 +411,7 @@ function SubscribeContent() {
 
 			<div className="relative z-10 mx-auto max-w-lg px-6 py-16 sm:py-24">
 				{/* Logo */}
-				<motion.div
-					initial={{ opacity: 0, y: -10 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5 }}
-					className="mb-12 flex justify-center"
-				>
+				<div className="animate-fade-slide-down mb-12 flex justify-center">
 					<Image
 						src={ALECCI_LOGO_URL}
 						alt="Alecci Media"
@@ -438,15 +420,10 @@ function SubscribeContent() {
 						className="h-9 w-auto object-contain"
 						priority
 					/>
-				</motion.div>
+				</div>
 
 				{/* Main card */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5, delay: 0.1 }}
-					className="relative"
-				>
+				<div className="animate-fade-slide-up relative [animation-delay:100ms]">
 					<div className="rounded-2xl border border-stone-200/60 bg-white shadow-xl shadow-stone-200/20">
 						{/* Top accent */}
 						<div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-stone-900/20 to-transparent" />
@@ -454,35 +431,20 @@ function SubscribeContent() {
 						<div className="p-8 sm:p-10">
 							{/* Header */}
 							<div className="mb-8 text-center">
-								<motion.h1
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									transition={{ delay: 0.2 }}
-									className="text-2xl font-light text-stone-900 tracking-tight sm:text-3xl"
-								>
+								<h1 className="animate-fade-in text-2xl font-light text-stone-900 tracking-tight sm:text-3xl [animation-delay:200ms]">
 									{reason === "expired"
 										? "Renew Your Access"
 										: "Start Your Journey"}
-								</motion.h1>
-								<motion.p
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									transition={{ delay: 0.25 }}
-									className="mt-2 text-stone-500"
-								>
+								</h1>
+								<p className="animate-fade-in mt-2 text-stone-500 [animation-delay:250ms]">
 									{reason === "expired"
 										? "Continue where you left off"
 										: "14-day free trial, then subscribe"}
-								</motion.p>
+								</p>
 							</div>
 
 							{/* Plan selector */}
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: 0.3 }}
-								className="mb-8"
-							>
+							<div className="animate-fade-in mb-8 [animation-delay:300ms]">
 								<div className="rounded-xl border border-stone-100 bg-stone-50/50 p-5">
 									<div className="flex items-center justify-between">
 										<div>
@@ -519,15 +481,10 @@ function SubscribeContent() {
 										<ChevronRight className="h-3.5 w-3.5" />
 									</button>
 								</div>
-							</motion.div>
+							</div>
 
 							{/* Form */}
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: 0.35 }}
-								className="space-y-5"
-							>
+							<div className="animate-fade-in space-y-5 [animation-delay:350ms]">
 								<div>
 									<Label
 										htmlFor="name"
@@ -565,15 +522,10 @@ function SubscribeContent() {
 										</SelectContent>
 									</Select>
 								</div>
-							</motion.div>
+							</div>
 
 							{/* Trial notice */}
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: 0.4 }}
-								className="mt-6 rounded-lg border border-stone-100 bg-stone-50/50 p-4"
-							>
+							<div className="animate-fade-in mt-6 rounded-lg border border-stone-100 bg-stone-50/50 p-4 [animation-delay:400ms]">
 								<p className="text-center text-sm text-stone-600">
 									<span className="font-medium text-stone-900">
 										14 days free
@@ -583,15 +535,10 @@ function SubscribeContent() {
 									{" \u00b7 "}
 									Secure checkout
 								</p>
-							</motion.div>
+							</div>
 
 							{/* CTA */}
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: 0.45 }}
-								className="mt-6"
-							>
+							<div className="animate-fade-in mt-6 [animation-delay:450ms]">
 								<Button
 									size="lg"
 									className={cn(
@@ -610,27 +557,17 @@ function SubscribeContent() {
 										"Continue to payment"
 									)}
 								</Button>
-							</motion.div>
+							</div>
 
-							<motion.p
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ delay: 0.5 }}
-								className="mt-4 text-center text-xs text-stone-400"
-							>
+							<p className="animate-fade-in mt-4 text-center text-xs text-stone-400 [animation-delay:500ms]">
 								Your card will be saved securely for when your trial ends
-							</motion.p>
+							</p>
 						</div>
 					</div>
-				</motion.div>
+				</div>
 
 				{/* Footer */}
-				<motion.p
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ delay: 0.6 }}
-					className="mt-8 text-center text-sm text-stone-400"
-				>
+				<p className="animate-fade-in mt-8 text-center text-sm text-stone-400 [animation-delay:600ms]">
 					Questions?{" "}
 					<Link
 						href="/contact"
@@ -638,7 +575,7 @@ function SubscribeContent() {
 					>
 						Contact us
 					</Link>
-				</motion.p>
+				</p>
 			</div>
 		</div>
 	);

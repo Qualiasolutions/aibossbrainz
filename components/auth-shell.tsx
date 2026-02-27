@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Globe, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,12 +38,7 @@ function AuthHeader() {
 	return (
 		<header className="absolute top-0 left-0 right-0 z-50">
 			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-				<motion.nav
-					initial={{ y: -20, opacity: 0 }}
-					animate={{ y: 0, opacity: 1 }}
-					transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-					className="mt-4 flex items-center justify-between rounded-2xl border border-stone-200/50 bg-white/80 px-4 py-3 shadow-lg backdrop-blur-xl sm:px-6"
-				>
+				<nav className="animate-fade-slide-down mt-4 flex items-center justify-between rounded-2xl border border-stone-200/50 bg-white/80 px-4 py-3 shadow-lg backdrop-blur-xl sm:px-6">
 					<Link href="/" className="group flex items-center">
 						<Image
 							src={ALECCI_LOGO_URL}
@@ -74,10 +68,7 @@ function AuthHeader() {
 									{link.label}
 								</span>
 								{pathname === link.href && (
-									<motion.div
-										layoutId="auth-nav-indicator"
-										className="absolute inset-x-2 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600"
-									/>
+									<span className="absolute inset-x-2 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600" />
 								)}
 								{pathname !== link.href && (
 									<span className="absolute inset-x-2 -bottom-0.5 h-0.5 rounded-full bg-stone-300 scale-x-0 group-hover:scale-x-100 transition-transform" />
@@ -98,15 +89,10 @@ function AuthHeader() {
 							<Menu className="size-5" />
 						)}
 					</button>
-				</motion.nav>
+				</nav>
 
 				{mobileMenuOpen && (
-					<motion.div
-						initial={{ opacity: 0, y: -10, height: 0 }}
-						animate={{ opacity: 1, y: 0, height: "auto" }}
-						exit={{ opacity: 0, y: -10, height: 0 }}
-						className="mt-2 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-2xl md:hidden"
-					>
+					<div className="animate-fade-slide-down mt-2 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-2xl md:hidden">
 						<div className="flex flex-col p-2">
 							{navLinks.map((link) => (
 								<Link
@@ -124,7 +110,7 @@ function AuthHeader() {
 								</Link>
 							))}
 						</div>
-					</motion.div>
+					</div>
 				)}
 			</div>
 		</header>
@@ -240,21 +226,12 @@ export function AuthShell({
 			</div>
 
 			<div className="flex flex-1 items-center justify-center">
-				<motion.div
-					animate={{ opacity: 1, y: 0 }}
-					className="relative z-10 grid w-full max-w-6xl items-center gap-16 px-6 pt-24 pb-12 sm:px-8 lg:grid-cols-[1fr_420px] lg:gap-20 lg:px-12"
-					initial={{ opacity: 0, y: 16 }}
-					transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-				>
+				<div className="animate-fade-slide-up relative z-10 grid w-full max-w-6xl items-center gap-16 px-6 pt-24 pb-12 sm:px-8 lg:grid-cols-[1fr_420px] lg:gap-20 lg:px-12">
 					{/* Left side - Brand & highlights */}
 					<div className="space-y-12">
 						{/* Logo */}
 						{showLogo && (
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ duration: 0.5 }}
-							>
+							<div className="animate-fade-in">
 								<Image
 									src={ALECCI_LOGO_URL}
 									alt="Alecci Media"
@@ -263,65 +240,29 @@ export function AuthShell({
 									className="h-10 w-auto object-contain"
 									priority
 								/>
-							</motion.div>
+							</div>
 						)}
 
 						{/* Title & description */}
 						<div className="space-y-5">
-							<motion.h1
-								animate={{ opacity: 1, y: 0 }}
-								className="font-light text-4xl text-stone-900 leading-[1.15] tracking-tight sm:text-5xl"
-								initial={{ opacity: 0, y: 12 }}
-								transition={{
-									duration: 0.5,
-									delay: 0.1,
-									ease: [0.22, 1, 0.36, 1],
-								}}
-							>
+							<h1 className="animate-fade-in font-light text-4xl text-stone-900 leading-[1.15] tracking-tight sm:text-5xl [animation-delay:100ms]">
 								{title}
-							</motion.h1>
+							</h1>
 
-							<motion.p
-								animate={{ opacity: 1, y: 0 }}
-								className="max-w-lg text-lg text-stone-500 leading-relaxed"
-								initial={{ opacity: 0, y: 10 }}
-								transition={{
-									duration: 0.5,
-									delay: 0.15,
-									ease: [0.22, 1, 0.36, 1],
-								}}
-							>
+							<p className="animate-fade-in max-w-lg text-lg text-stone-500 leading-relaxed [animation-delay:150ms]">
 								{description}
-							</motion.p>
+							</p>
 						</div>
 
 						{/* Highlights - minimal, refined */}
 						{highlights.length > 0 && (
-							<motion.div
-								className="space-y-4"
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ duration: 0.5, delay: 0.25 }}
-							>
+							<div className="animate-fade-in space-y-4 [animation-delay:250ms]">
 								{highlights.map(
-									(
-										{
-											title: highlightTitle,
-											description: highlightDescription,
-										},
-										index,
-									) => (
-										<motion.div
-											key={highlightTitle}
-											className="group"
-											initial={{ opacity: 0, x: -12 }}
-											animate={{ opacity: 1, x: 0 }}
-											transition={{
-												duration: 0.4,
-												delay: 0.3 + index * 0.08,
-												ease: [0.22, 1, 0.36, 1],
-											}}
-										>
+									({
+										title: highlightTitle,
+										description: highlightDescription,
+									}) => (
+										<div key={highlightTitle} className="group">
 											<div className="flex items-start gap-4">
 												<div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-stone-300 transition-colors duration-300 group-hover:bg-stone-900" />
 												<div className="space-y-1">
@@ -333,24 +274,15 @@ export function AuthShell({
 													</p>
 												</div>
 											</div>
-										</motion.div>
+										</div>
 									),
 								)}
-							</motion.div>
+							</div>
 						)}
 					</div>
 
 					{/* Right side - Form card */}
-					<motion.div
-						animate={{ opacity: 1, y: 0 }}
-						className="relative"
-						initial={{ opacity: 0, y: 20 }}
-						transition={{
-							duration: 0.5,
-							delay: 0.2,
-							ease: [0.22, 1, 0.36, 1],
-						}}
-					>
+					<div className="animate-fade-slide-up relative [animation-delay:200ms]">
 						{/* Premium card with subtle border */}
 						<div className="relative rounded-2xl border border-stone-200/60 bg-white p-8 shadow-xl shadow-stone-200/20">
 							{/* Top accent line */}
@@ -359,8 +291,8 @@ export function AuthShell({
 							{/* Content */}
 							<div className="flex flex-col gap-6">{children}</div>
 						</div>
-					</motion.div>
-				</motion.div>
+					</div>
+				</div>
 			</div>
 
 			<AuthFooter />

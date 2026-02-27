@@ -4,7 +4,7 @@ import type { UseChatHelpers } from "@ai-sdk/react";
 import { Trigger } from "@radix-ui/react-select";
 import type { UIMessage } from "ai";
 import equal from "fast-deep-equal";
-import { motion } from "framer-motion";
+
 import {
 	type ChangeEvent,
 	type Dispatch,
@@ -541,14 +541,14 @@ function PureModelSelectorCompact({
 				<span className="hidden font-semibold text-[10px] text-foreground sm:inline sm:text-xs lg:text-sm">
 					{isMobile ? selectedModel?.name.split(" ")[0] : selectedModel?.name}
 				</span>
-				<motion.div
-					animate={{ rotate: isOpen ? 180 : 0 }}
-					transition={{ duration: 0.2 }}
+				<div
+					className="transition-transform duration-200"
+					style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
 				>
 					<div className="text-muted-foreground">
 						<ChevronDownIcon size={12} />
 					</div>
-				</motion.div>
+				</div>
 			</Trigger>
 			<PromptInputModelSelectContent className="min-w-[280px] max-w-[90vw] overflow-hidden rounded-2xl border border-white/10 bg-black/90 p-0 shadow-2xl shadow-black/50 backdrop-blur-xl">
 				<div className="p-2">

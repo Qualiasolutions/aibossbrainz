@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,39 +47,16 @@ export function VoiceInputButton({
 					type="button"
 					variant="ghost"
 				>
-					<AnimatePresence mode="wait">
+					<div className="transition-transform duration-200">
 						{isRecording ? (
-							<motion.div
-								animate={{ scale: 1, rotate: 0 }}
-								exit={{ scale: 0, rotate: 180 }}
-								initial={{ scale: 0, rotate: -180 }}
-								key="recording"
-								transition={{ type: "spring", stiffness: 200, damping: 15 }}
-							>
-								<MicOff className="h-3 w-3" />
-							</motion.div>
+							<MicOff className="h-3 w-3" />
 						) : (
-							<motion.div
-								animate={{ scale: 1 }}
-								exit={{ scale: 0 }}
-								initial={{ scale: 0 }}
-								key="idle"
-								whileHover={{ scale: 1.1 }}
-								whileTap={{ scale: 0.9 }}
-							>
-								<Mic className="h-3 w-3" />
-							</motion.div>
+							<Mic className="h-3 w-3" />
 						)}
-					</AnimatePresence>
+					</div>
 
 					{isRecording && (
-						<motion.div
-							animate={{ scale: 2 }}
-							className="absolute inset-0 rounded-full bg-gradient-to-br from-rose-500/40 via-rose-500/20 to-red-500/20 opacity-50"
-							exit={{ scale: 0 }}
-							initial={{ scale: 0 }}
-							transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
-						/>
+						<div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-br from-rose-500/40 via-rose-500/20 to-red-500/20 opacity-50" />
 					)}
 				</Button>
 			</TooltipTrigger>

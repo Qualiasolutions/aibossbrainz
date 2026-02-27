@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { AudioLines, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -68,56 +67,20 @@ export function VoiceModeButton({
 					type="button"
 					variant="ghost"
 				>
-					<AnimatePresence mode="wait">
+					<div className="transition-transform duration-200">
 						{isVoiceMode && isProcessing ? (
-							<motion.div
-								animate={{ scale: 1 }}
-								exit={{ scale: 0 }}
-								initial={{ scale: 0 }}
-								key="processing"
-							>
-								<Loader2 className="h-4 w-4 animate-spin" />
-							</motion.div>
+							<Loader2 className="h-4 w-4 animate-spin" />
 						) : isVoiceMode && isListening ? (
-							<motion.div
-								animate={{ scale: 1, rotate: 0 }}
-								exit={{ scale: 0, rotate: 180 }}
-								initial={{ scale: 0, rotate: -180 }}
-								key="listening"
-								transition={{ type: "spring", stiffness: 200, damping: 15 }}
-							>
-								<AudioLines className="h-4 w-4" />
-							</motion.div>
+							<AudioLines className="h-4 w-4" />
 						) : isVoiceMode ? (
-							<motion.div
-								animate={{ scale: [1, 1.1, 1] }}
-								key="waiting"
-								transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-							>
-								<AudioLines className="h-4 w-4 text-purple-500" />
-							</motion.div>
+							<AudioLines className="h-4 w-4 animate-pulse text-purple-500" />
 						) : (
-							<motion.div
-								animate={{ scale: 1 }}
-								exit={{ scale: 0 }}
-								initial={{ scale: 0 }}
-								key="idle"
-								whileHover={{ scale: 1.1 }}
-								whileTap={{ scale: 0.9 }}
-							>
-								<AudioLines className="h-4 w-4" />
-							</motion.div>
+							<AudioLines className="h-4 w-4" />
 						)}
-					</AnimatePresence>
+					</div>
 
 					{isVoiceMode && isListening && (
-						<motion.div
-							animate={{ scale: 2 }}
-							className="absolute inset-0 rounded-lg bg-gradient-to-br from-rose-500/40 via-rose-500/20 to-red-500/20 opacity-50"
-							exit={{ scale: 0 }}
-							initial={{ scale: 0 }}
-							transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
-						/>
+						<div className="absolute inset-0 animate-pulse rounded-lg bg-gradient-to-br from-rose-500/40 via-rose-500/20 to-red-500/20 opacity-50" />
 					)}
 				</Button>
 			</TooltipTrigger>
