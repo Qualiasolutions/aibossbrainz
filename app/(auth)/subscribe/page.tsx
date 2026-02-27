@@ -38,37 +38,25 @@ const WelcomeStep = dynamic(() => import("./components/welcome-step"), {
 const ALECCI_LOGO_URL = "/images/alecci-media-logo.webp";
 
 const planDetails = {
-	free: {
-		name: "Free",
-		price: "£0",
-		period: "forever",
-		description: "Purpose: acquisition funnel",
-	},
-	starter: {
-		name: "Starter",
-		price: "£89",
+	monthly: {
+		name: "Monthly",
+		price: "$297",
 		period: "/month",
-		description: "Best for founders / solo SDRs",
+		description: "Full access, cancel anytime",
 	},
-	growth: {
-		name: "Growth",
-		price: "£179",
-		period: "/month",
-		description: "Best for small sales teams",
-		badge: "Most Popular",
+	annual: {
+		name: "Annual",
+		price: "$2,500",
+		period: "/year",
+		description: "Save over $1,000 annually",
+		badge: "Best Value",
 	},
-	pro: {
-		name: "Pro",
-		price: "£349",
-		period: "/month",
-		description: "Serious outbound teams",
-	},
-	enterprise: {
-		name: "Enterprise",
-		price: "From £799",
-		period: "/month",
-		description: "Revenue teams / agencies",
-		badge: "Custom",
+	lifetime: {
+		name: "Lifetime",
+		price: "$3,500",
+		period: "one-time",
+		description: "Forever access, limited seats",
+		badge: "Exclusive",
 	},
 };
 
@@ -424,8 +412,8 @@ function SubscribeContent() {
 		return <WelcomeStep onContinue={() => setShowWelcome(false)} />;
 	}
 
-	const activePlan = selectedPlan || planDetails.free;
-	const activePlanId = plan || "free";
+	const activePlan = selectedPlan || planDetails.monthly;
+	const activePlanId = plan || "monthly";
 
 	return (
 		<div className="relative min-h-screen bg-stone-50">

@@ -9,7 +9,7 @@ import {
 	Gift,
 	Loader2,
 	MessageSquare,
-	type Phone,
+	Phone,
 	Sparkles,
 	Star,
 	Target,
@@ -43,93 +43,96 @@ interface PricingPlan {
 
 const pricingPlans: PricingPlan[] = [
 	{
-		id: "free",
-		name: "Free",
-		price: 0,
-		period: "Forever",
-		description: "Purpose: acquisition funnel",
-		popular: false,
-		features: [
-			{ text: "50 Signals / month", icon: Zap },
-			{ text: "50 Credits / month", icon: Gift },
-			{ text: "Basic filters", icon: Check },
-			{ text: "No API, No export", icon: Check },
-		],
-		cta: "Start for Free",
-		ctaLink: "/signup?plan=free",
-	},
-	{
-		id: "starter",
-		name: "Starter",
-		price: 89,
+		id: "monthly",
+		name: "Most Flexible",
+		price: 297,
 		period: "Monthly",
-		description: "Best for founders / solo SDRs",
+		description: "",
 		popular: false,
 		features: [
-			{ text: "500 Signals / month", icon: Zap },
-			{ text: "1,000 Credits / month", icon: Gift },
-			{ text: "Slack alerts", icon: MessageSquare },
-			{ text: "CSV export & Basic CRM push", icon: Check },
+			{
+				text: "Sales and Marketing Message Makeover",
+				icon: MessageSquare,
+			},
+			{
+				text: "Prompt Guide",
+				icon: Zap,
+			},
+			{
+				text: "24/7 Access",
+				icon: Clock,
+			},
+			{
+				text: "Cancel Anytime",
+				icon: Check,
+			},
 		],
 		cta: "Start 14-Day Free Trial",
-		ctaLink: "/signup?plan=starter",
+		ctaLink: "/signup?plan=monthly",
 	},
 	{
-		id: "growth",
-		name: "Growth",
-		price: 179,
-		period: "Monthly",
-		description: "Best for small sales teams (1 seat)",
+		id: "annual",
+		name: "Best Value",
+		price: 2500,
+		period: "Annual",
+		description: "Annual Membership",
 		popular: true,
-		savings: "MOST POPULAR",
+		savings: "SAVE $1,000 + EXCLUSIVE BONUSES",
 		features: [
-			{ text: "1,500 Signals / month", icon: Zap, highlight: true },
-			{ text: "3,000 Credits / month", icon: Gift, highlight: true },
 			{
-				text: "Advanced filtering & CRM integrations",
+				text: "Everything in Monthly Subscription",
+				icon: Check,
+			},
+			{
+				text: "The Sales & Marketing Checkup",
 				icon: Target,
 				highlight: true,
 			},
 			{
-				text: "Lead scoring & Shared workspace (up to 2)",
-				icon: Users,
+				text: "Access to Our Resource Library",
+				icon: Gift,
+				highlight: true,
+			},
+			{
+				text: "Monthly Group Sales & Marketing Strategy Call",
+				icon: Phone,
 				highlight: true,
 			},
 		],
 		cta: "Start 14-Day Free Trial",
-		ctaLink: "/signup?plan=growth",
+		ctaLink: "/signup?plan=annual",
 	},
 	{
-		id: "pro",
-		name: "Pro",
-		price: 349,
-		period: "Monthly",
-		description: "Serious outbound teams (3 seats included)",
+		id: "lifetime",
+		name: "Exclusive Lifetime",
+		price: 3500,
+		period: "One-Time",
+		description: "Limited to 10 Seats Only",
 		popular: false,
+		savings: "ONE PAYMENT. NO SURPRISES. EVER.",
 		features: [
-			{ text: "5,000 Signals / month", icon: Zap },
-			{ text: "8,000 Credits / month", icon: Gift },
-			{ text: "Team routing rules & API access", icon: Target },
-			{ text: "Webhook automations & Intent-based filtering", icon: Sparkles },
+			{
+				text: "Everything in Monthly Membership",
+				icon: Check,
+			},
+			{
+				text: "Private Quarterly Coaching Calls",
+				icon: Users,
+				highlight: true,
+			},
+			{
+				text: "Lifetime Sales + Marketing Support",
+				icon: Star,
+				highlight: true,
+			},
+			{
+				text: "Fresh insights & real-time pivots every 90 days",
+				icon: Sparkles,
+				highlight: true,
+			},
 		],
-		cta: "Start 14-Day Free Trial",
-		ctaLink: "/signup?plan=pro",
-	},
-	{
-		id: "enterprise",
-		name: "Enterprise",
-		price: 799,
-		period: "Monthly",
-		description: "Revenue teams / agencies (5+ seats)",
-		popular: false,
-		features: [
-			{ text: "15,000+ Signals & 20,000+ Credits", icon: Zap },
-			{ text: "Custom signal scoring & Dedicated Slack", icon: Star },
-			{ text: "SSO, DPA + compliance support", icon: Check },
-			{ text: "Dedicated success manager", icon: Users },
-		],
-		cta: "Contact Sales",
-		ctaLink: "/contact?plan=enterprise",
+		cta: "Claim Your Seat",
+		ctaLink: "/signup?plan=lifetime",
 	},
 ];
 
@@ -203,7 +206,7 @@ function PricingCard({
 				<div className="mt-6">
 					<div className="flex items-baseline gap-2">
 						<span className="font-bold text-5xl tracking-tight text-stone-900">
-							£{plan.price.toLocaleString()}
+							${plan.price.toLocaleString()}
 						</span>
 						<span className="text-lg text-stone-500">{plan.period}</span>
 					</div>
@@ -297,24 +300,29 @@ function FAQSection() {
 
 	const faqs = [
 		{
-			question: "What's the difference between Signals and Credits?",
-			answer:
-				"Signals are intent-based triggers (like job changes, funding, tech stack changes) used for tracking companies. Credits are used for lead unlocking (1 Credit = 1 Verified Email, 10 Credits = 1 Direct Phone).",
-		},
-		{
-			question: "Can I buy more credits if I run out?",
-			answer:
-				"Yes, you can purchase Credit Top-Ups without upgrading your subscription. Top-ups are available starting at £39 for 1,000 Credits.",
-		},
-		{
-			question: "Do signals and credits roll over?",
-			answer:
-				"Your Signals and Credits allowance resets at the beginning of each billing cycle according to your plan.",
-		},
-		{
 			question: "Can I cancel my subscription?",
 			answer:
 				"Your subscription is yours to control, upgrade, downgrade, or cancel whenever you want. No penalties, no hassle.",
+		},
+		{
+			question: "What is 24/7 Access?",
+			answer:
+				"You get unlimited access to our AI executive platform anytime, anywhere. Chat with Alexandria (CMO) or Kim (CSO) whenever you need strategic guidance - day or night. Don't forget, you can hear their voices too!",
+		},
+		{
+			question: "What's the Sales & Marketing Checkup?",
+			answer:
+				"A comprehensive audit of your current sales and marketing operations. We analyze your pipeline, messaging, campaigns, and provide a prioritized action plan.",
+		},
+		{
+			question: "Why choose the Annual plan?",
+			answer:
+				"The Annual plan saves you $1,000 compared to monthly AND includes exclusive bonuses: Monthly Group Strategy Calls ($6,000 value), Resource Library access ($1,000+ value), and the Sales & Marketing Checkup ($97 value).",
+		},
+		{
+			question: "What's included in Lifetime Access?",
+			answer:
+				"Limited to just 10 seats, Lifetime Access includes everything in the monthly membership PLUS Private Quarterly Coaching Calls with founders Alexandria and Kim, and Lifetime Sales + Marketing Support. One payment. No BS. No surprises. Ever.",
 		},
 	];
 
@@ -491,15 +499,15 @@ export function PricingPageClient() {
 							Simple, Transparent Pricing
 						</span>
 						<h1 className="mt-8 font-bold text-4xl tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
-							Signal Intelligence &{" "}
+							Invest in Your{" "}
 							<span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-								Lead Unlocking
+								Business Growth
 							</span>
 						</h1>
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-stone-600">
-							Scale your outbound with high-margin recurring signal intelligence
-							and usage-based lead unlocking. Everything you need to grow your
-							pipeline.
+							Get executive-level marketing and sales strategy at a fraction of
+							traditional consulting costs. Choose the plan that works best for
+							you.
 						</p>
 					</motion.div>
 				</div>
