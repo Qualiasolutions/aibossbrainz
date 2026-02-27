@@ -25,14 +25,14 @@ const EXTENSION_MAP: Record<DocumentKind, string> = {
 	text: ".txt",
 	code: ".js",
 	image: ".txt",
-	sheet: ".csv",
+	sheet: ".txt",
 };
 
 const MIME_MAP: Record<DocumentKind, string> = {
 	text: "text/plain",
 	code: "text/javascript",
 	image: "text/plain",
-	sheet: "text/csv",
+	sheet: "text/plain",
 };
 
 export function ReportActions({ title, content, kind }: ReportActionsProps) {
