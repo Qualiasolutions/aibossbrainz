@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	ArrowUpDown,
 	Calendar,
 	Clock,
 	CreditCard,
@@ -111,6 +112,9 @@ export function UsersTable({
 	);
 	const [selectedSubscription, setSelectedSubscription] =
 		useState<SubscriptionType>("trial");
+	const [sortBy, setSortBy] = useState<
+		"newest" | "oldest" | "name" | "activity"
+	>("newest");
 	const [newUser, setNewUser] = useState({
 		email: "",
 		displayName: "",
@@ -118,12 +122,35 @@ export function UsersTable({
 		subscriptionType: "trial" as SubscriptionType,
 	});
 
-	const filteredUsers = users.filter(
-		(user) =>
-			user.email.toLowerCase().includes(search.toLowerCase()) ||
-			user.displayName?.toLowerCase().includes(search.toLowerCase()) ||
-			user.companyName?.toLowerCase().includes(search.toLowerCase()),
-	);
+	const filteredUsers = users
+		.filter(
+			(user) =>
+				user.email.toLowerCase().includes(search.toLowerCase()) ||
+				user.displayName?.toLowerCase().includes(search.toLowerCase()) ||
+				user.companyName?.toLowerCase().includes(search.toLowerCase()),
+		)
+		.sort((a, b) => {
+			switch (sortBy) {
+				case "newest":
+					return (
+						new Date(b.subscriptionStartDate || 0).getTime() -
+						new Date(a.subscriptionStartDate || 0).getTime()
+					);
+				case "oldest":
+					return (
+						new Date(a.subscriptionStartDate || 0).getTime() -
+						new Date(b.subscriptionStartDate || 0).getTime()
+					);
+				case "name":
+					return (a.displayName || a.email).localeCompare(
+						b.displayName || b.email,
+					);
+				case "activity":
+					return b.messageCount - a.messageCount;
+				default:
+					return 0;
+			}
+		});
 
 	const handleDelete = () => {
 		if (!deleteUserId) return;
@@ -168,16 +195,35 @@ export function UsersTable({
 
 	return (
 		<div className="space-y-4">
-			{/* Search and Actions */}
+			{/* Search, Sort, and Actions */}
 			<div className="flex items-center justify-between gap-4">
-				<div className="relative flex-1 max-w-sm">
-					<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-					<Input
-						placeholder="Search users..."
-						value={search}
-						onChange={(e) => setSearch(e.target.value)}
-						className="pl-9"
-					/>
+				<div className="flex items-center gap-3 flex-1">
+					<div className="relative flex-1 max-w-sm">
+						<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+						<Input
+							placeholder="Search users..."
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+							className="pl-9"
+						/>
+					</div>
+					<Select
+						value={sortBy}
+						onValueChange={(v) =>
+							setSortBy(v as "newest" | "oldest" | "name" | "activity")
+						}
+					>
+						<SelectTrigger className="w-[160px]">
+							<ArrowUpDown className="h-3.5 w-3.5 mr-1.5 text-neutral-500" />
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="newest">Newest first</SelectItem>
+							<SelectItem value="oldest">Oldest first</SelectItem>
+							<SelectItem value="name">Name A-Z</SelectItem>
+							<SelectItem value="activity">Most active</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
 				<Button
 					onClick={() => setShowCreateDialog(true)}
