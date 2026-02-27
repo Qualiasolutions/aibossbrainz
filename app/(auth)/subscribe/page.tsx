@@ -20,16 +20,13 @@ import {
 } from "@/components/ui/select";
 import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
 
-const PaymentSuccess = dynamic(
-	() => import("./components/payment-success"),
-	{
-		loading: () => (
-			<div className="flex min-h-screen items-center justify-center bg-stone-50">
-				<div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
-			</div>
-		),
-	},
-);
+const PaymentSuccess = dynamic(() => import("./components/payment-success"), {
+	loading: () => (
+		<div className="flex min-h-screen items-center justify-center bg-stone-50">
+			<div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
+		</div>
+	),
+});
 const WelcomeStep = dynamic(() => import("./components/welcome-step"), {
 	loading: () => (
 		<div className="flex min-h-screen items-center justify-center bg-stone-50">

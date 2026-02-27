@@ -271,22 +271,13 @@ export async function deleteUserByAdmin(userId: string) {
 			.from("ConversationSummary")
 			.update({ deletedAt })
 			.eq("userId", userId),
-		supabase
-			.from("StrategyCanvas")
-			.update({ deletedAt })
-			.eq("userId", userId),
+		supabase.from("StrategyCanvas").update({ deletedAt }).eq("userId", userId),
 	];
 
 	if (chatIds.length > 0) {
 		deleteOps.push(
-			supabase
-				.from("Message_v2")
-				.update({ deletedAt })
-				.in("chatId", chatIds),
-			supabase
-				.from("Vote_v2")
-				.update({ deletedAt })
-				.in("chatId", chatIds),
+			supabase.from("Message_v2").update({ deletedAt }).in("chatId", chatIds),
+			supabase.from("Vote_v2").update({ deletedAt }).in("chatId", chatIds),
 			supabase.from("Stream").update({ deletedAt }).in("chatId", chatIds),
 			supabase.from("Chat").update({ deletedAt }).in("id", chatIds),
 		);

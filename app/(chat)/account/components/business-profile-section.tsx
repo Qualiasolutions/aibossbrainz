@@ -182,10 +182,7 @@ export default function BusinessProfileSection({
 						<Label className="text-sm font-medium text-stone-700">
 							Years in Business
 						</Label>
-						<Select
-							value={yearsInBusiness}
-							onValueChange={setYearsInBusiness}
-						>
+						<Select value={yearsInBusiness} onValueChange={setYearsInBusiness}>
 							<SelectTrigger className="mt-1.5">
 								<SelectValue placeholder="Select range" />
 							</SelectTrigger>

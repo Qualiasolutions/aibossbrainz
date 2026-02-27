@@ -10,9 +10,12 @@ export default function ExecutivesPage() {
 	const kim = BOT_PERSONALITIES.kim;
 
 	return (
-		<div className="min-h-screen bg-white">
+		<main
+			className="min-h-screen bg-white dark:bg-slate-950"
+			aria-label="Executive Profiles"
+		>
 			{/* Header */}
-			<header className="border-b border-zinc-200 bg-white">
+			<header className="border-b border-zinc-200 bg-white dark:border-slate-700 dark:bg-slate-900">
 				<div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
 					<div className="flex items-center justify-between">
 						<Link href="/new">
@@ -40,7 +43,7 @@ export default function ExecutivesPage() {
 						<h1 className="bg-gradient-to-r from-rose-600 via-purple-600 to-indigo-600 bg-clip-text font-bold text-4xl text-transparent sm:text-5xl lg:text-6xl">
 							Meet the dream team behind Boss Brainz
 						</h1>
-						<p className="mx-auto mt-4 max-w-2xl text-base text-slate-600 sm:text-lg lg:text-xl">
+						<p className="mx-auto mt-4 max-w-2xl text-base text-slate-600 dark:text-slate-400 sm:text-lg lg:text-xl">
 							40+ years of proven sales and marketing expertise to scale your
 							brand with strategy that sells.
 						</p>
@@ -53,14 +56,18 @@ export default function ExecutivesPage() {
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
 						{/* Alexandria Alecci */}
-						<Card className="overflow-hidden border border-zinc-200 bg-white shadow-lg">
+						<Card
+							className="overflow-hidden border border-zinc-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800"
+							role="article"
+							aria-label="Alexandria Alecci profile"
+						>
 							<CardContent className="p-6 sm:p-8 lg:p-10">
 								<div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
 									<div className="relative mb-6 flex-shrink-0 sm:mr-6 sm:mb-0">
 										<div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-r from-rose-400 to-orange-400 opacity-20 blur-xl" />
 										<Image
 											alt={alexandria.name}
-											className="relative rounded-full border-4 border-white shadow-2xl"
+											className="relative rounded-full border-4 border-white shadow-2xl dark:border-slate-800"
 											height={160}
 											src={alexandria.avatar!}
 											width={160}
@@ -71,13 +78,13 @@ export default function ExecutivesPage() {
 									</div>
 
 									<div className="flex-1">
-										<h2 className="font-bold text-2xl text-slate-900 sm:text-3xl">
+										<h2 className="font-bold text-2xl text-slate-900 dark:text-white sm:text-3xl">
 											{alexandria.name}
 										</h2>
 										<p className="mt-1 font-semibold text-base text-rose-600 sm:text-lg">
 											{alexandria.role}
 										</p>
-										<p className="mt-4 text-slate-600 text-sm leading-relaxed sm:text-base">
+										<p className="mt-4 text-slate-600 dark:text-slate-400 text-sm leading-relaxed sm:text-base">
 											{alexandria.personality}
 										</p>
 									</div>
@@ -85,11 +92,11 @@ export default function ExecutivesPage() {
 
 								{/* Bio Highlights */}
 								<div className="mt-6">
-									<h3 className="mb-3 flex items-center gap-2 font-semibold text-slate-700 text-sm uppercase tracking-wide sm:text-base">
+									<h3 className="mb-3 flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wide sm:text-base">
 										<TrendingUp className="h-4 w-4 text-rose-500 sm:h-5 sm:w-5" />
 										Bio
 									</h3>
-									<ul className="space-y-2 text-slate-600 text-sm">
+									<ul className="space-y-2 text-slate-600 dark:text-slate-400 text-sm">
 										<li className="flex items-start gap-2">
 											<span className="mt-1.5 inline-block size-2 flex-shrink-0 rounded-full bg-rose-500" />
 											Worked with Fortune 500s to startups to grow their
@@ -114,21 +121,24 @@ export default function ExecutivesPage() {
 								</div>
 
 								<div className="mt-6">
-									<h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-700 text-sm uppercase tracking-wide sm:text-base">
+									<h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wide sm:text-base">
 										<Target className="h-4 w-4 text-rose-500 sm:h-5 sm:w-5" />
 										Core Expertise
 									</h3>
-									<div className="grid gap-2 sm:grid-cols-2 sm:gap-3">
+									<ul
+										className="grid list-none gap-2 sm:grid-cols-2 sm:gap-3"
+										aria-label="Core expertise"
+									>
 										{alexandria.expertise.map((item) => (
-											<div
-												className="flex items-start gap-2 rounded-lg bg-rose-50 px-3 py-2 text-left text-slate-700 text-sm shadow-sm"
+											<li
+												className="flex items-start gap-2 rounded-lg bg-rose-50 dark:bg-rose-900/20 px-3 py-2 text-left text-slate-700 dark:text-slate-300 text-sm shadow-sm"
 												key={item}
 											>
 												<span className="mt-1.5 inline-block size-2 flex-shrink-0 rounded-full bg-rose-500" />
 												<span>{item}</span>
-											</div>
+											</li>
 										))}
-									</div>
+									</ul>
 								</div>
 
 								<div className="mt-6">
@@ -143,14 +153,18 @@ export default function ExecutivesPage() {
 						</Card>
 
 						{/* Kim Mylls */}
-						<Card className="overflow-hidden border border-zinc-200 bg-white shadow-lg">
+						<Card
+							className="overflow-hidden border border-zinc-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800"
+							role="article"
+							aria-label="Kim Mylls profile"
+						>
 							<CardContent className="p-6 sm:p-8 lg:p-10">
 								<div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
 									<div className="relative mb-6 flex-shrink-0 sm:mr-6 sm:mb-0">
 										<div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 opacity-20 blur-xl" />
 										<Image
 											alt={kim.name}
-											className="relative rounded-full border-4 border-white shadow-2xl"
+											className="relative rounded-full border-4 border-white shadow-2xl dark:border-slate-800"
 											height={160}
 											src={kim.avatar!}
 											width={160}
@@ -161,13 +175,13 @@ export default function ExecutivesPage() {
 									</div>
 
 									<div className="flex-1">
-										<h2 className="font-bold text-2xl text-slate-900 sm:text-3xl">
+										<h2 className="font-bold text-2xl text-slate-900 dark:text-white sm:text-3xl">
 											{kim.name}
 										</h2>
 										<p className="mt-1 font-semibold text-base text-blue-600 sm:text-lg">
 											{kim.role}
 										</p>
-										<p className="mt-4 text-slate-600 text-sm leading-relaxed sm:text-base">
+										<p className="mt-4 text-slate-600 dark:text-slate-400 text-sm leading-relaxed sm:text-base">
 											{kim.personality}
 										</p>
 									</div>
@@ -175,11 +189,11 @@ export default function ExecutivesPage() {
 
 								{/* Bio Highlights */}
 								<div className="mt-6">
-									<h3 className="mb-3 flex items-center gap-2 font-semibold text-slate-700 text-sm uppercase tracking-wide sm:text-base">
+									<h3 className="mb-3 flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wide sm:text-base">
 										<TrendingUp className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />
 										Bio
 									</h3>
-									<ul className="space-y-2 text-slate-600 text-sm">
+									<ul className="space-y-2 text-slate-600 dark:text-slate-400 text-sm">
 										<li className="flex items-start gap-2">
 											<span className="mt-1.5 inline-block size-2 flex-shrink-0 rounded-full bg-blue-500" />
 											Serial entrepreneur across brick and mortar, non-profits,
@@ -205,21 +219,24 @@ export default function ExecutivesPage() {
 								</div>
 
 								<div className="mt-6">
-									<h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-700 text-sm uppercase tracking-wide sm:text-base">
+									<h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wide sm:text-base">
 										<Target className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />
 										Core Expertise
 									</h3>
-									<div className="grid gap-2 sm:grid-cols-2 sm:gap-3">
+									<ul
+										className="grid list-none gap-2 sm:grid-cols-2 sm:gap-3"
+										aria-label="Core expertise"
+									>
 										{kim.expertise.map((item) => (
-											<div
-												className="flex items-start gap-2 rounded-lg bg-blue-50 px-3 py-2 text-left text-slate-700 text-sm shadow-sm"
+											<li
+												className="flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-left text-slate-700 dark:text-slate-300 text-sm shadow-sm"
 												key={item}
 											>
 												<span className="mt-1.5 inline-block size-2 flex-shrink-0 rounded-full bg-blue-500" />
 												<span>{item}</span>
-											</div>
+											</li>
 										))}
-									</div>
+									</ul>
 								</div>
 
 								<div className="mt-6">
@@ -235,16 +252,20 @@ export default function ExecutivesPage() {
 					</div>
 
 					{/* Collaborative Section */}
-					<Card className="mt-8 overflow-hidden border border-zinc-200 bg-white shadow-lg lg:mt-12">
+					<Card
+						className="mt-8 overflow-hidden border border-zinc-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800 lg:mt-12"
+						role="article"
+						aria-label="Collaborative consulting"
+					>
 						<CardContent className="p-6 text-center sm:p-8 lg:p-10">
 							<div className="mx-auto max-w-3xl">
-								<h2 className="font-bold text-2xl text-slate-900 sm:text-3xl lg:text-4xl">
+								<h2 className="font-bold text-2xl text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
 									Get the Full Perspective{" "}
 									<span className="bg-gradient-to-r from-rose-500 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
 										(aka the Power Combo)
 									</span>
 								</h2>
-								<p className="mt-4 text-slate-600 text-sm leading-relaxed sm:text-base lg:text-lg">
+								<p className="mt-4 text-slate-600 dark:text-slate-400 text-sm leading-relaxed sm:text-base lg:text-lg">
 									Work with Alexandria and Kim at the same time for powerhouse
 									sales and marketing strategy that actually moves the needle.
 									Two expert perspectives, one aligned plan, zero BS.
@@ -262,6 +283,6 @@ export default function ExecutivesPage() {
 					</Card>
 				</div>
 			</section>
-		</div>
+		</main>
 	);
 }

@@ -55,9 +55,7 @@ export default function ProfileSection({
 				</div>
 				<div>
 					<h2 className="text-lg font-semibold text-stone-900">Profile</h2>
-					<p className="text-sm text-stone-500">
-						Your personal information
-					</p>
+					<p className="text-sm text-stone-500">Your personal information</p>
 				</div>
 			</div>
 

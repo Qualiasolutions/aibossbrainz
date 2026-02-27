@@ -1,7 +1,7 @@
 "use client";
 
-import { Check } from "lucide-react";
 import { motion } from "framer-motion";
+import { Check } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,9 @@ const ALECCI_LOGO_URL = "/images/alecci-media-logo.webp";
 
 export default function PaymentSuccess({
 	redirectPath,
-}: { redirectPath: string }) {
+}: {
+	redirectPath: string;
+}) {
 	const [countdown, setCountdown] = useState(3);
 
 	useEffect(() => {

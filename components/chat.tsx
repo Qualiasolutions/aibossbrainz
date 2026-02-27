@@ -190,7 +190,10 @@ export function Chat({
 			const personality = BOT_PERSONALITIES[newBot];
 			setSelectedBot(newBot);
 			// MED-17: Reset focus mode if incompatible with new executive
-			if (focusMode !== "default" && !FOCUS_MODES[focusMode].applicableTo.includes(newBot)) {
+			if (
+				focusMode !== "default" &&
+				!FOCUS_MODES[focusMode].applicableTo.includes(newBot)
+			) {
 				setFocusMode("default");
 			}
 			toast({

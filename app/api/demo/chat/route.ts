@@ -19,9 +19,9 @@ import {
 	recordCircuitFailure,
 	recordCircuitSuccess,
 } from "@/lib/resilience";
-import { containsAbusePatterns } from "@/lib/security/input-moderation";
 import { containsCanary, getCanaryToken } from "@/lib/safety/canary";
 import { redactPII } from "@/lib/safety/pii-redactor";
+import { containsAbusePatterns } from "@/lib/security/input-moderation";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { generateUUID } from "@/lib/utils";
 import { checkDemoRateLimit } from "./rate-limit";

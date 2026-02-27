@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, ChevronRight, Shield, Sparkles, Users } from "lucide-react";
 import { motion } from "framer-motion";
+import { Check, ChevronRight, Shield, Sparkles, Users } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -15,7 +15,9 @@ const valueProps = [
 
 export default function WelcomeStep({
 	onContinue,
-}: { onContinue: () => void }) {
+}: {
+	onContinue: () => void;
+}) {
 	return (
 		<div className="relative min-h-screen bg-stone-50">
 			<div aria-hidden className="pointer-events-none absolute inset-0">

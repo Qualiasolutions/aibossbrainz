@@ -124,7 +124,12 @@ export const POST = withCsrf(async (request: Request) => {
 		const { message, botType } = parseResult.data;
 
 		// MED-1: Check for abuse patterns before AI processing
-		if (containsAbusePatterns(message, { userId: user.id, route: "/api/realtime" })) {
+		if (
+			containsAbusePatterns(message, {
+				userId: user.id,
+				route: "/api/realtime",
+			})
+		) {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 

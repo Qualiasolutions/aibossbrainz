@@ -216,7 +216,10 @@ async function parseFile(filePath: string, fileName: string): Promise<string> {
 	}
 }
 
-async function readDirectoryContent(dirPath: string, depth = 0): Promise<string> {
+async function readDirectoryContent(
+	dirPath: string,
+	depth = 0,
+): Promise<string> {
 	try {
 		await fs.access(dirPath);
 	} catch {
@@ -393,7 +396,11 @@ export async function getKnowledgeBaseContent(
 				// CRIT-1: Enforce aggregate size limit to prevent context overflow
 				if (content.length > MAX_KB_CONTENT_CHARS) {
 					logger.warn(
-						{ botType, originalLength: content.length, limit: MAX_KB_CONTENT_CHARS },
+						{
+							botType,
+							originalLength: content.length,
+							limit: MAX_KB_CONTENT_CHARS,
+						},
 						"Knowledge base content truncated to aggregate limit",
 					);
 					content = content.slice(0, MAX_KB_CONTENT_CHARS);

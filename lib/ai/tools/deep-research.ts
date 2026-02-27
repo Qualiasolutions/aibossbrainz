@@ -47,7 +47,10 @@ function checkPerUserLimit(userId: string, maxPerDay: number): boolean {
 export function createDeepResearch({
 	userId,
 	userType,
-}: { userId: string; userType: UserType }) {
+}: {
+	userId: string;
+	userType: UserType;
+}) {
 	const maxPerDay =
 		entitlementsByUserType[userType]?.maxDeepResearchPerDay ?? 5;
 
@@ -58,9 +61,7 @@ export function createDeepResearch({
 			topic: z
 				.string()
 				.max(500)
-				.describe(
-					"The overall research topic or question being investigated.",
-				),
+				.describe("The overall research topic or question being investigated."),
 			queries: z
 				.array(
 					z.object({

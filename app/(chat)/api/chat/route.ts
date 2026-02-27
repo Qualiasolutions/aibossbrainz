@@ -64,11 +64,11 @@ import {
 } from "@/lib/resilience";
 import { containsCanary } from "@/lib/safety/canary";
 import { redactPII } from "@/lib/safety/pii-redactor";
+import { containsAbusePatterns } from "@/lib/security/input-moderation";
 import {
 	checkRateLimit,
 	getRateLimitHeaders,
 } from "@/lib/security/rate-limiter";
-import { containsAbusePatterns } from "@/lib/security/input-moderation";
 import { withCsrf } from "@/lib/security/with-csrf";
 import { chatBreadcrumb } from "@/lib/sentry";
 import { createClient } from "@/lib/supabase/server";
@@ -138,7 +138,17 @@ export const POST = withCsrf(async (request: Request) => {
 	try {
 		const json = await request.json();
 		// MED-5: Redact message content before debug logging to prevent PII in logs
-		apiLog.logger().debug({ body: { ...json, message: json?.message ? { ...json.message, parts: "[redacted]" } : undefined } }, "Chat API request received");
+		apiLog.logger().debug(
+			{
+				body: {
+					...json,
+					message: json?.message
+						? { ...json.message, parts: "[redacted]" }
+						: undefined,
+				},
+			},
+			"Chat API request received",
+		);
 		requestBody = postRequestBodySchema.parse(json);
 	} catch (error) {
 		apiLog.error(error, { phase: "validation" });
@@ -282,7 +292,13 @@ export const POST = withCsrf(async (request: Request) => {
 			.join(" ");
 
 		// MED-1: Shared content moderation - reject obvious abuse before AI processing
-		if (containsAbusePatterns(messageText, { chatId: id, userId: user.id, route: "/api/chat" })) {
+		if (
+			containsAbusePatterns(messageText, {
+				chatId: id,
+				userId: user.id,
+				route: "/api/chat",
+			})
+		) {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
 

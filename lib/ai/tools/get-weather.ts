@@ -112,7 +112,8 @@ export const getWeather = tool({
 			// Keep only first 24 hourly entries (today) instead of all 168
 			if (weatherData.hourly?.time) {
 				weatherData.hourly.time = weatherData.hourly.time.slice(0, 24);
-				weatherData.hourly.temperature_2m = weatherData.hourly.temperature_2m.slice(0, 24);
+				weatherData.hourly.temperature_2m =
+					weatherData.hourly.temperature_2m.slice(0, 24);
 			}
 			// Keep only first 2 days of daily data
 			if (weatherData.daily?.time) {

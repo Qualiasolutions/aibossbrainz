@@ -41,9 +41,7 @@ export default function DataPrivacySection({
 					<h2 className="text-lg font-semibold text-stone-900">
 						Data & Privacy
 					</h2>
-					<p className="text-sm text-stone-500">
-						Export or delete your data
-					</p>
+					<p className="text-sm text-stone-500">Export or delete your data</p>
 				</div>
 			</div>
 
@@ -74,9 +72,7 @@ export default function DataPrivacySection({
 				{/* Delete Account */}
 				<div className="flex items-center justify-between rounded-xl border border-red-100 bg-red-50/50 p-4">
 					<div>
-						<p className="font-medium text-stone-900">
-							Delete Your Account
-						</p>
+						<p className="font-medium text-stone-900">Delete Your Account</p>
 						<p className="text-sm text-stone-500">
 							Permanently delete your account and all data
 						</p>
@@ -94,12 +90,10 @@ export default function DataPrivacySection({
 						</AlertDialogTrigger>
 						<AlertDialogContent>
 							<AlertDialogHeader>
-								<AlertDialogTitle>
-									Are you absolutely sure?
-								</AlertDialogTitle>
+								<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
 								<AlertDialogDescription>
-									This action cannot be undone. All your chats, documents,
-									and account data will be permanently deleted.
+									This action cannot be undone. All your chats, documents, and
+									account data will be permanently deleted.
 								</AlertDialogDescription>
 							</AlertDialogHeader>
 							<div className="py-2">

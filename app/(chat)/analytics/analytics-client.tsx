@@ -80,13 +80,13 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-50/80">
+		<div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-50/80 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
 			{/* Header */}
-			<header className="border-stone-200/60 border-b bg-white/95 backdrop-blur-sm">
+			<header className="border-stone-200/60 dark:border-slate-700/60 border-b bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm">
 				<div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
 					<div className="flex items-center gap-4">
 						<Link
-							className="flex items-center gap-2 font-semibold text-stone-800"
+							className="flex items-center gap-2 font-semibold text-stone-800 dark:text-slate-100"
 							href="/new"
 						>
 							<BarChart3 className="size-5 text-rose-500" />
@@ -94,15 +94,19 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 						</Link>
 					</div>
 
-					<div className="flex items-center gap-2">
+					<fieldset
+						className="flex items-center gap-2 border-none p-0 m-0"
+						aria-label="Date range selector"
+					>
 						{[7, 30, 90].map((days) => (
 							<Button
 								key={days}
+								aria-pressed={range === days}
 								className={cn(
 									"h-8 rounded-lg px-3 text-sm",
 									range === days
 										? "bg-rose-500 text-white hover:bg-rose-600"
-										: "bg-stone-100 text-stone-600 hover:bg-stone-200",
+										: "bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600",
 								)}
 								onClick={() => handleRangeChange(days)}
 								variant="ghost"
@@ -110,15 +114,19 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 								{days}d
 							</Button>
 						))}
-					</div>
+					</fieldset>
 				</div>
 			</header>
 
-			<main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+			<main
+				aria-label="Analytics Dashboard"
+				className="mx-auto max-w-7xl px-4 py-8 sm:px-6"
+			>
 				<div className="space-y-8">
 					{/* Summary Cards */}
 					<div className="grid gap-4 sm:grid-cols-2">
 						<MetricCard
+							aria-label={`Total Messages: ${formatNumber(data.summary.totalMessages)}, ${data.summary.averageMessagesPerChat.toFixed(1)} average per chat`}
 							color="from-rose-500 to-pink-500"
 							icon={<MessageSquare className="size-5" />}
 							subtitle={`${data.summary.averageMessagesPerChat.toFixed(1)} avg per chat`}
@@ -126,6 +134,7 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 							value={formatNumber(data.summary.totalMessages)}
 						/>
 						<MetricCard
+							aria-label={`Conversations: ${formatNumber(data.summary.totalChats)}, last ${range} days`}
 							color="from-blue-500 to-indigo-500"
 							icon={<FileText className="size-5" />}
 							subtitle={`Last ${range} days`}
@@ -137,14 +146,18 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 					{/* Charts Section */}
 					<div className="grid gap-6 lg:grid-cols-2">
 						{/* Daily Activity Chart */}
-						<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-							<h3 className="mb-4 flex items-center gap-2 font-semibold text-stone-800">
+						<div className="rounded-2xl border border-stone-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+							<h3 className="mb-4 flex items-center gap-2 font-semibold text-stone-800 dark:text-slate-100">
 								<Calendar className="size-4" />
 								Daily Activity
 							</h3>
 
 							{data.daily.length > 0 ? (
-								<div className="h-64">
+								<div
+									className="h-64"
+									role="img"
+									aria-label="Daily activity chart"
+								>
 									<div className="flex h-full items-end gap-1">
 										{data.daily.slice(-14).map((day, _idx) => (
 											<div
@@ -158,7 +171,7 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 														minHeight: day.messageCount > 0 ? "4px" : "0",
 													}}
 												/>
-												<span className="mt-2 text-stone-400 text-xs">
+												<span className="mt-2 text-stone-400 dark:text-slate-500 text-xs">
 													{formatDate(day.date).split(" ")[1]}
 												</span>
 
@@ -173,15 +186,15 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 									</div>
 								</div>
 							) : (
-								<div className="flex h-64 items-center justify-center text-stone-400">
+								<div className="flex h-64 items-center justify-center text-stone-400 dark:text-slate-500">
 									No activity data available
 								</div>
 							)}
 						</div>
 
 						{/* Topics Breakdown */}
-						<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-							<h3 className="mb-4 font-semibold text-stone-800">
+						<div className="rounded-2xl border border-stone-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+							<h3 className="mb-4 font-semibold text-stone-800 dark:text-slate-100">
 								Topics Breakdown
 							</h3>
 
@@ -196,24 +209,24 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 										return (
 											<div key={topic.topic || "uncategorized"}>
 												<div className="mb-1 flex items-center justify-between">
-													<span className="flex items-center gap-2 text-sm text-stone-700">
+													<span className="flex items-center gap-2 text-sm text-stone-700 dark:text-slate-300">
 														<span
 															className={cn(
 																"size-2.5 rounded-full",
-																topic.color || "bg-gray-400",
+																topic.color || "bg-gray-400 dark:bg-gray-500",
 															)}
 														/>
 														{topic.topic || "Uncategorized"}
 													</span>
-													<span className="text-sm text-stone-500">
+													<span className="text-sm text-stone-500 dark:text-slate-400">
 														{topic.count}
 													</span>
 												</div>
-												<div className="h-2 overflow-hidden rounded-full bg-stone-100">
+												<div className="h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-slate-700">
 													<div
 														className={cn(
 															"h-full rounded-full transition-all",
-															topic.color || "bg-gray-400",
+															topic.color || "bg-gray-400 dark:bg-gray-500",
 														)}
 														style={{ width: `${percentage}%` }}
 													/>
@@ -223,7 +236,7 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 									})}
 								</div>
 							) : (
-								<div className="flex h-48 items-center justify-center text-stone-400">
+								<div className="flex h-48 items-center justify-center text-stone-400 dark:text-slate-500">
 									No topic data available
 								</div>
 							)}
@@ -231,8 +244,8 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 					</div>
 
 					{/* Recent Activity */}
-					<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-						<h3 className="mb-4 font-semibold text-stone-800">
+					<div className="rounded-2xl border border-stone-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
+						<h3 className="mb-4 font-semibold text-stone-800 dark:text-slate-100">
 							Recent Conversations
 						</h3>
 
@@ -241,28 +254,28 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 								{data.recentActivity.map((activity) => (
 									<Link
 										key={activity.id}
-										className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-stone-50"
+										className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-stone-50 dark:hover:bg-slate-700/50"
 										href={`/chat/${activity.id}`}
 									>
 										<div className="flex items-center gap-3">
-											<MessageSquare className="size-4 text-stone-400" />
-											<span className="line-clamp-1 text-stone-700">
+											<MessageSquare className="size-4 text-stone-400 dark:text-slate-500" />
+											<span className="line-clamp-1 text-stone-700 dark:text-slate-300">
 												{activity.title}
 											</span>
 											{activity.topic && (
-												<span className="rounded-full bg-stone-100 px-2 py-0.5 text-stone-500 text-xs">
+												<span className="rounded-full bg-stone-100 dark:bg-slate-700 px-2 py-0.5 text-stone-500 dark:text-slate-400 text-xs">
 													{activity.topic}
 												</span>
 											)}
 										</div>
-										<span className="text-sm text-stone-400">
+										<span className="text-sm text-stone-400 dark:text-slate-500">
 											{formatDate(activity.createdAt)}
 										</span>
 									</Link>
 								))}
 							</div>
 						) : (
-							<div className="flex h-32 items-center justify-center text-stone-400">
+							<div className="flex h-32 items-center justify-center text-stone-400 dark:text-slate-500">
 								No recent conversations
 							</div>
 						)}
@@ -279,20 +292,29 @@ function MetricCard({
 	subtitle,
 	icon,
 	color,
+	"aria-label": ariaLabel,
 }: {
 	title: string;
 	value: string;
 	subtitle: string;
 	icon: React.ReactNode;
 	color: string;
+	"aria-label"?: string;
 }) {
 	return (
-		<div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+		<section
+			aria-label={ariaLabel}
+			className="relative overflow-hidden rounded-2xl border border-stone-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm"
+		>
 			<div className="flex items-start justify-between">
 				<div>
-					<p className="text-sm text-stone-500">{title}</p>
-					<p className="mt-2 font-bold text-3xl text-stone-900">{value}</p>
-					<p className="mt-1 text-sm text-stone-400">{subtitle}</p>
+					<p className="text-sm text-stone-500 dark:text-slate-400">{title}</p>
+					<p className="mt-2 font-bold text-3xl text-stone-900 dark:text-white">
+						{value}
+					</p>
+					<p className="mt-1 text-sm text-stone-400 dark:text-slate-500">
+						{subtitle}
+					</p>
 				</div>
 				<div
 					className={cn(
@@ -303,6 +325,6 @@ function MetricCard({
 					{icon}
 				</div>
 			</div>
-		</div>
+		</section>
 	);
 }

@@ -1,8 +1,6 @@
 import { format } from "date-fns";
 import {
 	Calendar,
-	Download,
-	Eye,
 	FileCode,
 	FileImage,
 	FileSpreadsheet,
@@ -14,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getDocumentsByUserId } from "@/lib/db/queries";
 import { createClient } from "@/lib/supabase/server";
+import { ReportActions } from "./report-actions";
 
 type DocumentKind = "text" | "code" | "image" | "sheet";
 
@@ -85,7 +84,10 @@ export default async function ReportsPage() {
 	const sheetCount = documentsByKind.sheet || 0;
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+		<main
+			aria-label="Reports Library"
+			className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"
+		>
 			{/* Header */}
 			<header className="border-white/20 border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
 				<div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
@@ -108,7 +110,10 @@ export default async function ReportsPage() {
 			</header>
 
 			{/* Stats Section */}
-			<section className="border-white/20 border-b bg-white/40 dark:bg-slate-800/40 py-6 sm:py-8">
+			<section
+				aria-label="Report statistics"
+				className="border-white/20 border-b bg-white/40 dark:bg-slate-800/40 py-6 sm:py-8"
+			>
 				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 						<Card className="border-0 bg-gradient-to-br from-white to-rose-50/50 dark:from-slate-800 dark:to-rose-900/20 shadow-md">
@@ -206,65 +211,56 @@ export default async function ReportsPage() {
 							</CardContent>
 						</Card>
 					) : (
-						<div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+						<ul
+							aria-label="Generated reports"
+							className="grid list-none gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3"
+						>
 							{documents.map((doc) => (
-								<Card
-									key={`${doc.id}-${doc.createdAt}`}
-									className="group hover:-translate-y-1 border-0 bg-white/80 dark:bg-slate-800/80 shadow-md transition-all duration-200 hover:shadow-xl"
-								>
-									<CardContent className="p-4 sm:p-6">
-										<div className="flex items-start gap-3">
-											<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-rose-100 to-purple-100 dark:from-rose-900/50 dark:to-purple-900/50">
-												{getDocumentIcon((doc.kind || "text") as DocumentKind)}
-											</div>
-											<div className="min-w-0 flex-1">
-												<h3 className="truncate font-semibold text-base text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400">
-													{doc.title}
-												</h3>
-												<div className="mt-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-													<Calendar className="h-3 w-3" />
-													{format(new Date(doc.createdAt), "MMM d, yyyy")}
-													<span>•</span>
-													{format(new Date(doc.createdAt), "h:mm a")}
+								<li key={`${doc.id}-${doc.createdAt}`}>
+									<Card className="group hover:-translate-y-1 border-0 bg-white/80 dark:bg-slate-800/80 shadow-md transition-all duration-200 hover:shadow-xl h-full">
+										<CardContent className="p-4 sm:p-6">
+											<div className="flex items-start gap-3">
+												<div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-rose-100 to-purple-100 dark:from-rose-900/50 dark:to-purple-900/50">
+													{getDocumentIcon(
+														(doc.kind || "text") as DocumentKind,
+													)}
+												</div>
+												<div className="min-w-0 flex-1">
+													<h3 className="truncate font-semibold text-base text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400">
+														{doc.title}
+													</h3>
+													<div className="mt-1 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
+														<Calendar className="h-3 w-3" />
+														{format(new Date(doc.createdAt), "MMM d, yyyy")}
+														<span>•</span>
+														{format(new Date(doc.createdAt), "h:mm a")}
+													</div>
 												</div>
 											</div>
-										</div>
 
-										{doc.content && (
-											<p className="mt-3 text-slate-600 dark:text-slate-400 text-sm line-clamp-2">
-												{doc.content.slice(0, 150)}
-												{doc.content.length > 150 ? "..." : ""}
-											</p>
-										)}
+											{doc.content && (
+												<p className="mt-3 text-slate-600 dark:text-slate-400 text-sm line-clamp-2">
+													{doc.content.slice(0, 150)}
+													{doc.content.length > 150 ? "..." : ""}
+												</p>
+											)}
 
-										<div className="mt-4 flex items-center justify-between">
-											{getKindBadge((doc.kind || "text") as DocumentKind)}
-											<div className="flex items-center gap-2">
-												<Button
-													variant="ghost"
-													size="sm"
-													className="h-8 w-8 p-0"
-													title="View Document"
-												>
-													<Eye className="h-4 w-4" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="sm"
-													className="h-8 w-8 p-0"
-													title="Download"
-												>
-													<Download className="h-4 w-4" />
-												</Button>
+											<div className="mt-4 flex items-center justify-between">
+												{getKindBadge((doc.kind || "text") as DocumentKind)}
+												<ReportActions
+													title={doc.title}
+													content={doc.content}
+													kind={(doc.kind || "text") as DocumentKind}
+												/>
 											</div>
-										</div>
-									</CardContent>
-								</Card>
+										</CardContent>
+									</Card>
+								</li>
 							))}
-						</div>
+						</ul>
 					)}
 				</div>
 			</section>
-		</div>
+		</main>
 	);
 }

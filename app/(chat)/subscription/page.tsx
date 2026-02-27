@@ -112,7 +112,7 @@ function getStatusBadge(status: string | null | undefined) {
 		expired: { color: "bg-red-100 text-red-700", label: "Expired" },
 	};
 	const config = statusConfig[status as keyof typeof statusConfig] || {
-		color: "bg-gray-100 text-gray-700",
+		color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
 		label: status || "None",
 	};
 	return (
@@ -267,65 +267,75 @@ export default function SubscriptionPage() {
 	}
 
 	return (
-		<div className="mx-auto max-w-4xl px-4 py-8">
+		<main
+			aria-label="Subscription Management"
+			className="mx-auto max-w-4xl px-4 py-8"
+		>
 			<div className="mb-8">
-				<h1 className="text-3xl font-bold text-stone-900">
+				<h1 className="text-3xl font-bold text-stone-900 dark:text-white">
 					Subscription & Billing
 				</h1>
-				<p className="mt-1 text-stone-500">
+				<p className="mt-1 text-stone-500 dark:text-slate-400">
 					Manage your plan, billing, and membership
 				</p>
 			</div>
 
 			<div className="space-y-6">
 				{/* Current Plan Status */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+				<section
+					aria-label="Current plan details"
+					className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+				>
 					<div className="mb-6 flex items-center gap-3">
-						<div className="flex size-10 items-center justify-center rounded-xl bg-rose-100">
-							<Crown className="size-5 text-rose-600" />
+						<div className="flex size-10 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/50">
+							<Crown className="size-5 text-rose-600 dark:text-rose-400" />
 						</div>
 						<div>
-							<h2 className="text-lg font-semibold text-stone-900">
+							<h2 className="text-lg font-semibold text-stone-900 dark:text-white">
 								Current Plan
 							</h2>
-							<p className="text-sm text-stone-500">
+							<p className="text-sm text-stone-500 dark:text-slate-400">
 								Your active subscription details
 							</p>
 						</div>
 					</div>
 
-					<div className="rounded-xl bg-stone-50 p-4">
+					<div className="rounded-xl bg-stone-50 p-4 dark:bg-slate-700/50">
 						<div className="grid gap-4 sm:grid-cols-2">
 							<div>
-								<p className="text-sm font-medium text-stone-500">
+								<p className="text-sm font-medium text-stone-500 dark:text-slate-400">
 									Current Plan
 								</p>
-								<p className="mt-1 text-lg font-semibold text-stone-900">
+								<p className="mt-1 text-lg font-semibold text-stone-900 dark:text-white">
 									{getPlanName(subscription?.subscriptionType)}
 								</p>
 							</div>
 							<div>
-								<p className="text-sm font-medium text-stone-500">Status</p>
+								<p className="text-sm font-medium text-stone-500 dark:text-slate-400">
+									Status
+								</p>
 								<div className="mt-1">
 									{getStatusBadge(subscription?.subscriptionStatus)}
 								</div>
 							</div>
 							{subscription?.subscriptionStartDate && (
 								<div>
-									<p className="text-sm font-medium text-stone-500">Started</p>
-									<p className="mt-1 text-stone-900">
+									<p className="text-sm font-medium text-stone-500 dark:text-slate-400">
+										Started
+									</p>
+									<p className="mt-1 text-stone-900 dark:text-white">
 										{formatDate(subscription.subscriptionStartDate)}
 									</p>
 								</div>
 							)}
 							{subscription?.subscriptionEndDate && (
 								<div>
-									<p className="text-sm font-medium text-stone-500">
+									<p className="text-sm font-medium text-stone-500 dark:text-slate-400">
 										{subscription.subscriptionStatus === "cancelled"
 											? "Access Until"
 											: "Renews"}
 									</p>
-									<p className="mt-1 text-stone-900">
+									<p className="mt-1 text-stone-900 dark:text-white">
 										{formatDate(subscription.subscriptionEndDate)}
 									</p>
 								</div>
@@ -334,13 +344,13 @@ export default function SubscriptionPage() {
 					</div>
 
 					{subscription?.subscriptionStatus === "cancelled" && (
-						<div className="mt-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+						<div className="mt-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
 							<AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600" />
 							<div>
-								<p className="font-medium text-amber-800">
+								<p className="font-medium text-amber-800 dark:text-amber-200">
 									Subscription Cancelled
 								</p>
-								<p className="text-sm text-amber-700">
+								<p className="text-sm text-amber-700 dark:text-amber-300">
 									You'll continue to have access until{" "}
 									{formatDate(subscription.subscriptionEndDate)}. After that,
 									you can resubscribe anytime.
@@ -355,6 +365,7 @@ export default function SubscriptionPage() {
 								variant="outline"
 								onClick={handleManageBilling}
 								disabled={portalLoading}
+								aria-label="Manage billing in Stripe portal"
 								className="gap-2"
 							>
 								{portalLoading ? (
@@ -368,7 +379,11 @@ export default function SubscriptionPage() {
 						)}
 
 						{!subscription?.subscriptionType && (
-							<Button onClick={() => router.push("/pricing")} className="gap-2">
+							<Button
+								onClick={() => router.push("/pricing")}
+								aria-label="View available plans"
+								className="gap-2"
+							>
 								<Crown className="size-4" />
 								View Plans
 							</Button>
@@ -379,16 +394,20 @@ export default function SubscriptionPage() {
 							<Button
 								variant="ghost"
 								onClick={() => setShowCancelDialog(true)}
-								className="text-stone-500 hover:text-red-600"
+								aria-label="Cancel subscription"
+								className="text-stone-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
 							>
 								Cancel Subscription
 							</Button>
 						) : null}
 					</div>
-				</div>
+				</section>
 
 				{/* Plans Section */}
-				<div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+				<section
+					aria-label="Available plans"
+					className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
+				>
 					<div className="bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 px-6 py-8 text-center">
 						<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
 							<Sparkles className="size-6 text-rose-400" />
@@ -399,7 +418,7 @@ export default function SubscriptionPage() {
 								? "Choose Your Plan"
 								: "Your Membership"}
 						</h2>
-						<p className="mt-2 text-sm text-stone-400">
+						<p className="mt-2 text-sm text-stone-400 dark:text-slate-500">
 							{subscription?.subscriptionType === "trial" ||
 							!subscription?.subscriptionType
 								? "Unlock unlimited access to Alexandria and Kim"
@@ -420,8 +439,8 @@ export default function SubscriptionPage() {
 											isCurrentPlan
 												? "border-emerald-300 bg-emerald-50/50 shadow-lg ring-2 ring-emerald-300"
 												: plan.popular
-													? "border-rose-200 bg-white shadow-md hover:-translate-y-1 hover:border-rose-300 hover:shadow-xl"
-													: "border-stone-200 bg-white hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-lg"
+													? "border-rose-200 bg-white shadow-md hover:-translate-y-1 hover:border-rose-300 hover:shadow-xl dark:border-rose-700 dark:bg-slate-800 dark:hover:border-rose-500"
+													: "border-stone-200 bg-white hover:-translate-y-0.5 hover:border-stone-300 hover:shadow-lg dark:border-slate-600 dark:bg-slate-800 dark:hover:border-slate-500"
 										}`}
 									>
 										{/* Top accent bar */}
@@ -455,20 +474,20 @@ export default function SubscriptionPage() {
 
 										<div className="flex flex-1 flex-col p-5 pt-4">
 											<div className="mb-4">
-												<h3 className="text-base font-bold text-stone-900">
+												<h3 className="text-base font-bold text-stone-900 dark:text-white">
 													{plan.name}
 												</h3>
-												<p className="mt-0.5 text-xs text-stone-500">
+												<p className="mt-0.5 text-xs text-stone-500 dark:text-slate-400">
 													{plan.description}
 												</p>
 											</div>
 
 											<div className="mb-4">
 												<div className="flex items-baseline gap-1">
-													<span className="text-3xl font-extrabold tracking-tight text-stone-900">
+													<span className="text-3xl font-extrabold tracking-tight text-stone-900 dark:text-white">
 														{plan.price}
 													</span>
-													<span className="text-sm font-medium text-stone-400">
+													<span className="text-sm font-medium text-stone-400 dark:text-slate-500">
 														{plan.period}
 													</span>
 												</div>
@@ -476,7 +495,7 @@ export default function SubscriptionPage() {
 
 											{plan.savings && (
 												<div className="mb-4">
-													<span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-700">
+													<span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-700 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
 														<Gift className="size-3" />
 														{plan.savings}
 													</span>
@@ -487,13 +506,13 @@ export default function SubscriptionPage() {
 												{plan.features.map((feature) => (
 													<li
 														key={feature}
-														className="flex items-start gap-2.5 text-sm text-stone-600"
+														className="flex items-start gap-2.5 text-sm text-stone-600 dark:text-slate-400"
 													>
 														<div
 															className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full ${
 																isCurrentPlan
 																	? "bg-emerald-100 text-emerald-600"
-																	: "bg-rose-50 text-rose-500"
+																	: "bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-400"
 															}`}
 														>
 															<Check className="size-2.5" strokeWidth={3} />
@@ -505,6 +524,11 @@ export default function SubscriptionPage() {
 
 											<Button
 												size="lg"
+												aria-label={
+													isCurrentPlan
+														? `${plan.name} is your current plan`
+														: `Select ${plan.name} plan for ${plan.price} ${plan.period}`
+												}
 												className={`w-full gap-2 font-semibold transition-all duration-200 ${
 													isCurrentPlan
 														? "bg-emerald-600 shadow-sm hover:bg-emerald-700"
@@ -542,14 +566,14 @@ export default function SubscriptionPage() {
 						</div>
 
 						{subscription?.subscriptionType === "trial" && (
-							<div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+							<div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
 								<span className="font-semibold">Trial ending soon?</span> Your
 								trial includes full access to all features. Choose a plan above
 								to continue working with Alexandria and Kim.
 							</div>
 						)}
 					</div>
-				</div>
+				</section>
 			</div>
 
 			{/* Cancel Subscription Dialog */}
@@ -560,7 +584,7 @@ export default function SubscriptionPage() {
 							<AlertTriangle className="size-5 text-amber-500" />
 							Cancel Subscription?
 						</AlertDialogTitle>
-						<AlertDialogDescription className="text-stone-600">
+						<AlertDialogDescription className="text-stone-600 dark:text-slate-400">
 							Are you sure you want to cancel your subscription? You'll continue
 							to have access until the end of your current billing period.
 						</AlertDialogDescription>
@@ -585,6 +609,6 @@ export default function SubscriptionPage() {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
-		</div>
+		</main>
 	);
 }
