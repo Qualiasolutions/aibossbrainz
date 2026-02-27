@@ -32,10 +32,13 @@ export default async function HistoryPage() {
 	const chatStats = chats.map((chat) => {
 		const stats = statsMap.get(chat.id);
 		return {
-			...chat,
+			id: chat.id,
+			title: chat.title,
+			createdAt: new Date(chat.createdAt),
+			visibility: chat.visibility,
+			isPinned: chat.isPinned || false,
 			primaryBot: stats?.primaryBot || "collaborative",
 			messageCount: stats?.messageCount || 0,
-			isPinned: chat.isPinned || false,
 		};
 	});
 
