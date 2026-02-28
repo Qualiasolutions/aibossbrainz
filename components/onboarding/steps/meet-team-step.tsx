@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	Brain,
-	LayoutGrid,
-	MessageSquare,
-	Users,
-} from "lucide-react";
+import { Brain, LayoutGrid, MessageSquare, Users } from "lucide-react";
 import { TargetedStep } from "../shared/targeted-step";
 
 interface TourStep {
