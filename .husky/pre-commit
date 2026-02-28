@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+npx @biomejs/biome check --write --staged --no-errors-on-unmatched --files-ignore-unknown=true
