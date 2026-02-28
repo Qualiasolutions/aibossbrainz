@@ -84,7 +84,7 @@ None yet.
 Last session: 2026-02-28
 Stopped at: Phase 27 complete (Foundation & Quick Wins)
 Resume file: .planning/phases/27-foundation-quick-wins/27-02-SUMMARY.md
-Next action: Move to Phase 28 (Tree-shaking & Dead Code Removal)
+Next action: Run `/gsd:plan-phase 28` to create Phase 28 plans (Logging & Observability)
 
 ---
 
