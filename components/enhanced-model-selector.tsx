@@ -20,7 +20,9 @@ import {
 } from "@/lib/ai/executive-personalities";
 import { chatModels } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
-import { CheckCircleFillIcon, ChevronDownIcon, UserIcon } from "./icons";
+import { CheckCircleFillIcon } from "./icons/status";
+import { ChevronDownIcon } from "./icons/navigation";
+import { UserIcon } from "./icons/misc";
 
 const EXECUTIVE_ENTRIES = Object.entries(EXECUTIVE_PERSONALITIES) as Array<
 	[ExecutiveType, ExecutivePersonality]

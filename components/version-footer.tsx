@@ -8,7 +8,7 @@ import { useArtifact } from "@/hooks/use-artifact";
 import { useWindowSize } from "@/hooks/use-window-size";
 import type { Document } from "@/lib/supabase/types";
 import { getDocumentTimestampByIndex } from "@/lib/utils";
-import { LoaderIcon } from "./icons";
+import { LoaderIcon } from "./icons/status";
 import { Button } from "./ui/button";
 
 type VersionFooterProps = {

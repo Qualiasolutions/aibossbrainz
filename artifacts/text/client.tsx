@@ -11,13 +11,13 @@ const DiffView = dynamic(
 );
 import { DocumentSkeleton } from "@/components/document-skeleton";
 import {
-  ClockRewind,
-  CopyIcon,
-  MessageIcon,
-  PenIcon,
-  RedoIcon,
-  UndoIcon,
-} from "@/components/icons";
+	ClockRewind,
+	CopyIcon,
+	PenIcon,
+	RedoIcon,
+	UndoIcon,
+} from "@/components/icons/actions";
+import { MessageIcon } from "@/components/icons/content";
 import { Editor } from "@/components/text-editor";
 import type { Suggestion } from "@/lib/supabase/types";
 import { getSuggestions } from "../actions";

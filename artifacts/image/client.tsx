@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { Artifact } from "@/components/create-artifact";
-import { CopyIcon, RedoIcon, UndoIcon } from "@/components/icons";
+import { CopyIcon, RedoIcon, UndoIcon } from "@/components/icons/actions";
 import { ImageEditor } from "@/components/image-editor";
 
 export const imageArtifact = new Artifact({

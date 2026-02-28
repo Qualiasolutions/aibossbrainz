@@ -9,7 +9,7 @@ import type { BotType } from "@/lib/bot-personalities";
 import { BOT_PERSONALITIES } from "@/lib/bot-personalities";
 import { stripMarkdownForClipboard } from "@/lib/clipboard-utils";
 import { Response } from "./elements/response";
-import { CopyIcon } from "./icons";
+import { CopyIcon } from "./icons/actions";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 

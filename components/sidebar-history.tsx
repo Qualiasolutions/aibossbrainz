@@ -36,7 +36,7 @@ import { useCsrf } from "@/hooks/use-csrf";
 import { getTopicCategories } from "@/lib/ai/topic-classifier";
 import type { Chat, UserCategory } from "@/lib/supabase/types";
 import { fetcher } from "@/lib/utils";
-import { LoaderIcon } from "./icons";
+import { LoaderIcon } from "./icons/status";
 import { ChatItem } from "./sidebar-history-item";
 
 type GroupedChats = {

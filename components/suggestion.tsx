@@ -7,7 +7,8 @@ import { useWindowSize } from "@/hooks/use-window-size";
 import type { UISuggestion } from "@/lib/editor/suggestions";
 import { cn } from "@/lib/utils";
 import type { ArtifactKind } from "./artifact";
-import { CrossIcon, MessageIcon } from "./icons";
+import { CrossIcon } from "./icons/actions";
+import { MessageIcon } from "./icons/content";
 import { Button } from "./ui/button";
 
 export const Suggestion = ({

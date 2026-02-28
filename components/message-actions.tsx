@@ -6,20 +6,15 @@ import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
 import { useCsrf } from "@/hooks/use-csrf";
 import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
+import { logClientError } from "@/lib/client-logger";
 import { stripMarkdownForClipboard } from "@/lib/clipboard-utils";
 import type { Vote } from "@/lib/supabase/types";
 import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { logClientError } from "@/lib/client-logger";
 import { Action, Actions } from "./elements/actions";
-import {
-	CopyIcon,
-	FileSpreadsheetIcon,
-	FileTextIcon,
-	PencilEditIcon,
-	ThumbDownIcon,
-	ThumbUpIcon,
-} from "./icons";
+import { CopyIcon, PencilEditIcon } from "./icons/actions";
+import { FileSpreadsheetIcon, FileTextIcon } from "./icons/status";
+import { ThumbDownIcon, ThumbUpIcon } from "./icons/status";
 import { MessageReactions } from "./message-reactions";
 import { VoicePlayerButton } from "./voice-player-button";
 

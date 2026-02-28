@@ -7,13 +7,13 @@ import {
 } from "@/components/console";
 import { Artifact } from "@/components/create-artifact";
 import {
-  CopyIcon,
-  LogsIcon,
-  MessageIcon,
-  PlayIcon,
-  RedoIcon,
-  UndoIcon,
-} from "@/components/icons";
+	CopyIcon,
+	PlayIcon,
+	RedoIcon,
+	UndoIcon,
+} from "@/components/icons/actions";
+import { MessageIcon } from "@/components/icons/content";
+import { LogsIcon } from "@/components/icons/misc";
 import { generateUUID } from "@/lib/utils";
 
 const OUTPUT_HANDLERS = {

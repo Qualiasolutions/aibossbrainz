@@ -9,7 +9,8 @@ import {
 import { useArtifactSelector } from "@/hooks/use-artifact";
 import { cn } from "@/lib/utils";
 import { Loader } from "./elements/loader";
-import { CrossSmallIcon, TerminalWindowIcon } from "./icons";
+import { CrossSmallIcon } from "./icons/actions";
+import { TerminalWindowIcon } from "./icons/content";
 import { Button } from "./ui/button";
 
 export type ConsoleOutputContent = {

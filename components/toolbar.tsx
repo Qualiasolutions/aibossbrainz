@@ -27,7 +27,9 @@ import {
 import type { ChatMessage } from "@/lib/types";
 import { type ArtifactKind, artifactDefinitions } from "./artifact";
 import type { ArtifactToolbarItem } from "./create-artifact";
-import { ArrowUpIcon, StopIcon, SummarizeIcon } from "./icons";
+import { ArrowUpIcon } from "./icons/navigation";
+import { StopIcon } from "./icons/actions";
+import { SummarizeIcon } from "./icons/content";
 
 type ToolProps = {
 	description: string;

@@ -10,12 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { cn } from "@/lib/utils";
-import {
-	CheckCircleFillIcon,
-	ChevronDownIcon,
-	GlobeIcon,
-	LockIcon,
-} from "./icons";
+import { CheckCircleFillIcon } from "./icons/status";
+import { ChevronDownIcon, GlobeIcon } from "./icons/navigation";
+import { LockIcon } from "./icons/misc";
 
 export type VisibilityType = "private" | "public";
 

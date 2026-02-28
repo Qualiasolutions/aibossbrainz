@@ -23,10 +23,10 @@ import { SelectItem } from "@/components/ui/select";
 import { useCsrf } from "@/hooks/use-csrf";
 import { useWindowSize } from "@/hooks/use-window-size";
 import { chatModels } from "@/lib/ai/models";
+import { logClientError } from "@/lib/client-logger";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { cn } from "@/lib/utils";
-import { logClientError } from "@/lib/client-logger";
 import {
 	PromptInput,
 	PromptInputModelSelect,
@@ -34,13 +34,11 @@ import {
 	PromptInputSubmit,
 	PromptInputTextarea,
 } from "./elements/prompt-input";
-import {
-	ArrowUpIcon,
-	ChevronDownIcon,
-	CpuIcon,
-	PaperclipIcon,
-	StopIcon,
-} from "./icons";
+import { ArrowUpIcon } from "./icons/navigation";
+import { PaperclipIcon } from "./icons/content";
+import { ChevronDownIcon } from "./icons/navigation";
+import { StopIcon } from "./icons/actions";
+import { CpuIcon } from "./icons/misc";
 import { PreviewAttachment } from "./preview-attachment";
 import { Button } from "./ui/button";
 import type { VisibilityType } from "./visibility-selector";

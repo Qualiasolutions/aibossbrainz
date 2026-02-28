@@ -3,7 +3,7 @@ import Link from "next/link";
 import { memo } from "react";
 import type { Chat, UserCategory } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
-import { MoreHorizontalIcon, TrashIcon } from "./icons";
+import { MoreHorizontalIcon, TrashIcon } from "./icons/actions";
 import {
 	DropdownMenu,
 	DropdownMenuContent,

@@ -17,7 +17,9 @@ import { cn, fetcher } from "@/lib/utils";
 import type { ArtifactKind, UIArtifact } from "./artifact";
 import { DocumentToolCall, DocumentToolResult } from "./document";
 import { InlineDocumentSkeleton } from "./document-skeleton";
-import { FileIcon, FullscreenIcon, ImageIcon, LoaderIcon } from "./icons";
+import { FileIcon, ImageIcon } from "./icons/content";
+import { FullscreenIcon } from "./icons/navigation";
+import { LoaderIcon } from "./icons/status";
 
 // Lazy load heavy editor components to reduce initial bundle size
 const CodeEditor = dynamic(

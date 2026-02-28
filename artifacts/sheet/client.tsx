@@ -1,13 +1,9 @@
 import { parse } from "papaparse";
 import { toast } from "sonner";
 import { Artifact } from "@/components/create-artifact";
-import {
-  CopyIcon,
-  LineChartIcon,
-  RedoIcon,
-  SparklesIcon,
-  UndoIcon,
-} from "@/components/icons";
+import { CopyIcon, RedoIcon, UndoIcon } from "@/components/icons/actions";
+import { LineChartIcon } from "@/components/icons/content";
+import { SparklesIcon } from "@/components/icons/content";
 import { SpreadsheetEditor } from "@/components/sheet-editor";
 
 type Metadata = any;

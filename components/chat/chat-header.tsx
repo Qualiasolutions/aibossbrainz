@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { BotType } from "@/lib/bot-personalities";
 import type { ChatMessage } from "@/lib/types";
-import { PlusIcon } from "../icons";
+import { PlusIcon } from "../icons/actions";
 
 interface ChatHeaderProps {
 	selectedBot: BotType;
