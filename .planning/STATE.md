@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives who remember context and deliver frameworks-based guidance.
 
-**Current focus:** Phase 28 - Logging & Observability (complete)
+**Current focus:** Phase 29 - File Splitting & Refactoring (in progress)
 
 ## Current Position
 
-Phase: 28 of 31 (Logging & Observability)
-Plan: 1 of 1 complete
-Status: Phase complete
-Last activity: 2026-02-28 — Completed 28-01-PLAN.md (Client-Side Logging Migration)
+Phase: 29 of 31 (File Splitting & Refactoring)
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-02-28 — Completed 29-01-PLAN.md (Icon Splitting)
 
-Progress: [████████░░] 90% (28/31 phases complete)
+Progress: [████████░░] 90% (28/31 phases complete, 29 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 36 (11 v1.2 + 10 v1.3 + 13 v1.4 + 2 v1.5)
-- Average duration: 7min
-- Total execution time: 233min
+- Total plans completed: 37 (11 v1.2 + 10 v1.3 + 13 v1.4 + 3 v1.5)
+- Average duration: 6.9min
+- Total execution time: 235min
 
 **By Milestone:**
 
@@ -37,8 +37,9 @@ Progress: [████████░░] 90% (28/31 phases complete)
 - Phase 27 Plan 01: 4min 21s (Code Quality Automation)
 - Phase 27 Plan 02: 9min (Image Optimization & Baseline)
 - Phase 28 Plan 01: 10min (Client-Side Logging Migration)
+- Phase 29 Plan 01: 2min 7s (Icon Splitting)
 
-*Updated after 28-01 completion*
+*Updated after 29-01 completion*
 
 ## Accumulated Context
 
@@ -60,6 +61,9 @@ Recent decisions affecting v1.5 work:
 - 27-02: No priority prop on avatar images (small UI elements, not LCP candidates)
 - 27-02: Keep original PNGs for 1-2 sprints as rollback option
 - 27-02: Main chat route (1.06 MB) identified as primary Phase 30 optimization target
+- 29-01: Icon categorization based on functional purpose (navigation, actions, status, brand, content, misc)
+- 29-01: No barrel index.ts created - direct imports preserve tree-shaking capability
+- 29-01: IconProps type preserved despite unused warnings (consistency for future refactoring)
 
 ### Pending Todos
 
@@ -82,12 +86,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-01
-Stopped at: Phase 28 complete (Logging & Observability) — verified
-Resume file: .planning/phases/28-logging-observability/28-01-SUMMARY.md
-Next action: Run `/gsd:plan-phase 29` to create Phase 29 plans (File Splitting & Refactoring)
+Last session: 2026-02-28
+Stopped at: Phase 29 Plan 01 complete (Icon Splitting)
+Resume file: .planning/phases/29-file-splitting-refactoring/29-01-SUMMARY.md
+Next action: Execute Plan 29-02 (Icon Consumer Migration)
 
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-03-01 after Phase 28 verification*
+*Last updated: 2026-02-28 after Plan 29-01 completion*
