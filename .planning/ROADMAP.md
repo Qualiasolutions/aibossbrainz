@@ -75,10 +75,11 @@ Phases 21-26, 13 plans total. All 50 audit findings remediated.
   4. Pre-commit hook blocks commits containing new lint errors
   5. Developer has documented baseline metrics (bundle sizes, current LCP times) for comparison
 
-**Plans:** TBD
+**Plans:** 2 plans in 1 wave
 
 Plans:
-- [ ] 27-01: TBD
+- [ ] 27-01-PLAN.md — Code quality automation and build optimization
+- [ ] 27-02-PLAN.md — Image optimization and baseline metrics
 
 ---
 
@@ -175,7 +176,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 27. Foundation & Quick Wins | 0/0 | Not started | - |
+| 27. Foundation & Quick Wins | 0/2 | Not started | - |
 | 28. Logging & Observability | 0/0 | Not started | - |
 | 29. File Splitting & Refactoring | 0/0 | Not started | - |
 | 30. Dynamic Import Expansion | 0/0 | Not started | - |
