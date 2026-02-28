@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 29 of 31 (File Splitting & Refactoring)
-Plan: 2 of 4 complete
+Plan: 3 of 4 complete
 Status: In progress
-Last activity: 2026-02-28 — Completed 29-02-PLAN.md (Icon Consumer Migration)
+Last activity: 2026-02-28 — Completed 29-03-PLAN.md (Onboarding Modal Refactoring)
 
 Progress: [████████░░] 90% (28/31 phases complete, 29 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 38 (11 v1.2 + 10 v1.3 + 13 v1.4 + 4 v1.5)
-- Average duration: 6.8min
-- Total execution time: 240min
+- Total plans completed: 39 (11 v1.2 + 10 v1.3 + 13 v1.4 + 5 v1.5)
+- Average duration: 6.6min
+- Total execution time: 246min
 
 **By Milestone:**
 
@@ -39,8 +39,9 @@ Progress: [████████░░] 90% (28/31 phases complete, 29 in pro
 - Phase 28 Plan 01: 10min (Client-Side Logging Migration)
 - Phase 29 Plan 01: 2min 7s (Icon Splitting)
 - Phase 29 Plan 02: 5min (Icon Consumer Migration)
+- Phase 29 Plan 03: 5min 41s (Onboarding Modal Refactoring)
 
-*Updated after 29-02 completion*
+*Updated after 29-03 completion*
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Recent decisions affecting v1.5 work:
 - 29-02: Icons grouped by functional purpose, not alphabetically
 - 29-02: Multi-category imports kept separate (not merged) for clarity
 - 29-02: ClockRewind categorized as action icon (view changes functionality)
+- 29-03: React Context pattern for onboarding state management (eliminates prop-drilling)
+- 29-03: Separate targeted and centered step rendering (different UI patterns)
+- 29-03: TourStep type duplicated across files for component isolation (slight duplication for clarity)
 
 ### Pending Todos
 
@@ -91,11 +95,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Phase 29 Plan 02 complete (Icon Consumer Migration)
-Resume file: .planning/phases/29-file-splitting-refactoring/29-02-SUMMARY.md
-Next action: Execute Plan 29-03 (Icon Deprecation & Cleanup)
+Stopped at: Phase 29 Plan 03 complete (Onboarding Modal Refactoring)
+Resume file: .planning/phases/29-file-splitting-refactoring/29-03-SUMMARY.md
+Next action: Execute Plan 29-04 (Icon Deprecation & Cleanup)
 
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-02-28 after Plan 29-02 completion*
+*Last updated: 2026-02-28 after Plan 29-03 completion*
