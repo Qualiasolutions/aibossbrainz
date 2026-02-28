@@ -95,11 +95,11 @@ export const defaultLandingPageContent: LandingPageCMSContent = {
 			"40+ years bringing Fortune 500 strategy to founders to the next level. Now laser-focused on scaling your brand with strategy that actually sells.",
 		alex_name: "Alexandria Alecci",
 		alex_role: "Chief Marketing Officer",
-		alex_image: "/images/alex-avatar.png",
+		alex_image: "/images/alex-avatar.webp",
 		alex_expertise: "Brand Strategy,Go-to-Market,Digital Campaigns",
 		kim_name: "Kim Mylls",
 		kim_role: "Chief Sales Officer",
-		kim_image: "/images/kim-avatar.png",
+		kim_image: "/images/kim-avatar.webp",
 		kim_expertise: "Enterprise Sales,Pipeline Growth,Deal Closing",
 		alex_description:
 			"Brand strategist with Fortune 500 experience. Specializes in go-to-market strategy, brand positioning, and digital campaigns that drive growth.",

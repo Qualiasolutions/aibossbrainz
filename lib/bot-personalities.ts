@@ -166,7 +166,7 @@ export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
 		color: "from-red-600 to-red-800",
 		description: "Your Marketing Mastermind",
 		icon: "Crown",
-		avatar: "/images/alex-avatar.png",
+		avatar: "/images/alex-avatar.webp",
 	},
 	kim: {
 		id: "kim",
@@ -185,7 +185,7 @@ export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
 		color: "from-red-700 to-red-900",
 		description: "Your Sales Strategy Expert",
 		icon: "UserRound",
-		avatar: "/images/kim-avatar.png",
+		avatar: "/images/kim-avatar.webp",
 		voiceVolume: 0.03,
 	},
 	collaborative: {
@@ -205,7 +205,7 @@ export const BOT_PERSONALITIES: Record<BotType, BotPersonality> = {
 		color: "from-red-600 via-red-700 to-red-900",
 		description: "Your Complete Executive Team",
 		icon: "Users",
-		avatar: "/images/collaborative-avatar.png",
+		avatar: "/images/collaborative-avatar.webp",
 	},
 };
 

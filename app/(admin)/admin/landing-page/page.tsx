@@ -506,7 +506,7 @@ export default function LandingPageCMSPage() {
 											<Image
 												src={
 													getFieldValue("executives", "alex_image") ||
-													"/images/alex-avatar.png"
+													"/images/alex-avatar.webp"
 												}
 												alt="Alexandria"
 												width={32}
@@ -587,7 +587,7 @@ export default function LandingPageCMSPage() {
 											<Image
 												src={
 													getFieldValue("executives", "kim_image") ||
-													"/images/kim-avatar.png"
+													"/images/kim-avatar.webp"
 												}
 												alt="Kim"
 												width={32}
