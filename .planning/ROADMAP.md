@@ -97,10 +97,10 @@ Plans:
   3. Structured logs capture error context (user ID, endpoint, operation) in consistent format
   4. Developer can filter production logs by request ID to trace full request lifecycle
 
-**Plans:** TBD
+**Plans:** 1 plan in 1 wave
 
 Plans:
-- [ ] 28-01: TBD
+- [ ] 28-01-PLAN.md — Client-side logging migration with Sentry integration
 
 ---
 
