@@ -15,6 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useCsrf } from "@/hooks/use-csrf";
 import type { SupportTicket, TicketCategory } from "@/lib/supabase/types";
+import { logClientError } from "@/lib/client-logger";
 
 export function SupportNewTicket({
 	onTicketCreated,
@@ -57,7 +58,10 @@ export function SupportNewTicket({
 				);
 			}
 		} catch (err) {
-			console.error("Error creating ticket:", err);
+			logClientError(err, {
+				component: "SupportNewTicket",
+				action: "create_ticket",
+			});
 			setError("Failed to create ticket. Please try again.");
 		} finally {
 			setIsSubmitting(false);

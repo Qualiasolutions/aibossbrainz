@@ -18,6 +18,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 
 const PaymentSuccess = dynamic(() => import("./components/payment-success"), {
 	loading: () => (
@@ -151,7 +152,11 @@ function SubscribeContent() {
 					setCheckingSubscription(false);
 				}
 			} catch (error) {
-				console.error("Failed to check subscription:", error);
+				logClientError(error, {
+					component: "SubscribePage",
+					action: "check_subscription",
+					payment,
+				});
 				if (!isMounted) return;
 				// On error during payment success, keep polling unless we hit max
 				if (payment === "success" && pollCount < maxPolls) {
@@ -210,7 +215,11 @@ function SubscribeContent() {
 			});
 
 			if (!profileRes.ok) {
-				console.error("Failed to save profile");
+				logClientError(new Error("Failed to save profile"), {
+					component: "SubscribePage",
+					action: "save_profile",
+					status: profileRes.status,
+				});
 			}
 
 			const response = await fetch("/api/stripe/checkout", {
@@ -246,7 +255,11 @@ function SubscribeContent() {
 				setIsLoading(false);
 			}
 		} catch (error) {
-			console.error("Checkout error:", error);
+			logClientError(error, {
+				component: "SubscribePage",
+				action: "checkout",
+				planId: activePlanId,
+			});
 			toast({ type: "error", description: "Network error. Please try again." });
 			setIsLoading(false);
 		}
@@ -330,7 +343,11 @@ function SubscribeContent() {
 						return;
 					}
 				} catch (error) {
-					console.error("Retry check failed:", error);
+					logClientError(error, {
+						component: "SubscribePage",
+						action: "retry_check",
+						attempt: i + 1,
+					});
 				}
 				// Wait 4 seconds between attempts (except on last attempt)
 				if (i < 4) {

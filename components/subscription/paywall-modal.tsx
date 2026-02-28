@@ -14,6 +14,7 @@ import { useState } from "react";
 import { toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 
 interface PaywallModalProps {
 	isOpen: boolean;
@@ -91,7 +92,11 @@ export function PaywallModal({
 				setLoading(null);
 			}
 		} catch (error) {
-			console.error("Checkout error:", error);
+			logClientError(error, {
+				component: "PaywallModal",
+				action: "checkout",
+				planId,
+			});
 			toast({
 				type: "error",
 				description: "Network error. Please check your connection.",

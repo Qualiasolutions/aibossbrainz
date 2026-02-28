@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { getCsrfToken, initCsrfToken } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 import type { ProfileData } from "./components/profile-section";
 
 const ProfileSection = dynamic(() => import("./components/profile-section"));
@@ -92,7 +93,10 @@ export function AccountClient({ initialProfile }: AccountClientProps) {
 				toast.error("Failed to update profile");
 			}
 		} catch (error) {
-			console.error("Failed to save profile:", error);
+			logClientError(error, {
+				component: "AccountClient",
+				action: "save_profile",
+			});
 			toast.error("Failed to save profile");
 		} finally {
 			setSaving(false);
@@ -119,7 +123,10 @@ export function AccountClient({ initialProfile }: AccountClientProps) {
 			URL.revokeObjectURL(url);
 			toast.success("Data exported successfully");
 		} catch (error) {
-			console.error("Failed to export data:", error);
+			logClientError(error, {
+				component: "AccountClient",
+				action: "export_data",
+			});
 			toast.error("Failed to export data");
 		} finally {
 			setExporting(false);
@@ -142,9 +149,12 @@ export function AccountClient({ initialProfile }: AccountClientProps) {
 				toast.error("Failed to delete account");
 			}
 		} catch (error) {
-			console.error("Failed to delete account:", error);
+			logClientError(error, {
+				component: "AccountClient",
+				action: "delete_account",
+			});
 			toast.error("Failed to delete account");
-		} finally {
+		} finally{
 			setDeleting(false);
 			setDeleteConfirmText("");
 		}

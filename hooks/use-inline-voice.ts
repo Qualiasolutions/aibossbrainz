@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isAudioPlaying, subscribeToAudioChanges } from "@/lib/audio-manager";
+import { logClientError } from "@/lib/client-logger";
 
 type SpeechRecognitionConstructor = typeof window.SpeechRecognition;
 
@@ -170,7 +171,11 @@ export function useInlineVoice({
 				return;
 			}
 
-			console.error("Speech recognition error:", event.error);
+			logClientError(new Error(`Speech recognition error: ${event.error}`), {
+				component: "useInlineVoice",
+				action: "speech_recognition",
+				errorType: event.error,
+			});
 		};
 
 		recognition.onend = () => {
@@ -195,7 +200,10 @@ export function useInlineVoice({
 		try {
 			recognition.start();
 		} catch (err) {
-			console.error("Failed to start recognition:", err);
+			logClientError(err, {
+				component: "useInlineVoice",
+				action: "start_recognition",
+			});
 			// Retry after a delay
 			if (voiceModeActiveRef.current) {
 				restartTimeoutRef.current = setTimeout(() => {
@@ -263,7 +271,10 @@ export function useInlineVoice({
 				}
 			})
 			.catch((err) => {
-				console.error("Microphone permission error:", err);
+				logClientError(err, {
+					component: "useInlineVoice",
+					action: "microphone_permission",
+				});
 				setIsVoiceMode(false);
 				voiceModeActiveRef.current = false;
 			});

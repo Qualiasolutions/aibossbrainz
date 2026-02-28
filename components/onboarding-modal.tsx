@@ -26,6 +26,7 @@ import { useCsrf } from "@/hooks/use-csrf";
 import { BOT_PERSONALITIES } from "@/lib/bot-personalities";
 import { INDUSTRIES } from "@/lib/constants/business-profile";
 import { cn } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -235,7 +236,10 @@ export function OnboardingModal() {
 					if (!profile.onboardedAt) setIsOpen(true);
 				}
 			} catch (error) {
-				console.error("Failed to fetch profile:", error);
+				logClientError(error, {
+					component: "OnboardingModal",
+					action: "fetch_profile",
+				});
 			} finally {
 				setIsLoading(false);
 			}

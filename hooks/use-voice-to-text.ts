@@ -2,6 +2,7 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { logClientError } from "@/lib/client-logger";
 
 type SpeechRecognitionConstructor = typeof window.SpeechRecognition;
 
@@ -132,7 +133,11 @@ export function useVoiceToText({
 				recognitionRef.current = null;
 				return;
 			}
-			console.error("Speech recognition error:", event.error);
+			logClientError(new Error(`Speech recognition error: ${event.error}`), {
+				component: "useVoiceToText",
+				action: "speech_recognition",
+				errorType: event.error,
+			});
 		};
 
 		recognition.onend = () => {
@@ -148,7 +153,10 @@ export function useVoiceToText({
 		try {
 			recognition.start();
 		} catch (err) {
-			console.error("Failed to start dictation:", err);
+			logClientError(err, {
+				component: "useVoiceToText",
+				action: "start_dictation",
+			});
 			setIsRecording(false);
 		}
 	}, [setInput]);

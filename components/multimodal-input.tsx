@@ -26,6 +26,7 @@ import { chatModels } from "@/lib/ai/models";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { cn } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 import {
 	PromptInput,
 	PromptInputModelSelect,
@@ -248,7 +249,11 @@ function PureMultimodalInput({
 					...successfullyUploadedAttachments,
 				]);
 			} catch (error) {
-				console.error("Error uploading files!", error);
+				logClientError(error, {
+					component: "MultimodalInput",
+					action: "upload_files",
+					fileCount: files.length,
+				});
 			} finally {
 				setUploadQueue([]);
 			}

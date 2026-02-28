@@ -10,6 +10,7 @@ import { stripMarkdownForClipboard } from "@/lib/clipboard-utils";
 import type { Vote } from "@/lib/supabase/types";
 import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 import { Action, Actions } from "./elements/actions";
 import {
 	CopyIcon,
@@ -105,7 +106,10 @@ export function PureMessageActions({
 
 			toast.success("PDF exported successfully");
 		} catch (error) {
-			console.error("PDF export failed:", error);
+			logClientError(error, {
+				component: "MessageActions",
+				action: "export_pdf",
+			});
 			toast.error("Failed to export PDF");
 		} finally {
 			setIsExportingPdf(false);
@@ -132,7 +136,10 @@ export function PureMessageActions({
 
 			toast.success("Excel exported successfully");
 		} catch (error) {
-			console.error("Excel export failed:", error);
+			logClientError(error, {
+				component: "MessageActions",
+				action: "export_excel",
+			});
 			toast.error("Failed to export Excel");
 		} finally {
 			setIsExportingExcel(false);

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCsrf } from "@/hooks/use-csrf";
 import type { SupportTicket, SupportTicketMessage } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -70,7 +71,11 @@ export function SupportTicketConversation({ ticketId }: { ticketId: string }) {
 				mutate("/api/support");
 			}
 		} catch (err) {
-			console.error("Error closing ticket:", err);
+			logClientError(err, {
+				component: "SupportTicketConversation",
+				action: "close_ticket",
+				ticketId,
+			});
 		}
 	};
 

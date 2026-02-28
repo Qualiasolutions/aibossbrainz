@@ -8,6 +8,7 @@ import { twMerge } from "tailwind-merge";
 import type { DBMessage, Document } from "@/lib/supabase/types";
 import { ChatSDKError, type ErrorCode } from "./errors";
 import type { ChatMessage, ChatTools, CustomUIDataTypes } from "./types";
+import { logClientError } from "./client-logger";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -39,7 +40,10 @@ export async function initCsrfToken(): Promise<string | null> {
       });
 
       if (!response.ok) {
-        console.error("Failed to fetch CSRF token");
+        logClientError(new Error("Failed to fetch CSRF token"), {
+          component: "utils",
+          action: "csrf_token_fetch",
+        });
         return null;
       }
 
@@ -47,7 +51,10 @@ export async function initCsrfToken(): Promise<string | null> {
       csrfToken = data.token;
       return csrfToken;
     } catch (error) {
-      console.error("CSRF initialization error:", error);
+      logClientError(error, {
+        component: "utils",
+        action: "csrf_init",
+      });
       return null;
     } finally {
       csrfInitPromise = null;

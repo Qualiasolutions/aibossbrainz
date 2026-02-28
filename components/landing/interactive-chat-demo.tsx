@@ -9,6 +9,7 @@ import { useCsrf } from "@/hooks/use-csrf";
 import type { BotType } from "@/lib/bot-personalities";
 import type { LandingPageCMSContent } from "@/lib/cms/landing-page-types";
 import { cn } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 
 interface Message {
 	id: string;
@@ -174,7 +175,10 @@ export function InteractiveChatDemo({ content }: InteractiveChatDemoProps) {
 				}
 			}
 		} catch (err) {
-			console.error("Demo chat error:", err);
+			logClientError(err, {
+				component: "InteractiveChatDemo",
+				action: "demo_chat",
+			});
 			setError("Something went wrong. Please try again.");
 		} finally {
 			setIsLoading(false);

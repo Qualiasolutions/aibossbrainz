@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { AlertTriangle, Home, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -50,9 +51,15 @@ export function ChatErrorBoundary({ children }: ChatErrorBoundaryProps) {
 		<ErrorBoundary
 			fallback={<ChatErrorFallback onReset={() => window.location.reload()} />}
 			onError={(error, errorInfo) => {
-				// Log to console in development, could send to error tracking in production
-				console.error("Chat error:", error);
-				console.error("Component stack:", errorInfo.componentStack);
+				Sentry.captureException(error, {
+					tags: {
+						component: "ChatErrorBoundary",
+						errorBoundary: "true",
+					},
+					extra: {
+						componentStack: errorInfo.componentStack,
+					},
+				});
 			}}
 		>
 			{children}

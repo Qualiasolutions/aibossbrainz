@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useCsrf } from "@/hooks/use-csrf";
+import { logClientError } from "@/lib/client-logger";
 
 interface HistoryPinButtonProps {
 	chatId: string;
@@ -57,7 +58,11 @@ export function HistoryPinButton({
 			// Revert optimistic update
 			setLocalIsPinned(previousState);
 			toast.error("Failed to update pin status");
-			console.error("Pin toggle error:", error);
+			logClientError(error, {
+				component: "HistoryPinButton",
+				action: "toggle_pin",
+				chatId,
+			});
 		} finally {
 			setIsLoading(false);
 		}

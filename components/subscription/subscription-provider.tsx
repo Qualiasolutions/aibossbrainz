@@ -9,6 +9,7 @@ import {
 	useState,
 } from "react";
 import { PaywallModal } from "./paywall-modal";
+import { logClientError } from "@/lib/client-logger";
 
 interface SubscriptionStatus {
 	isActive: boolean;
@@ -56,7 +57,10 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 				setStatus(data);
 			}
 		} catch (error) {
-			console.error("Failed to fetch subscription status:", error);
+			logClientError(error, {
+				component: "SubscriptionProvider",
+				action: "fetch_subscription_status",
+			});
 		} finally {
 			setIsLoading(false);
 		}

@@ -21,6 +21,7 @@ import { useRef, useState } from "react";
 import { toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 
 interface PricingFeature {
 	text: string;
@@ -465,7 +466,11 @@ export function PricingPageClient() {
 				setLoading(null);
 			}
 		} catch (error) {
-			console.error("Checkout error:", error);
+			logClientError(error, {
+				component: "PricingClient",
+				action: "checkout",
+				planId,
+			});
 			toast({
 				type: "error",
 				description:

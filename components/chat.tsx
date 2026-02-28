@@ -46,6 +46,7 @@ import {
 	fetchWithErrorHandlers,
 	generateUUID,
 } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 import { ChatHeader } from "./chat/chat-header";
 import { ChatViewportLock } from "./chat-viewport-lock";
 import { useDataStream } from "./data-stream-provider";
@@ -499,7 +500,11 @@ export function Chat({
 			await exportConversationToPDF(messages, chatTitle, selectedBot);
 			toast({ type: "success", description: "Conversation exported to PDF" });
 		} catch (error) {
-			console.error("Export failed:", error);
+			logClientError(error, {
+				component: "Chat",
+				action: "export_pdf",
+				messageCount: messages.length,
+			});
 			toast({ type: "error", description: "Failed to export conversation" });
 		} finally {
 			setIsExporting(false);

@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { getCsrfToken, initCsrfToken } from "@/lib/utils";
+import { logClientError } from "@/lib/client-logger";
 
 interface SubscriptionData {
 	subscriptionType: string | null;
@@ -153,7 +154,10 @@ export default function SubscriptionPage() {
 				setSubscription(data);
 			}
 		} catch (error) {
-			console.error("Failed to load subscription data:", error);
+			logClientError(error, {
+				component: "SubscriptionPage",
+				action: "load_subscription_data",
+			});
 			toast.error("Failed to load subscription data");
 		} finally {
 			setLoading(false);
@@ -187,7 +191,10 @@ export default function SubscriptionPage() {
 				toast.error("Failed to open billing portal");
 			}
 		} catch (error) {
-			console.error("Failed to open billing portal:", error);
+			logClientError(error, {
+				component: "SubscriptionPage",
+				action: "open_billing_portal",
+			});
 			toast.error("Failed to open billing portal");
 		} finally {
 			setPortalLoading(false);
@@ -217,7 +224,10 @@ export default function SubscriptionPage() {
 				toast.error("Failed to cancel subscription");
 			}
 		} catch (error) {
-			console.error("Failed to cancel subscription:", error);
+			logClientError(error, {
+				component: "SubscriptionPage",
+				action: "cancel_subscription",
+			});
 			toast.error("Failed to cancel subscription");
 		} finally {
 			setCancelling(false);
@@ -252,7 +262,11 @@ export default function SubscriptionPage() {
 				setUpgradeLoading(null);
 			}
 		} catch (error) {
-			console.error("Upgrade error:", error);
+			logClientError(error, {
+				component: "SubscriptionPage",
+				action: "upgrade",
+				planId,
+			});
 			toast.error("Network error. Please check your connection and try again.");
 			setUpgradeLoading(null);
 		}
