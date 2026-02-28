@@ -67,30 +67,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| QUAL-01 | TBD | Pending |
-| QUAL-02 | TBD | Pending |
-| QUAL-03 | TBD | Pending |
-| QUAL-04 | TBD | Pending |
-| QUAL-05 | TBD | Pending |
-| QUAL-06 | TBD | Pending |
-| PERF-01 | TBD | Pending |
-| PERF-02 | TBD | Pending |
-| PERF-03 | TBD | Pending |
-| PERF-04 | TBD | Pending |
-| PERF-05 | TBD | Pending |
-| PERF-06 | TBD | Pending |
-| PERF-07 | TBD | Pending |
-| MON-01 | TBD | Pending |
-| MON-02 | TBD | Pending |
-| MON-03 | TBD | Pending |
-| MON-04 | TBD | Pending |
-| MON-05 | TBD | Pending |
+| QUAL-01 | Phase 27 | Pending |
+| QUAL-02 | Phase 28 | Pending |
+| QUAL-03 | Phase 29 | Pending |
+| QUAL-04 | Phase 29 | Pending |
+| QUAL-05 | Phase 29 | Pending |
+| QUAL-06 | Phase 27 | Pending |
+| PERF-01 | Phase 27 | Pending |
+| PERF-02 | Phase 27 | Pending |
+| PERF-03 | Phase 30 | Pending |
+| PERF-04 | Phase 30 | Pending |
+| PERF-05 | Phase 30 | Pending |
+| PERF-06 | Phase 30 | Pending |
+| PERF-07 | Phase 27 | Pending |
+| MON-01 | Phase 27 | Pending |
+| MON-02 | Phase 31 | Pending |
+| MON-03 | Phase 31 | Pending |
+| MON-04 | Phase 31 | Pending |
+| MON-05 | Phase 31 | Pending |
 
 **Coverage:**
 - v1.5 requirements: 18 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18/18 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after initial definition*
+*Last updated: 2026-02-28 after roadmap creation*

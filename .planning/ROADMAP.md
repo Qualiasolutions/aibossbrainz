@@ -2,132 +2,186 @@
 
 ## Milestones
 
-- v1.0 MVP (Phases 1-5) - shipped
-- v1.1 Alexandria Requests (Phases 6-10) - shipped
-- v1.2 Client Feedback Sweep (Phases 11-15) - shipped
-- v1.3 AI Production Hardening (Phases 16-20) - shipped
-- **v1.4 AI Production Audit Completion** (Phases 21-26) - shipped
-
-## Overview
-
-v1.4 systematically remediates the remaining 50 findings from the AI Production Audit -- 17 medium-severity and 33 low/informational items. Work is organized by security domain: prompt injection hardening first (highest user-facing risk), then auth/subscription gaps, webhook reliability, model resilience with voice optimization, general security/performance tuning, and finally documentation of design decisions. Target: push audit score from 87/100 to 90+ (A-grade).
+- ✅ **v1.0 MVP** - Phases 1-5 (shipped before GSD tracking)
+- ✅ **v1.1 Alexandria Requests** - Phases 6-10 (shipped 2026-02-02)
+- ✅ **v1.2 Client Feedback Sweep** - Phases 11-15 (shipped 2026-02-11)
+- ✅ **v1.3 AI Production Hardening** - Phases 16-20 (shipped 2026-02-18)
+- ✅ **v1.4 Audit Remediation** - Phases 21-26 (shipped 2026-02-18)
+- 🚧 **v1.5 Audit & Performance Fixes** - Phases 27-31 (in progress)
 
 ## Phases
 
-- [x] **Phase 21: Prompt Security Hardening** - Eliminate prompt injection vectors across all AI entry points
-- [x] **Phase 22: Auth & Subscription Guards** - Close subscription enforcement gaps on voice/realtime endpoints
-- [x] **Phase 23: Webhook Reliability** - Achieve true idempotency and failure resilience for Stripe webhooks
-- [x] **Phase 24: Model Resilience & Voice Optimization** - Harden AI provider failover and optimize voice cost/latency
-- [x] **Phase 25: Security, Performance & Cost Controls** - Tighten validation, add pagination, pin model versions
-- [x] **Phase 26: Documentation & Design Decisions** - Document trade-offs and informational findings
+<details>
+<summary>✅ v1.0 MVP - SHIPPED (before GSD tracking)</summary>
 
-## Phase Details
+User authentication, AI personas, focus modes, chat with history, strategy canvases, voice playback, subscriptions, admin panel, landing page, support tickets.
 
-### Phase 21: Prompt Security Hardening
-**Goal**: All AI prompt paths sanitize user-controlled input, preventing injection from manipulating AI behavior
-**Depends on**: Nothing (first phase -- highest risk items)
-**Requirements**: PROMPT-01, PROMPT-02, PROMPT-03, PROMPT-04, PROMPT-05, PROMPT-06, PROMPT-07, PROMPT-08, PROMPT-09
+</details>
+
+<details>
+<summary>✅ v1.1 Alexandria Requests - SHIPPED 2026-02-02</summary>
+
+Bug fixes (admin panel, unpin), branding updates, billing documentation, Mailchimp integration, documentation assets for email marketing.
+
+</details>
+
+<details>
+<summary>✅ v1.2 Client Feedback Sweep - SHIPPED 2026-02-11</summary>
+
+Auth hardening, PDF/copy export quality, AI content generation, voice call fixes, homepage/SEO updates, billing portal, Fireflies KB ingestion, analytics user categories, multi-select reactions.
+
+</details>
+
+<details>
+<summary>✅ v1.3 AI Production Hardening - SHIPPED 2026-02-18</summary>
+
+Model resilience with OpenRouter fallback, security hardening (XSS, middleware allowlist, input validation), PII redaction, voice quality improvements, 98% structured logging coverage, AI cost tracking and alerting.
+
+</details>
+
+<details>
+<summary>✅ v1.4 Audit Remediation - SHIPPED 2026-02-18</summary>
+
+Prompt injection sanitization, subscription enforcement on voice/realtime, webhook idempotency, model resilience with circuit breakers, security validation, pagination, cost controls, design decision documentation.
+
+Phases 21-26, 13 plans total. All 50 audit findings remediated.
+
+</details>
+
+### 🚧 v1.5 Audit & Performance Fixes (In Progress)
+
+**Milestone Goal:** Improve code quality and page performance based on comprehensive audit findings. Reduce LCP times from 2-4s to under 1.5s on key routes. Achieve RES scores of 80+ on subscribe page, 95+ on new chat page.
+
+**Phase Numbering:** Continues from v1.4 (starts at 27)
+
+**Depth:** Standard (5 phases)
+
+**Coverage:** 18/18 requirements mapped ✓
+
+---
+
+#### Phase 27: Foundation & Quick Wins
+
+**Goal:** Establish performance baselines and deliver immediate improvements with minimal risk
+
+**Depends on:** Nothing (first phase)
+
+**Requirements:** QUAL-01, QUAL-06, PERF-01, PERF-02, PERF-07, MON-01
+
 **Success Criteria** (what must be TRUE):
-  1. User-controlled text in title generation, document creation, personalization, and conversation summarization is sanitized through `sanitizePromptContent()` before reaching any AI prompt
-  2. Demo chat route applies the same safety middleware (canary tokens, PII scanning) as the main chat route
-  3. Request suggestions wrap document content in XML delimiters to prevent injection
-  4. Canary token generation uses SHA256 hashing instead of raw secret prefix
-  5. Streaming PII bypass limitation is documented in codebase comments and CLAUDE.md
-**Plans**: 2 plans
+  1. Developer can view bundle size report showing client/server/edge bundles with component-level breakdown
+  2. Subscribe page loads avatar images in WebP format instead of PNG (verified in Network tab)
+  3. Production build console output contains zero debug/log statements (only error/warn preserved for Sentry)
+  4. Pre-commit hook blocks commits containing new lint errors
+  5. Developer has documented baseline metrics (bundle sizes, current LCP times) for comparison
+
+**Plans:** TBD
 
 Plans:
-- [x] 21-01-PLAN.md — Sanitize medium-severity prompt injection vectors (PROMPT-01 through PROMPT-05)
-- [x] 21-02-PLAN.md — Low-severity prompt hardening: blocklist, suggestions, canary hash, docs (PROMPT-06 through PROMPT-09)
+- [ ] 27-01: TBD
 
-### Phase 22: Auth & Subscription Guards
-**Goal**: Expired/unauthorized users cannot consume paid voice and realtime resources
-**Depends on**: Nothing (independent of Phase 21)
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05
+---
+
+#### Phase 28: Logging & Observability
+
+**Goal:** Complete migration to structured logging for production debugging capability
+
+**Depends on:** Phase 27
+
+**Requirements:** QUAL-02
+
 **Success Criteria** (what must be TRUE):
-  1. Voice TTS endpoint rejects requests from users with expired subscriptions
-  2. Realtime voice chat endpoints reject requests from users with expired subscriptions
-  3. Voice rate limiting tracks actual voice requests (not chat messages) in DB fallback mode
-  4. Demo chat endpoint has CSRF protection preventing cross-origin abuse
-  5. Export rate limiting queries AuditLog entries when Redis is unavailable
-**Plans**: 1 plan
+  1. Production logs contain zero console.error calls (100% Pino coverage, up from 98%)
+  2. All error logs include request ID for Sentry correlation
+  3. Structured logs capture error context (user ID, endpoint, operation) in consistent format
+  4. Developer can filter production logs by request ID to trace full request lifecycle
+
+**Plans:** TBD
 
 Plans:
-- [x] 22-01-PLAN.md — Subscription enforcement, rate limit DB fallback fixes, and demo CSRF protection (AUTH-01 through AUTH-05)
+- [ ] 28-01: TBD
 
-### Phase 23: Webhook Reliability
-**Goal**: Stripe webhook processing is idempotent, race-condition-free, and failure-resilient
-**Depends on**: Nothing (independent)
-**Requirements**: WEBHOOK-01, WEBHOOK-02, WEBHOOK-03, WEBHOOK-04, WEBHOOK-05, WEBHOOK-06, WEBHOOK-07
+---
+
+#### Phase 29: File Splitting & Refactoring
+
+**Goal:** Reduce large files to maintainable sizes with clear module boundaries
+
+**Depends on:** Phase 28 (logging complete before refactoring to track errors)
+
+**Requirements:** QUAL-03, QUAL-04, QUAL-05
+
 **Success Criteria** (what must be TRUE):
-  1. Stripe webhook route has `maxDuration` configured to prevent Vercel timeout on slow processing
-  2. Duplicate Stripe events (same event ID) are detected and skipped without side effects
-  3. Concurrent webhook events for the same user are serialized via database locking
-  4. Failed webhook events are persisted to a dead-letter table for later inspection/replay
-  5. Webhook endpoint has rate limiting to prevent DoS via high-volume signed events
-**Plans**: 3 plans
+  1. Admin landing page split into modular components (no single file exceeds 400 lines)
+  2. Icons.tsx organized by category with barrel exports (navigation, actions, status, brand)
+  3. Onboarding modal refactored into step components with shared wrapper
+  4. TypeScript compilation succeeds with zero errors after all splits
+  5. Bundle analyzer shows no circular dependencies in refactored modules
+
+**Plans:** TBD
 
 Plans:
-- [x] 23-01-PLAN.md — maxDuration export and event-ID-based idempotency replacing status-based dedup (WEBHOOK-01 through WEBHOOK-04)
-- [x] 23-02-PLAN.md — Advisory lock serialization, dead-letter queue, and IP-based rate limiting (WEBHOOK-05 through WEBHOOK-07)
-- [x] 23-03-PLAN.md — Gap closure: Retry-After header, RPC search_path fix, resolvedAt column
+- [ ] 29-01: TBD
 
-### Phase 24: Model Resilience & Voice Optimization
-**Goal**: AI responses survive provider outages gracefully and voice features are cost-optimized
-**Depends on**: Phase 22 (subscription checks should exist before optimizing voice paths)
-**Requirements**: RESIL-01, RESIL-02, RESIL-03, RESIL-04, RESIL-05, RESIL-06, VOICE-01, VOICE-02, VOICE-03
+---
+
+#### Phase 30: Dynamic Import Expansion
+
+**Goal:** Reduce initial bundle size through lazy loading of heavy components
+
+**Depends on:** Phase 29 (files split before applying dynamic imports)
+
+**Requirements:** PERF-03, PERF-04, PERF-05, PERF-06
+
 **Success Criteria** (what must be TRUE):
-  1. Application respects OpenRouter `retry-after` headers instead of hammering a rate-limited provider
-  2. When OpenRouter is completely down, a secondary AI provider serves requests (degraded but functional)
-  3. Collaborative voice generation isolates errors per-segment so one failure does not kill the entire response
-  4. Repeated TTS requests for identical text return cached audio instead of regenerating
-  5. Health check endpoint probes OpenRouter reachability and reports AI provider status
-**Plans**: 2 plans
+  1. New chat page FCP bundle reduces by 30-40% (target: 500KB → 300KB)
+  2. Admin analytics charts load on-demand when user navigates to analytics section
+  3. Subscribe page uses native select instead of Radix Select (lighter bundle)
+  4. Geist fonts subset to latin-only and preload key weights (400, 500, 600)
+  5. Stripe payment flow completes successfully in production build (no code-splitting breakage)
+
+**Plans:** TBD
 
 Plans:
-- [x] 24-01-PLAN.md — Circuit breaker fix, retry-after parsing, provider fallback, Zod summarizer validation, health probe (RESIL-01 through RESIL-06)
-- [x] 24-02-PLAN.md — TTS caching with Vercel Blob, per-segment error isolation, realtime base64 elimination, rate limiting (VOICE-01 through VOICE-03, RESIL-03)
+- [ ] 30-01: TBD
 
-### Phase 25: Security, Performance & Cost Controls
-**Goal**: Validation is tight, chat loads fast, and model versions are pinned for cost predictability
-**Depends on**: Nothing (independent low-severity improvements)
-**Requirements**: SEC-01, SEC-02, SEC-03, PERF-01, PERF-02, PERF-03, COST-01, COST-02, COST-03, COST-04
+---
+
+#### Phase 31: Validation & Monitoring
+
+**Goal:** Verify performance goals achieved and establish ongoing monitoring
+
+**Depends on:** Phase 30 (all optimizations complete)
+
+**Requirements:** MON-02, MON-03, MON-04, MON-05
+
 **Success Criteria** (what must be TRUE):
-  1. API validation errors return generic messages without leaking Zod schema details to clients
-  2. Chat page loads initial messages via pagination (not full history), with older messages loaded on demand
-  3. Model versions are pinned with date suffixes in provider configuration, preventing silent drift
-  4. Demo chat logs token usage for cost tracking
-  5. Per-user spending alerts aggregate daily/monthly costs and flag anomalies
-**Plans**: 3 plans
+  1. Lighthouse CI reports Performance score >90 on subscribe and new chat pages
+  2. Subscribe page LCP measures <1.5s in production (improved from 3.66s)
+  3. Subscribe page achieves RES score of 80+ (Lighthouse metric)
+  4. New chat page achieves RES score of 95+
+  5. CI fails builds when bundle size exceeds defined threshold (prevents regressions)
+
+**Plans:** TBD
 
 Plans:
-- [x] 25-01-PLAN.md — Sanitize Zod error leaks in 8 API routes, tighten CSP, fix ajv vulnerability (SEC-01, SEC-02, SEC-03)
-- [x] 25-02-PLAN.md — Chat message pagination, summary interval optimization, stream failure cleanup (PERF-01, PERF-02, PERF-03)
-- [x] 25-03-PLAN.md — Model documentation alignment, demo cost tracking, per-user spending alerts (COST-01, COST-02, COST-03, COST-04)
+- [ ] 31-01: TBD
 
-### Phase 26: Documentation & Design Decisions
-**Goal**: All informational audit findings are documented as intentional design decisions or considered enhancements
-**Depends on**: Phases 21-25 (documents decisions made during implementation)
-**Requirements**: DOC-01, DOC-02, DOC-03, DOC-04, DOC-05, DOC-06, DOC-07, DOC-08, DOC-09, DOC-10
-**Success Criteria** (what must be TRUE):
-  1. Code comments or CLAUDE.md explain intentional trade-offs for updateDocumentPrompt, CSRF token design, subscription GET behavior, and Supabase ID exposure
-  2. Stream recovery Redis requirement and resumable stream limitations are documented
-  3. Focus mode persistence options (localStorage vs database) are evaluated and decision recorded
-  4. CLAUDE.md focus modes list matches actual implementation
-  5. ElevenLabs cost tracking and payment failure notification considerations are documented with accept/defer decisions
-**Plans**: 1 plan
-
-Plans:
-- [x] 26-01-PLAN.md — Inline DESIGN comments in 7 source files, CLAUDE.md corrections and Design Decisions section, X-XSS-Protection header
+---
 
 ## Progress
 
-**Execution Order:** 21 -> 22 -> 23 -> 24 -> 25 -> 26
+**Execution Order:** Phases 27 → 28 → 29 → 30 → 31
 
 | Phase | Plans Complete | Status | Completed |
-|-------|---------------|--------|-----------|
-| 21. Prompt Security Hardening | 2/2 | Complete | 2026-02-18 |
-| 22. Auth & Subscription Guards | 1/1 | Complete | 2026-02-18 |
-| 23. Webhook Reliability | 3/3 | Complete | 2026-02-18 |
-| 24. Model Resilience & Voice | 2/2 | Complete | 2026-02-19 |
-| 25. Security, Performance & Cost | 3/3 | Complete | 2026-02-18 |
-| 26. Documentation & Decisions | 1/1 | Complete | 2026-02-18 |
+|-------|----------------|--------|-----------|
+| 27. Foundation & Quick Wins | 0/0 | Not started | - |
+| 28. Logging & Observability | 0/0 | Not started | - |
+| 29. File Splitting & Refactoring | 0/0 | Not started | - |
+| 30. Dynamic Import Expansion | 0/0 | Not started | - |
+| 31. Validation & Monitoring | 0/0 | Not started | - |
+
+---
+
+*Roadmap created: 2026-02-28*
+*Milestone: v1.5 Audit & Performance Fixes*
