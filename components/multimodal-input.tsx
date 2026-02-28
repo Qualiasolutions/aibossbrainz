@@ -34,11 +34,10 @@ import {
 	PromptInputSubmit,
 	PromptInputTextarea,
 } from "./elements/prompt-input";
-import { ArrowUpIcon } from "./icons/navigation";
-import { PaperclipIcon } from "./icons/content";
-import { ChevronDownIcon } from "./icons/navigation";
 import { StopIcon } from "./icons/actions";
+import { PaperclipIcon } from "./icons/content";
 import { CpuIcon } from "./icons/misc";
+import { ArrowUpIcon, ChevronDownIcon } from "./icons/navigation";
 import { PreviewAttachment } from "./preview-attachment";
 import { Button } from "./ui/button";
 import type { VisibilityType } from "./visibility-selector";

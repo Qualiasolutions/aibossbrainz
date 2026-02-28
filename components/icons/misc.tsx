@@ -173,4 +173,3 @@ export const PythonIcon = ({ size = 16 }: { size?: number }) => {
 		</svg>
 	);
 };
-

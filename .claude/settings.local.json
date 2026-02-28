@@ -1,0 +1,4 @@
+{
+	"enableAllProjectMcpServers": true,
+	"enabledMcpjsonServers": ["firecrawl", "business-central", "zapier"]
+}

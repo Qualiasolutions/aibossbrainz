@@ -8,9 +8,9 @@ import {
 	updateTicketAdmin,
 } from "@/lib/db/support-queries";
 import { sendTicketReplyNotification } from "@/lib/email/support-notifications";
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import type { TicketPriority, TicketStatus } from "@/lib/supabase/types";
-import { logger } from "@/lib/logger";
 
 async function requireAdmin() {
 	const supabase = await createClient();
@@ -65,7 +65,15 @@ async function sendReply(
 				replyContent: content,
 				userEmail: data.user.email,
 			}).catch((err) => {
-				logger.error({ error: err, component: "SupportTicketDetailPage", action: "send_reply_notification", ticketId }, "Failed to send reply notification email");
+				logger.error(
+					{
+						error: err,
+						component: "SupportTicketDetailPage",
+						action: "send_reply_notification",
+						ticketId,
+					},
+					"Failed to send reply notification email",
+				);
 			});
 		}
 	}

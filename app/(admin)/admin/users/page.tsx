@@ -8,9 +8,9 @@ import {
 	updateUserByAdmin,
 	updateUserSubscription,
 } from "@/lib/admin/queries";
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import type { SubscriptionType } from "@/lib/supabase/types";
-import { logger } from "@/lib/logger";
 
 async function requireAdmin() {
 	const supabase = await createClient();
@@ -80,7 +80,10 @@ async function createUser(data: {
 			};
 		}
 
-		logger.error({ error, component: "AdminUsersPage", action: "create_user" }, "Create user error");
+		logger.error(
+			{ error, component: "AdminUsersPage", action: "create_user" },
+			"Create user error",
+		);
 		return { success: false, error: message };
 	}
 }

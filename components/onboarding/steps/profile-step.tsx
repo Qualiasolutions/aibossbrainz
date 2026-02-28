@@ -59,9 +59,7 @@ export function ProfileStep({ onSubmit }: ProfileStepProps) {
 						id="displayName"
 						placeholder="How should we address you?"
 						value={formData.displayName}
-						onChange={(e) =>
-							setFormData({ displayName: e.target.value })
-						}
+						onChange={(e) => setFormData({ displayName: e.target.value })}
 						className="h-11 border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:border-stone-400 focus:ring-stone-400/20"
 						autoFocus
 					/>
@@ -86,9 +84,7 @@ export function ProfileStep({ onSubmit }: ProfileStepProps) {
 						id="companyName"
 						placeholder="Your company or business name"
 						value={formData.companyName}
-						onChange={(e) =>
-							setFormData({ companyName: e.target.value })
-						}
+						onChange={(e) => setFormData({ companyName: e.target.value })}
 						className="h-11 border-stone-200 bg-white text-stone-900 placeholder:text-stone-400 focus:border-stone-400 focus:ring-stone-400/20"
 					/>
 				</motion.div>

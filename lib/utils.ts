@@ -6,9 +6,9 @@ import { type ClassValue, clsx } from "clsx";
 import { formatISO } from "date-fns";
 import { twMerge } from "tailwind-merge";
 import type { DBMessage, Document } from "@/lib/supabase/types";
+import { logClientError } from "./client-logger";
 import { ChatSDKError, type ErrorCode } from "./errors";
 import type { ChatMessage, ChatTools, CustomUIDataTypes } from "./types";
-import { logClientError } from "./client-logger";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

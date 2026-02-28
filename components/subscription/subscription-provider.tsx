@@ -8,8 +8,8 @@ import {
 	useEffect,
 	useState,
 } from "react";
-import { PaywallModal } from "./paywall-modal";
 import { logClientError } from "@/lib/client-logger";
+import { PaywallModal } from "./paywall-modal";
 
 interface SubscriptionStatus {
 	isActive: boolean;

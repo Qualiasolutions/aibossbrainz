@@ -4,7 +4,6 @@ import {
 	Brain,
 	LayoutGrid,
 	MessageSquare,
-	Sparkles,
 	Users,
 } from "lucide-react";
 import { TargetedStep } from "../shared/targeted-step";

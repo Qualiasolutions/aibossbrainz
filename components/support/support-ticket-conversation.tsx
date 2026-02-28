@@ -7,9 +7,9 @@ import useSWR, { mutate } from "swr";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useCsrf } from "@/hooks/use-csrf";
+import { logClientError } from "@/lib/client-logger";
 import type { SupportTicket, SupportTicketMessage } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
-import { logClientError } from "@/lib/client-logger";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 

@@ -27,8 +27,8 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { getCsrfToken, initCsrfToken } from "@/lib/utils";
 import { logClientError } from "@/lib/client-logger";
+import { getCsrfToken, initCsrfToken } from "@/lib/utils";
 
 interface SubscriptionData {
 	subscriptionType: string | null;

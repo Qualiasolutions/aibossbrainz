@@ -7,9 +7,9 @@ import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { useCsrf } from "@/hooks/use-csrf";
 import type { BotType } from "@/lib/bot-personalities";
+import { logClientError } from "@/lib/client-logger";
 import type { LandingPageCMSContent } from "@/lib/cms/landing-page-types";
 import { cn } from "@/lib/utils";
-import { logClientError } from "@/lib/client-logger";
 
 interface Message {
 	id: string;

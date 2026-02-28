@@ -13,8 +13,8 @@ import {
 import { useState } from "react";
 import { toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { logClientError } from "@/lib/client-logger";
+import { cn } from "@/lib/utils";
 
 interface PaywallModalProps {
 	isOpen: boolean;

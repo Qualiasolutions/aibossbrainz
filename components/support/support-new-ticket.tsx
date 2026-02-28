@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCsrf } from "@/hooks/use-csrf";
-import type { SupportTicket, TicketCategory } from "@/lib/supabase/types";
 import { logClientError } from "@/lib/client-logger";
+import type { SupportTicket, TicketCategory } from "@/lib/supabase/types";
 
 export function SupportNewTicket({
 	onTicketCreated,

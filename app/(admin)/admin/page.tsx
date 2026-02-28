@@ -25,8 +25,8 @@ import {
 	type SupportTicketPreview,
 	type UserPreview,
 } from "@/lib/admin/queries";
-import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { createClient } from "@/lib/supabase/server";
 
 async function requireAdmin() {
 	const supabase = await createClient();
@@ -46,7 +46,10 @@ async function safeGetAdminStats(): Promise<AdminStats | null> {
 	try {
 		return await getAdminStats();
 	} catch (error) {
-		logger.error({ error, component: "AdminDashboard", action: "fetch_stats" }, "Failed to fetch admin stats");
+		logger.error(
+			{ error, component: "AdminDashboard", action: "fetch_stats" },
+			"Failed to fetch admin stats",
+		);
 		return null;
 	}
 }
@@ -57,7 +60,10 @@ async function safeGetRecentActivity(
 	try {
 		return await getRecentActivity(limit);
 	} catch (error) {
-		logger.error({ error, component: "AdminDashboard", action: "fetch_activity" }, "Failed to fetch recent activity");
+		logger.error(
+			{ error, component: "AdminDashboard", action: "fetch_activity" },
+			"Failed to fetch recent activity",
+		);
 		return [];
 	}
 }
@@ -66,7 +72,14 @@ async function safeGetSubscriptionStats(): Promise<SubscriptionStatsType | null>
 	try {
 		return await getSubscriptionStats({ excludeTeam: true });
 	} catch (error) {
-		logger.error({ error, component: "AdminDashboard", action: "fetch_subscription_stats" }, "Failed to fetch subscription stats");
+		logger.error(
+			{
+				error,
+				component: "AdminDashboard",
+				action: "fetch_subscription_stats",
+			},
+			"Failed to fetch subscription stats",
+		);
 		return null;
 	}
 }
@@ -75,7 +88,10 @@ async function safeGetRecentUsers(limit: number): Promise<UserPreview[]> {
 	try {
 		return await getRecentUsers(limit);
 	} catch (error) {
-		logger.error({ error, component: "AdminDashboard", action: "fetch_recent_users" }, "Failed to fetch recent users");
+		logger.error(
+			{ error, component: "AdminDashboard", action: "fetch_recent_users" },
+			"Failed to fetch recent users",
+		);
 		return [];
 	}
 }
@@ -86,7 +102,10 @@ async function safeGetRecentConversations(
 	try {
 		return await getRecentConversations(limit);
 	} catch (error) {
-		logger.error({ error, component: "AdminDashboard", action: "fetch_conversations" }, "Failed to fetch recent conversations");
+		logger.error(
+			{ error, component: "AdminDashboard", action: "fetch_conversations" },
+			"Failed to fetch recent conversations",
+		);
 		return [];
 	}
 }
@@ -97,7 +116,10 @@ async function safeGetRecentSupportTickets(
 	try {
 		return await getRecentSupportTickets(limit);
 	} catch (error) {
-		logger.error({ error, component: "AdminDashboard", action: "fetch_support_tickets" }, "Failed to fetch support tickets");
+		logger.error(
+			{ error, component: "AdminDashboard", action: "fetch_support_tickets" },
+			"Failed to fetch support tickets",
+		);
 		return [];
 	}
 }

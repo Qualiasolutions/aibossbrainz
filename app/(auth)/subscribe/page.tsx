@@ -17,8 +17,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
 import { logClientError } from "@/lib/client-logger";
+import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
 
 const PaymentSuccess = dynamic(() => import("./components/payment-success"), {
 	loading: () => (

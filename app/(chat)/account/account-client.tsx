@@ -5,8 +5,8 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { getCsrfToken, initCsrfToken } from "@/lib/utils";
 import { logClientError } from "@/lib/client-logger";
+import { getCsrfToken, initCsrfToken } from "@/lib/utils";
 import type { ProfileData } from "./components/profile-section";
 
 const ProfileSection = dynamic(() => import("./components/profile-section"));
@@ -154,7 +154,7 @@ export function AccountClient({ initialProfile }: AccountClientProps) {
 				action: "delete_account",
 			});
 			toast.error("Failed to delete account");
-		} finally{
+		} finally {
 			setDeleting(false);
 			setDeleteConfirmText("");
 		}

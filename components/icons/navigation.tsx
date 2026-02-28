@@ -174,4 +174,3 @@ export const GlobeIcon = ({ size = 16 }: { size?: number }) => {
 		</svg>
 	);
 };
-

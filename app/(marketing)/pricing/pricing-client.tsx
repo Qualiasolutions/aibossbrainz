@@ -20,8 +20,8 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
-import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
 import { logClientError } from "@/lib/client-logger";
+import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
 
 interface PricingFeature {
 	text: string;

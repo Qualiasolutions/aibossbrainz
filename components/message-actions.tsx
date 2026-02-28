@@ -13,8 +13,12 @@ import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Action, Actions } from "./elements/actions";
 import { CopyIcon, PencilEditIcon } from "./icons/actions";
-import { FileSpreadsheetIcon, FileTextIcon } from "./icons/status";
-import { ThumbDownIcon, ThumbUpIcon } from "./icons/status";
+import {
+	FileSpreadsheetIcon,
+	FileTextIcon,
+	ThumbDownIcon,
+	ThumbUpIcon,
+} from "./icons/status";
 import { MessageReactions } from "./message-reactions";
 import { VoicePlayerButton } from "./voice-player-button";
 

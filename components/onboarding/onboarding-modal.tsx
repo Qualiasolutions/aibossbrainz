@@ -8,11 +8,8 @@ import { toast } from "@/components/toast";
 import { useCsrf } from "@/hooks/use-csrf";
 import { logClientError } from "@/lib/client-logger";
 import { cn } from "@/lib/utils";
-import {
-	OnboardingContext,
-	type ProfileFormData,
-} from "./onboarding-context";
-import { MeetTeamStep, MEET_TEAM_STEPS } from "./steps/meet-team-step";
+import { OnboardingContext, type ProfileFormData } from "./onboarding-context";
+import { MEET_TEAM_STEPS, MeetTeamStep } from "./steps/meet-team-step";
 import { ProfileStep } from "./steps/profile-step";
 import { ReadyStep } from "./steps/ready-step";
 import { WelcomeStep } from "./steps/welcome-step";
@@ -155,12 +152,9 @@ export function OnboardingModal() {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [isTourMode, isOpen, closeTour]);
 
-	const handleSetFormData = useCallback(
-		(data: Partial<ProfileFormData>) => {
-			setFormData((prev) => ({ ...prev, ...data }));
-		},
-		[],
-	);
+	const handleSetFormData = useCallback((data: Partial<ProfileFormData>) => {
+		setFormData((prev) => ({ ...prev, ...data }));
+	}, []);
 
 	const saveAndFinish = async () => {
 		if (csrfLoading) {
@@ -305,9 +299,7 @@ function CenteredStep({
 						{step.id === "profile" && (
 							<ProfileStep key="profile" onSubmit={goNext} />
 						)}
-						{step.id === "ready" && (
-							<ReadyStep key="ready" onClose={onSkip} />
-						)}
+						{step.id === "ready" && <ReadyStep key="ready" onClose={onSkip} />}
 					</AnimatePresence>
 				</motion.div>
 			</div>

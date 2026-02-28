@@ -234,4 +234,3 @@ export const DeltaIcon = ({ size = 16 }: { size?: number }) => (
 		/>
 	</svg>
 );
-
