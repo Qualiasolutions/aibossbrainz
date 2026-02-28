@@ -360,17 +360,36 @@ export function UsersTable({
 										</td>
 										<td className="hidden sm:table-cell px-3 sm:px-6 py-4">
 											<div className="flex flex-col gap-1">
-												{user.userType === "team" ? (
+												{/* Subscription status badge */}
+												{user.subscriptionStatus === "active" ? (
+													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700">
+														Active
+													</span>
+												) : user.subscriptionStatus === "trialing" ? (
+													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-700">
+														Trialing
+													</span>
+												) : user.subscriptionStatus === "expired" ||
+													user.subscriptionStatus === "cancelled" ? (
+													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-50 text-orange-600">
+														{user.subscriptionStatus === "expired"
+															? "Expired"
+															: "Cancelled"}
+													</span>
+												) : (
+													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-neutral-100 text-neutral-500">
+														No Subscription
+													</span>
+												)}
+												{/* User type badge (only show for team/client) */}
+												{user.userType === "team" && (
 													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-indigo-50 text-indigo-600">
 														Team
 													</span>
-												) : user.userType === "client" ? (
+												)}
+												{user.userType === "client" && (
 													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-sky-50 text-sky-600">
 														Client
-													</span>
-												) : (
-													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-teal-50 text-teal-600">
-														Subscriber
 													</span>
 												)}
 												{user.isAdmin && (
@@ -379,23 +398,9 @@ export function UsersTable({
 														Admin
 													</span>
 												)}
-												{(user.subscriptionStatus === "expired" ||
-													user.subscriptionStatus === "cancelled" ||
-													(getDaysRemaining(user.subscriptionEndDate) !==
-														null &&
-														(getDaysRemaining(user.subscriptionEndDate) ?? 0) <=
-															0)) && (
-													<span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-50 text-orange-600">
-														Unsubscribed
-													</span>
-												)}
-												{user.onboardedAt ? (
-													<span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-600">
-														Onboarded
-													</span>
-												) : (
+												{!user.onboardedAt && (
 													<span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-neutral-100 text-neutral-500">
-														Pending
+														Not Onboarded
 													</span>
 												)}
 											</div>
