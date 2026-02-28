@@ -182,11 +182,32 @@ export async function updateUserByAdmin(
 }
 
 // Update user subscription (change type and reset dates)
+// Also cancels any active Stripe subscription so the user isn't double-charged
 export async function updateUserSubscription(
 	userId: string,
 	subscriptionType: SubscriptionType,
 ) {
 	const supabase = createServiceClient();
+
+	// Cancel existing Stripe subscription if one exists
+	const { data: existing } = await supabase
+		.from("User")
+		.select("stripeSubscriptionId")
+		.eq("id", userId)
+		.single();
+
+	if (existing?.stripeSubscriptionId) {
+		try {
+			const { getStripe } = await import("@/lib/stripe/config");
+			await getStripe().subscriptions.cancel(existing.stripeSubscriptionId);
+		} catch (stripeError) {
+			// Log but don't block — subscription may already be cancelled/expired
+			logger.warn(
+				{ err: stripeError, userId, stripeSubscriptionId: existing.stripeSubscriptionId },
+				"Failed to cancel Stripe subscription during admin update (may already be inactive)",
+			);
+		}
+	}
 
 	const startDate = new Date();
 	const endDate = calculateSubscriptionEndDate(startDate, subscriptionType);
@@ -198,6 +219,7 @@ export async function updateUserSubscription(
 			subscriptionStartDate: startDate.toISOString(),
 			subscriptionEndDate: endDate.toISOString(),
 			subscriptionStatus: "active" as SubscriptionStatus,
+			stripeSubscriptionId: null,
 			profileUpdatedAt: new Date().toISOString(),
 		})
 		.eq("id", userId)
