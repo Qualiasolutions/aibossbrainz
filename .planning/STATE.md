@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 29 of 31 (File Splitting & Refactoring)
-Plan: 3 of 4 complete
-Status: In progress
-Last activity: 2026-02-28 — Completed 29-03-PLAN.md (Onboarding Modal Refactoring)
+Plan: 4 of 4 complete
+Status: ✓ Phase complete
+Last activity: 2026-03-01 — Completed 29-04-PLAN.md (Icon Deprecation & Cleanup)
 
-Progress: [████████░░] 90% (28/31 phases complete, 29 in progress)
+Progress: [█████████░] 94% (29/31 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 39 (11 v1.2 + 10 v1.3 + 13 v1.4 + 5 v1.5)
-- Average duration: 6.6min
-- Total execution time: 246min
+- Total plans completed: 40 (11 v1.2 + 10 v1.3 + 13 v1.4 + 6 v1.5)
+- Average duration: 6.3min
+- Total execution time: 251min
 
 **By Milestone:**
 
@@ -40,8 +40,9 @@ Progress: [████████░░] 90% (28/31 phases complete, 29 in pro
 - Phase 29 Plan 01: 2min 7s (Icon Splitting)
 - Phase 29 Plan 02: 5min (Icon Consumer Migration)
 - Phase 29 Plan 03: 5min 41s (Onboarding Modal Refactoring)
+- Phase 29 Plan 04: 4min 33s (Icon Deprecation & Cleanup)
 
-*Updated after 29-03 completion*
+*Updated after Phase 29 completion (2026-03-01)*
 
 ## Accumulated Context
 
@@ -72,6 +73,9 @@ Recent decisions affecting v1.5 work:
 - 29-03: React Context pattern for onboarding state management (eliminates prop-drilling)
 - 29-03: Separate targeted and centered step rendering (different UI patterns)
 - 29-03: TourStep type duplicated across files for component isolation (slight duplication for clarity)
+- 29-04: Bundle size unchanged despite refactoring (tree-shaking benefits deferred to Phase 30)
+- 29-04: Zero circular dependencies confirmed with madge (clean module graph)
+- 29-04: Modular icon structure preserves tree-shaking (direct imports, no barrel exports)
 
 ### Pending Todos
 
@@ -86,6 +90,7 @@ None yet.
 
 ### Completed
 
+**Phase 29 (Complete 2026-03-01):** File Splitting & Refactoring - 4 plans, 2337 lines split into 15 modules, zero circular dependencies
 **v1.4 (Shipped 2026-02-18):** Phases 21-26, 13 plans -- AI Production Audit Remediation
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
@@ -94,12 +99,12 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-28
-Stopped at: Phase 29 Plan 03 complete (Onboarding Modal Refactoring)
-Resume file: .planning/phases/29-file-splitting-refactoring/29-03-SUMMARY.md
-Next action: Execute Plan 29-04 (Icon Deprecation & Cleanup)
+Last session: 2026-03-01
+Stopped at: Phase 29 complete (all 4 plans executed)
+Resume file: .planning/phases/29-file-splitting-refactoring/29-04-SUMMARY.md
+Next action: Execute Phase 30-route-splitting-lazy-loading
 
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-02-28 after Plan 29-03 completion*
+*Last updated: 2026-03-01 after Phase 29 completion*
