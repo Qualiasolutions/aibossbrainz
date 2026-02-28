@@ -145,10 +145,13 @@ Plans:
   4. Geist fonts subset to latin-only and preload key weights (400, 500, 600)
   5. Stripe payment flow completes successfully in production build (no code-splitting breakage)
 
-**Plans:** TBD
+**Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 30-01: TBD
+- [ ] 30-01-PLAN.md — Baseline bundle analysis and Chat component dynamic imports
+- [ ] 30-02-PLAN.md — Font optimization and native select replacement
+- [ ] 30-03-PLAN.md — Admin analytics and artifact renderer dynamic imports
+- [ ] 30-04-PLAN.md — Production verification and bundle comparison
 
 ---
 
