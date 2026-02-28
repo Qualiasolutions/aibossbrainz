@@ -113,16 +113,20 @@ Plans:
 **Requirements:** QUAL-03, QUAL-04, QUAL-05
 
 **Success Criteria** (what must be TRUE):
-  1. Admin landing page split into modular components (no single file exceeds 400 lines)
-  2. Icons.tsx organized by category with barrel exports (navigation, actions, status, brand)
-  3. Onboarding modal refactored into step components with shared wrapper
-  4. TypeScript compilation succeeds with zero errors after all splits
-  5. Bundle analyzer shows no circular dependencies in refactored modules
+  1. Admin landing page verified as already optimal (308 lines with modular components)
+  2. Icons.tsx (1274 lines, 54 icons) split into 6 category files with direct exports (NO barrel index)
+  3. Icon consumers (~20 files) migrated to direct category imports for tree-shaking
+  4. Onboarding modal (1063 lines) refactored into 9 files with React Context pattern
+  5. TypeScript compilation succeeds with zero errors after all splits
+  6. Bundle analyzer verifies tree-shaking effectiveness and no circular dependencies
 
-**Plans:** TBD
+**Plans:** 4 plans in 4 waves (sequential execution)
 
 Plans:
-- [ ] 29-01: TBD
+- [ ] 29-01-PLAN.md — Split icons.tsx into 6 semantic category files
+- [ ] 29-02-PLAN.md — Migrate icon consumers to direct category imports
+- [ ] 29-03-PLAN.md — Split onboarding modal into step components with shared context
+- [ ] 29-04-PLAN.md — Delete deprecated files and verify bundle improvements
 
 ---
 
@@ -178,7 +182,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 27. Foundation & Quick Wins | 2/2 | ✓ Complete | 2026-02-28 |
 | 28. Logging & Observability | 1/1 | ✓ Complete | 2026-03-01 |
-| 29. File Splitting & Refactoring | 0/0 | Not started | - |
+| 29. File Splitting & Refactoring | 0/4 | Not started | - |
 | 30. Dynamic Import Expansion | 0/0 | Not started | - |
 | 31. Validation & Monitoring | 0/0 | Not started | - |
 
