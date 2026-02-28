@@ -1,7 +1,18 @@
+import bundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
+const withBundleAnalyzer = bundleAnalyzer({
+	enabled: process.env.ANALYZE === "true",
+	openAnalyzer: false,
+});
+
 const nextConfig: NextConfig = {
+	compiler: {
+		removeConsole: {
+			exclude: ["error", "warn"], // Preserve for Sentry
+		},
+	},
 	experimental: {
 		// Tree-shake barrel exports for heavy libraries to reduce bundle size
 		optimizePackageImports: [
@@ -88,8 +99,10 @@ const nextConfig: NextConfig = {
 	},
 };
 
-// Export with Sentry config
-export default withSentryConfig(nextConfig, {
+// Export with wrapper composition: baseConfig → withBundleAnalyzer → withSentryConfig
+const configWithAnalyzer = withBundleAnalyzer(nextConfig);
+
+export default withSentryConfig(configWithAnalyzer, {
 	silent: true,
 	authToken: process.env.SENTRY_AUTH_TOKEN,
 	bundleSizeOptimizations: {

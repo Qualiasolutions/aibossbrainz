@@ -203,7 +203,11 @@ export async function updateUserSubscription(
 		} catch (stripeError) {
 			// Log but don't block — subscription may already be cancelled/expired
 			logger.warn(
-				{ err: stripeError, userId, stripeSubscriptionId: existing.stripeSubscriptionId },
+				{
+					err: stripeError,
+					userId,
+					stripeSubscriptionId: existing.stripeSubscriptionId,
+				},
 				"Failed to cancel Stripe subscription during admin update (may already be inactive)",
 			);
 		}
