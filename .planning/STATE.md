@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 ## Current Position
 
-Phase: 26 (documentation-design-decisions) -- COMPLETE
-Plan: 1 of 1 (phase complete)
-Status: Phase complete
-Last activity: 2026-02-28 - Completed quick task 12: Voice call button, remove CSV export, history pinning
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-28 — Milestone v1.5 started
 
-Progress: ████████████ 12/12 plans (100%)
+Progress: —
 
 ## Performance Metrics
 

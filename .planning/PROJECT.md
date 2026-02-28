@@ -79,17 +79,25 @@ Founders get instant, actionable sales and marketing strategy from AI executives
 - Daily cost alerting cron (COST-01)
 - Monthly cost dashboard API (COST-02)
 
+**v1.4:**
+- Prompt injection sanitization across all AI entry points
+- Subscription enforcement on voice/realtime endpoints
+- Webhook idempotency and failure resilience
+- Model resilience with circuit breakers and abort signals
+- Security validation, pagination, and cost controls
+- Design decision documentation
+
 ### Active
 
-## Current Milestone: v1.4 AI Production Audit Completion
+## Current Milestone: v1.5 Audit & Performance Fixes
 
-**Goal:** Achieve 100% AI Production Audit compliance by systematically addressing all remaining findings.
+**Goal:** Improve code quality and page performance based on comprehensive audit findings.
 
-**Target scope:**
-- Complete remediation of 17 medium-severity findings
-- Address 23 low-severity findings for code quality
-- Review 10 informational items for best practices
-- Maintain current score of 87/100 and push toward A-grade (90+)
+**Target features:**
+- Fix code quality issues (lint errors, console statements, large files)
+- Optimize page performance (image compression, bundle splitting, font optimization)
+- Reduce LCP times from 2-4s to under 1.5s on key routes
+- Achieve RES scores of 80+ on subscribe page, 95+ on new chat page
 
 ### Out of Scope
 
@@ -140,4 +148,4 @@ Known tech debt: cost dashboard API-only (no frontend), AICostLog migration manu
 
 ---
 
-*Last updated: 2026-02-18 after v1.4 milestone start*
+*Last updated: 2026-02-28 after v1.5 milestone start*
