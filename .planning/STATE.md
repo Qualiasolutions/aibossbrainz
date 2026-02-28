@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 27 of 31 (Foundation & Quick Wins)
-Plan: 1 of 2 complete
-Status: In progress
-Last activity: 2026-02-28 — Completed 27-01-PLAN.md (Code Quality Automation)
+Plan: 2 of 2 complete
+Status: Phase complete
+Last activity: 2026-02-28 — Completed 27-02-PLAN.md (Image Optimization & Baseline)
 
-Progress: [███████░░░] 84% (26/31 phases complete, 1/2 phase 27 plans complete)
+Progress: [████████░░] 87% (27/31 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 34 (11 v1.2 + 10 v1.3 + 13 v1.4)
-- Average duration: 6min
-- Total execution time: 220min
+- Total plans completed: 36 (11 v1.2 + 10 v1.3 + 13 v1.4 + 2 v1.5)
+- Average duration: 7min
+- Total execution time: 233min
 
 **By Milestone:**
 
@@ -34,9 +34,10 @@ Progress: [███████░░░] 84% (26/31 phases complete, 1/2 phase
 | v1.4 | 21-26 | <1 day | 13 |
 
 **v1.5 Progress:**
-- Phase 27 Plan 01: 4min 21s (2026-02-28)
+- Phase 27 Plan 01: 4min 21s (Code Quality Automation)
+- Phase 27 Plan 02: 9min (Image Optimization & Baseline)
 
-*Updated after 27-01 completion*
+*Updated after 27-02 completion*
 
 ## Accumulated Context
 
@@ -55,6 +56,9 @@ Recent decisions affecting v1.5 work:
 - 27-01: Preserve console.error/warn in production for Sentry error capture
 - 27-01: Bundle analyzer disabled by default (ANALYZE=true flag) to avoid build overhead
 - 27-01: Pre-commit hooks auto-fix (not block) via Biome --write
+- 27-02: No priority prop on avatar images (small UI elements, not LCP candidates)
+- 27-02: Keep original PNGs for 1-2 sprints as rollback option
+- 27-02: Main chat route (1.06 MB) identified as primary Phase 30 optimization target
 
 ### Pending Todos
 
@@ -78,11 +82,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Plan 27-01 complete (Code Quality Automation)
-Resume file: .planning/phases/27-foundation-quick-wins/27-01-SUMMARY.md
-Next action: Execute plan 27-02 (Bundle Analysis)
+Stopped at: Phase 27 complete (Foundation & Quick Wins)
+Resume file: .planning/phases/27-foundation-quick-wins/27-02-SUMMARY.md
+Next action: Move to Phase 28 (Tree-shaking & Dead Code Removal)
 
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-02-28 after plan 27-01 completion*
+*Last updated: 2026-02-28 after Phase 27 completion*
