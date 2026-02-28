@@ -1,167 +1,96 @@
-# Requirements: AI Boss Brainz
+# Requirements: AI Boss Brainz v1.5
 
-**Defined:** 2026-02-18
+**Defined:** 2026-02-28
 **Core Value:** Founders get instant, actionable sales and marketing strategy from AI executives who remember context and deliver frameworks-based guidance.
 
-## v1.4 Requirements
+## v1.5 Requirements
 
-Requirements for AI Production Audit completion. All findings from audit report systematically addressed.
+Requirements for performance optimization and code quality improvements. Each maps to roadmap phases.
 
-### Prompt Security
+### Code Quality
 
-- [ ] **PROMPT-01**: Fix title generation prompt injection (M-1) - sanitize user messages in title prompts
-- [ ] **PROMPT-02**: Fix document title injection (M-2) - sanitize artifact generation prompts
-- [ ] **PROMPT-03**: Fix personalization context injection (M-3) - sanitize user profile/canvas data
-- [ ] **PROMPT-04**: Fix conversation summarizer injection (M-4) - sanitize conversation text input
-- [ ] **PROMPT-05**: Add demo chat safety middleware (M-5) - canary tokens and PII scanning
-- [ ] **PROMPT-06**: Sanitize request suggestions content (L-1) - XML wrapping for document content
-- [ ] **PROMPT-07**: Extend sanitizePromptContent blocklist (L-2) - cover system tags and role markers
-- [ ] **PROMPT-08**: Hash canary token generation (L-3) - use SHA256 instead of raw secret prefix
-- [ ] **PROMPT-09**: Document streaming PII bypass limitation (L-4) - update docs on detection-only nature
+- [ ] **QUAL-01**: Fix lint formatting error in lib/admin/queries.ts:206
+- [ ] **QUAL-02**: Replace 20 console.error calls with Pino structured logging
+- [ ] **QUAL-03**: Split admin landing page (1540 lines) into maintainable components
+- [ ] **QUAL-04**: Split icons.tsx (1274 lines) into category-based modules
+- [ ] **QUAL-05**: Split onboarding modal (1059 lines) into step components
+- [ ] **QUAL-06**: Add pre-commit lint hooks to prevent future errors
 
-### Auth & Subscription
+### Performance Optimization
 
-- [ ] **AUTH-01**: Add subscription check to voice API (M-6) - prevent expired users from TTS generation
-- [ ] **AUTH-02**: Add subscription check to realtime endpoints (M-7) - prevent expired voice chat access
-- [ ] **AUTH-03**: Fix voice rate limit DB fallback (L-5) - track voice requests not chat messages
-- [ ] **AUTH-04**: Add CSRF protection to demo chat (L-6) - prevent cross-origin abuse
-- [ ] **AUTH-05**: Fix export rate limit DB fallback (L-7) - query AuditLog entries when Redis down
+- [ ] **PERF-01**: Compress avatar PNGs to WebP format (alex-avatar.png, kim-avatar.png, collaborative-avatar.png)
+- [ ] **PERF-02**: Add priority prop to above-fold avatar images
+- [ ] **PERF-03**: Code-split Chat component with dynamic import on /new route
+- [ ] **PERF-04**: Replace Radix Select with native select on subscribe page
+- [ ] **PERF-05**: Dynamic import heavy admin components (analytics charts, artifact renderers)
+- [ ] **PERF-06**: Subset Geist fonts to latin-only and preload key weights
+- [ ] **PERF-07**: Configure SWC compiler to remove console statements in production
 
-### Model Resilience
+### Monitoring & Validation
 
-- [ ] **RESIL-01**: Add OpenRouter rate limit header parsing (M-12) - respect retry-after values
-- [ ] **RESIL-02**: Implement provider-level fallback (M-13) - secondary provider when OpenRouter down
-- [ ] **RESIL-03**: Add collaborative voice error isolation (M-14) - per-segment error handling
-- [ ] **RESIL-04**: Add Zod validation to conversation summarizer (L-11) - schema validation for AI JSON
-- [ ] **RESIL-05**: Add OpenRouter probe to health check (L-12) - verify AI provider reachability
-- [ ] **RESIL-06**: Fix circuit breaker error classification (L-13) - only record transient failures
-
-### Voice & Realtime
-
-- [ ] **VOICE-01**: Implement TTS caching system (M-15) - cache repeated audio generation
-- [ ] **VOICE-02**: Add rate limiting to realtime route (M-16) - prevent unbounded AI/TTS costs
-- [ ] **VOICE-03**: Optimize realtime audio streaming (M-17) - avoid base64 data URLs
-
-### Webhook Reliability
-
-- [ ] **WEBHOOK-01**: Add maxDuration to Stripe webhook (M-8) - prevent Vercel timeout
-- [ ] **WEBHOOK-02**: Implement event-ID deduplication (M-9) - true idempotency for Stripe events
-- [ ] **WEBHOOK-03**: Add idempotency to subscription.updated (M-10) - prevent redundant updates
-- [ ] **WEBHOOK-04**: Add idempotency to invoice.paid (M-11) - prevent date drift
-- [ ] **WEBHOOK-05**: Fix webhook race conditions (L-8) - database locking for concurrent events
-- [ ] **WEBHOOK-06**: Add dead-letter queue for failures (L-9) - persistent failure tracking
-- [ ] **WEBHOOK-07**: Add webhook endpoint rate limiting (L-10) - prevent DoS via signed events
-
-### Security & Validation
-
-- [ ] **SEC-01**: Fix Zod error detail leaks (L-14) - return generic validation errors to clients
-- [ ] **SEC-02**: Tighten CSP unsafe-inline policy (L-15) - consider nonces/hashes for scripts
-- [ ] **SEC-03**: Update ajv dependency vulnerability (L-16) - upgrade when Sentry updates
-
-### Performance & Cost
-
-- [ ] **PERF-01**: Add message pagination to chat page (L-17) - limit initial message load
-- [ ] **PERF-02**: Optimize conversation summary frequency (L-18) - interval-based generation
-- [ ] **PERF-03**: Add message rollback on stream failure (L-19) - clean up dangling messages
-- [ ] **COST-01**: Pin model versions with date suffixes (L-20) - prevent silent version drift
-- [ ] **COST-02**: Align model documentation (L-21) - fix Gemini version references
-- [ ] **COST-03**: Add cost tracking to demo chat (L-22) - log token usage
-- [ ] **COST-04**: Implement per-user spending alerts (L-23) - daily/monthly cost aggregation
-
-### Documentation & Info
-
-- [ ] **DOC-01**: Document updateDocumentPrompt code handling (I-1) - clarify intentional trade-off
-- [ ] **DOC-02**: Document CSRF token design (I-2) - explain unauthenticated endpoint rationale
-- [ ] **DOC-03**: Document subscription GET behavior (I-3) - clarify graceful unauthenticated return
-- [ ] **DOC-04**: Consider payment failure notifications (I-4) - user visibility for failed payments
-- [ ] **DOC-05**: Document stream recovery Redis requirement (I-5) - clarify resumable limitations
-- [ ] **DOC-06**: Consider focus mode persistence (I-6) - evaluate localStorage vs database storage
-- [ ] **DOC-07**: Update CLAUDE.md focus modes (I-7) - align with actual implementation
-- [ ] **DOC-08**: Acknowledge Supabase ID exposure (I-8) - confirm by-design public nature
-- [ ] **DOC-09**: Consider XSS-Protection header (I-9) - disable buggy auditor in old browsers
-- [ ] **DOC-10**: Consider ElevenLabs cost tracking (I-10) - evaluate character-based logging
+- [ ] **MON-01**: Install @next/bundle-analyzer and establish baseline metrics
+- [ ] **MON-02**: Configure Lighthouse CI with Core Web Vitals targets (LCP <1.5s, INP <200ms)
+- [ ] **MON-03**: Add CI bundle size monitoring to prevent regressions
+- [ ] **MON-04**: Validate LCP improvement from 3.66s to <1.5s on subscribe page
+- [ ] **MON-05**: Verify RES score improvement to 80+ on subscribe, 95+ on /new
 
 ## v2 Requirements
 
-Deferred to future release.
+Deferred to future release. Tracked but not in current roadmap.
 
-### Advanced Features
-- **VOICE-04**: Real-time voice conversation streaming
-- **AI-01**: Multi-model AI provider switching UI
-- **ADMIN-01**: Webhook event replay dashboard
-- **PERF-05**: Advanced conversation virtualization
+### Advanced Performance
+
+- **PERF-08**: Implement request-level performance tracking with OpenTelemetry
+- **PERF-09**: Custom performance monitoring dashboard beyond Vercel Analytics
+- **PERF-10**: Automated component performance profiling in development
+
+### Enhanced Quality
+
+- **QUAL-07**: Automated circular dependency detection in CI
+- **QUAL-08**: Advanced ESLint rules for React 19 best practices
 
 ## Out of Scope
 
-Explicitly excluded for this milestone.
+Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| New audit categories | Focus on completing existing findings |
-| UI/UX improvements | Pure remediation milestone, no user-facing changes |
-| Performance benchmarking | Fix implementation first, measure after |
-| Additional safety rules | Current safety rails already comprehensive |
+| Sharp as npm dependency | Conflicts with Vercel auto-install, unnecessary |
+| Babel plugins for console removal | Next.js 15 uses SWC compiler, Babel disables SWC optimization |
+| Custom image CDN | Next.js + Vercel sufficient for requirements |
+| Database migrations to split existing data | No data structure changes required |
+| Mobile app optimization | Web-first approach maintained |
 
 ## Traceability
 
+Which phases cover which requirements. Updated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROMPT-01 | Phase 21 | Pending |
-| PROMPT-02 | Phase 21 | Pending |
-| PROMPT-03 | Phase 21 | Pending |
-| PROMPT-04 | Phase 21 | Pending |
-| PROMPT-05 | Phase 21 | Pending |
-| PROMPT-06 | Phase 21 | Pending |
-| PROMPT-07 | Phase 21 | Pending |
-| PROMPT-08 | Phase 21 | Pending |
-| PROMPT-09 | Phase 21 | Pending |
-| AUTH-01 | Phase 22 | Pending |
-| AUTH-02 | Phase 22 | Pending |
-| AUTH-03 | Phase 22 | Pending |
-| AUTH-04 | Phase 22 | Pending |
-| AUTH-05 | Phase 22 | Pending |
-| WEBHOOK-01 | Phase 23 | Pending |
-| WEBHOOK-02 | Phase 23 | Pending |
-| WEBHOOK-03 | Phase 23 | Pending |
-| WEBHOOK-04 | Phase 23 | Pending |
-| WEBHOOK-05 | Phase 23 | Pending |
-| WEBHOOK-06 | Phase 23 | Pending |
-| WEBHOOK-07 | Phase 23 | Pending |
-| RESIL-01 | Phase 24 | Pending |
-| RESIL-02 | Phase 24 | Pending |
-| RESIL-03 | Phase 24 | Pending |
-| RESIL-04 | Phase 24 | Pending |
-| RESIL-05 | Phase 24 | Pending |
-| RESIL-06 | Phase 24 | Pending |
-| VOICE-01 | Phase 24 | Pending |
-| VOICE-02 | Phase 24 | Pending |
-| VOICE-03 | Phase 24 | Pending |
-| SEC-01 | Phase 25 | Pending |
-| SEC-02 | Phase 25 | Pending |
-| SEC-03 | Phase 25 | Pending |
-| PERF-01 | Phase 25 | Pending |
-| PERF-02 | Phase 25 | Pending |
-| PERF-03 | Phase 25 | Pending |
-| COST-01 | Phase 25 | Pending |
-| COST-02 | Phase 25 | Pending |
-| COST-03 | Phase 25 | Pending |
-| COST-04 | Phase 25 | Pending |
-| DOC-01 | Phase 26 | Pending |
-| DOC-02 | Phase 26 | Pending |
-| DOC-03 | Phase 26 | Pending |
-| DOC-04 | Phase 26 | Pending |
-| DOC-05 | Phase 26 | Pending |
-| DOC-06 | Phase 26 | Pending |
-| DOC-07 | Phase 26 | Pending |
-| DOC-08 | Phase 26 | Pending |
-| DOC-09 | Phase 26 | Pending |
-| DOC-10 | Phase 26 | Pending |
+| QUAL-01 | TBD | Pending |
+| QUAL-02 | TBD | Pending |
+| QUAL-03 | TBD | Pending |
+| QUAL-04 | TBD | Pending |
+| QUAL-05 | TBD | Pending |
+| QUAL-06 | TBD | Pending |
+| PERF-01 | TBD | Pending |
+| PERF-02 | TBD | Pending |
+| PERF-03 | TBD | Pending |
+| PERF-04 | TBD | Pending |
+| PERF-05 | TBD | Pending |
+| PERF-06 | TBD | Pending |
+| PERF-07 | TBD | Pending |
+| MON-01 | TBD | Pending |
+| MON-02 | TBD | Pending |
+| MON-03 | TBD | Pending |
+| MON-04 | TBD | Pending |
+| MON-05 | TBD | Pending |
 
 **Coverage:**
-- v1.4 requirements: 50 total
-- Mapped to phases: 50
-- Unmapped: 0
+- v1.5 requirements: 18 total
+- Mapped to phases: 0 (pending roadmap creation)
+- Unmapped: 18 ⚠️
 
 ---
-*Requirements defined: 2026-02-18*
-*Last updated: 2026-02-18 after roadmap creation*
+*Requirements defined: 2026-02-28*
+*Last updated: 2026-02-28 after initial definition*
