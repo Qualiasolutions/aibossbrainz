@@ -36,6 +36,7 @@ const exportConversationToPDF = (
 		mod.exportConversationToPDF(...args),
 	);
 
+import { logClientError } from "@/lib/client-logger";
 import { ChatSDKError } from "@/lib/errors";
 import type { CanvasType, DBMessage, Vote } from "@/lib/supabase/types";
 import type { Attachment, ChatMessage } from "@/lib/types";
@@ -46,7 +47,6 @@ import {
 	fetchWithErrorHandlers,
 	generateUUID,
 } from "@/lib/utils";
-import { logClientError } from "@/lib/client-logger";
 import { ChatHeader } from "./chat/chat-header";
 import { ChatViewportLock } from "./chat-viewport-lock";
 import { useDataStream } from "./data-stream-provider";
@@ -71,7 +71,7 @@ import { MultimodalInput } from "./multimodal-input";
 
 const OnboardingModal = dynamic(
 	() =>
-		import("./onboarding-modal").then((mod) => ({
+		import("./onboarding/onboarding-modal").then((mod) => ({
 			default: mod.OnboardingModal,
 		})),
 	{ ssr: false, loading: () => null },
