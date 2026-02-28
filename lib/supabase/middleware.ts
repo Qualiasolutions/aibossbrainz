@@ -193,7 +193,7 @@ export async function updateSession(request: NextRequest) {
 		const { data: userData } = await supabase
 			.from("User")
 			.select(
-				"subscriptionStatus, subscriptionType, subscriptionEndDate, isAdmin, stripeCustomerId",
+				"subscriptionStatus, subscriptionType, subscriptionEndDate, isAdmin, stripeCustomerId, stripeSubscriptionId",
 			)
 			.eq("id", user.id)
 			.maybeSingle();
@@ -224,11 +224,14 @@ export async function updateSession(request: NextRequest) {
 				}
 			} else if (
 				userData.subscriptionStatus === "pending" &&
-				userData.stripeCustomerId
+				userData.stripeSubscriptionId
 			) {
-				// User has a Stripe customer but DB still says "pending" — webhook
-				// likely failed. Redirect to subscribe with payment=success so the
-				// subscribe page can sync from Stripe via the /api/subscription endpoint.
+				// User has an actual Stripe subscription but DB still says "pending" —
+				// webhook likely failed. Redirect to subscribe with payment=success so
+				// the subscribe page can sync from Stripe via /api/subscription.
+				// NOTE: We check stripeSubscriptionId (not stripeCustomerId) because
+				// a customer is created at checkout start, before payment completes.
+				// Using stripeCustomerId would trap abandoned-checkout users in a loop.
 				const url = request.nextUrl.clone();
 				url.pathname = "/subscribe";
 				url.searchParams.set("payment", "success");
