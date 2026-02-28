@@ -90,6 +90,9 @@ const nextConfig: NextConfig = {
 
 // Export with Sentry config
 export default withSentryConfig(nextConfig, {
-	// Suppresses source map uploading in favor of Vercel source map uploads
 	silent: true,
+	authToken: process.env.SENTRY_AUTH_TOKEN,
+	bundleSizeOptimizations: {
+		excludeDebugStatements: true,
+	},
 });
