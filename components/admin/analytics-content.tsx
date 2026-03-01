@@ -1,7 +1,7 @@
 "use client";
 
-import dynamicImport from "next/dynamic";
 import { Activity, MessageSquare, TrendingUp, Users } from "lucide-react";
+import dynamicImport from "next/dynamic";
 
 // Dynamically import heavy admin chart components
 const ExecutiveBreakdown = dynamicImport(
