@@ -10,13 +10,6 @@ import { toast } from "@/components/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { logClientError } from "@/lib/client-logger";
 import { cn, getCsrfToken, initCsrfToken } from "@/lib/utils";
 
@@ -526,18 +519,19 @@ function SubscribeContent() {
 									>
 										Industry
 									</Label>
-									<Select value={industry} onValueChange={setIndustry}>
-										<SelectTrigger className="mt-2 h-11 border-stone-200 bg-white focus:border-stone-400 focus:ring-stone-400">
-											<SelectValue placeholder="Select your industry" />
-										</SelectTrigger>
-										<SelectContent>
-											{industries.map((ind) => (
-												<SelectItem key={ind} value={ind}>
-													{ind}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
+									<select
+										id="industry"
+										value={industry}
+										onChange={(e) => setIndustry(e.target.value)}
+										className="mt-2 h-11 w-full rounded-md border border-stone-200 bg-white px-3 text-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-0"
+									>
+										<option value="">Select your industry</option>
+										{industries.map((ind) => (
+											<option key={ind} value={ind}>
+												{ind}
+											</option>
+										))}
+									</select>
 								</div>
 							</div>
 
