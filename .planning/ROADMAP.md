@@ -150,7 +150,7 @@ Plans:
 Plans:
 - [ ] 30-01-PLAN.md — Baseline bundle analysis and Chat component dynamic imports
 - [ ] 30-02-PLAN.md — Font optimization and native select replacement
-- [ ] 30-03-PLAN.md — Admin analytics and artifact renderer dynamic imports
+- [ ] 30-03-PLAN.md — Admin analytics dynamic imports
 - [ ] 30-04-PLAN.md — Production verification and bundle comparison
 
 ---
