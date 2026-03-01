@@ -1,6 +1,6 @@
+import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import dynamic from "next/dynamic";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
