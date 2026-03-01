@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { ChatWithErrorBoundary } from "@/components/chat-with-error-boundary";
+import dynamic from "next/dynamic";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
@@ -15,6 +15,20 @@ const INITIAL_MESSAGE_LIMIT = 50;
 
 import { createClient } from "@/lib/supabase/server";
 import { convertToUIMessages } from "@/lib/utils";
+
+const ChatWithErrorBoundary = dynamic(
+	() =>
+		import("@/components/chat-with-error-boundary").then(
+			(mod) => mod.ChatWithErrorBoundary,
+		),
+	{
+		loading: () => (
+			<div className="flex items-center justify-center h-screen">
+				<div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-stone-900" />
+			</div>
+		),
+	},
+);
 
 // Type guard for BotType validation
 function isBotType(value: unknown): value is BotType {
