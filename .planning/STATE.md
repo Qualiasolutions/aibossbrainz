@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives who remember context and deliver frameworks-based guidance.
 
-**Current focus:** Phase 29 - File Splitting & Refactoring (in progress)
+**Current focus:** Phase 30 - Dynamic Import Expansion (in progress)
 
 ## Current Position
 
-Phase: 29 of 31 (File Splitting & Refactoring)
-Plan: 4 of 4 complete
-Status: ✓ Phase complete
-Last activity: 2026-03-01 — Completed 29-04-PLAN.md (Icon Deprecation & Cleanup)
+Phase: 30 of 31 (Dynamic Import Expansion)
+Plan: 2 of 4 complete
+Status: In progress
+Last activity: 2026-03-01 — Completed 30-02-PLAN.md (Font Optimization & Native Select Replacement)
 
-Progress: [█████████░] 94% (29/31 phases complete)
+Progress: [█████████░] 94% (29/31 phases complete, Phase 30 at 50%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 40 (11 v1.2 + 10 v1.3 + 13 v1.4 + 6 v1.5)
-- Average duration: 6.3min
-- Total execution time: 251min
+- Total plans completed: 41 (11 v1.2 + 10 v1.3 + 13 v1.4 + 7 v1.5)
+- Average duration: 6.2min
+- Total execution time: 256min
 
 **By Milestone:**
 
@@ -41,8 +41,9 @@ Progress: [█████████░] 94% (29/31 phases complete)
 - Phase 29 Plan 02: 5min (Icon Consumer Migration)
 - Phase 29 Plan 03: 5min 41s (Onboarding Modal Refactoring)
 - Phase 29 Plan 04: 4min 33s (Icon Deprecation & Cleanup)
+- Phase 30 Plan 02: 4min 55s (Font Optimization & Native Select Replacement)
 
-*Updated after Phase 29 completion (2026-03-01)*
+*Updated after Phase 30-02 completion (2026-03-01)*
 
 ## Accumulated Context
 
@@ -76,6 +77,9 @@ Recent decisions affecting v1.5 work:
 - 29-04: Bundle size unchanged despite refactoring (tree-shaking benefits deferred to Phase 30)
 - 29-04: Zero circular dependencies confirmed with madge (clean module graph)
 - 29-04: Modular icon structure preserves tree-shaking (direct imports, no barrel exports)
+- 30-02: Geist font package exports pre-configured objects (no runtime configuration API)
+- 30-02: Native select sufficient for simple dropdowns (Radix Select kept for complex UI)
+- 30-02: Subscribe page bundle reduced by ~29.5KB via Radix Select removal
 
 ### Pending Todos
 
@@ -90,6 +94,7 @@ None yet.
 
 ### Completed
 
+**Phase 30-02 (Complete 2026-03-01):** Font Optimization & Native Select - Verified Geist font optimization, replaced Radix Select with native select on subscribe page (~29.5KB reduction)
 **Phase 29 (Complete 2026-03-01):** File Splitting & Refactoring - 4 plans, 2337 lines split into 15 modules, zero circular dependencies
 **v1.4 (Shipped 2026-02-18):** Phases 21-26, 13 plans -- AI Production Audit Remediation
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
@@ -100,11 +105,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Phase 29 complete (all 4 plans executed)
-Resume file: .planning/phases/29-file-splitting-refactoring/29-04-SUMMARY.md
-Next action: Execute Phase 30-route-splitting-lazy-loading
+Stopped at: Phase 30 Plan 02 complete (2 of 4 plans executed)
+Resume file: .planning/phases/30-dynamic-import-expansion/30-02-SUMMARY.md
+Next action: Execute Phase 30-03-PLAN.md (Dynamic Imports for Heavy Components)
 
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-03-01 after Phase 29 completion*
+*Last updated: 2026-03-01 after Phase 30-02 completion*
