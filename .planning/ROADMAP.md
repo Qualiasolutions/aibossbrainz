@@ -148,10 +148,10 @@ Plans:
 **Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 30-01-PLAN.md — Baseline bundle analysis and Chat component dynamic imports
-- [ ] 30-02-PLAN.md — Font optimization and native select replacement
-- [ ] 30-03-PLAN.md — Admin analytics dynamic imports
-- [ ] 30-04-PLAN.md — Production verification and bundle comparison
+- [x] 30-01-PLAN.md — Baseline bundle analysis and Chat component dynamic imports
+- [x] 30-02-PLAN.md — Font optimization and native select replacement
+- [x] 30-03-PLAN.md — Admin analytics dynamic imports
+- [x] 30-04-PLAN.md — Production verification and bundle comparison
 
 ---
 
@@ -186,7 +186,7 @@ Plans:
 | 27. Foundation & Quick Wins | 2/2 | ✓ Complete | 2026-02-28 |
 | 28. Logging & Observability | 1/1 | ✓ Complete | 2026-03-01 |
 | 29. File Splitting & Refactoring | 4/4 | ✓ Complete | 2026-03-01 |
-| 30. Dynamic Import Expansion | 0/0 | Not started | - |
+| 30. Dynamic Import Expansion | 4/4 | ✓ Complete | 2026-03-01 |
 | 31. Validation & Monitoring | 0/0 | Not started | - |
 
 ---
