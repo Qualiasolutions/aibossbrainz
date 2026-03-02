@@ -13,9 +13,7 @@ import {
 	useArtifactSelector,
 } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
-import { useAutoSpeak } from "@/hooks/use-auto-speak";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import { useInlineVoice } from "@/hooks/use-inline-voice";
 import { useKeyboardHeight } from "@/hooks/use-keyboard-height";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useVoiceToText } from "@/hooks/use-voice-to-text";
@@ -481,14 +479,6 @@ export function Chat({
 		setMessages,
 	});
 
-	// Auto-speak functionality - speaks assistant responses automatically when streaming completes
-	// Defaults to ON and persists user preference to localStorage
-	useAutoSpeak({
-		messages,
-		status,
-		botType: activeBotTypeForStreaming,
-	});
-
 	// Export conversation handlers
 	const [isExporting, setIsExporting] = useState(false);
 
@@ -511,35 +501,12 @@ export function Chat({
 		}
 	};
 
-	// Inline voice mode (ChatGPT-style)
-	const {
-		isVoiceMode,
-		isListening: isVoiceListening,
-		isProcessing: isVoiceProcessing,
-		isSupported: isVoiceSupported,
-		transcript: voiceTranscript,
-		toggleVoiceMode,
-		stopVoiceMode,
-	} = useInlineVoice({ status, sendMessage });
-
 	// One-shot dictation (speech-to-text into input field)
 	const {
 		isRecording: isDictating,
 		isSupported: isDictationSupported,
 		toggleRecording: onDictationToggle,
 	} = useVoiceToText({ setInput });
-
-	// Listen for voice mode toggle from sidebar
-	useEffect(() => {
-		const handleVoiceToggle = () => {
-			toggleVoiceMode();
-		};
-
-		window.addEventListener("toggle-voice-mode", handleVoiceToggle);
-		return () => {
-			window.removeEventListener("toggle-voice-mode", handleVoiceToggle);
-		};
-	}, [toggleVoiceMode]);
 
 	return (
 		<>
@@ -655,15 +622,9 @@ export function Chat({
 										input={input}
 										isDictating={isDictating}
 										isDictationSupported={isDictationSupported}
-										isVoiceListening={isVoiceListening}
-										isVoiceMode={isVoiceMode}
-										isVoiceProcessing={isVoiceProcessing}
-										isVoiceSupported={isVoiceSupported}
 										messages={messages}
 										onDictationToggle={onDictationToggle}
 										onModelChange={setCurrentModelId}
-										onVoiceStop={stopVoiceMode}
-										onVoiceToggle={toggleVoiceMode}
 										selectedModelId={currentModelId}
 										selectedVisibilityType={visibilityType}
 										sendMessage={sendMessage}
@@ -673,7 +634,6 @@ export function Chat({
 										status={status}
 										stop={stop}
 										usage={usage}
-										voiceTranscript={voiceTranscript}
 									/>
 								</div>
 							</div>
