@@ -7,7 +7,7 @@
 - ✅ **v1.2 Client Feedback Sweep** - Phases 11-15 (shipped 2026-02-11)
 - ✅ **v1.3 AI Production Hardening** - Phases 16-20 (shipped 2026-02-18)
 - ✅ **v1.4 Audit Remediation** - Phases 21-26 (shipped 2026-02-18)
-- 🚧 **v1.5 Audit & Performance Fixes** - Phases 27-31 (in progress)
+- 🚧 **v1.5 Audit & Performance Fixes** - Phases 27-32 (in progress)
 
 ## Phases
 
@@ -177,9 +177,35 @@ Plans:
 
 ---
 
+#### Phase 32: Voice Call Redesign
+
+**Goal:** Separate chat and voice into distinct experiences — remove inline voice/TTS from chat bubbles, add dedicated "Call" button in sidebar for premium real-time voice calls with Alexandria or Kim
+
+**Depends on:** Phase 31
+
+**Requirements:** UX redesign, voice architecture
+
+**Success Criteria** (what must be TRUE):
+  1. Chat bubbles have no voice playback button — chat is text-only
+  2. Automatic TTS on AI responses is disabled
+  3. Top-left sidebar shows "Call" button (replacing Clear button)
+  4. Call button opens a premium, minimalist real-time voice call UI
+  5. Users can select Alexandria or Kim for the voice call
+  6. Voice call connects to real-time AI agent conversation
+
+**Plans:** 4 plans in 3 waves
+
+Plans:
+- [ ] 32-01-PLAN.md — Remove voice features from chat (Wave 1, cleanup)
+- [ ] 32-02-PLAN.md — Build call modal infrastructure (Wave 1, new components)
+- [ ] 32-03-PLAN.md — Integrate call button into sidebar (Wave 2)
+- [ ] 32-04-PLAN.md — Verification checkpoint (Wave 3)
+
+---
+
 ## Progress
 
-**Execution Order:** Phases 27 → 28 → 29 → 30 → 31
+**Execution Order:** Phases 27 → 28 → 29 → 30 → 31 → 32
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -188,6 +214,7 @@ Plans:
 | 29. File Splitting & Refactoring | 4/4 | ✓ Complete | 2026-03-01 |
 | 30. Dynamic Import Expansion | 4/4 | ✓ Complete | 2026-03-01 |
 | 31. Validation & Monitoring | 0/0 | Not started | - |
+| 32. Voice Call Redesign | 0/4 | Not started | - |
 
 ---
 
