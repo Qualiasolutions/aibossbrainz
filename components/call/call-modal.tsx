@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { BotType } from "@/lib/bot-personalities";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import type { BotType } from "@/lib/bot-personalities";
 import { ExecutiveSelector } from "./executive-selector";
 import { VoiceCallInterface } from "./voice-call-interface";
 

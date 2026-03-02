@@ -7,11 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useMobileSidebar } from "@/components/mobile-sidebar-context";
 import { CallModal } from "@/components/call/call-modal";
-import {
-	SidebarHistory,
-} from "@/components/sidebar-history";
+import { useMobileSidebar } from "@/components/mobile-sidebar-context";
+import { SidebarHistory } from "@/components/sidebar-history";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import { Button } from "@/components/ui/button";
 import {

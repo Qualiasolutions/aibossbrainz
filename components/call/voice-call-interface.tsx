@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import type { BotType } from "@/lib/bot-personalities";
 import { useVoiceCall } from "@/hooks/use-voice-call";
-import { VoiceVisualizer } from "./voice-visualizer";
+import type { BotType } from "@/lib/bot-personalities";
 import { CallControls } from "./call-controls";
+import { VoiceVisualizer } from "./voice-visualizer";
 
 interface VoiceCallInterfaceProps {
 	executive: BotType;
@@ -21,8 +21,14 @@ export function VoiceCallInterface({
 	executive,
 	onHangup,
 }: VoiceCallInterfaceProps) {
-	const { callState, transcript, startCall, stopCall, isListening, isSpeaking } =
-		useVoiceCall({ executive });
+	const {
+		callState,
+		transcript,
+		startCall,
+		stopCall,
+		isListening,
+		isSpeaking,
+	} = useVoiceCall({ executive });
 
 	// Start call on mount
 	useEffect(() => {
@@ -50,9 +56,7 @@ export function VoiceCallInterface({
 		<div className="flex flex-col items-center justify-between min-h-[400px] py-8 px-6 space-y-8">
 			{/* Executive name */}
 			<div className="text-center space-y-1">
-				<h2 className="text-2xl font-semibold">
-					{EXECUTIVE_NAMES[executive]}
-				</h2>
+				<h2 className="text-2xl font-semibold">{EXECUTIVE_NAMES[executive]}</h2>
 				<p className="text-sm text-muted-foreground">{getStateLabel()}</p>
 			</div>
 

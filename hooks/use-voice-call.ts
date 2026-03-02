@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { BotType } from "@/lib/bot-personalities";
 import { useCsrf } from "@/hooks/use-csrf";
+import type { BotType } from "@/lib/bot-personalities";
 import { logClientError } from "@/lib/client-logger";
 
 export type CallState = "idle" | "listening" | "thinking" | "speaking";
@@ -37,6 +37,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	const recognitionRef = useRef<SpeechRecognition | null>(null);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 	const shouldListenRef = useRef(false); // Controls whether to restart recognition
+	const startRecognitionRef = useRef<() => void>(() => {});
 
 	// Update state flags when callState changes
 	useEffect(() => {
@@ -86,7 +87,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 							// Return to listening after audio finishes
 							if (shouldListenRef.current) {
 								setCallState("listening");
-								startRecognition();
+								startRecognitionRef.current();
 							}
 						};
 
@@ -99,7 +100,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 							// Return to listening even on error
 							if (shouldListenRef.current) {
 								setCallState("listening");
-								startRecognition();
+								startRecognitionRef.current();
 							}
 						};
 
@@ -109,7 +110,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 					// No audio, return to listening
 					if (shouldListenRef.current) {
 						setCallState("listening");
-						startRecognition();
+						startRecognitionRef.current();
 					}
 				}
 			} catch (error) {
@@ -122,7 +123,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				// Return to listening on error
 				if (shouldListenRef.current) {
 					setCallState("listening");
-					startRecognition();
+					startRecognitionRef.current();
 				}
 			}
 		},
@@ -133,7 +134,10 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	 * Initialize and start speech recognition
 	 */
 	const startRecognition = useCallback(() => {
-		if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+		if (
+			!("webkitSpeechRecognition" in window) &&
+			!("SpeechRecognition" in window)
+		) {
 			logClientError(new Error("Speech recognition not supported"), {
 				component: "useVoiceCall",
 				action: "check_browser_support",
@@ -141,7 +145,8 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 			return;
 		}
 
-		const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+		const SpeechRecognition =
+			window.SpeechRecognition || window.webkitSpeechRecognition;
 		const recognition = new SpeechRecognition();
 
 		recognition.continuous = true;
@@ -194,7 +199,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 			if (shouldListenRef.current && callState === "listening") {
 				try {
 					recognition.start();
-				} catch (error) {
+				} catch (_error) {
 					// Ignore - likely already started
 				}
 			}
@@ -211,6 +216,9 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 			});
 		}
 	}, [callState, handleAIResponse]);
+
+	// Keep ref in sync so handleAIResponse can call latest startRecognition
+	startRecognitionRef.current = startRecognition;
 
 	/**
 	 * Start the voice call - request mic permission and begin listening
@@ -242,7 +250,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 		if (recognitionRef.current) {
 			try {
 				recognitionRef.current.stop();
-			} catch (error) {
+			} catch (_error) {
 				// Ignore - likely already stopped
 			}
 			recognitionRef.current = null;
