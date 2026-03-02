@@ -6,7 +6,7 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Founders get instant, actionable sales and marketing strategy from AI executives who remember context and deliver frameworks-based guidance.
 
-**Current focus:** Phase 30 complete, Phase 31 next
+**Current focus:** Phase 30 complete, Phase 31 next, Phase 32 added (Voice Call Redesign)
 
 ## Current Position
 
@@ -88,6 +88,10 @@ Recent decisions affecting v1.5 work:
 - 30-02: Subscribe page bundle reduced by ~29.5KB via Radix Select removal
 - 30-03: Client component wrapper pattern for dynamic imports in server components (Next.js 15 ssr: false restriction)
 - 30-03: Artifact renderer dynamic imports deferred (requires architectural refactor for object property access pattern)
+
+### Roadmap Evolution
+
+- Phase 32 added: Voice Call Redesign — separate chat from voice, dedicated premium call experience
 
 ### Pending Todos
 
