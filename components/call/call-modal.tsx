@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import type { BotType } from "@/lib/bot-personalities";
 import { ExecutiveSelector } from "./executive-selector";
 import { VoiceCallInterface } from "./voice-call-interface";
@@ -56,7 +57,11 @@ export function CallModal({ isOpen, onClose }: CallModalProps) {
 						e.preventDefault();
 					}
 				}}
+				aria-describedby={undefined}
 			>
+				<VisuallyHidden>
+					<DialogTitle>Voice Call</DialogTitle>
+				</VisuallyHidden>
 				{!isConnected && !selectedExecutive ? (
 					<ExecutiveSelector onSelect={handleSelectExecutive} />
 				) : (
