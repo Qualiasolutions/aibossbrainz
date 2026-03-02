@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 ## Current Position
 
 Phase: 32 of 33 (Voice Call Redesign)
-Plan: 1 of 4 complete
+Plan: 2 of 4 complete
 Status: In progress
-Last activity: 2026-03-02 — Completed 32-01-PLAN.md (Chat Voice Feature Removal)
+Last activity: 2026-03-02 — Completed 32-02-PLAN.md (Voice Call Modal Infrastructure)
 
-Progress: [█████████░] 91% (30/33 phases complete, Phase 32 started)
+Progress: [█████████░] 91% (30/33 phases complete, Phase 32 in progress)
 
 ## Performance Metrics
 
@@ -48,8 +48,9 @@ Progress: [█████████░] 91% (30/33 phases complete, Phase 32 
 
 **v1.6 Progress (Voice Call Redesign):**
 - Phase 32 Plan 01: 4min 34s (Chat Voice Feature Removal)
+- Phase 32 Plan 02: 6min 56s (Voice Call Modal Infrastructure)
 
-*Updated after Phase 32-01 completion (2026-03-02)*
+*Updated after Phase 32-02 completion (2026-03-02)*
 
 ## Accumulated Context
 
@@ -91,6 +92,11 @@ Recent decisions affecting v1.5 work:
 - 30-02: Subscribe page bundle reduced by ~29.5KB via Radix Select removal
 - 30-03: Client component wrapper pattern for dynamic imports in server components (Next.js 15 ssr: false restriction)
 - 30-03: Artifact renderer dynamic imports deferred (requires architectural refactor for object property access pattern)
+- 32-02: Web Speech API for voice input (not custom MediaRecorder) - browser-native simplifies implementation
+- 32-02: State machine in React hook for voice loop (idle → listening → thinking → speaking)
+- 32-02: Prevent modal dismissal during active call (onEscapeKeyDown/onPointerDownOutside preventDefault)
+- 32-02: Visualizer active during both listening AND speaking states (continuous visual feedback)
+- 32-02: ultracite/next extends removed from biome.jsonc (module not found, blocking pre-commit hooks)
 
 ### Roadmap Evolution
 
@@ -120,11 +126,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Phase 32 Plan 01 complete (Chat Voice Feature Removal)
-Resume file: .planning/phases/32-voice-call-redesign/32-01-SUMMARY.md
-Next action: Execute Phase 32 Plan 02 (Create Voice Call Modal)
+Stopped at: Phase 32 Plan 02 complete (Voice Call Modal Infrastructure)
+Resume file: .planning/phases/32-voice-call-redesign/32-02-SUMMARY.md
+Next action: Execute Phase 32 Plan 03 (Call Trigger Integration)
 
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-03-02 after Phase 32-01 completion*
+*Last updated: 2026-03-02 after Phase 32-02 completion*
