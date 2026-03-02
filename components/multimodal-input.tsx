@@ -308,22 +308,20 @@ function PureMultimodalInput({
 					</div>
 				)}
 				<div className="flex flex-row items-center gap-1.5">
-					{
-						<>
-							<AttachmentsButton
-								fileInputRef={fileInputRef}
-								selectedModelId={selectedModelId}
-								status={status}
-							/>
-							<VoiceInputButton
-								className="size-8 rounded text-muted-foreground/70 transition-colors duration-200 hover:text-red-400 sm:size-6"
-								disabled={status !== "ready"}
-								isRecording={isDictating}
-								isSupported={isDictationSupported}
-								onToggle={onDictationToggle ?? (() => {})}
-							/>
-						</>
-					)}
+					<>
+						<AttachmentsButton
+							fileInputRef={fileInputRef}
+							selectedModelId={selectedModelId}
+							status={status}
+						/>
+						<VoiceInputButton
+							className="size-8 rounded text-muted-foreground/70 transition-colors duration-200 hover:text-red-400 sm:size-6"
+							disabled={status !== "ready"}
+							isRecording={isDictating}
+							isSupported={isDictationSupported}
+							onToggle={onDictationToggle ?? (() => {})}
+						/>
+					</>
 					<PromptInputTextarea
 						autoFocus
 						className="grow resize-none border-0! border-none! bg-transparent py-0.5 pl-0 text-base leading-normal text-foreground caret-primary outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground placeholder:text-base placeholder:pl-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-sm sm:placeholder:text-sm [&::-webkit-scrollbar]:hidden"
@@ -333,8 +331,7 @@ function PureMultimodalInput({
 						maxHeight={28}
 						minHeight={20}
 						onChange={handleInput}
-					placeholder="Message your executive team..."
-						}
+						placeholder="Message your executive team..."
 						ref={textareaRef}
 						rows={1}
 						value={input}

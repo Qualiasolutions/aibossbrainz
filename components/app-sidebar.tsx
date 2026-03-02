@@ -2,17 +2,14 @@
 
 import type { User } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
-import { AudioLines, Plus, Trash2 } from "lucide-react";
+import { Phone, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
-import { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
 import { useMobileSidebar } from "@/components/mobile-sidebar-context";
+import { CallModal } from "@/components/call/call-modal";
 import {
-	getChatHistoryPaginationKey,
 	SidebarHistory,
 } from "@/components/sidebar-history";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
@@ -31,17 +28,6 @@ import {
 	SidebarMenu,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import { useCsrf } from "@/hooks/use-csrf";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-} from "./ui/alert-dialog";
 
 export function AppSidebar({
 	user,
@@ -52,38 +38,14 @@ export function AppSidebar({
 }) {
 	const router = useRouter();
 	const { setOpenMobile } = useSidebar();
-	const { mutate } = useSWRConfig();
-	const { csrfFetch } = useCsrf();
-	const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+	const [showCallModal, setShowCallModal] = useState(false);
 	const { isMobileSidebarOpen, setIsMobileSidebarOpen } = useMobileSidebar();
-
-	const handleDeleteAll = () => {
-		const deletePromise = csrfFetch("/api/history", {
-			method: "DELETE",
-		});
-
-		toast.promise(deletePromise, {
-			loading: "Deleting all chats...",
-			success: () => {
-				mutate(unstable_serialize(getChatHistoryPaginationKey));
-				router.push("/new");
-				setShowDeleteAllDialog(false);
-				setIsMobileSidebarOpen(false);
-				return "All chats deleted successfully";
-			},
-			error: "Failed to delete all chats",
-		});
-	};
 
 	const handleNewChat = () => {
 		setOpenMobile(false);
 		setIsMobileSidebarOpen(false);
 		router.push("/new");
 		router.refresh();
-	};
-
-	const handleVoiceToggle = () => {
-		window.dispatchEvent(new CustomEvent("toggle-voice-mode"));
 	};
 
 	return (
@@ -119,26 +81,15 @@ export function AppSidebar({
 							{/* Action buttons - consistent height */}
 							<div className="flex gap-1.5">
 								{user && (
-									<>
-										<Button
-											className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
-											onClick={() => setShowDeleteAllDialog(true)}
-											variant="ghost"
-											size="sm"
-										>
-											<Trash2 className="mr-1.5 h-3.5 w-3.5" />
-											<span className="text-xs font-medium">Clear</span>
-										</Button>
-										<Button
-											className="h-9 w-9 shrink-0 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
-											onClick={handleVoiceToggle}
-											variant="ghost"
-											size="icon"
-											title="Start voice conversation"
-										>
-											<AudioLines className="h-4 w-4" />
-										</Button>
-									</>
+									<Button
+										className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
+										onClick={() => setShowCallModal(true)}
+										variant="ghost"
+										size="sm"
+									>
+										<Phone className="mr-1.5 h-3.5 w-3.5" />
+										<span className="text-xs font-medium">Call</span>
+									</Button>
 								)}
 								<Button
 									className="h-9 flex-1 rounded-lg"
@@ -210,26 +161,15 @@ export function AppSidebar({
 
 								<div className="flex gap-1.5">
 									{user && (
-										<>
-											<Button
-												className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
-												onClick={() => setShowDeleteAllDialog(true)}
-												variant="ghost"
-												size="sm"
-											>
-												<Trash2 className="mr-1 h-3.5 w-3.5" />
-												<span className="text-xs">Clear</span>
-											</Button>
-											<Button
-												className="h-9 w-9 shrink-0 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
-												onClick={handleVoiceToggle}
-												variant="ghost"
-												size="icon"
-												title="Start voice conversation"
-											>
-												<AudioLines className="h-4 w-4" />
-											</Button>
-										</>
+										<Button
+											className="h-9 flex-1 rounded-lg border border-border bg-background text-muted-foreground shadow-none hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600"
+											onClick={() => setShowCallModal(true)}
+											variant="ghost"
+											size="sm"
+										>
+											<Phone className="mr-1 h-3.5 w-3.5" />
+											<span className="text-xs">Call</span>
+										</Button>
 									)}
 									<Button
 										className="h-9 flex-1 rounded-lg"
@@ -271,31 +211,10 @@ export function AppSidebar({
 				</Sheet>
 			</div>
 
-			<AlertDialog
-				onOpenChange={setShowDeleteAllDialog}
-				open={showDeleteAllDialog}
-			>
-				<AlertDialogContent className="mx-4 max-w-md rounded-2xl border-border bg-background">
-					<AlertDialogHeader>
-						<AlertDialogTitle className="font-semibold text-lg text-foreground">
-							Delete all chats?
-						</AlertDialogTitle>
-						<AlertDialogDescription className="text-muted-foreground">
-							This action cannot be undone. This will permanently delete all
-							your chats and remove them from our servers.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							className="rounded-lg bg-red-600 text-white hover:bg-red-700"
-							onClick={handleDeleteAll}
-						>
-							Delete All
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+			<CallModal
+				isOpen={showCallModal}
+				onClose={() => setShowCallModal(false)}
+			/>
 		</>
 	);
 }
