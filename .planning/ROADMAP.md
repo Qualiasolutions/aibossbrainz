@@ -196,10 +196,10 @@ Plans:
 **Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 32-01-PLAN.md — Remove voice features from chat (Wave 1, cleanup)
-- [ ] 32-02-PLAN.md — Build call modal infrastructure (Wave 1, new components)
-- [ ] 32-03-PLAN.md — Integrate call button into sidebar (Wave 2)
-- [ ] 32-04-PLAN.md — Verification checkpoint (Wave 3)
+- [x] 32-01-PLAN.md — Remove voice features from chat (Wave 1, cleanup)
+- [x] 32-02-PLAN.md — Build call modal infrastructure (Wave 1, new components)
+- [x] 32-03-PLAN.md — Integrate call button into sidebar (Wave 2)
+- [x] 32-04-PLAN.md — Verification checkpoint (Wave 3)
 
 ---
 
@@ -214,7 +214,7 @@ Plans:
 | 29. File Splitting & Refactoring | 4/4 | ✓ Complete | 2026-03-01 |
 | 30. Dynamic Import Expansion | 4/4 | ✓ Complete | 2026-03-01 |
 | 31. Validation & Monitoring | 0/0 | Not started | - |
-| 32. Voice Call Redesign | 0/4 | Not started | - |
+| 32. Voice Call Redesign | 4/4 | ✓ Complete | 2026-03-03 |
 
 ---
 
