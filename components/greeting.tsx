@@ -1,7 +1,5 @@
 "use client";
 
-import { Volume2, VolumeX } from "lucide-react";
-import { useGreetingSpeech } from "@/hooks/use-greeting-speech";
 import { BOT_PERSONALITIES, type BotType } from "@/lib/bot-personalities";
 
 type GreetingProps = {
@@ -9,11 +7,6 @@ type GreetingProps = {
 };
 
 export const Greeting = ({ botType }: GreetingProps) => {
-	const { isPlaying, isLoading, stop } = useGreetingSpeech({
-		botType,
-		enabled: true,
-	});
-
 	const personality = BOT_PERSONALITIES[botType];
 
 	return (
@@ -26,21 +19,6 @@ export const Greeting = ({ botType }: GreetingProps) => {
 				style={{ animationDelay: "0.3s" }}
 			>
 				<span>Hello there!</span>
-				{(isPlaying || isLoading) && (
-					<button
-						aria-label="Stop greeting audio"
-						className="inline-flex items-center justify-center rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-						onClick={stop}
-						onKeyUp={(e) => e.key === "Enter" && stop()}
-						type="button"
-					>
-						{isLoading ? (
-							<Volume2 className="size-5 animate-pulse" />
-						) : (
-							<VolumeX className="size-5" />
-						)}
-					</button>
-				)}
 			</div>
 			<div
 				className="text-xl text-zinc-500 md:text-2xl animate-fade-in-up"
