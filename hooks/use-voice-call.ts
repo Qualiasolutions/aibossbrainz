@@ -424,7 +424,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	// ---- Send to AI ----
 
 	const sendToAI = useCallback(
-		async (text: string) => {
+		async (text: string, skipHistory = false) => {
 			if (!text.trim()) return;
 
 			try {
@@ -432,17 +432,20 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				stopAudioPlayback();
 
 				setCallState("thinking");
-				setTranscript(text);
+				setTranscript(skipHistory ? "" : text);
 
-				// Add user message to conversation
-				const userEntry: ConversationEntry = { role: "user", content: text };
-				conversationRef.current = [...conversationRef.current, userEntry].slice(
-					-MAX_HISTORY,
-				);
-				setConversation([...conversationRef.current]);
+				// Add user message to conversation (skip for system-triggered greetings)
+				if (!skipHistory) {
+					const userEntry: ConversationEntry = { role: "user", content: text };
+					conversationRef.current = [
+						...conversationRef.current,
+						userEntry,
+					].slice(-MAX_HISTORY);
+					setConversation([...conversationRef.current]);
+				}
 
 				// Build history for API (exclude the message we're about to send)
-				const history = conversationRef.current.slice(0, -1);
+				const history = skipHistory ? [] : conversationRef.current.slice(0, -1);
 
 				const response = await csrfFetchRef.current("/api/realtime/stream", {
 					method: "POST",
@@ -525,8 +528,12 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				setCallDuration(Math.floor((Date.now() - callStartRef.current) / 1000));
 			}, 1000);
 
-			setCallState("listening");
-			startRecognitionInstance();
+			// Auto-trigger greeting: AI speaks first (skip history to avoid polluting conversation)
+			setCallState("thinking");
+			sendToAIRef.current(
+				"Greet the caller. You're speaking to them for the first time on this call. Keep it warm, brief (1-2 sentences), and then ask how you can help them today.",
+				true,
+			);
 		} catch (error) {
 			logClientError(error, {
 				component: "useVoiceCall",
@@ -537,7 +544,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				"Could not access microphone. Please allow mic access and try again.",
 			);
 		}
-	}, [startRecognitionInstance]);
+	}, []);
 
 	// ---- Stop Call ----
 
