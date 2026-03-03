@@ -36,11 +36,9 @@ export function VoiceCallInterface({
 }: VoiceCallInterfaceProps) {
 	const {
 		callState,
-		transcript,
 		errorMessage,
 		isMuted,
 		callDuration,
-		conversation,
 		analyserNode,
 		startCall,
 		stopCall,
@@ -63,12 +61,6 @@ export function VoiceCallInterface({
 
 	const isThinking = callState === "thinking";
 	const isActive = isListening || isSpeaking || isThinking;
-
-	// Get the most recent AI response for display
-	const lastAIMessage =
-		conversation.length > 0
-			? [...conversation].reverse().find((c) => c.role === "assistant")
-			: null;
 
 	return (
 		<div className="relative flex flex-col items-center justify-between min-h-[460px] py-8 px-6">
@@ -125,18 +117,9 @@ export function VoiceCallInterface({
 					)}
 				</div>
 
-				{/* Status + transcript area */}
-				<div className="w-full min-h-[72px] text-center space-y-2 mb-2">
-					{/* Thinking indicator */}
-					{isThinking && (
-						<div className="flex items-center justify-center gap-1.5 animate-in fade-in duration-300">
-							<span className="size-1.5 rounded-full bg-neutral-400 animate-pulse" />
-							<span className="size-1.5 rounded-full bg-neutral-400 animate-pulse [animation-delay:150ms]" />
-							<span className="size-1.5 rounded-full bg-neutral-400 animate-pulse [animation-delay:300ms]" />
-						</div>
-					)}
-
-					{isListening && !isMuted && !transcript && (
+				{/* Status area */}
+				<div className="w-full min-h-[40px] text-center space-y-2 mb-2">
+					{isListening && !isMuted && (
 						<p className="text-xs text-neutral-400 animate-in fade-in duration-300">
 							Listening...
 						</p>
@@ -145,21 +128,6 @@ export function VoiceCallInterface({
 					{isMuted && isListening && (
 						<p className="text-xs text-red-400 font-medium animate-in fade-in duration-300">
 							Muted
-						</p>
-					)}
-
-					{/* Live transcript (what user is saying) */}
-					{transcript && (isListening || isThinking) && (
-						<p className="text-sm text-neutral-500 italic line-clamp-2 animate-in fade-in duration-300">
-							&ldquo;{transcript}&rdquo;
-						</p>
-					)}
-
-					{/* Last AI response (while speaking) */}
-					{isSpeaking && lastAIMessage && (
-						<p className="text-xs text-neutral-400 line-clamp-2 px-4 animate-in fade-in duration-300">
-							{lastAIMessage.content.slice(0, 120)}
-							{lastAIMessage.content.length > 120 ? "..." : ""}
 						</p>
 					)}
 				</div>
