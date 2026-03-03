@@ -31,6 +31,14 @@ interface NdjsonChunk {
 
 /** Wait this long after last speech before sending to AI */
 const SILENCE_TIMEOUT_MS = 1500;
+
+/** Get time-of-day greeting context based on user's local clock */
+function getTimeGreeting(): string {
+	const hour = new Date().getHours();
+	if (hour < 12) return "morning";
+	if (hour < 17) return "afternoon";
+	return "evening";
+}
 /** Max conversation history messages to send */
 const MAX_HISTORY = 20;
 
@@ -536,8 +544,15 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 		try {
 			setCallState("connecting");
 
-			// Request mic
-			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			// Fetch user profile + request mic in parallel
+			const [stream, profileRes] = await Promise.all([
+				navigator.mediaDevices.getUserMedia({ audio: true }),
+				fetch("/api/profile")
+					.then((r) => (r.ok ? r.json() : null))
+					.catch(() => null),
+			]);
+
+			const userName: string | null = profileRes?.displayName || null;
 			mediaStreamRef.current = stream;
 
 			// Create AudioContext + AnalyserNode for visualizer
@@ -562,12 +577,16 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				setCallDuration(Math.floor((Date.now() - callStartRef.current) / 1000));
 			}, 1000);
 
+			// Build personalized, time-aware, varied greeting prompt
+			const timeOfDay = getTimeGreeting();
+			const nameInstruction = userName
+				? `Address them by name — their name is ${userName}.`
+				: "You don't know their name yet, so don't use one.";
+			const greetingPrompt = `Greet the caller to start this voice call. It's ${timeOfDay} for them. ${nameInstruction} Say good ${timeOfDay} naturally. Keep it warm and brief (1-2 sentences), then ask how you can help. Vary your greeting — never use the exact same opening twice. Be natural, like you're picking up a real phone call.`;
+
 			// Auto-trigger greeting: AI speaks first (skip history to avoid polluting conversation)
 			setCallState("thinking");
-			sendToAIRef.current(
-				"Greet the caller. You're speaking to them for the first time on this call. Keep it warm, brief (1-2 sentences), and then ask how you can help them today.",
-				true,
-			);
+			sendToAIRef.current(greetingPrompt, true);
 		} catch (error) {
 			logClientError(error, {
 				component: "useVoiceCall",
