@@ -1,4 +1,4 @@
-import { generateText } from "ai";
+import { streamText } from "ai";
 import { after } from "next/server";
 import { z } from "zod";
 import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
@@ -17,7 +17,6 @@ import { ChatSDKError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import {
 	CircuitBreakerError,
-	withAIGatewayResilience,
 	withElevenLabsResilience,
 } from "@/lib/resilience";
 import { containsCanary } from "@/lib/safety/canary";
@@ -51,6 +50,20 @@ export const maxDuration = 60;
 
 // Rate limits for realtime API
 const MAX_REALTIME_REQUESTS_PER_DAY = 200;
+
+/** Sentence boundary: `. `, `! `, `? ` followed by uppercase or end of text */
+const SENTENCE_END_RE = /[.!?]\s+(?=[A-Z])|[.!?]$/;
+
+/**
+ * Split accumulated text at the first complete sentence boundary.
+ * Returns [firstSentence, remainder] or null if no boundary found.
+ */
+function splitAtSentence(text: string): [string, string] | null {
+	const match = SENTENCE_END_RE.exec(text);
+	if (!match) return null;
+	const splitIndex = match.index + match[0].trimEnd().length;
+	return [text.slice(0, splitIndex).trim(), text.slice(splitIndex).trim()];
+}
 
 /**
  * Generate audio for a single segment using ElevenLabs API with request stitching.
@@ -114,6 +127,78 @@ async function generateAudioForSegment(
 	const requestId = response.headers.get("request-id");
 	const buffer = await response.arrayBuffer();
 	return { buffer, requestId };
+}
+
+/**
+ * Generate collaborative audio (sequential segments with request stitching).
+ * Returns combined audio buffer as base64, or null on failure.
+ */
+async function generateCollaborativeAudio(
+	responseText: string,
+	apiKey: string,
+): Promise<string | null> {
+	const truncatedText = responseText.slice(0, MAX_TTS_TEXT_LENGTH);
+	const segments = parseCollaborativeSegments(truncatedText);
+	const validSegments = segments
+		.map((s) => ({ ...s, text: stripMarkdownForTTS(s.text) }))
+		.filter((s) => s.text.trim());
+
+	if (validSegments.length === 0) return null;
+
+	const audioBuffers: ArrayBuffer[] = [];
+	const previousRequestIds: string[] = [];
+
+	for (let i = 0; i < validSegments.length; i++) {
+		const segment = validSegments[i];
+		try {
+			const voiceConfig = getVoiceConfig(segment.speaker);
+
+			// Check TTS cache
+			const cacheParams = buildCacheParams(segment.text, voiceConfig);
+			const cachedUrl = await getCachedAudio(cacheParams);
+
+			if (cachedUrl) {
+				const cachedResponse = await fetch(cachedUrl);
+				const cachedBuffer = await cachedResponse.arrayBuffer();
+				audioBuffers.push(cachedBuffer);
+				continue;
+			}
+
+			const segResult = await generateAudioForSegment(
+				segment.text,
+				voiceConfig,
+				apiKey,
+				previousRequestIds,
+			);
+			audioBuffers.push(segResult.buffer);
+			if (segResult.requestId) {
+				previousRequestIds.push(segResult.requestId);
+			}
+
+			// Cache in background
+			cacheAudio(cacheParams, segResult.buffer).catch(() => {});
+		} catch (err) {
+			logger.warn(
+				{ err, segmentIndex: i, speaker: segment.speaker },
+				"Collaborative segment TTS failed, skipping",
+			);
+		}
+	}
+
+	if (audioBuffers.length === 0) return null;
+
+	const totalLength = audioBuffers.reduce(
+		(sum, buf) => sum + buf.byteLength,
+		0,
+	);
+	const combined = new Uint8Array(totalLength);
+	let offset = 0;
+	for (const buffer of audioBuffers) {
+		combined.set(new Uint8Array(buffer), offset);
+		offset += buffer.byteLength;
+	}
+
+	return Buffer.from(combined.buffer).toString("base64");
 }
 
 export const POST = withCsrf(async (request: Request) => {
@@ -236,236 +321,424 @@ You are in a real-time voice call. Keep responses:
 
 Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 
-		// Generate AI response (optimized for voice, with circuit breaker + retry)
-		const result = await withAIGatewayResilience(() =>
-			generateText({
-				model: myProvider.languageModel("chat-model"),
-				system: realtimePrompt,
-				messages: [
-					{
-						role: "user",
-						content: message,
-					},
-				],
-				maxOutputTokens: 400, // Shorter for voice
-				abortSignal: AbortSignal.timeout(55_000), // M-14: Just under maxDuration=60
-			}),
-		);
-
-		const responseText = result.text;
-
-		// M-3: Post-hoc safety scan for realtime stream responses
-		if (responseText) {
-			try {
-				const piiResult = redactPII(responseText);
-				if (piiResult.redactedCount > 0) {
-					logger.warn(
-						{
-							userId: user.id,
-							redactedCount: piiResult.redactedCount,
-							redactedTypes: piiResult.redactedTypes,
-						},
-						"PII detected in realtime AI response (post-hoc scan)",
-					);
-				}
-				if (containsCanary(responseText)) {
-					logger.error(
-						{ userId: user.id },
-						"CANARY LEAK: Realtime response contains system prompt fragment",
-					);
-				}
-			} catch (scanErr) {
-				logger.warn(
-					{ err: scanErr },
-					"Post-hoc realtime safety scan failed (non-blocking)",
-				);
-			}
-		}
-
-		// Generate audio — deliver via blob URL when possible, base64 inline as fallback.
-		// The previous implementation discarded the audio buffer when blob caching failed,
-		// resulting in silent responses. Now we always keep the raw buffer for base64 delivery.
-		let audioUrl: string | null = null;
-		let audioBase64: string | null = null;
 		const apiKey = process.env.ELEVENLABS_API_KEY;
 
-		if (apiKey && responseText) {
-			try {
-				const truncatedText = responseText.slice(0, MAX_TTS_TEXT_LENGTH);
-
-				// Handle collaborative mode with multiple speakers
-				if (botType === "collaborative") {
-					const segments = parseCollaborativeSegments(truncatedText);
-					const validSegments = segments
-						.map((s) => ({ ...s, text: stripMarkdownForTTS(s.text) }))
-						.filter((s) => s.text.trim());
-
-					if (validSegments.length > 0) {
-						// Generate segments sequentially with per-segment error isolation
-						const audioBuffers: ArrayBuffer[] = [];
-						const previousRequestIds: string[] = [];
-						const failedSegments: number[] = [];
-
-						for (let i = 0; i < validSegments.length; i++) {
-							const segment = validSegments[i];
-							try {
-								const voiceConfig = getVoiceConfig(segment.speaker);
-
-								// Check TTS cache first
-								const cacheParams = buildCacheParams(segment.text, voiceConfig);
-								const cachedUrl = await getCachedAudio(cacheParams);
-
-								if (cachedUrl) {
-									// Cache hit -- fetch audio from CDN
-									const cachedResponse = await fetch(cachedUrl);
-									const cachedBuffer = await cachedResponse.arrayBuffer();
-									audioBuffers.push(cachedBuffer);
-									continue;
-								}
-
-								// Cache miss -- generate with ElevenLabs
-								const segResult = await generateAudioForSegment(
-									segment.text,
-									voiceConfig,
-									apiKey,
-									previousRequestIds,
-								);
-								audioBuffers.push(segResult.buffer);
-								if (segResult.requestId) {
-									previousRequestIds.push(segResult.requestId);
-								}
-
-								// Cache the generated audio (fire-and-forget)
-								cacheAudio(cacheParams, segResult.buffer).catch(() => {});
-							} catch (err) {
-								logger.warn(
-									{
-										err,
-										segmentIndex: i,
-										speaker: segment.speaker,
-									},
-									"Collaborative segment TTS failed, skipping",
-								);
-								failedSegments.push(i);
-							}
-						}
-
-						if (failedSegments.length > 0) {
-							logger.warn(
-								{
-									failedSegments,
-									total: validSegments.length,
-								},
-								"Collaborative stream TTS completed with partial failures",
-							);
-						}
-
-						if (audioBuffers.length > 0) {
-							// Concatenate audio buffers
-							const totalLength = audioBuffers.reduce(
-								(sum, buf) => sum + buf.byteLength,
-								0,
-							);
-							const combined = new Uint8Array(totalLength);
-							let offset = 0;
-							for (const buffer of audioBuffers) {
-								combined.set(new Uint8Array(buffer), offset);
-								offset += buffer.byteLength;
-							}
-
-							// Try blob cache for CDN URL
-							const combinedVoiceConfig = getVoiceConfig("collaborative");
-							const combinedCacheParams = buildCacheParams(
-								truncatedText,
-								combinedVoiceConfig,
-							);
-							const blobUrl = await cacheAudio(
-								combinedCacheParams,
-								combined.buffer,
-							);
-							audioUrl = blobUrl || null;
-
-							// Always keep base64 fallback so audio plays even if blob fails
-							if (!audioUrl) {
-								audioBase64 = Buffer.from(combined.buffer).toString("base64");
-							}
-						}
-					}
-				} else {
-					// Single voice
-					const cleanText = stripMarkdownForTTS(truncatedText);
-					if (cleanText.trim()) {
-						const voiceConfig = getVoiceConfig(botType);
-
-						// Check TTS cache first
-						const cacheParams = buildCacheParams(cleanText, voiceConfig);
-						const cachedUrl = await getCachedAudio(cacheParams);
-
-						if (cachedUrl) {
-							audioUrl = cachedUrl;
-						} else {
-							// Cache miss -- generate with ElevenLabs
-							const { buffer: audioData } = await generateAudioForSegment(
-								cleanText,
-								voiceConfig,
-								apiKey,
-							);
-
-							// Try blob cache for CDN URL
-							const blobUrl = await cacheAudio(cacheParams, audioData);
-							audioUrl = blobUrl || null;
-
-							// Always keep base64 fallback so audio plays even if blob fails
-							if (!audioUrl) {
-								audioBase64 = Buffer.from(audioData).toString("base64");
-							}
-						}
-					}
-				}
-			} catch (error) {
-				logger.error({ err: error }, "TTS error during realtime stream");
-				// Continue without audio
-			}
+		// --- Collaborative mode: keep sequential approach (needs previous_request_ids) ---
+		if (botType === "collaborative") {
+			return handleCollaborativeResponse({
+				message,
+				botType,
+				realtimePrompt,
+				existingChatId,
+				apiKey,
+				userId: user.id,
+				apiLog,
+			});
 		}
 
-		// Save messages to chat history for real-time calls
-		// Reuse existing chat if chatId provided, otherwise create a new one
-		let savedChatId: string | null = existingChatId || null;
+		// --- Single-voice mode: sentence-level streaming ---
+		const voiceConfig = getVoiceConfig(botType);
+		const encoder = new TextEncoder();
+
+		const stream = new ReadableStream({
+			async start(controller) {
+				try {
+					const result = streamText({
+						model: myProvider.languageModel("chat-model"),
+						system: realtimePrompt,
+						messages: [{ role: "user", content: message }],
+						maxOutputTokens: 250,
+						abortSignal: AbortSignal.timeout(55_000),
+					});
+
+					let accumulated = "";
+					let fullText = "";
+					let firstSentenceSent = false;
+
+					for await (const chunk of result.textStream) {
+						accumulated += chunk;
+						fullText += chunk;
+
+						// Try to extract a complete first sentence
+						if (!firstSentenceSent) {
+							const split = splitAtSentence(accumulated);
+							if (split) {
+								const [sentence, remainder] = split;
+								accumulated = remainder;
+								firstSentenceSent = true;
+
+								// Generate TTS for first sentence immediately
+								if (apiKey && sentence.trim()) {
+									try {
+										const cleanText = stripMarkdownForTTS(sentence);
+										if (cleanText.trim()) {
+											const { buffer } = await generateAudioForSegment(
+												cleanText,
+												voiceConfig,
+												apiKey,
+											);
+											const base64 = Buffer.from(buffer).toString("base64");
+											const line = JSON.stringify({
+												type: "audio",
+												data: base64,
+											});
+											controller.enqueue(encoder.encode(`${line}\n`));
+
+											// Cache first sentence in background
+											after(() => {
+												const cacheParams = buildCacheParams(
+													cleanText,
+													voiceConfig,
+												);
+												cacheAudio(cacheParams, buffer).catch(() => {});
+											});
+										}
+									} catch (err) {
+										logger.warn({ err }, "First sentence TTS failed");
+									}
+								}
+							}
+						}
+					}
+
+					// Collect usage for cost tracking
+					const usage = await result.usage;
+
+					// M-3: Post-hoc safety scan
+					if (fullText) {
+						try {
+							const piiResult = redactPII(fullText);
+							if (piiResult.redactedCount > 0) {
+								logger.warn(
+									{
+										userId: user.id,
+										redactedCount: piiResult.redactedCount,
+										redactedTypes: piiResult.redactedTypes,
+									},
+									"PII detected in realtime AI response (post-hoc scan)",
+								);
+							}
+							if (containsCanary(fullText)) {
+								logger.error(
+									{ userId: user.id },
+									"CANARY LEAK: Realtime response contains system prompt fragment",
+								);
+							}
+						} catch (scanErr) {
+							logger.warn(
+								{ err: scanErr },
+								"Post-hoc realtime safety scan failed (non-blocking)",
+							);
+						}
+					}
+
+					// Generate TTS for remaining text (everything after first sentence)
+					const remainingText = firstSentenceSent ? accumulated : fullText;
+
+					if (apiKey && remainingText.trim()) {
+						try {
+							const cleanRemaining = stripMarkdownForTTS(remainingText);
+							if (cleanRemaining.trim()) {
+								const { buffer } = await generateAudioForSegment(
+									cleanRemaining,
+									voiceConfig,
+									apiKey,
+								);
+								const base64 = Buffer.from(buffer).toString("base64");
+								const line = JSON.stringify({
+									type: "audio",
+									data: base64,
+									text: fullText,
+								});
+								controller.enqueue(encoder.encode(`${line}\n`));
+
+								// Cache remaining in background
+								after(() => {
+									const cacheParams = buildCacheParams(
+										cleanRemaining,
+										voiceConfig,
+									);
+									cacheAudio(cacheParams, buffer).catch(() => {});
+								});
+							}
+						} catch (err) {
+							logger.warn({ err }, "Remaining text TTS failed");
+						}
+					} else if (!apiKey) {
+						// No TTS available — send text-only response
+						const line = JSON.stringify({
+							type: "audio",
+							text: fullText,
+						});
+						controller.enqueue(encoder.encode(`${line}\n`));
+					}
+
+					// If first sentence was never sent (short response), send full text as single audio
+					if (!firstSentenceSent && apiKey && fullText.trim()) {
+						try {
+							const cleanFull = stripMarkdownForTTS(fullText);
+							if (cleanFull.trim()) {
+								const { buffer } = await generateAudioForSegment(
+									cleanFull,
+									voiceConfig,
+									apiKey,
+								);
+								const base64 = Buffer.from(buffer).toString("base64");
+								const line = JSON.stringify({
+									type: "audio",
+									data: base64,
+									text: fullText,
+								});
+								controller.enqueue(encoder.encode(`${line}\n`));
+
+								after(() => {
+									const cacheParams = buildCacheParams(cleanFull, voiceConfig);
+									cacheAudio(cacheParams, buffer).catch(() => {});
+								});
+							}
+						} catch (err) {
+							logger.warn({ err }, "Full text TTS failed");
+						}
+					}
+
+					// Send final metadata line (chatId for client to track)
+					const metaLine = JSON.stringify({ type: "done" });
+					controller.enqueue(encoder.encode(`${metaLine}\n`));
+					controller.close();
+
+					// Defer all DB writes to after() — not blocking response
+					after(async () => {
+						try {
+							const afterSupabase = await createClient();
+							let savedChatId = existingChatId || null;
+
+							if (!savedChatId) {
+								const chatId = crypto.randomUUID();
+								let title = message.trim();
+								if (title.length > 50) {
+									title = `${title.slice(0, 50).replace(/\s+\S*$/, "")}...`;
+								}
+								if (!title) title = "Voice Call";
+
+								const { error: insertError } = await afterSupabase
+									.from("Chat")
+									.insert({
+										id: chatId,
+										userId: user.id,
+										title,
+										chatType: "voice",
+									});
+
+								if (!insertError) savedChatId = chatId;
+								else
+									logger.error(
+										{ err: insertError, chatId },
+										"Failed to create voice call chat",
+									);
+							}
+
+							if (savedChatId) {
+								const now = new Date().toISOString();
+								const messages: DBMessage[] = [
+									{
+										id: crypto.randomUUID(),
+										chatId: savedChatId,
+										role: "user",
+										parts: [{ type: "text", text: message }],
+										attachments: [],
+										botType: null,
+										deletedAt: null,
+										createdAt: now,
+									},
+									{
+										id: crypto.randomUUID(),
+										chatId: savedChatId,
+										role: "assistant",
+										parts: [{ type: "text", text: fullText }],
+										attachments: [],
+										botType,
+										deletedAt: null,
+										createdAt: new Date(Date.now() + 1).toISOString(),
+									},
+								];
+								await saveMessages({ messages });
+							}
+
+							// Voice analytics
+							if (fullText) {
+								const cleanForEstimate = stripMarkdownForTTS(fullText);
+								const estimatedMinutes = Math.max(
+									1,
+									Math.ceil(cleanForEstimate.length / 750),
+								);
+								recordAnalytics(user.id, "voice", estimatedMinutes);
+								recordAnalytics(user.id, "voice_request", 1);
+							}
+
+							// AI cost tracking
+							recordAICost({
+								userId: user.id,
+								chatId: savedChatId,
+								modelId: "chat-model",
+								inputTokens: usage.inputTokens ?? 0,
+								outputTokens: usage.outputTokens ?? 0,
+								costUSD: 0,
+							});
+
+							apiLog.success({
+								botType,
+								hasAudio: !!apiKey,
+								audioDelivery: apiKey ? "streaming" : "none",
+								chatId: savedChatId,
+							});
+						} catch (afterError) {
+							logger.error(
+								{ err: afterError },
+								"Failed in after() for voice stream",
+							);
+						}
+					});
+				} catch (err) {
+					logger.error({ err }, "Voice stream error");
+					const errorLine = JSON.stringify({
+						type: "error",
+						message: "Stream failed",
+					});
+					controller.enqueue(encoder.encode(`${errorLine}\n`));
+					controller.close();
+				}
+			},
+		});
+
+		return new Response(stream, {
+			headers: {
+				"Content-Type": "application/x-ndjson",
+				"Cache-Control": "no-cache",
+				"Transfer-Encoding": "chunked",
+			},
+		});
+	} catch (error) {
+		apiLog.error(error);
+
+		if (error instanceof CircuitBreakerError) {
+			return new ChatSDKError("offline:chat").toResponse();
+		}
+
+		if (error instanceof ChatSDKError) {
+			return error.toResponse();
+		}
+
+		return new ChatSDKError("offline:chat").toResponse();
+	}
+});
+
+/**
+ * Handle collaborative mode — sequential generation + TTS (needs request stitching).
+ * Falls back to single JSON response since collaborative requires previous_request_ids.
+ */
+async function handleCollaborativeResponse({
+	message,
+	botType,
+	realtimePrompt,
+	existingChatId,
+	apiKey,
+	userId,
+	apiLog,
+}: {
+	message: string;
+	botType: "collaborative";
+	realtimePrompt: string;
+	existingChatId: string | null | undefined;
+	apiKey: string | undefined;
+	userId: string;
+	apiLog: ReturnType<typeof apiRequestLogger>;
+}) {
+	// Use streamText but collect full text (collaborative needs full text for segment parsing)
+	const result = streamText({
+		model: myProvider.languageModel("chat-model"),
+		system: realtimePrompt,
+		messages: [{ role: "user", content: message }],
+		maxOutputTokens: 250,
+		abortSignal: AbortSignal.timeout(55_000),
+	});
+
+	// Collect full text
+	let responseText = "";
+	for await (const chunk of result.textStream) {
+		responseText += chunk;
+	}
+
+	const usage = await result.usage;
+
+	// M-3: Post-hoc safety scan
+	if (responseText) {
 		try {
-			const supabase = await createClient();
+			const piiResult = redactPII(responseText);
+			if (piiResult.redactedCount > 0) {
+				logger.warn(
+					{
+						userId,
+						redactedCount: piiResult.redactedCount,
+						redactedTypes: piiResult.redactedTypes,
+					},
+					"PII detected in realtime AI response (post-hoc scan)",
+				);
+			}
+			if (containsCanary(responseText)) {
+				logger.error(
+					{ userId },
+					"CANARY LEAK: Realtime response contains system prompt fragment",
+				);
+			}
+		} catch (scanErr) {
+			logger.warn(
+				{ err: scanErr },
+				"Post-hoc realtime safety scan failed (non-blocking)",
+			);
+		}
+	}
+
+	// Generate collaborative audio
+	let audioBase64: string | null = null;
+	if (apiKey && responseText) {
+		try {
+			audioBase64 = await generateCollaborativeAudio(responseText, apiKey);
+		} catch (error) {
+			logger.error({ err: error }, "Collaborative TTS error");
+		}
+	}
+
+	// Defer DB writes
+	after(async () => {
+		try {
+			const afterSupabase = await createClient();
+			let savedChatId = existingChatId || null;
 
 			if (!savedChatId) {
-				// Create a new chat for this voice call session
 				const chatId = crypto.randomUUID();
-
 				let title = message.trim();
 				if (title.length > 50) {
 					title = `${title.slice(0, 50).replace(/\s+\S*$/, "")}...`;
 				}
-				if (!title) {
-					title = "Voice Call";
-				}
+				if (!title) title = "Voice Call";
 
-				const { error: insertError } = await supabase.from("Chat").insert({
+				const { error: insertError } = await afterSupabase.from("Chat").insert({
 					id: chatId,
-					userId: user.id,
+					userId,
 					title,
 					chatType: "voice",
 				});
 
-				if (insertError) {
+				if (!insertError) savedChatId = chatId;
+				else
 					logger.error(
 						{ err: insertError, chatId },
 						"Failed to create voice call chat",
 					);
-				} else {
-					savedChatId = chatId;
-				}
 			}
 
 			if (savedChatId) {
 				const now = new Date().toISOString();
-
 				const messages: DBMessage[] = [
 					{
 						id: crypto.randomUUID(),
@@ -488,65 +761,46 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 						createdAt: new Date(Date.now() + 1).toISOString(),
 					},
 				];
-
 				await saveMessages({ messages });
 			}
-		} catch (saveError) {
-			logger.error(
-				{ err: saveError, chatId: savedChatId },
-				"Failed to save voice call messages",
-			);
-		}
 
-		apiLog.success({
-			botType,
-			hasAudio: !!(audioUrl || audioBase64),
-			audioDelivery: audioUrl ? "blob" : audioBase64 ? "base64" : "none",
-			chatId: savedChatId,
-		});
+			if (responseText) {
+				const cleanForEstimate = stripMarkdownForTTS(responseText);
+				const estimatedMinutes = Math.max(
+					1,
+					Math.ceil(cleanForEstimate.length / 750),
+				);
+				recordAnalytics(userId, "voice", estimatedMinutes);
+				recordAnalytics(userId, "voice_request", 1);
+			}
 
-		// Record voice analytics for realtime stream route (MED-7)
-		if (responseText) {
-			const cleanForEstimate = stripMarkdownForTTS(responseText);
-			const estimatedMinutes = Math.max(
-				1,
-				Math.ceil(cleanForEstimate.length / 750),
-			);
-			after(() => {
-				recordAnalytics(user.id, "voice", estimatedMinutes);
-				recordAnalytics(user.id, "voice_request", 1);
-			});
-		}
-
-		// MED-21: Record AI cost for tracking
-		after(() => {
 			recordAICost({
-				userId: user.id,
+				userId,
 				chatId: savedChatId,
 				modelId: "chat-model",
-				inputTokens: result.usage.inputTokens ?? 0,
-				outputTokens: result.usage.outputTokens ?? 0,
-				costUSD: 0, // Actual cost tracked via OpenRouter billing
+				inputTokens: usage.inputTokens ?? 0,
+				outputTokens: usage.outputTokens ?? 0,
+				costUSD: 0,
 			});
-		});
 
-		return Response.json({
-			text: responseText,
-			audioUrl,
-			audioData: audioBase64,
-			chatId: savedChatId, // Return chatId so frontend can redirect
-		});
-	} catch (error) {
-		apiLog.error(error);
-
-		if (error instanceof CircuitBreakerError) {
-			return new ChatSDKError("offline:chat").toResponse();
+			apiLog.success({
+				botType,
+				hasAudio: !!audioBase64,
+				audioDelivery: audioBase64 ? "base64" : "none",
+				chatId: savedChatId,
+			});
+		} catch (afterError) {
+			logger.error(
+				{ err: afterError },
+				"Failed in after() for collaborative voice",
+			);
 		}
+	});
 
-		if (error instanceof ChatSDKError) {
-			return error.toResponse();
-		}
-
-		return new ChatSDKError("offline:chat").toResponse();
-	}
-});
+	// Collaborative returns single JSON (not NDJSON)
+	return Response.json({
+		text: responseText,
+		audioData: audioBase64,
+		chatId: existingChatId || null,
+	});
+}

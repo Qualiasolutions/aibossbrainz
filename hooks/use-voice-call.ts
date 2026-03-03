@@ -23,6 +23,13 @@ interface StreamResponse {
 	text?: string;
 }
 
+interface NdjsonChunk {
+	type: "audio" | "done" | "error";
+	data?: string;
+	text?: string;
+	message?: string;
+}
+
 /**
  * Hook to manage real-time voice call lifecycle.
  *
@@ -40,6 +47,8 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	// Refs for persistent objects across renders — avoids stale closures
 	const recognitionRef = useRef<SpeechRecognition | null>(null);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
+	const audioQueueRef = useRef<string[]>([]);
+	const isPlayingRef = useRef(false);
 	const shouldListenRef = useRef(false);
 	const callStateRef = useRef<CallState>("idle");
 	const csrfFetchRef = useRef(csrfFetch);
@@ -161,6 +170,193 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	}, []);
 
 	/**
+	 * Play queued audio chunks sequentially.
+	 * First chunk triggers "speaking" state, subsequent chain via onended.
+	 */
+	const playNextInQueue = useCallback(() => {
+		if (audioQueueRef.current.length === 0) {
+			isPlayingRef.current = false;
+			// All audio finished — return to listening
+			if (shouldListenRef.current) {
+				setCallState("listening");
+				startRecognitionInstance();
+			}
+			return;
+		}
+
+		isPlayingRef.current = true;
+		const base64 = audioQueueRef.current.shift()!;
+		const audioSrc = `data:audio/mpeg;base64,${base64}`;
+		const audio = new Audio(audioSrc);
+		audioRef.current = audio;
+
+		audio.onended = () => {
+			playNextInQueue();
+		};
+
+		audio.onerror = (error) => {
+			logClientError(error, {
+				component: "useVoiceCall",
+				action: "audio_playback",
+				executive,
+			});
+			playNextInQueue();
+		};
+
+		audio.play().catch((err) => {
+			logClientError(err, {
+				component: "useVoiceCall",
+				action: "audio_play_promise",
+				executive,
+			});
+			playNextInQueue();
+		});
+	}, [executive, startRecognitionInstance]);
+
+	/**
+	 * Enqueue a base64 audio chunk. Starts playback if not already playing.
+	 */
+	const enqueueAudio = useCallback(
+		(base64: string) => {
+			audioQueueRef.current.push(base64);
+
+			if (!isPlayingRef.current) {
+				setCallState("speaking");
+				playNextInQueue();
+			}
+		},
+		[playNextInQueue],
+	);
+
+	/**
+	 * Handle NDJSON streaming response (single voice — alexandria/kim).
+	 * Reads audio chunks as they arrive and queues them for playback.
+	 */
+	const handleStreamingResponse = useCallback(
+		async (response: Response) => {
+			const reader = response.body?.getReader();
+			if (!reader) {
+				throw new Error("Response body is not readable");
+			}
+
+			const decoder = new TextDecoder();
+			let buffer = "";
+
+			try {
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+
+					buffer += decoder.decode(value, { stream: true });
+
+					// Process complete NDJSON lines
+					const lines = buffer.split("\n");
+					// Keep the last incomplete line in buffer
+					buffer = lines.pop() || "";
+
+					for (const line of lines) {
+						const trimmed = line.trim();
+						if (!trimmed) continue;
+
+						try {
+							const chunk: NdjsonChunk = JSON.parse(trimmed);
+
+							if (chunk.type === "audio" && chunk.data) {
+								enqueueAudio(chunk.data);
+							} else if (chunk.type === "error") {
+								throw new Error(chunk.message || "Stream error");
+							}
+							// "done" type — stream complete, no action needed
+						} catch (parseErr) {
+							// Skip malformed lines
+							if (parseErr instanceof SyntaxError === false) {
+								throw parseErr;
+							}
+						}
+					}
+				}
+
+				// Process any remaining buffer
+				if (buffer.trim()) {
+					try {
+						const chunk: NdjsonChunk = JSON.parse(buffer.trim());
+						if (chunk.type === "audio" && chunk.data) {
+							enqueueAudio(chunk.data);
+						}
+					} catch {
+						// Ignore trailing partial data
+					}
+				}
+			} finally {
+				reader.releaseLock();
+			}
+
+			// If no audio was queued at all, go back to listening
+			if (
+				audioQueueRef.current.length === 0 &&
+				!isPlayingRef.current &&
+				shouldListenRef.current
+			) {
+				setCallState("listening");
+				startRecognitionInstance();
+			}
+		},
+		[enqueueAudio, startRecognitionInstance],
+	);
+
+	/**
+	 * Handle legacy JSON response (collaborative mode).
+	 */
+	const handleLegacyResponse = useCallback(
+		async (data: StreamResponse) => {
+			if (data.audioUrl || data.audioData) {
+				const audioSrc = data.audioUrl || data.audioData;
+				if (audioSrc) {
+					setCallState("speaking");
+
+					const audio = new Audio(
+						data.audioUrl ? audioSrc : `data:audio/mpeg;base64,${audioSrc}`,
+					);
+					audioRef.current = audio;
+
+					audio.onended = () => {
+						if (shouldListenRef.current) {
+							setCallState("listening");
+							startRecognitionInstance();
+						}
+					};
+
+					audio.onerror = (error) => {
+						logClientError(error, {
+							component: "useVoiceCall",
+							action: "audio_playback",
+							executive,
+						});
+						if (shouldListenRef.current) {
+							setCallState("listening");
+							startRecognitionInstance();
+						}
+					};
+
+					await audio.play();
+					return;
+				}
+			}
+
+			// No audio — show text briefly then return to listening
+			if (data.text) {
+				setTranscript(data.text);
+			}
+
+			if (shouldListenRef.current) {
+				setCallState("listening");
+				startRecognitionInstance();
+			}
+		},
+		[executive, startRecognitionInstance],
+	);
+
+	/**
 	 * Send transcript to AI and play response
 	 */
 	const handleAIResponse = useCallback(
@@ -170,6 +366,10 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 			try {
 				setCallState("thinking");
 				setTranscript(text);
+
+				// Reset audio queue
+				audioQueueRef.current = [];
+				isPlayingRef.current = false;
 
 				const response = await csrfFetchRef.current("/api/realtime/stream", {
 					method: "POST",
@@ -186,49 +386,15 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 					throw new Error(`AI request failed: ${response.status}`);
 				}
 
-				const data: StreamResponse = await response.json();
+				const contentType = response.headers.get("content-type") || "";
 
-				// Play audio response
-				if (data.audioUrl || data.audioData) {
-					const audioSrc = data.audioUrl || data.audioData;
-					if (audioSrc) {
-						setCallState("speaking");
-
-						const audio = new Audio(audioSrc);
-						audioRef.current = audio;
-
-						audio.onended = () => {
-							if (shouldListenRef.current) {
-								setCallState("listening");
-								startRecognitionInstance();
-							}
-						};
-
-						audio.onerror = (error) => {
-							logClientError(error, {
-								component: "useVoiceCall",
-								action: "audio_playback",
-								executive,
-							});
-							if (shouldListenRef.current) {
-								setCallState("listening");
-								startRecognitionInstance();
-							}
-						};
-
-						await audio.play();
-						return;
-					}
-				}
-
-				// No audio, show text response briefly then return to listening
-				if (data.text) {
-					setTranscript(data.text);
-				}
-
-				if (shouldListenRef.current) {
-					setCallState("listening");
-					startRecognitionInstance();
+				if (contentType.includes("ndjson")) {
+					// Streaming NDJSON response (single voice)
+					await handleStreamingResponse(response);
+				} else {
+					// Legacy JSON response (collaborative mode)
+					const data: StreamResponse = await response.json();
+					await handleLegacyResponse(data);
 				}
 			} catch (error) {
 				logClientError(error, {
@@ -243,7 +409,12 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				}
 			}
 		},
-		[executive, startRecognitionInstance],
+		[
+			executive,
+			startRecognitionInstance,
+			handleStreamingResponse,
+			handleLegacyResponse,
+		],
 	);
 
 	// Keep handleAIResponse ref in sync for use in recognition callbacks
@@ -300,6 +471,10 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 			audioRef.current = null;
 		}
 
+		// Clear audio queue
+		audioQueueRef.current = [];
+		isPlayingRef.current = false;
+
 		setCallState("idle");
 		setTranscript("");
 		setErrorMessage("");
@@ -321,6 +496,8 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				audioRef.current.pause();
 				audioRef.current = null;
 			}
+			audioQueueRef.current = [];
+			isPlayingRef.current = false;
 		};
 	}, []);
 
