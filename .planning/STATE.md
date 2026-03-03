@@ -123,16 +123,16 @@ None yet.
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 12 completed
+**Quick tasks:** 13 completed
 
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 32 complete (all 4 plans executed)
-Resume file: .planning/phases/32-voice-call-redesign/32-VERIFICATION.md
-Next action: Deploy or start next milestone
+Stopped at: Quick task 13 complete (agents speak first + polished call UI)
+Resume file: .planning/quick/13-agents-speak-first-in-calls-add-mute-mic/13-01-SUMMARY.md
+Next action: Test voice calls in dev, then deploy
 
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-03-03 after Phase 32 completion*
+*Last updated: 2026-03-03 after Quick Task 13 completion*
