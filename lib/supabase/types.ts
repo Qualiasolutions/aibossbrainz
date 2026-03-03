@@ -77,6 +77,52 @@ export type ConversationSummaryInsert =
 	Database["public"]["Tables"]["ConversationSummary"]["Insert"];
 export type CanvasType = "swot" | "bmc" | "journey" | "brainstorm";
 
+// Social Media Content Calendar types
+export type SocialPlatform =
+	| "linkedin"
+	| "instagram"
+	| "tiktok"
+	| "facebook"
+	| "twitter"
+	| "generic";
+
+export type ContentStatus = "draft" | "scheduled" | "posted";
+
+export interface ContentCalendar {
+	id: string;
+	userId: string;
+	chatId: string | null;
+	platform: SocialPlatform;
+	caption: string;
+	hashtags: string[];
+	visualSuggestion: string | null;
+	scheduledDate: string;
+	scheduledTime: string | null;
+	status: ContentStatus;
+	botType: BotType | null;
+	focusMode: string | null;
+	metadata: Json;
+	createdAt: string;
+	updatedAt: string;
+	deletedAt: string | null;
+}
+
+export interface ContentCalendarInsert {
+	id?: string;
+	userId: string;
+	chatId?: string | null;
+	platform: SocialPlatform;
+	caption: string;
+	hashtags?: string[];
+	visualSuggestion?: string | null;
+	scheduledDate: string;
+	scheduledTime?: string | null;
+	status?: ContentStatus;
+	botType?: BotType | null;
+	focusMode?: string | null;
+	metadata?: Json;
+}
+
 // Support Ticket types
 export type TicketStatus = "open" | "in_progress" | "resolved" | "closed";
 export type TicketPriority = "low" | "normal" | "high" | "urgent";

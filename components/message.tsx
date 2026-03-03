@@ -447,6 +447,72 @@ const PurePreviewMessage = ({
 							);
 						}
 
+						// Content Calendar tool - summary banner
+						if ((type as string) === "tool-contentCalendar") {
+							const { state, toolCallId } = part as any;
+							if (state !== "output-available") return null;
+
+							// Collapse multiple calls into single banner
+							const allCalendarParts = parts.filter(
+								(p: any) =>
+									(p as any).type === "tool-contentCalendar" &&
+									(p as any).state === "output-available",
+							);
+							const isLast =
+								allCalendarParts[allCalendarParts.length - 1] === part;
+							if (!isLast) return null;
+
+							const totalPosts = allCalendarParts.reduce(
+								(sum: number, p: any) =>
+									sum + ((p as any).output?.postsCreated || 0),
+								0,
+							);
+							const hasError = allCalendarParts.some(
+								(p: any) => (p as any).output?.success === false,
+							);
+							const platformSummary =
+								(allCalendarParts[0] as any)?.output?.platformSummary || "";
+
+							if (hasError && totalPosts === 0) {
+								return (
+									<div
+										key={`calendar-summary-${toolCallId}`}
+										className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-200 animate-in fade-in slide-in-from-bottom-2"
+									>
+										<div className="flex items-center gap-2 font-medium">
+											<span className="flex items-center justify-center size-5 rounded-full bg-red-100 text-red-600 dark:bg-red-900/50">
+												✕
+											</span>
+											Content Calendar Error
+										</div>
+										<div className="mt-1 ml-7 text-red-700/90 dark:text-red-300/90">
+											Failed to save posts. Please try again.
+										</div>
+									</div>
+								);
+							}
+
+							return (
+								<div
+									key={`calendar-summary-${toolCallId}`}
+									className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-200 animate-in fade-in slide-in-from-bottom-2"
+								>
+									<div className="flex items-center gap-2 font-medium">
+										<span className="flex items-center justify-center size-5 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50">
+											✓
+										</span>
+										Content Calendar Updated
+									</div>
+									<div className="mt-1 ml-7 text-emerald-700/90 dark:text-emerald-300/90">
+										Added {totalPosts} post
+										{totalPosts !== 1 ? "s" : ""}
+										{platformSummary ? ` (${platformSummary})` : ""} to your
+										Content Calendar
+									</div>
+								</div>
+							);
+						}
+
 						return null;
 					})}
 

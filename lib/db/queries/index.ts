@@ -39,6 +39,14 @@ export {
 	updateChatTopic,
 	updateChatVisiblityById,
 } from "./chat";
+// Content Calendar queries
+export {
+	createContentCalendarPosts,
+	deleteContentCalendarPost,
+	getContentCalendarByDate,
+	getContentCalendarByMonth,
+	updateContentCalendarStatus,
+} from "./content-calendar";
 // Document queries
 export {
 	deleteDocumentsByIdAfterTimestamp,
@@ -78,6 +86,9 @@ export type {
 	BotType,
 	CanvasType,
 	Chat,
+	ContentCalendar,
+	ContentCalendarInsert,
+	ContentStatus,
 	ConversationSummary,
 	DBMessage,
 	Document,
@@ -85,6 +96,7 @@ export type {
 	Json,
 	MessageReaction,
 	ReactionType,
+	SocialPlatform,
 	StrategyCanvas,
 	Suggestion,
 	User,

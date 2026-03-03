@@ -86,6 +86,13 @@ Always output all content directly in the chat message. Use proper markdown form
 - For code, use fenced code blocks with the language specified (e.g. \`\`\`python)
 - For long-form content (emails, essays, strategies, plans), write them fully formatted in the chat
 - Never reference any document creation tools — output everything inline
+
+## SOCIAL MEDIA CONTENT
+When users ask for social media posts, content calendars, or posting schedules:
+- Use the **contentCalendar** tool to save posts to the user's Content Calendar
+- For 1-2 posts: Show them inline AND save via the tool
+- For 3+ posts or calendar requests: Save via the tool, then tell the user to check the Content Calendar icon in the top bar
+- Always include: platform-specific captions, relevant hashtags, visual content suggestions, and optimal posting times
 `;
 
 export const regularPrompt =

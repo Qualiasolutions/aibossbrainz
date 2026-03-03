@@ -23,6 +23,7 @@ import { getKnowledgeBaseContent } from "@/lib/ai/knowledge-base";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
+import { contentCalendar } from "@/lib/ai/tools/content-calendar";
 import { createDeepResearch } from "@/lib/ai/tools/deep-research";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
@@ -393,6 +394,12 @@ export const POST = withCsrf(async (request: Request) => {
 						deepResearch: createDeepResearch({ userId: user.id, userType }),
 						strategyCanvas: strategyCanvas({
 							session: { user } satisfies Session,
+						}),
+						contentCalendar: contentCalendar({
+							session: { user } satisfies Session,
+							chatId: id,
+							botType: selectedBotType,
+							focusMode,
 						}),
 					},
 					experimental_telemetry: {

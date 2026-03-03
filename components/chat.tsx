@@ -98,6 +98,13 @@ const SwotSlidePanel = dynamic(
 		})),
 	{ ssr: false, loading: () => null },
 );
+const ContentCalendarPanel = dynamic(
+	() =>
+		import("./content-calendar-panel").then((mod) => ({
+			default: mod.ContentCalendarPanel,
+		})),
+	{ ssr: false, loading: () => null },
+);
 const SupportWidget = dynamic(
 	() =>
 		import("./support/support-widget").then((mod) => ({
@@ -220,6 +227,10 @@ export function Chat({
 	const [canvasRefreshVersion, setCanvasRefreshVersion] = useState(0);
 	const [targetCanvasTab, setTargetCanvasTab] = useState<CanvasType>("swot");
 	const processedToolCallIds = useRef<Set<string>>(new Set());
+
+	// Content Calendar integration
+	const [isContentCalendarOpen, setIsContentCalendarOpen] = useState(false);
+	const [calendarRefreshVersion, setCalendarRefreshVersion] = useState(0);
 
 	// Handler for bot switching with toast notification
 	const handleBotChange = (newBot: BotType) => {
@@ -418,6 +429,24 @@ export function Chat({
 					});
 				}
 			}
+
+			// Auto-open Content Calendar when AI uses contentCalendar tool
+			if (
+				partType === "tool-contentCalendar" &&
+				(part as any).state === "output-available" &&
+				!processedToolCallIds.current.has((part as any).toolCallId)
+			) {
+				processedToolCallIds.current.add((part as any).toolCallId);
+				const output = (part as any).output;
+				if (output?.success) {
+					setIsContentCalendarOpen(true);
+					setCalendarRefreshVersion((v) => v + 1);
+					toast({
+						type: "success",
+						description: `Added ${output.postsCreated} post${output.postsCreated !== 1 ? "s" : ""} to Content Calendar`,
+					});
+				}
+			}
 		}
 	}, [messages]);
 
@@ -533,6 +562,7 @@ export function Chat({
 								router.refresh();
 							}}
 							onOpenReactionPopup={setReactionPopup}
+							onOpenContentCalendar={() => setIsContentCalendarOpen(true)}
 							onOpenSupport={() => setIsSupportOpen(true)}
 							onOpenSwotPanel={() => setIsSwotPanelOpen(true)}
 							selectedBot={selectedBot}
@@ -647,6 +677,13 @@ export function Chat({
 					onClose={() => setIsSwotPanelOpen(false)}
 					activeTab={targetCanvasTab}
 					refreshKey={canvasRefreshVersion}
+				/>
+
+				{/* Content Calendar Panel - part of flex layout */}
+				<ContentCalendarPanel
+					isOpen={isContentCalendarOpen}
+					onClose={() => setIsContentCalendarOpen(false)}
+					refreshKey={calendarRefreshVersion}
 				/>
 
 				{/* Support Widget */}

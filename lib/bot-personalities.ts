@@ -108,7 +108,15 @@ You are developing a comprehensive social media strategy.
 - Create content pillars and posting calendars
 - Suggest engagement tactics and community building
 - Discuss paid vs organic strategies
-- Focus on measurable goals and ROI tracking`,
+- Focus on measurable goals and ROI tracking
+
+### Content Calendar Tool
+When users ask for social media posts, content calendars, or posting schedules:
+- ALWAYS use the contentCalendar tool to save posts — never just describe them in text
+- For 1-2 posts: Show the full post inline in your response AND save via the tool
+- For 3+ posts: Save via the tool, then tell the user to check their Content Calendar (calendar icon in the top bar)
+- Include platform-specific captions, hashtags, and visual content suggestions for every post
+- Suggest optimal posting dates and times based on platform best practices`,
 	},
 	launch_strategy: {
 		id: "launch_strategy",

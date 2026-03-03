@@ -3,6 +3,7 @@
 import {
 	BarChart3,
 	Bookmark,
+	CalendarDays,
 	Download,
 	Headphones,
 	HelpCircle,
@@ -30,6 +31,7 @@ interface ChatHeaderProps {
 	onBotChange: (bot: BotType) => void;
 	onNewChat: () => void;
 	onOpenSwotPanel: () => void;
+	onOpenContentCalendar: () => void;
 	onOpenSupport: () => void;
 	showNewButton: boolean;
 	messages: ChatMessage[];
@@ -45,6 +47,7 @@ export function ChatHeader({
 	onBotChange,
 	onNewChat,
 	onOpenSwotPanel,
+	onOpenContentCalendar,
 	onOpenSupport,
 	showNewButton,
 	messages,
@@ -80,7 +83,7 @@ export function ChatHeader({
 					/>
 				</div>
 
-				{/* Right: Strategy Canvas, Menu & Support */}
+				{/* Right: Strategy Canvas, Content Calendar, Menu & Support */}
 				<div className="flex shrink-0 items-center gap-1.5">
 					<Button
 						className="h-8 gap-1.5 rounded-lg border-border bg-background px-2 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:h-8 sm:px-2.5"
@@ -90,6 +93,16 @@ export function ChatHeader({
 					>
 						<LayoutGrid className="size-3.5" />
 						<span className="hidden sm:inline">Strategy Canvas</span>
+					</Button>
+
+					{/* Content Calendar: icon-only on mobile, full on desktop */}
+					<Button
+						className="hidden h-8 gap-1.5 rounded-lg border-border bg-background px-2 font-medium text-xs text-muted-foreground shadow-sm transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary sm:flex sm:h-8 sm:px-2.5"
+						variant="outline"
+						onClick={onOpenContentCalendar}
+					>
+						<CalendarDays className="size-3.5" />
+						<span>Calendar</span>
 					</Button>
 
 					<DropdownMenu>
@@ -102,7 +115,15 @@ export function ChatHeader({
 								<span className="hidden sm:inline">Menu</span>
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-44">
+						<DropdownMenuContent align="end" className="w-48">
+							{/* Content Calendar in mobile dropdown */}
+							<DropdownMenuItem
+								className="cursor-pointer sm:hidden"
+								onClick={onOpenContentCalendar}
+							>
+								<CalendarDays className="size-4 text-primary" />
+								<span>Content Calendar</span>
+							</DropdownMenuItem>
 							<DropdownMenuItem asChild className="cursor-pointer">
 								<Link href="/analytics" className="flex items-center gap-2">
 									<BarChart3 className="size-4 text-primary" />
