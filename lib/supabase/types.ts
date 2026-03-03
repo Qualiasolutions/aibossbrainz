@@ -50,6 +50,9 @@ export type UserInsert = Database["public"]["Tables"]["User"]["Insert"];
 // Visibility type for Chat
 export type VisibilityType = "public" | "private";
 
+// Chat type (text chat vs voice call)
+export type ChatType = "text" | "voice";
+
 // Bot type for messages
 export type BotType = "alexandria" | "kim" | "collaborative";
 

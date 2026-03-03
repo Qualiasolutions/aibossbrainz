@@ -450,6 +450,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 					id: chatId,
 					userId: user.id,
 					title,
+					chatType: "voice",
 				});
 
 				if (insertError) {

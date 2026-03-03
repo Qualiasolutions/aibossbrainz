@@ -1,4 +1,4 @@
-import { Briefcase, Star, User, Users } from "lucide-react";
+import { Briefcase, Phone, Star, User, Users } from "lucide-react";
 import Link from "next/link";
 import { memo } from "react";
 import type { Chat, UserCategory } from "@/lib/supabase/types";
@@ -60,6 +60,7 @@ const PureChatItem = ({
 	onCategoryChange?: (chatId: string, category: UserCategory) => void;
 }) => {
 	const isPinned = chat.isPinned ?? false;
+	const isVoiceCall = chat.chatType === "voice";
 	const currentCategory = (chat.userCategory || "none") as UserCategory;
 	const CategoryIcon = categoryConfig[currentCategory].icon;
 
@@ -87,8 +88,12 @@ const PureChatItem = ({
 						{isPinned && (
 							<Star className="size-3 shrink-0 fill-red-500 text-red-500" />
 						)}
+						{/* Voice call indicator */}
+						{isVoiceCall && (
+							<Phone className="size-3 shrink-0 text-emerald-600" />
+						)}
 						{/* Category indicator */}
-						{currentCategory !== "none" && (
+						{!isVoiceCall && currentCategory !== "none" && (
 							<CategoryIcon
 								className={cn(
 									"size-3 shrink-0",
@@ -210,6 +215,9 @@ export const ChatItem = memo(PureChatItem, (prevProps, nextProps) => {
 		return false;
 	}
 	if (prevProps.chat.userCategory !== nextProps.chat.userCategory) {
+		return false;
+	}
+	if (prevProps.chat.chatType !== nextProps.chat.chatType) {
 		return false;
 	}
 	if (prevProps.chat.topic !== nextProps.chat.topic) {

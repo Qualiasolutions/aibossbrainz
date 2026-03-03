@@ -108,6 +108,7 @@ export type Database = {
 			};
 			Chat: {
 				Row: {
+					chatType: string | null;
 					createdAt: string;
 					deletedAt: string | null;
 					id: string;
@@ -121,6 +122,7 @@ export type Database = {
 					visibility: string;
 				};
 				Insert: {
+					chatType?: string | null;
 					createdAt?: string;
 					deletedAt?: string | null;
 					id?: string;
@@ -134,6 +136,7 @@ export type Database = {
 					visibility?: string;
 				};
 				Update: {
+					chatType?: string | null;
 					createdAt?: string;
 					deletedAt?: string | null;
 					id?: string;

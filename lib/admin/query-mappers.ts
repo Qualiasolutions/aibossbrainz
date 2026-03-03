@@ -60,6 +60,7 @@ export function mapRpcRowToAdminChat(row: AdminChatRow): AdminChat {
 		createdAt: row.createdAt,
 		deletedAt: row.deletedAt,
 		lastContext: row.lastContext ?? null,
+		chatType: (row as { chatType?: string | null }).chatType ?? null,
 		userCategory: null, // Not returned by admin RPC
 		userEmail: row.userEmail || "Unknown",
 		messageCount: Number(row.messageCount) || 0,
