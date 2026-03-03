@@ -5,7 +5,13 @@ import { useCsrf } from "@/hooks/use-csrf";
 import type { BotType } from "@/lib/bot-personalities";
 import { logClientError } from "@/lib/client-logger";
 
-export type CallState = "idle" | "listening" | "thinking" | "speaking";
+export type CallState =
+	| "idle"
+	| "connecting"
+	| "listening"
+	| "thinking"
+	| "speaking"
+	| "error";
 
 interface VoiceCallHookOptions {
 	executive: BotType;
@@ -20,31 +26,139 @@ interface StreamResponse {
 /**
  * Hook to manage real-time voice call lifecycle.
  *
- * State machine: idle → listening → thinking → speaking → (loop back to listening)
+ * State machine: idle → connecting → listening → thinking → speaking → (loop back to listening)
  *
  * SpeechRecognition → AI response → TTS playback
  */
 export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	const [callState, setCallState] = useState<CallState>("idle");
 	const [transcript, setTranscript] = useState<string>("");
-	const [isListening, setIsListening] = useState(false);
-	const [isThinking, setIsThinking] = useState(false);
-	const [isSpeaking, setIsSpeaking] = useState(false);
+	const [errorMessage, setErrorMessage] = useState<string>("");
 
 	const { csrfFetch } = useCsrf();
 
-	// Refs for persistent objects across renders
+	// Refs for persistent objects across renders — avoids stale closures
 	const recognitionRef = useRef<SpeechRecognition | null>(null);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
-	const shouldListenRef = useRef(false); // Controls whether to restart recognition
-	const startRecognitionRef = useRef<() => void>(() => {});
+	const shouldListenRef = useRef(false);
+	const callStateRef = useRef<CallState>("idle");
+	const csrfFetchRef = useRef(csrfFetch);
+	const handleAIResponseRef = useRef<(text: string) => Promise<void>>(
+		async () => {},
+	);
+	const startedRef = useRef(false);
 
-	// Update state flags when callState changes
-	useEffect(() => {
-		setIsListening(callState === "listening");
-		setIsThinking(callState === "thinking");
-		setIsSpeaking(callState === "speaking");
-	}, [callState]);
+	// Keep refs in sync
+	csrfFetchRef.current = csrfFetch;
+	callStateRef.current = callState;
+
+	/**
+	 * Create and start a new speech recognition instance.
+	 * Uses refs exclusively — no dependency on React state — so it's safe
+	 * to call from any callback without stale closure issues.
+	 */
+	const startRecognitionInstance = useCallback(() => {
+		// Clean up existing recognition
+		if (recognitionRef.current) {
+			try {
+				recognitionRef.current.stop();
+			} catch {
+				// Ignore — may already be stopped
+			}
+			recognitionRef.current = null;
+		}
+
+		if (
+			!("webkitSpeechRecognition" in window) &&
+			!("SpeechRecognition" in window)
+		) {
+			setCallState("error");
+			setErrorMessage(
+				"Speech recognition is not supported in this browser. Please use Chrome.",
+			);
+			return;
+		}
+
+		const SpeechRecognition =
+			window.SpeechRecognition || window.webkitSpeechRecognition;
+		const recognition = new SpeechRecognition();
+
+		recognition.continuous = true;
+		recognition.interimResults = true;
+		recognition.lang = "en-US";
+
+		let finalTranscript = "";
+
+		recognition.onresult = (event: SpeechRecognitionEvent) => {
+			let interimTranscript = "";
+
+			for (let i = event.resultIndex; i < event.results.length; i++) {
+				const result = event.results[i];
+				if (result.isFinal) {
+					finalTranscript += result[0].transcript;
+				} else {
+					interimTranscript += result[0].transcript;
+				}
+			}
+
+			setTranscript(finalTranscript + interimTranscript);
+
+			if (finalTranscript.trim()) {
+				recognition.stop();
+				handleAIResponseRef.current(finalTranscript.trim());
+				finalTranscript = "";
+			}
+		};
+
+		recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+			if (event.error === "no-speech" || event.error === "aborted") {
+				if (shouldListenRef.current) {
+					try {
+						recognition.start();
+					} catch {
+						// Ignore — may already be running
+					}
+				}
+				return;
+			}
+
+			if (event.error === "not-allowed") {
+				setCallState("error");
+				setErrorMessage(
+					"Microphone access was denied. Please allow microphone access and try again.",
+				);
+				return;
+			}
+
+			logClientError(new Error(`Speech recognition error: ${event.error}`), {
+				component: "useVoiceCall",
+				action: "recognition_error",
+				errorType: event.error,
+			});
+		};
+
+		recognition.onend = () => {
+			// Reads from ref — not from a stale closure
+			if (shouldListenRef.current && callStateRef.current === "listening") {
+				try {
+					recognition.start();
+				} catch {
+					// Ignore — may already be running
+				}
+			}
+		};
+
+		recognitionRef.current = recognition;
+
+		try {
+			recognition.start();
+		} catch (error) {
+			logClientError(error, {
+				component: "useVoiceCall",
+				action: "start_recognition",
+			});
+		}
+	}, []);
 
 	/**
 	 * Send transcript to AI and play response
@@ -57,7 +171,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				setCallState("thinking");
 				setTranscript(text);
 
-				const response = await csrfFetch("/api/realtime/stream", {
+				const response = await csrfFetchRef.current("/api/realtime/stream", {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -84,10 +198,9 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 						audioRef.current = audio;
 
 						audio.onended = () => {
-							// Return to listening after audio finishes
 							if (shouldListenRef.current) {
 								setCallState("listening");
-								startRecognitionRef.current();
+								startRecognitionInstance();
 							}
 						};
 
@@ -97,21 +210,25 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 								action: "audio_playback",
 								executive,
 							});
-							// Return to listening even on error
 							if (shouldListenRef.current) {
 								setCallState("listening");
-								startRecognitionRef.current();
+								startRecognitionInstance();
 							}
 						};
 
 						await audio.play();
+						return;
 					}
-				} else {
-					// No audio, return to listening
-					if (shouldListenRef.current) {
-						setCallState("listening");
-						startRecognitionRef.current();
-					}
+				}
+
+				// No audio, show text response briefly then return to listening
+				if (data.text) {
+					setTranscript(data.text);
+				}
+
+				if (shouldListenRef.current) {
+					setCallState("listening");
+					startRecognitionInstance();
 				}
 			} catch (error) {
 				logClientError(error, {
@@ -120,143 +237,64 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 					executive,
 				});
 
-				// Return to listening on error
 				if (shouldListenRef.current) {
 					setCallState("listening");
-					startRecognitionRef.current();
+					startRecognitionInstance();
 				}
 			}
 		},
-		[csrfFetch, executive],
+		[executive, startRecognitionInstance],
 	);
 
-	/**
-	 * Initialize and start speech recognition
-	 */
-	const startRecognition = useCallback(() => {
-		if (
-			!("webkitSpeechRecognition" in window) &&
-			!("SpeechRecognition" in window)
-		) {
-			logClientError(new Error("Speech recognition not supported"), {
-				component: "useVoiceCall",
-				action: "check_browser_support",
-			});
-			return;
-		}
-
-		const SpeechRecognition =
-			window.SpeechRecognition || window.webkitSpeechRecognition;
-		const recognition = new SpeechRecognition();
-
-		recognition.continuous = true;
-		recognition.interimResults = true;
-		recognition.lang = "en-US";
-
-		let finalTranscript = "";
-
-		recognition.onresult = (event: SpeechRecognitionEvent) => {
-			let interimTranscript = "";
-
-			for (let i = event.resultIndex; i < event.results.length; i++) {
-				const result = event.results[i];
-				if (result.isFinal) {
-					finalTranscript += result[0].transcript;
-				} else {
-					interimTranscript += result[0].transcript;
-				}
-			}
-
-			// Update UI with interim results
-			setTranscript(finalTranscript + interimTranscript);
-
-			// Send final transcript to AI
-			if (finalTranscript.trim()) {
-				recognition.stop();
-				handleAIResponse(finalTranscript.trim());
-				finalTranscript = "";
-			}
-		};
-
-		recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-			// Transient errors - retry
-			if (event.error === "no-speech" || event.error === "aborted") {
-				if (shouldListenRef.current) {
-					recognition.start();
-				}
-				return;
-			}
-
-			logClientError(new Error(`Speech recognition error: ${event.error}`), {
-				component: "useVoiceCall",
-				action: "recognition_error",
-				errorType: event.error,
-			});
-		};
-
-		recognition.onend = () => {
-			// Auto-restart if still in listening state
-			if (shouldListenRef.current && callState === "listening") {
-				try {
-					recognition.start();
-				} catch (_error) {
-					// Ignore - likely already started
-				}
-			}
-		};
-
-		recognitionRef.current = recognition;
-
-		try {
-			recognition.start();
-		} catch (error) {
-			logClientError(error, {
-				component: "useVoiceCall",
-				action: "start_recognition",
-			});
-		}
-	}, [callState, handleAIResponse]);
-
-	// Keep ref in sync so handleAIResponse can call latest startRecognition
-	startRecognitionRef.current = startRecognition;
+	// Keep handleAIResponse ref in sync for use in recognition callbacks
+	handleAIResponseRef.current = handleAIResponse;
 
 	/**
-	 * Start the voice call - request mic permission and begin listening
+	 * Start the voice call — request mic permission and begin listening.
+	 * Guarded by startedRef to prevent double-invocation from useEffect re-fires.
 	 */
 	const startCall = useCallback(async () => {
+		if (startedRef.current) return;
+		startedRef.current = true;
+
 		try {
+			setCallState("connecting");
+
 			// Request microphone permission
 			await navigator.mediaDevices.getUserMedia({ audio: true });
 
 			shouldListenRef.current = true;
 			setCallState("listening");
-			startRecognition();
+			startRecognitionInstance();
 		} catch (error) {
 			logClientError(error, {
 				component: "useVoiceCall",
 				action: "start_call",
 				errorType: "microphone_permission",
 			});
+			setCallState("error");
+			setErrorMessage(
+				"Could not access microphone. Please allow microphone access and try again.",
+			);
 		}
-	}, [startRecognition]);
+	}, [startRecognitionInstance]);
 
 	/**
-	 * Stop the voice call - stop recognition, pause audio, reset state
+	 * Stop the voice call — stop recognition, pause audio, reset state
 	 */
 	const stopCall = useCallback(() => {
 		shouldListenRef.current = false;
+		startedRef.current = false;
 
-		// Stop recognition
 		if (recognitionRef.current) {
 			try {
 				recognitionRef.current.stop();
-			} catch (_error) {
-				// Ignore - likely already stopped
+			} catch {
+				// Ignore — likely already stopped
 			}
 			recognitionRef.current = null;
 		}
 
-		// Stop audio
 		if (audioRef.current) {
 			audioRef.current.pause();
 			audioRef.current = null;
@@ -264,22 +302,38 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 
 		setCallState("idle");
 		setTranscript("");
+		setErrorMessage("");
 	}, []);
 
 	// Cleanup on unmount
 	useEffect(() => {
 		return () => {
-			stopCall();
+			shouldListenRef.current = false;
+			if (recognitionRef.current) {
+				try {
+					recognitionRef.current.stop();
+				} catch {
+					// Ignore
+				}
+				recognitionRef.current = null;
+			}
+			if (audioRef.current) {
+				audioRef.current.pause();
+				audioRef.current = null;
+			}
 		};
-	}, [stopCall]);
+	}, []);
 
 	return {
 		callState,
 		transcript,
+		errorMessage,
 		startCall,
 		stopCall,
-		isListening,
-		isThinking,
-		isSpeaking,
+		isListening: callState === "listening",
+		isThinking: callState === "thinking",
+		isSpeaking: callState === "speaking",
+		isConnecting: callState === "connecting",
+		hasError: callState === "error",
 	};
 }

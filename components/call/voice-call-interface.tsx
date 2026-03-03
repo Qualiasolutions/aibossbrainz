@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertCircle } from "lucide-react";
 import { useEffect } from "react";
 import { useVoiceCall } from "@/hooks/use-voice-call";
 import type { BotType } from "@/lib/bot-personalities";
@@ -24,10 +25,13 @@ export function VoiceCallInterface({
 	const {
 		callState,
 		transcript,
+		errorMessage,
 		startCall,
 		stopCall,
 		isListening,
 		isSpeaking,
+		isConnecting,
+		hasError,
 	} = useVoiceCall({ executive });
 
 	// Start call on mount
@@ -43,6 +47,8 @@ export function VoiceCallInterface({
 
 	// Determine state label
 	const getStateLabel = () => {
+		if (hasError) return "Call failed";
+		if (isConnecting) return "Connecting...";
 		if (isListening) return "Listening...";
 		if (callState === "thinking") return "Thinking...";
 		if (isSpeaking) return "Speaking...";
@@ -57,17 +63,30 @@ export function VoiceCallInterface({
 			{/* Executive name */}
 			<div className="text-center space-y-1">
 				<h2 className="text-2xl font-semibold">{EXECUTIVE_NAMES[executive]}</h2>
-				<p className="text-sm text-muted-foreground">{getStateLabel()}</p>
+				<p
+					className={`text-sm ${hasError ? "text-red-500" : "text-muted-foreground"}`}
+				>
+					{getStateLabel()}
+				</p>
 			</div>
 
-			{/* Voice visualizer */}
+			{/* Voice visualizer or error */}
 			<div className="flex-1 flex items-center justify-center">
-				<VoiceVisualizer isActive={isVisualizerActive} />
+				{hasError ? (
+					<div className="flex flex-col items-center gap-3 text-center px-4">
+						<AlertCircle className="h-12 w-12 text-red-500/60" />
+						<p className="text-sm text-muted-foreground max-w-[280px]">
+							{errorMessage}
+						</p>
+					</div>
+				) : (
+					<VoiceVisualizer isActive={isVisualizerActive} />
+				)}
 			</div>
 
 			{/* Transcript */}
 			<div className="w-full min-h-[60px] text-center">
-				{transcript && (
+				{transcript && !hasError && (
 					<p className="text-sm text-muted-foreground/80 italic">
 						"{transcript}"
 					</p>
