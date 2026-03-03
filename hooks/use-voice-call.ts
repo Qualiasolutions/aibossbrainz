@@ -13,14 +13,13 @@ export type CallState =
 	| "speaking"
 	| "error";
 
-interface VoiceCallHookOptions {
-	executive: BotType;
+export interface ConversationEntry {
+	role: "user" | "assistant";
+	content: string;
 }
 
-interface StreamResponse {
-	audioUrl?: string;
-	audioData?: string;
-	text?: string;
+interface VoiceCallHookOptions {
+	executive: BotType;
 }
 
 interface NdjsonChunk {
@@ -30,21 +29,22 @@ interface NdjsonChunk {
 	message?: string;
 }
 
-/**
- * Hook to manage real-time voice call lifecycle.
- *
- * State machine: idle → connecting → listening → thinking → speaking → (loop back to listening)
- *
- * SpeechRecognition → AI response → TTS playback
- */
+/** Wait this long after last speech before sending to AI */
+const SILENCE_TIMEOUT_MS = 1500;
+/** Max conversation history messages to send */
+const MAX_HISTORY = 20;
+
 export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	const [callState, setCallState] = useState<CallState>("idle");
-	const [transcript, setTranscript] = useState<string>("");
-	const [errorMessage, setErrorMessage] = useState<string>("");
+	const [transcript, setTranscript] = useState("");
+	const [errorMessage, setErrorMessage] = useState("");
+	const [isMuted, setIsMuted] = useState(false);
+	const [callDuration, setCallDuration] = useState(0);
+	const [conversation, setConversation] = useState<ConversationEntry[]>([]);
 
 	const { csrfFetch } = useCsrf();
 
-	// Refs for persistent objects across renders — avoids stale closures
+	// ---- Refs (persistent across renders, no stale closures) ----
 	const recognitionRef = useRef<SpeechRecognition | null>(null);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 	const audioQueueRef = useRef<string[]>([]);
@@ -52,28 +52,62 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	const shouldListenRef = useRef(false);
 	const callStateRef = useRef<CallState>("idle");
 	const csrfFetchRef = useRef(csrfFetch);
-	const handleAIResponseRef = useRef<(text: string) => Promise<void>>(
-		async () => {},
-	);
 	const startedRef = useRef(false);
+	const isMutedRef = useRef(false);
+
+	// Silence detection
+	const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const accumulatedRef = useRef("");
+
+	// Conversation history
+	const conversationRef = useRef<ConversationEntry[]>([]);
+
+	// Call timer
+	const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+		null,
+	);
+	const callStartRef = useRef(0);
+
+	// Audio analysis for visualizer
+	const mediaStreamRef = useRef<MediaStream | null>(null);
+	const audioContextRef = useRef<AudioContext | null>(null);
+	const analyserRef = useRef<AnalyserNode | null>(null);
+
+	// Function refs to break circular deps
+	const sendToAIRef = useRef<(text: string) => Promise<void>>(async () => {});
+	const startRecognitionRef = useRef<() => void>(() => {});
 
 	// Keep refs in sync
 	csrfFetchRef.current = csrfFetch;
 	callStateRef.current = callState;
+	isMutedRef.current = isMuted;
 
-	/**
-	 * Create and start a new speech recognition instance.
-	 * Uses refs exclusively — no dependency on React state — so it's safe
-	 * to call from any callback without stale closure issues.
-	 */
+	// ---- Helpers ----
+
+	const clearSilenceTimer = useCallback(() => {
+		if (silenceTimerRef.current) {
+			clearTimeout(silenceTimerRef.current);
+			silenceTimerRef.current = null;
+		}
+	}, []);
+
+	const stopAudioPlayback = useCallback(() => {
+		if (audioRef.current) {
+			audioRef.current.pause();
+			audioRef.current.currentTime = 0;
+			audioRef.current = null;
+		}
+		audioQueueRef.current = [];
+		isPlayingRef.current = false;
+	}, []);
+
+	// ---- Speech Recognition with silence-based turn detection ----
+
 	const startRecognitionInstance = useCallback(() => {
-		// Clean up existing recognition
 		if (recognitionRef.current) {
 			try {
 				recognitionRef.current.stop();
-			} catch {
-				// Ignore — may already be stopped
-			}
+			} catch {}
 			recognitionRef.current = null;
 		}
 
@@ -83,50 +117,85 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 		) {
 			setCallState("error");
 			setErrorMessage(
-				"Speech recognition is not supported in this browser. Please use Chrome.",
+				"Speech recognition not supported. Please use Chrome or Edge.",
 			);
 			return;
 		}
 
-		const SpeechRecognition =
-			window.SpeechRecognition || window.webkitSpeechRecognition;
-		const recognition = new SpeechRecognition();
+		const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+		const recognition = new SR();
 
 		recognition.continuous = true;
 		recognition.interimResults = true;
 		recognition.lang = "en-US";
 
-		let finalTranscript = "";
-
 		recognition.onresult = (event: SpeechRecognitionEvent) => {
-			let interimTranscript = "";
+			if (isMutedRef.current) return;
+
+			// If AI is speaking, this is an interruption
+			if (
+				callStateRef.current === "speaking" ||
+				callStateRef.current === "thinking"
+			) {
+				// Check if this is actual speech (not just noise)
+				let hasContent = false;
+				for (let i = event.resultIndex; i < event.results.length; i++) {
+					if (event.results[i][0].transcript.trim().length > 2) {
+						hasContent = true;
+						break;
+					}
+				}
+				if (hasContent && callStateRef.current === "speaking") {
+					// Interrupt: stop audio, switch to listening
+					stopAudioPlayback();
+					setCallState("listening");
+					callStateRef.current = "listening";
+				}
+			}
+
+			let finalText = "";
+			let interimText = "";
 
 			for (let i = event.resultIndex; i < event.results.length; i++) {
 				const result = event.results[i];
 				if (result.isFinal) {
-					finalTranscript += result[0].transcript;
+					finalText += result[0].transcript;
 				} else {
-					interimTranscript += result[0].transcript;
+					interimText += result[0].transcript;
 				}
 			}
 
-			setTranscript(finalTranscript + interimTranscript);
+			if (finalText) {
+				accumulatedRef.current += finalText;
+			}
 
-			if (finalTranscript.trim()) {
-				recognition.stop();
-				handleAIResponseRef.current(finalTranscript.trim());
-				finalTranscript = "";
+			// Show live transcript (accumulated final + current interim)
+			setTranscript(accumulatedRef.current + interimText);
+
+			// Reset silence timer on any speech activity
+			clearSilenceTimer();
+
+			// If we got final text, start the silence countdown
+			if (finalText && accumulatedRef.current.trim()) {
+				silenceTimerRef.current = setTimeout(() => {
+					const text = accumulatedRef.current.trim();
+					if (text) {
+						accumulatedRef.current = "";
+						try {
+							recognition.stop();
+						} catch {}
+						sendToAIRef.current(text);
+					}
+				}, SILENCE_TIMEOUT_MS);
 			}
 		};
 
 		recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
 			if (event.error === "no-speech" || event.error === "aborted") {
-				if (shouldListenRef.current) {
+				if (shouldListenRef.current && !isMutedRef.current) {
 					try {
 						recognition.start();
-					} catch {
-						// Ignore — may already be running
-					}
+					} catch {}
 				}
 				return;
 			}
@@ -134,12 +203,12 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 			if (event.error === "not-allowed") {
 				setCallState("error");
 				setErrorMessage(
-					"Microphone access was denied. Please allow microphone access and try again.",
+					"Microphone access denied. Please allow mic access and try again.",
 				);
 				return;
 			}
 
-			logClientError(new Error(`Speech recognition error: ${event.error}`), {
+			logClientError(new Error(`Speech recognition: ${event.error}`), {
 				component: "useVoiceCall",
 				action: "recognition_error",
 				errorType: event.error,
@@ -147,13 +216,15 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 		};
 
 		recognition.onend = () => {
-			// Reads from ref — not from a stale closure
-			if (shouldListenRef.current && callStateRef.current === "listening") {
+			if (
+				shouldListenRef.current &&
+				!isMutedRef.current &&
+				(callStateRef.current === "listening" ||
+					callStateRef.current === "speaking")
+			) {
 				try {
 					recognition.start();
-				} catch {
-					// Ignore — may already be running
-				}
+				} catch {}
 			}
 		};
 
@@ -161,44 +232,40 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 
 		try {
 			recognition.start();
-		} catch (error) {
-			logClientError(error, {
+		} catch (err) {
+			logClientError(err, {
 				component: "useVoiceCall",
 				action: "start_recognition",
 			});
 		}
-	}, []);
+	}, [clearSilenceTimer, stopAudioPlayback]);
 
-	/**
-	 * Play queued audio chunks sequentially.
-	 * First chunk triggers "speaking" state, subsequent chain via onended.
-	 */
+	// Keep ref in sync
+	startRecognitionRef.current = startRecognitionInstance;
+
+	// ---- Audio Playback ----
+
 	const playNextInQueue = useCallback(() => {
 		if (audioQueueRef.current.length === 0) {
 			isPlayingRef.current = false;
-			// All audio finished — return to listening
 			if (shouldListenRef.current) {
 				setCallState("listening");
-				startRecognitionInstance();
+				startRecognitionRef.current();
 			}
 			return;
 		}
 
 		isPlayingRef.current = true;
 		const base64 = audioQueueRef.current.shift()!;
-		const audioSrc = `data:audio/mpeg;base64,${base64}`;
-		const audio = new Audio(audioSrc);
+		const audio = new Audio(`data:audio/mpeg;base64,${base64}`);
 		audioRef.current = audio;
 
-		audio.onended = () => {
-			playNextInQueue();
-		};
+		audio.onended = () => playNextInQueue();
 
 		audio.onerror = (error) => {
 			logClientError(error, {
 				component: "useVoiceCall",
 				action: "audio_playback",
-				executive,
 			});
 			playNextInQueue();
 		};
@@ -206,20 +273,15 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 		audio.play().catch((err) => {
 			logClientError(err, {
 				component: "useVoiceCall",
-				action: "audio_play_promise",
-				executive,
+				action: "audio_play",
 			});
 			playNextInQueue();
 		});
-	}, [executive, startRecognitionInstance]);
+	}, []);
 
-	/**
-	 * Enqueue a base64 audio chunk. Starts playback if not already playing.
-	 */
 	const enqueueAudio = useCallback(
 		(base64: string) => {
 			audioQueueRef.current.push(base64);
-
 			if (!isPlayingRef.current) {
 				setCallState("speaking");
 				playNextInQueue();
@@ -228,19 +290,16 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 		[playNextInQueue],
 	);
 
-	/**
-	 * Handle NDJSON streaming response (single voice — alexandria/kim).
-	 * Reads audio chunks as they arrive and queues them for playback.
-	 */
+	// ---- NDJSON Stream Handler ----
+
 	const handleStreamingResponse = useCallback(
 		async (response: Response) => {
 			const reader = response.body?.getReader();
-			if (!reader) {
-				throw new Error("Response body is not readable");
-			}
+			if (!reader) throw new Error("Response body not readable");
 
 			const decoder = new TextDecoder();
 			let buffer = "";
+			let fullText = "";
 
 			try {
 				while (true) {
@@ -248,10 +307,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 					if (done) break;
 
 					buffer += decoder.decode(value, { stream: true });
-
-					// Process complete NDJSON lines
 					const lines = buffer.split("\n");
-					// Keep the last incomplete line in buffer
 					buffer = lines.pop() || "";
 
 					for (const line of lines) {
@@ -263,122 +319,138 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 
 							if (chunk.type === "audio" && chunk.data) {
 								enqueueAudio(chunk.data);
-							} else if (chunk.type === "error") {
+							}
+							if (chunk.text) {
+								fullText = chunk.text;
+							}
+							if (chunk.type === "error") {
 								throw new Error(chunk.message || "Stream error");
 							}
-							// "done" type — stream complete, no action needed
 						} catch (parseErr) {
-							// Skip malformed lines
-							if (parseErr instanceof SyntaxError === false) {
-								throw parseErr;
-							}
+							if (!(parseErr instanceof SyntaxError)) throw parseErr;
 						}
 					}
 				}
 
-				// Process any remaining buffer
+				// Process remaining buffer
 				if (buffer.trim()) {
 					try {
 						const chunk: NdjsonChunk = JSON.parse(buffer.trim());
 						if (chunk.type === "audio" && chunk.data) {
 							enqueueAudio(chunk.data);
 						}
-					} catch {
-						// Ignore trailing partial data
-					}
+						if (chunk.text) fullText = chunk.text;
+					} catch {}
 				}
 			} finally {
 				reader.releaseLock();
 			}
 
-			// If no audio was queued at all, go back to listening
+			// Add AI response to conversation history
+			if (fullText) {
+				const entry: ConversationEntry = {
+					role: "assistant",
+					content: fullText,
+				};
+				conversationRef.current = [...conversationRef.current, entry].slice(
+					-MAX_HISTORY,
+				);
+				setConversation([...conversationRef.current]);
+			}
+
+			// If no audio queued, go back to listening
 			if (
 				audioQueueRef.current.length === 0 &&
 				!isPlayingRef.current &&
 				shouldListenRef.current
 			) {
 				setCallState("listening");
-				startRecognitionInstance();
+				startRecognitionRef.current();
 			}
 		},
-		[enqueueAudio, startRecognitionInstance],
+		[enqueueAudio],
 	);
 
-	/**
-	 * Handle legacy JSON response (collaborative mode).
-	 */
+	// ---- Legacy JSON Handler (collaborative mode) ----
+
 	const handleLegacyResponse = useCallback(
-		async (data: StreamResponse) => {
-			if (data.audioUrl || data.audioData) {
-				const audioSrc = data.audioUrl || data.audioData;
-				if (audioSrc) {
-					setCallState("speaking");
-
-					const audio = new Audio(
-						data.audioUrl ? audioSrc : `data:audio/mpeg;base64,${audioSrc}`,
-					);
-					audioRef.current = audio;
-
-					audio.onended = () => {
-						if (shouldListenRef.current) {
-							setCallState("listening");
-							startRecognitionInstance();
-						}
-					};
-
-					audio.onerror = (error) => {
-						logClientError(error, {
-							component: "useVoiceCall",
-							action: "audio_playback",
-							executive,
-						});
-						if (shouldListenRef.current) {
-							setCallState("listening");
-							startRecognitionInstance();
-						}
-					};
-
-					await audio.play();
-					return;
-				}
+		async (data: { audioUrl?: string; audioData?: string; text?: string }) => {
+			// Add to conversation
+			if (data.text) {
+				const entry: ConversationEntry = {
+					role: "assistant",
+					content: data.text,
+				};
+				conversationRef.current = [...conversationRef.current, entry].slice(
+					-MAX_HISTORY,
+				);
+				setConversation([...conversationRef.current]);
 			}
 
-			// No audio — show text briefly then return to listening
-			if (data.text) {
-				setTranscript(data.text);
+			const audioSrc = data.audioUrl || data.audioData;
+			if (audioSrc) {
+				setCallState("speaking");
+				const audio = new Audio(
+					data.audioUrl ? audioSrc : `data:audio/mpeg;base64,${audioSrc}`,
+				);
+				audioRef.current = audio;
+
+				audio.onended = () => {
+					if (shouldListenRef.current) {
+						setCallState("listening");
+						startRecognitionRef.current();
+					}
+				};
+
+				audio.onerror = () => {
+					if (shouldListenRef.current) {
+						setCallState("listening");
+						startRecognitionRef.current();
+					}
+				};
+
+				await audio.play();
+				return;
 			}
 
 			if (shouldListenRef.current) {
 				setCallState("listening");
-				startRecognitionInstance();
+				startRecognitionRef.current();
 			}
 		},
-		[executive, startRecognitionInstance],
+		[],
 	);
 
-	/**
-	 * Send transcript to AI and play response
-	 */
-	const handleAIResponse = useCallback(
+	// ---- Send to AI ----
+
+	const sendToAI = useCallback(
 		async (text: string) => {
 			if (!text.trim()) return;
 
 			try {
+				// Stop any current audio (interruption)
+				stopAudioPlayback();
+
 				setCallState("thinking");
 				setTranscript(text);
 
-				// Reset audio queue
-				audioQueueRef.current = [];
-				isPlayingRef.current = false;
+				// Add user message to conversation
+				const userEntry: ConversationEntry = { role: "user", content: text };
+				conversationRef.current = [...conversationRef.current, userEntry].slice(
+					-MAX_HISTORY,
+				);
+				setConversation([...conversationRef.current]);
+
+				// Build history for API (exclude the message we're about to send)
+				const history = conversationRef.current.slice(0, -1);
 
 				const response = await csrfFetchRef.current("/api/realtime/stream", {
 					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
+					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						message: text,
 						botType: executive,
+						history,
 					}),
 				});
 
@@ -389,11 +461,9 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				const contentType = response.headers.get("content-type") || "";
 
 				if (contentType.includes("ndjson")) {
-					// Streaming NDJSON response (single voice)
 					await handleStreamingResponse(response);
 				} else {
-					// Legacy JSON response (collaborative mode)
-					const data: StreamResponse = await response.json();
+					const data = await response.json();
 					await handleLegacyResponse(data);
 				}
 			} catch (error) {
@@ -405,25 +475,23 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 
 				if (shouldListenRef.current) {
 					setCallState("listening");
-					startRecognitionInstance();
+					startRecognitionRef.current();
 				}
 			}
 		},
 		[
 			executive,
-			startRecognitionInstance,
+			stopAudioPlayback,
 			handleStreamingResponse,
 			handleLegacyResponse,
 		],
 	);
 
-	// Keep handleAIResponse ref in sync for use in recognition callbacks
-	handleAIResponseRef.current = handleAIResponse;
+	// Keep ref in sync
+	sendToAIRef.current = sendToAI;
 
-	/**
-	 * Start the voice call — request mic permission and begin listening.
-	 * Guarded by startedRef to prevent double-invocation from useEffect re-fires.
-	 */
+	// ---- Start Call ----
+
 	const startCall = useCallback(async () => {
 		if (startedRef.current) return;
 		startedRef.current = true;
@@ -431,71 +499,156 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 		try {
 			setCallState("connecting");
 
-			// Request microphone permission
-			await navigator.mediaDevices.getUserMedia({ audio: true });
+			// Request mic
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			mediaStreamRef.current = stream;
+
+			// Create AudioContext + AnalyserNode for visualizer
+			try {
+				const ctx = new AudioContext();
+				audioContextRef.current = ctx;
+				const source = ctx.createMediaStreamSource(stream);
+				const analyser = ctx.createAnalyser();
+				analyser.fftSize = 128;
+				analyser.smoothingTimeConstant = 0.8;
+				source.connect(analyser);
+				analyserRef.current = analyser;
+			} catch {
+				// Non-fatal — visualizer just won't be audio-reactive
+			}
 
 			shouldListenRef.current = true;
+			callStartRef.current = Date.now();
+
+			// Start call timer
+			durationIntervalRef.current = setInterval(() => {
+				setCallDuration(Math.floor((Date.now() - callStartRef.current) / 1000));
+			}, 1000);
+
 			setCallState("listening");
 			startRecognitionInstance();
 		} catch (error) {
 			logClientError(error, {
 				component: "useVoiceCall",
 				action: "start_call",
-				errorType: "microphone_permission",
 			});
 			setCallState("error");
 			setErrorMessage(
-				"Could not access microphone. Please allow microphone access and try again.",
+				"Could not access microphone. Please allow mic access and try again.",
 			);
 		}
 	}, [startRecognitionInstance]);
 
-	/**
-	 * Stop the voice call — stop recognition, pause audio, reset state
-	 */
+	// ---- Stop Call ----
+
 	const stopCall = useCallback(() => {
 		shouldListenRef.current = false;
 		startedRef.current = false;
+		clearSilenceTimer();
+		accumulatedRef.current = "";
 
 		if (recognitionRef.current) {
 			try {
 				recognitionRef.current.stop();
-			} catch {
-				// Ignore — likely already stopped
-			}
+			} catch {}
 			recognitionRef.current = null;
 		}
 
-		if (audioRef.current) {
-			audioRef.current.pause();
-			audioRef.current = null;
+		stopAudioPlayback();
+
+		// Stop timer
+		if (durationIntervalRef.current) {
+			clearInterval(durationIntervalRef.current);
+			durationIntervalRef.current = null;
 		}
 
-		// Clear audio queue
-		audioQueueRef.current = [];
-		isPlayingRef.current = false;
+		// Close audio context
+		if (audioContextRef.current) {
+			try {
+				audioContextRef.current.close();
+			} catch {}
+			audioContextRef.current = null;
+			analyserRef.current = null;
+		}
+
+		// Stop mic stream
+		if (mediaStreamRef.current) {
+			for (const track of mediaStreamRef.current.getTracks()) {
+				track.stop();
+			}
+			mediaStreamRef.current = null;
+		}
 
 		setCallState("idle");
 		setTranscript("");
 		setErrorMessage("");
-	}, []);
+		setIsMuted(false);
+		setCallDuration(0);
+		setConversation([]);
+		conversationRef.current = [];
+	}, [clearSilenceTimer, stopAudioPlayback]);
 
-	// Cleanup on unmount
-	useEffect(() => {
-		return () => {
-			shouldListenRef.current = false;
+	// ---- Mute Toggle ----
+
+	const toggleMute = useCallback(() => {
+		const newMuted = !isMutedRef.current;
+		setIsMuted(newMuted);
+		isMutedRef.current = newMuted;
+
+		// Mute/unmute mic tracks
+		if (mediaStreamRef.current) {
+			for (const track of mediaStreamRef.current.getAudioTracks()) {
+				track.enabled = !newMuted;
+			}
+		}
+
+		if (newMuted) {
+			// Stop recognition while muted
+			clearSilenceTimer();
+			accumulatedRef.current = "";
 			if (recognitionRef.current) {
 				try {
 					recognitionRef.current.stop();
-				} catch {
-					// Ignore
-				}
-				recognitionRef.current = null;
+				} catch {}
+			}
+		} else if (
+			shouldListenRef.current &&
+			callStateRef.current === "listening"
+		) {
+			// Restart recognition when unmuting
+			startRecognitionRef.current();
+		}
+	}, [clearSilenceTimer]);
+
+	// ---- Cleanup on unmount ----
+
+	useEffect(() => {
+		return () => {
+			shouldListenRef.current = false;
+
+			if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+			if (durationIntervalRef.current)
+				clearInterval(durationIntervalRef.current);
+
+			if (recognitionRef.current) {
+				try {
+					recognitionRef.current.stop();
+				} catch {}
 			}
 			if (audioRef.current) {
 				audioRef.current.pause();
-				audioRef.current = null;
 			}
+			if (audioContextRef.current) {
+				try {
+					audioContextRef.current.close();
+				} catch {}
+			}
+			if (mediaStreamRef.current) {
+				for (const track of mediaStreamRef.current.getTracks()) {
+					track.stop();
+				}
+			}
+
 			audioQueueRef.current = [];
 			isPlayingRef.current = false;
 		};
@@ -505,8 +658,13 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 		callState,
 		transcript,
 		errorMessage,
+		isMuted,
+		callDuration,
+		conversation,
+		analyserNode: analyserRef.current,
 		startCall,
 		stopCall,
+		toggleMute,
 		isListening: callState === "listening",
 		isThinking: callState === "thinking",
 		isSpeaking: callState === "speaking",

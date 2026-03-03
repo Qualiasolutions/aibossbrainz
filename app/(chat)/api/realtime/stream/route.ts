@@ -44,6 +44,15 @@ const realtimeStreamSchema = z.object({
 		.enum(["alexandria", "kim", "collaborative"])
 		.default("collaborative"),
 	chatId: z.string().uuid("Invalid chat ID").nullish(),
+	history: z
+		.array(
+			z.object({
+				role: z.enum(["user", "assistant"]),
+				content: z.string().max(5000),
+			}),
+		)
+		.max(20)
+		.default([]),
 });
 
 export const maxDuration = 60;
@@ -279,7 +288,12 @@ export const POST = withCsrf(async (request: Request) => {
 		if (!parseResult.success) {
 			return new ChatSDKError("bad_request:api").toResponse();
 		}
-		const { message, botType, chatId: existingChatId } = parseResult.data;
+		const {
+			message,
+			botType,
+			chatId: existingChatId,
+			history,
+		} = parseResult.data;
 
 		// MED-1: Check for abuse patterns before AI processing
 		if (
@@ -333,6 +347,7 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 				apiKey,
 				userId: user.id,
 				apiLog,
+				history,
 			});
 		}
 
@@ -343,10 +358,19 @@ Remember: This is a voice call, not a text chat. Be direct and conversational.`;
 		const stream = new ReadableStream({
 			async start(controller) {
 				try {
+					// Build messages with conversation history
+					const aiMessages = [
+						...history.map((h) => ({
+							role: h.role as "user" | "assistant",
+							content: h.content,
+						})),
+						{ role: "user" as const, content: message },
+					];
+
 					const result = streamText({
 						model: myProvider.languageModel("chat-model"),
 						system: realtimePrompt,
-						messages: [{ role: "user", content: message }],
+						messages: aiMessages,
 						maxOutputTokens: 250,
 						abortSignal: AbortSignal.timeout(55_000),
 					});
@@ -644,6 +668,7 @@ async function handleCollaborativeResponse({
 	apiKey,
 	userId,
 	apiLog,
+	history,
 }: {
 	message: string;
 	botType: "collaborative";
@@ -652,12 +677,22 @@ async function handleCollaborativeResponse({
 	apiKey: string | undefined;
 	userId: string;
 	apiLog: ReturnType<typeof apiRequestLogger>;
+	history: Array<{ role: "user" | "assistant"; content: string }>;
 }) {
+	// Build messages with conversation history
+	const aiMessages = [
+		...history.map((h) => ({
+			role: h.role as "user" | "assistant",
+			content: h.content,
+		})),
+		{ role: "user" as const, content: message },
+	];
+
 	// Use streamText but collect full text (collaborative needs full text for segment parsing)
 	const result = streamText({
 		model: myProvider.languageModel("chat-model"),
 		system: realtimePrompt,
-		messages: [{ role: "user", content: message }],
+		messages: aiMessages,
 		maxOutputTokens: 250,
 		abortSignal: AbortSignal.timeout(55_000),
 	});

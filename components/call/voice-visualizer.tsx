@@ -1,26 +1,98 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
 
 interface VoiceVisualizerProps {
+	analyserNode: AnalyserNode | null;
 	isActive: boolean;
+	isSpeaking?: boolean;
 }
 
-export function VoiceVisualizer({ isActive }: VoiceVisualizerProps) {
+const BAR_COUNT = 28;
+
+/**
+ * Audio-reactive voice visualizer.
+ * When an AnalyserNode is provided and active, reads real mic frequency data.
+ * Falls back to a gentle idle animation otherwise.
+ */
+export function VoiceVisualizer({
+	analyserNode,
+	isActive,
+	isSpeaking,
+}: VoiceVisualizerProps) {
+	const barsRef = useRef<(HTMLDivElement | null)[]>([]);
+	const rafRef = useRef(0);
+
+	useEffect(() => {
+		const bars = barsRef.current;
+
+		if (!isActive) {
+			// Idle: all bars at minimum height
+			for (const bar of bars) {
+				if (bar) bar.style.height = "6%";
+			}
+			cancelAnimationFrame(rafRef.current);
+			return;
+		}
+
+		// Animated mode: read from AnalyserNode or animate synthetically
+		const hasAnalyser = analyserNode !== null;
+		const bufferLength = hasAnalyser ? analyserNode.frequencyBinCount : 0;
+		const dataArray = hasAnalyser ? new Uint8Array(bufferLength) : null;
+
+		// Synthetic animation state (for speaking mode or no analyser)
+		let phase = 0;
+
+		const update = () => {
+			rafRef.current = requestAnimationFrame(update);
+
+			if (hasAnalyser && dataArray && !isSpeaking) {
+				// Real mic data
+				analyserNode.getByteFrequencyData(dataArray);
+
+				for (let i = 0; i < BAR_COUNT; i++) {
+					const bar = bars[i];
+					if (!bar) continue;
+					const start = Math.floor((i / BAR_COUNT) * bufferLength);
+					const end = Math.floor(((i + 1) / BAR_COUNT) * bufferLength);
+					let sum = 0;
+					for (let j = start; j < end; j++) sum += dataArray[j];
+					const level = sum / (end - start) / 255;
+					bar.style.height = `${Math.max(6, level * 85)}%`;
+				}
+			} else {
+				// Synthetic animation (speaking or no analyser)
+				phase += 0.06;
+				for (let i = 0; i < BAR_COUNT; i++) {
+					const bar = bars[i];
+					if (!bar) continue;
+					const wave =
+						Math.sin(phase + i * 0.4) * 0.3 +
+						Math.sin(phase * 1.5 + i * 0.25) * 0.2 +
+						0.5;
+					const level = isSpeaking ? wave * 0.7 + 0.1 : wave * 0.15 + 0.08;
+					bar.style.height = `${Math.max(6, level * 85)}%`;
+				}
+			}
+		};
+
+		update();
+		return () => cancelAnimationFrame(rafRef.current);
+	}, [analyserNode, isActive, isSpeaking]);
+
 	return (
-		<div className="flex items-center justify-center gap-2 h-24">
-			{Array.from({ length: 5 }).map((_, i) => (
-				<motion.div
+		<div className="flex items-end justify-center gap-[3px] h-28 px-4">
+			{Array.from({ length: BAR_COUNT }).map((_, i) => (
+				<div
 					key={i}
-					className="w-2 bg-gradient-to-t from-rose-500 to-amber-500 rounded-full"
-					animate={{
-						height: isActive ? ["20%", "80%", "40%", "60%", "20%"] : "20%",
+					ref={(el) => {
+						barsRef.current[i] = el;
 					}}
-					transition={{
-						duration: 1.2,
-						repeat: Number.POSITIVE_INFINITY,
-						delay: i * 0.15,
-						ease: "easeInOut",
+					className="w-1.5 rounded-full bg-gradient-to-t from-rose-500 to-amber-400"
+					style={{
+						height: "6%",
+						transition: "height 60ms ease-out",
+						opacity: 0.85,
 					}}
 				/>
 			))}
