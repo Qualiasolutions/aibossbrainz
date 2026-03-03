@@ -74,7 +74,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	const analyserRef = useRef<AnalyserNode | null>(null);
 
 	// Function refs to break circular deps
-	const sendToAIRef = useRef<(text: string) => Promise<void>>(async () => {});
+	const sendToAIRef = useRef<(text: string, skipHistory?: boolean) => Promise<void>>(async () => {});
 	const startRecognitionRef = useRef<() => void>(() => {});
 
 	// Keep refs in sync
