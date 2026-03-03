@@ -73,6 +73,9 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	const audioContextRef = useRef<AudioContext | null>(null);
 	const analyserRef = useRef<AnalyserNode | null>(null);
 
+	// Abort controller for in-flight fetch requests
+	const abortControllerRef = useRef<AbortController | null>(null);
+
 	// Function refs to break circular deps
 	const sendToAIRef = useRef<
 		(text: string, skipHistory?: boolean) => Promise<void>
@@ -248,6 +251,13 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	// ---- Audio Playback ----
 
 	const playNextInQueue = useCallback(() => {
+		// Bail if call ended
+		if (!shouldListenRef.current && callStateRef.current === "idle") {
+			audioQueueRef.current = [];
+			isPlayingRef.current = false;
+			return;
+		}
+
 		if (audioQueueRef.current.length === 0) {
 			isPlayingRef.current = false;
 			if (shouldListenRef.current) {
@@ -283,6 +293,9 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 
 	const enqueueAudio = useCallback(
 		(base64: string) => {
+			// Don't enqueue if call has ended
+			if (!shouldListenRef.current && callStateRef.current === "idle") return;
+
 			audioQueueRef.current.push(base64);
 			if (!isPlayingRef.current) {
 				setCallState("speaking");
@@ -307,6 +320,12 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				while (true) {
 					const { done, value } = await reader.read();
 					if (done) break;
+
+					// Bail early if call ended while streaming
+					if (!shouldListenRef.current && callStateRef.current === "idle") {
+						reader.cancel();
+						break;
+					}
 
 					buffer += decoder.decode(value, { stream: true });
 					const lines = buffer.split("\n");
@@ -449,6 +468,13 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 				// Build history for API (exclude the message we're about to send)
 				const history = skipHistory ? [] : conversationRef.current.slice(0, -1);
 
+				// Abort any previous in-flight request
+				if (abortControllerRef.current) {
+					abortControllerRef.current.abort();
+				}
+				const abortController = new AbortController();
+				abortControllerRef.current = abortController;
+
 				const response = await csrfFetchRef.current("/api/realtime/stream", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -457,6 +483,7 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 						botType: executive,
 						history,
 					}),
+					signal: abortController.signal,
 				});
 
 				if (!response.ok) {
@@ -472,6 +499,11 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 					await handleLegacyResponse(data);
 				}
 			} catch (error) {
+				// Ignore abort errors — they're expected on hangup
+				if (error instanceof DOMException && error.name === "AbortError") {
+					return;
+				}
+
 				logClientError(error, {
 					component: "useVoiceCall",
 					action: "ai_response",
@@ -556,6 +588,12 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 		clearSilenceTimer();
 		accumulatedRef.current = "";
 
+		// Abort any in-flight fetch request (stops streaming audio from server)
+		if (abortControllerRef.current) {
+			abortControllerRef.current.abort();
+			abortControllerRef.current = null;
+		}
+
 		if (recognitionRef.current) {
 			try {
 				recognitionRef.current.stop();
@@ -634,6 +672,11 @@ export function useVoiceCall({ executive }: VoiceCallHookOptions) {
 	useEffect(() => {
 		return () => {
 			shouldListenRef.current = false;
+
+			// Abort any in-flight request
+			if (abortControllerRef.current) {
+				abortControllerRef.current.abort();
+			}
 
 			if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
 			if (durationIntervalRef.current)
