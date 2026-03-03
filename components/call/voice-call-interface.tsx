@@ -90,24 +90,24 @@ export function VoiceCallInterface({
 					{hasError && <p className="text-sm text-red-500">Call failed</p>}
 				</div>
 
-			{/* Visualizer or error */}
-			<div className="flex-1 flex items-center justify-center w-full my-4">
-				{hasError ? (
-					<div className="flex flex-col items-center gap-3 text-center px-4">
-						<AlertCircle className="h-12 w-12 text-red-500/60" />
-						<p className="text-sm text-muted-foreground max-w-[280px]">
-							{errorMessage}
-						</p>
-					</div>
-				) : (
-					<VoiceVisualizer
-						analyserNode={analyserNode}
-						isActive={isActive}
-						isSpeaking={isSpeaking}
-						isConnecting={isConnecting}
-					/>
-				)}
-			</div>
+				{/* Visualizer or error */}
+				<div className="flex-1 flex items-center justify-center w-full my-4">
+					{hasError ? (
+						<div className="flex flex-col items-center gap-3 text-center px-4">
+							<AlertCircle className="h-12 w-12 text-red-500/60" />
+							<p className="text-sm text-muted-foreground max-w-[280px]">
+								{errorMessage}
+							</p>
+						</div>
+					) : (
+						<VoiceVisualizer
+							analyserNode={analyserNode}
+							isActive={isActive}
+							isSpeaking={isSpeaking}
+							isConnecting={isConnecting}
+						/>
+					)}
+				</div>
 
 				{/* Status + transcript area */}
 				<div className="w-full min-h-[80px] text-center space-y-2 mb-4">
