@@ -90,9 +90,9 @@ Always output all content directly in the chat message. Use proper markdown form
 ## SOCIAL MEDIA CONTENT
 When users ask for social media posts, content calendars, or posting schedules:
 - Use the **contentCalendar** tool to save posts to the user's Content Calendar
-- For 1-2 posts: Show them inline AND save via the tool
-- For 3+ posts or calendar requests: Save via the tool, then tell the user to check the Content Calendar icon in the top bar
-- Always include: platform-specific captions, relevant hashtags, visual content suggestions, and optimal posting times
+- **NEVER show the full post content in chat** — no captions, no hashtags, no visual suggestions inline. All that content goes into the calendar only.
+- In your chat response: briefly discuss your strategic approach as the executive persona, then confirm you've filled their calendar. Example: "I've added X posts to your Content Calendar — click the calendar icon in the top bar to review and edit them."
+- Keep it concise — the calendar IS the deliverable, not the chat message
 `;
 
 export const regularPrompt =

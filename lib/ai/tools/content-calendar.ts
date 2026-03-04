@@ -132,9 +132,10 @@ export const contentCalendar = ({
 Use this tool whenever users ask for social media content, posts, a content calendar, posting schedule, or any social media planning.
 
 **CRITICAL USAGE RULES:**
-1. For 1-2 posts: Show the full post content inline in your response AND call this tool to save them
-2. For 3+ posts or calendar/schedule requests: Call this tool to save all posts, then tell the user "I've added X posts to your Content Calendar — click the calendar icon in the top bar to review them"
-3. ALWAYS call this tool — never just describe posts without saving them
+1. ALWAYS call this tool to save posts — never just describe posts without saving them
+2. NEVER show the full post content (captions, hashtags, visual suggestions) inline in your chat response. The posts are saved to the Content Calendar and the user will review them there.
+3. In your chat response, briefly discuss your strategic approach (as the executive persona), then confirm: "I've added X posts to your Content Calendar — click the calendar icon in the top bar to review and edit them."
+4. Keep the chat response concise — the value is in the calendar, not in repeating content in chat.
 
 **Platform Guidelines:**
 - LinkedIn: Professional, thought leadership, 1300 chars, 3-5 hashtags

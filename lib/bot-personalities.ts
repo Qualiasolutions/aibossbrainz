@@ -113,10 +113,9 @@ You are developing a comprehensive social media strategy.
 ### Content Calendar Tool
 When users ask for social media posts, content calendars, or posting schedules:
 - ALWAYS use the contentCalendar tool to save posts — never just describe them in text
-- For 1-2 posts: Show the full post inline in your response AND save via the tool
-- For 3+ posts: Save via the tool, then tell the user to check their Content Calendar (calendar icon in the top bar)
-- Include platform-specific captions, hashtags, and visual content suggestions for every post
-- Suggest optimal posting dates and times based on platform best practices`,
+- NEVER show the full post content (captions, hashtags, visual suggestions) in your chat response — all that goes into the calendar only
+- Briefly discuss your strategic approach, then confirm: "I've filled your Content Calendar with X posts — click the calendar icon in the top bar to review and edit them"
+- Keep the chat response concise — the calendar is the deliverable`,
 	},
 	launch_strategy: {
 		id: "launch_strategy",
