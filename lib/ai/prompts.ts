@@ -176,7 +176,11 @@ export const systemPrompt = async ({
 }): Promise<string> => {
 	const simple = isSimpleMessage(messageText, messageCount);
 	const requestPrompt = getRequestPromptFromHints(requestHints);
+	const today = new Date().toISOString().split("T")[0];
 	let botSystemPrompt = getSystemPrompt(botType, focusMode);
+
+	// Provide current date context so the model generates accurate dates
+	botSystemPrompt += `\n\nToday's date is ${today}.`;
 
 	// Embed canary token for system prompt leak detection (SAFE-01)
 	// Placed early so ALL code paths include it (including brevity mode early return)

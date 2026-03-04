@@ -125,9 +125,12 @@ export const contentCalendar = ({
 	chatId,
 	botType,
 	focusMode,
-}: ContentCalendarProps) =>
-	tool({
+}: ContentCalendarProps) => {
+	const today = new Date().toISOString().split("T")[0];
+	return tool({
 		description: `Create social media posts and add them to the user's Content Calendar.
+
+**TODAY'S DATE: ${today}** — All scheduled dates MUST be ${today} or later. Never use past dates.
 
 Use this tool whenever users ask for social media content, posts, a content calendar, posting schedule, or any social media planning.
 
@@ -136,6 +139,7 @@ Use this tool whenever users ask for social media content, posts, a content cale
 2. NEVER show the full post content (captions, hashtags, visual suggestions) inline in your chat response. The posts are saved to the Content Calendar and the user will review them there.
 3. In your chat response, briefly discuss your strategic approach (as the executive persona), then confirm: "I've added X posts to your Content Calendar — click the calendar icon in the top bar to review and edit them."
 4. Keep the chat response concise — the value is in the calendar, not in repeating content in chat.
+5. Schedule posts starting from today (${today}) or future dates. NEVER use dates before today.
 
 **Platform Guidelines:**
 - LinkedIn: Professional, thought leadership, 1300 chars, 3-5 hashtags
@@ -244,3 +248,4 @@ Call this tool ONCE with all posts in the posts array.`,
 			}
 		},
 	});
+};
