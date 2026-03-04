@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 Phase: 32 of 32 (Voice Call Redesign)
 Plan: 4 of 4 complete
 Status: ✓ Phase complete
-Last activity: 2026-03-03 — Completed 32-04 (Verification — skipped by user)
+Last activity: 2026-03-04 - Completed quick task 14: fix content calendar tool errors
 
 Progress: [██████████] 100% (32/32 phases complete, Phase 31 skipped)
 
@@ -123,16 +123,16 @@ None yet.
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 13 completed
+**Quick tasks:** 14 completed
 
 ## Session Continuity
 
-Last session: 2026-03-03
-Stopped at: Quick task 13 complete (agents speak first + polished call UI)
-Resume file: .planning/quick/13-agents-speak-first-in-calls-add-mute-mic/13-01-SUMMARY.md
-Next action: Test voice calls in dev, then deploy
+Last session: 2026-03-04
+Stopped at: Quick task 14 complete (content calendar tool fix)
+Resume file: .planning/quick/14-fix-agents-erroring-when-generating-in-c/14-SUMMARY.md
+Next action: Test content calendar by asking AI agent to create social media posts
 
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-03-03 after Quick Task 13 completion*
+*Last updated: 2026-03-04 after Quick Task 14 completion*
