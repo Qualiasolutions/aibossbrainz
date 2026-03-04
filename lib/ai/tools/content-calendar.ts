@@ -42,6 +42,30 @@ function normalizeDate(input: string): string {
 }
 
 /**
+ * Shift all dates in a batch so the earliest date lands on today.
+ * Preserves the relative spacing between posts.
+ */
+function shiftDatesToPresent(
+	dates: string[],
+	today: string,
+): string[] {
+	const earliest = dates.reduce((min, d) => (d < min ? d : min), dates[0]);
+	if (earliest >= today) return dates;
+
+	const earliestMs = new Date(earliest).getTime();
+	const todayMs = new Date(today).getTime();
+	const shiftMs = todayMs - earliestMs;
+
+	return dates.map((d) => {
+		const shifted = new Date(new Date(d).getTime() + shiftMs);
+		const year = shifted.getFullYear();
+		const month = String(shifted.getMonth() + 1).padStart(2, "0");
+		const day = String(shifted.getDate()).padStart(2, "0");
+		return `${year}-${month}-${day}`;
+	});
+}
+
+/**
  * Normalize a time string to HH:MM (24-hour) format.
  * Handles: "09:30", "9:30", "10:00 AM", "3:30 PM", etc.
  */
@@ -169,47 +193,62 @@ Call this tool ONCE with all posts in the posts array.`,
 			}
 
 			try {
-				const sanitizedPosts = posts.map((post, index) => {
-					let normalizedDate: string;
-					let normalizedTime: string | null;
+				// First pass: normalize all dates and times
+				const normalizedDates: string[] = [];
+				const normalizedTimes: (string | null)[] = [];
 
+				for (let i = 0; i < posts.length; i++) {
+					const post = posts[i];
 					try {
-						normalizedDate = normalizeDate(post.scheduledDate);
+						normalizedDates.push(normalizeDate(post.scheduledDate));
 					} catch {
 						throw new Error(
-							`Post ${index + 1}: invalid scheduledDate "${post.scheduledDate}". Use YYYY-MM-DD format.`,
+							`Post ${i + 1}: invalid scheduledDate "${post.scheduledDate}". Use YYYY-MM-DD format.`,
 						);
 					}
-
 					try {
-						normalizedTime = post.scheduledTime
-							? normalizeTime(post.scheduledTime)
-							: null;
+						normalizedTimes.push(
+							post.scheduledTime ? normalizeTime(post.scheduledTime) : null,
+						);
 					} catch {
 						throw new Error(
-							`Post ${index + 1}: invalid scheduledTime "${post.scheduledTime}". Use HH:MM 24-hour format.`,
+							`Post ${i + 1}: invalid scheduledTime "${post.scheduledTime}". Use HH:MM 24-hour format.`,
 						);
 					}
+				}
 
-					return {
-						userId: session.user!.id,
-						chatId,
-						platform: post.platform,
-						caption: sanitizePromptContent(post.caption),
-						hashtags: post.hashtags.map((tag) =>
-							sanitizePromptContent(tag.replace(/^#/, "")),
-						),
-						visualSuggestion: post.visualSuggestion
-							? sanitizePromptContent(post.visualSuggestion)
-							: null,
-						scheduledDate: normalizedDate,
-						scheduledTime: normalizedTime,
-						status: "draft" as const,
-						botType: botType as "alexandria" | "kim" | "collaborative" | null,
-						focusMode: focusMode || null,
-						metadata: {},
-					};
-				});
+				// Shift all dates to present/future if any are in the past
+				const shiftedDates = shiftDatesToPresent(normalizedDates, today);
+
+				if (normalizedDates[0] !== shiftedDates[0]) {
+					logger.info(
+						{
+							originalEarliest: normalizedDates.reduce((a, b) => (a < b ? a : b)),
+							shiftedEarliest: shiftedDates.reduce((a, b) => (a < b ? a : b)),
+							postCount: posts.length,
+						},
+						"Content calendar: shifted past dates to present",
+					);
+				}
+
+				const sanitizedPosts = posts.map((post, index) => ({
+					userId: session.user!.id,
+					chatId,
+					platform: post.platform,
+					caption: sanitizePromptContent(post.caption),
+					hashtags: post.hashtags.map((tag) =>
+						sanitizePromptContent(tag.replace(/^#/, "")),
+					),
+					visualSuggestion: post.visualSuggestion
+						? sanitizePromptContent(post.visualSuggestion)
+						: null,
+					scheduledDate: shiftedDates[index],
+					scheduledTime: normalizedTimes[index],
+					status: "draft" as const,
+					botType: botType as "alexandria" | "kim" | "collaborative" | null,
+					focusMode: focusMode || null,
+					metadata: {},
+				}));
 
 				const created = await createContentCalendarPosts(sanitizedPosts);
 

@@ -8,6 +8,7 @@ import {
 	type ContentCalendarInsert,
 	type ContentStatus,
 	createClient,
+	createServiceClient,
 } from "./shared";
 
 // ============================================
@@ -94,15 +95,27 @@ export async function getContentCalendarByDate({
 }
 
 /**
- * Batch create multiple posts
+ * Batch create multiple posts.
+ * Uses service role client to bypass RLS — the AI tool calls this during
+ * streaming where cookie-based auth may not propagate reliably.
  */
 export async function createContentCalendarPosts(
 	posts: ContentCalendarInsert[],
 ): Promise<ContentCalendar[]> {
 	try {
-		const { data, error } = await (await fromCalendar()).insert(posts).select();
+		const supabase = createServiceClient();
+		const { data, error } = await (supabase as any)
+			.from("ContentCalendar")
+			.insert(posts)
+			.select();
 
 		if (error) throw error;
+
+		logger.info(
+			{ count: (data as ContentCalendar[])?.length ?? 0, userId: posts[0]?.userId },
+			"Content calendar posts created successfully",
+		);
+
 		return (data as ContentCalendar[]) || [];
 	} catch (error) {
 		logger.error(
