@@ -14,12 +14,12 @@ import {
 // CONTENT CALENDAR QUERIES
 // ============================================
 
-// Helper: get untyped Supabase client for ContentCalendar table
-// (table not yet in auto-generated database.types.ts — regenerate after migration)
-async function getClient() {
+// ContentCalendar table is not in auto-generated database.types.ts yet.
+// Using typed client with explicit casts on return values.
+const fromCalendar = async () => {
 	const supabase = await createClient();
-	return supabase as any;
-}
+	return (supabase as any).from("ContentCalendar");
+};
 
 /**
  * Get posts for a specific month
@@ -34,14 +34,11 @@ export async function getContentCalendarByMonth({
 	month: number; // 1-12
 }): Promise<ContentCalendar[]> {
 	try {
-		const supabase = await getClient();
-
 		const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
 		const lastDay = new Date(year, month, 0).getDate();
 		const endDate = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
 
-		const { data, error } = await supabase
-			.from("ContentCalendar")
+		const { data, error } = await (await fromCalendar())
 			.select("*")
 			.eq("userId", userId)
 			.is("deletedAt", null)
@@ -75,10 +72,7 @@ export async function getContentCalendarByDate({
 	date: string; // YYYY-MM-DD
 }): Promise<ContentCalendar[]> {
 	try {
-		const supabase = await getClient();
-
-		const { data, error } = await supabase
-			.from("ContentCalendar")
+		const { data, error } = await (await fromCalendar())
 			.select("*")
 			.eq("userId", userId)
 			.eq("scheduledDate", date)
@@ -106,12 +100,7 @@ export async function createContentCalendarPosts(
 	posts: ContentCalendarInsert[],
 ): Promise<ContentCalendar[]> {
 	try {
-		const supabase = await getClient();
-
-		const { data, error } = await supabase
-			.from("ContentCalendar")
-			.insert(posts)
-			.select();
+		const { data, error } = await (await fromCalendar()).insert(posts).select();
 
 		if (error) throw error;
 		return (data as ContentCalendar[]) || [];
@@ -140,10 +129,7 @@ export async function updateContentCalendarStatus({
 	status: ContentStatus;
 }): Promise<void> {
 	try {
-		const supabase = await getClient();
-
-		const { error } = await supabase
-			.from("ContentCalendar")
+		const { error } = await (await fromCalendar())
 			.update({ status, updatedAt: new Date().toISOString() })
 			.eq("id", postId)
 			.eq("userId", userId)
@@ -173,10 +159,7 @@ export async function deleteContentCalendarPost({
 	userId: string;
 }): Promise<void> {
 	try {
-		const supabase = await getClient();
-
-		const { error } = await supabase
-			.from("ContentCalendar")
+		const { error } = await (await fromCalendar())
 			.update({ deletedAt: new Date().toISOString() })
 			.eq("id", postId)
 			.eq("userId", userId);

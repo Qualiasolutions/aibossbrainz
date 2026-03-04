@@ -12,6 +12,65 @@ type ContentCalendarProps = {
 	focusMode?: string;
 };
 
+/**
+ * Normalize a date string to YYYY-MM-DD format.
+ * Handles: "2026-03-15", "2026-3-15", "March 15, 2026", "03/15/2026", etc.
+ */
+function normalizeDate(input: string): string {
+	// Already in YYYY-MM-DD format
+	if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
+
+	// Single-digit month/day: 2026-3-15 → 2026-03-15
+	const paddedMatch = input.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+	if (paddedMatch) {
+		const [, year, month, day] = paddedMatch;
+		return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+	}
+
+	// Fallback: try Date.parse() for natural formats (March 15, 2026)
+	const parsed = new Date(input);
+	if (!Number.isNaN(parsed.getTime())) {
+		const year = parsed.getFullYear();
+		const month = String(parsed.getMonth() + 1).padStart(2, "0");
+		const day = String(parsed.getDate()).padStart(2, "0");
+		return `${year}-${month}-${day}`;
+	}
+
+	throw new Error(
+		`Invalid date format: "${input}". Use YYYY-MM-DD (e.g., 2026-03-15).`,
+	);
+}
+
+/**
+ * Normalize a time string to HH:MM (24-hour) format.
+ * Handles: "09:30", "9:30", "10:00 AM", "3:30 PM", etc.
+ */
+function normalizeTime(input: string): string {
+	// Already in HH:MM format
+	if (/^\d{2}:\d{2}$/.test(input)) return input;
+
+	// Single-digit hour: 9:30 → 09:30
+	const paddedMatch = input.match(/^(\d{1,2}):(\d{2})$/);
+	if (paddedMatch) {
+		const [, hour, minute] = paddedMatch;
+		return `${hour.padStart(2, "0")}:${minute}`;
+	}
+
+	// 12-hour format: 10:00 AM → 10:00, 3:30 PM → 15:30
+	const ampmMatch = input.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+	if (ampmMatch) {
+		const [, hour, minute, period] = ampmMatch;
+		let hourNum = Number.parseInt(hour, 10);
+		if (period.toUpperCase() === "PM" && hourNum !== 12) hourNum += 12;
+		if (period.toUpperCase() === "AM" && hourNum === 12) hourNum = 0;
+		return `${String(hourNum).padStart(2, "0")}:${minute}`;
+	}
+
+	throw new Error(
+		`Invalid time format: "${input}". Use HH:MM 24-hour (e.g., 14:30) or HH:MM AM/PM.`,
+	);
+}
+
 const socialPostSchema = z.object({
 	platform: z
 		.enum(["linkedin", "instagram", "tiktok", "facebook", "twitter", "generic"])
@@ -37,14 +96,14 @@ const socialPostSchema = z.object({
 		),
 	scheduledDate: z
 		.string()
-		.regex(/^\d{4}-\d{2}-\d{2}$/)
-		.describe("Post date in YYYY-MM-DD format"),
+		.describe(
+			"Post date in YYYY-MM-DD format (e.g., 2026-03-15). Other date formats are also accepted and will be normalized.",
+		),
 	scheduledTime: z
 		.string()
-		.regex(/^\d{2}:\d{2}$/)
 		.optional()
 		.describe(
-			"Suggested posting time in HH:MM format (24-hour). Use platform best practices: LinkedIn 10:00-12:00, Instagram 11:00-14:00, TikTok 18:00-22:00",
+			"Suggested posting time in HH:MM 24-hour format (e.g., 14:00). Use platform best practices: LinkedIn 10:00-12:00, Instagram 11:00-14:00, TikTok 18:00-22:00",
 		),
 });
 
@@ -105,24 +164,47 @@ Call this tool ONCE with all posts in the posts array.`,
 			}
 
 			try {
-				const sanitizedPosts = posts.map((post) => ({
-					userId: session.user!.id,
-					chatId,
-					platform: post.platform,
-					caption: sanitizePromptContent(post.caption),
-					hashtags: post.hashtags.map((tag) =>
-						sanitizePromptContent(tag.replace(/^#/, "")),
-					),
-					visualSuggestion: post.visualSuggestion
-						? sanitizePromptContent(post.visualSuggestion)
-						: null,
-					scheduledDate: post.scheduledDate,
-					scheduledTime: post.scheduledTime || null,
-					status: "draft" as const,
-					botType: botType as "alexandria" | "kim" | "collaborative" | null,
-					focusMode: focusMode || null,
-					metadata: {},
-				}));
+				const sanitizedPosts = posts.map((post, index) => {
+					let normalizedDate: string;
+					let normalizedTime: string | null;
+
+					try {
+						normalizedDate = normalizeDate(post.scheduledDate);
+					} catch {
+						throw new Error(
+							`Post ${index + 1}: invalid scheduledDate "${post.scheduledDate}". Use YYYY-MM-DD format.`,
+						);
+					}
+
+					try {
+						normalizedTime = post.scheduledTime
+							? normalizeTime(post.scheduledTime)
+							: null;
+					} catch {
+						throw new Error(
+							`Post ${index + 1}: invalid scheduledTime "${post.scheduledTime}". Use HH:MM 24-hour format.`,
+						);
+					}
+
+					return {
+						userId: session.user!.id,
+						chatId,
+						platform: post.platform,
+						caption: sanitizePromptContent(post.caption),
+						hashtags: post.hashtags.map((tag) =>
+							sanitizePromptContent(tag.replace(/^#/, "")),
+						),
+						visualSuggestion: post.visualSuggestion
+							? sanitizePromptContent(post.visualSuggestion)
+							: null,
+						scheduledDate: normalizedDate,
+						scheduledTime: normalizedTime,
+						status: "draft" as const,
+						botType: botType as "alexandria" | "kim" | "collaborative" | null,
+						focusMode: focusMode || null,
+						metadata: {},
+					};
+				});
 
 				const created = await createContentCalendarPosts(sanitizedPosts);
 
@@ -148,14 +230,15 @@ Call this tool ONCE with all posts in the posts array.`,
 					message: `Added ${created.length} post(s) to your Content Calendar (${platformSummary}).`,
 				};
 			} catch (error) {
+				const errorMessage =
+					error instanceof Error ? error.message : "Unknown error";
 				logger.error(
-					{ err: error, postCount: posts.length },
-					"Content calendar tool unexpected error",
+					{ err: error, postCount: posts.length, errorMessage },
+					"Content calendar tool error",
 				);
 				return {
 					success: false,
-					message:
-						"An unexpected error occurred while saving posts. Please try again.",
+					message: `Failed to save posts: ${errorMessage}`,
 				};
 			}
 		},
