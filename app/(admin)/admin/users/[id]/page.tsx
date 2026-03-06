@@ -2,14 +2,18 @@ import { ArrowLeft } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SubscriptionManager } from "@/components/admin/subscription-manager";
 import { UserTypeSelector } from "@/components/admin/user-type-selector";
 import { Button } from "@/components/ui/button";
 import {
+	cancelSubscriptionByAdmin,
 	getUserById,
 	isUserAdmin,
 	updateUserByAdmin,
+	updateUserSubscription,
 } from "@/lib/admin/queries";
 import { createClient } from "@/lib/supabase/server";
+import type { SubscriptionType } from "@/lib/supabase/types";
 
 async function requireAdmin() {
 	const supabase = await createClient();
@@ -35,27 +39,29 @@ function formatDate(dateString: string | null | undefined): string {
 	});
 }
 
-function formatSubscriptionType(type: string | null | undefined): string {
-	switch (type) {
-		case "trial":
-			return "Trial (14 days)";
-		case "monthly":
-			return "Monthly";
-		case "annual":
-			return "Annual";
-		case "lifetime":
-			return "Lifetime";
-		default:
-			return "None";
-	}
-}
-
 async function updateUserType(userId: string, userType: string) {
 	"use server";
 	await requireAdmin();
 	await updateUserByAdmin(userId, {
 		userType: userType === "none" ? null : userType,
 	});
+	revalidatePath(`/admin/users/${userId}`);
+}
+
+async function changeSubscription(
+	userId: string,
+	subscriptionType: SubscriptionType,
+) {
+	"use server";
+	await requireAdmin();
+	await updateUserSubscription(userId, subscriptionType);
+	revalidatePath(`/admin/users/${userId}`);
+}
+
+async function cancelSubscription(userId: string) {
+	"use server";
+	await requireAdmin();
+	await cancelSubscriptionByAdmin(userId);
 	revalidatePath(`/admin/users/${userId}`);
 }
 
@@ -137,74 +143,18 @@ export default async function UserDetailsPage({
 					</dl>
 				</div>
 
-				{/* Subscription Info */}
-				<div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
-					<h2 className="text-lg font-semibold text-neutral-900 mb-4">
-						Subscription
-					</h2>
-					<dl className="space-y-3">
-						<div>
-							<dt className="text-sm text-neutral-500">Plan</dt>
-							<dd className="text-neutral-900">
-								<span
-									className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-										user.subscriptionType === "trial"
-											? "bg-amber-50 text-amber-700"
-											: user.subscriptionType === "monthly"
-												? "bg-blue-50 text-blue-700"
-												: user.subscriptionType === "annual"
-													? "bg-purple-50 text-purple-700"
-													: user.subscriptionType === "lifetime"
-														? "bg-rose-50 text-rose-700"
-														: "bg-neutral-100 text-neutral-500"
-									}`}
-								>
-									{formatSubscriptionType(user.subscriptionType)}
-								</span>
-							</dd>
-						</div>
-						<div>
-							<dt className="text-sm text-neutral-500">Status</dt>
-							<dd className="text-neutral-900">
-								<span
-									className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-										user.subscriptionStatus === "active"
-											? "bg-emerald-50 text-emerald-700"
-											: "bg-rose-50 text-rose-700"
-									}`}
-								>
-									{user.subscriptionStatus || "None"}
-								</span>
-							</dd>
-						</div>
-						<div>
-							<dt className="text-sm text-neutral-500">Start Date</dt>
-							<dd className="text-neutral-900">
-								{formatDate(user.subscriptionStartDate)}
-							</dd>
-						</div>
-						<div>
-							<dt className="text-sm text-neutral-500">End Date</dt>
-							<dd className="text-neutral-900">
-								{formatDate(user.subscriptionEndDate)}
-							</dd>
-						</div>
-						<div>
-							<dt className="text-sm text-neutral-500">Stripe Customer ID</dt>
-							<dd className="text-neutral-900 font-mono text-sm">
-								{user.stripeCustomerId || "Not connected"}
-							</dd>
-						</div>
-						<div>
-							<dt className="text-sm text-neutral-500">
-								Stripe Subscription ID
-							</dt>
-							<dd className="text-neutral-900 font-mono text-sm">
-								{user.stripeSubscriptionId || "Not connected"}
-							</dd>
-						</div>
-					</dl>
-				</div>
+				{/* Subscription Info + Management */}
+				<SubscriptionManager
+					userId={user.id}
+					subscriptionType={user.subscriptionType}
+					subscriptionStatus={user.subscriptionStatus}
+					subscriptionStartDate={user.subscriptionStartDate}
+					subscriptionEndDate={user.subscriptionEndDate}
+					stripeCustomerId={user.stripeCustomerId}
+					stripeSubscriptionId={user.stripeSubscriptionId}
+					onChangeSubscription={changeSubscription}
+					onCancelSubscription={cancelSubscription}
+				/>
 
 				{/* Activity & Status */}
 				<div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">

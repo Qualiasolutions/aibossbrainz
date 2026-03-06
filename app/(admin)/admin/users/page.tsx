@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { UsersTable } from "@/components/admin/users-table";
 import {
+	cancelSubscriptionByAdmin,
 	createUserByAdmin,
 	deleteUserByAdmin,
 	getAllUsers,
@@ -98,6 +99,13 @@ async function changeSubscription(
 	revalidatePath("/admin/users");
 }
 
+async function cancelSubscription(userId: string) {
+	"use server";
+	await requireAdmin();
+	await cancelSubscriptionByAdmin(userId);
+	revalidatePath("/admin/users");
+}
+
 export default async function UsersPage() {
 	// Defense-in-depth: verify admin access before loading sensitive data
 	await requireAdmin();
@@ -121,6 +129,7 @@ export default async function UsersPage() {
 				onToggleAdmin={toggleAdmin}
 				onCreateUser={createUser}
 				onChangeSubscription={changeSubscription}
+				onCancelSubscription={cancelSubscription}
 			/>
 		</div>
 	);

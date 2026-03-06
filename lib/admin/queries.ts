@@ -234,6 +234,59 @@ export async function updateUserSubscription(
 	return data;
 }
 
+// Cancel a user's subscription from admin panel
+// Cancels in Stripe (if connected) and updates DB status
+export async function cancelSubscriptionByAdmin(userId: string) {
+	const supabase = createServiceClient();
+
+	// Get current user data
+	const { data: user } = await supabase
+		.from("User")
+		.select("stripeSubscriptionId, stripeCustomerId, subscriptionStatus")
+		.eq("id", userId)
+		.single();
+
+	if (!user) throw new Error("User not found");
+
+	// Cancel in Stripe if there's an active subscription
+	if (user.stripeSubscriptionId) {
+		try {
+			const { getStripe } = await import("@/lib/stripe/config");
+			const sub = await getStripe().subscriptions.retrieve(
+				user.stripeSubscriptionId,
+			);
+			// Only cancel if not already cancelled/expired
+			if (sub.status !== "canceled") {
+				await getStripe().subscriptions.cancel(user.stripeSubscriptionId);
+			}
+		} catch (stripeError) {
+			logger.warn(
+				{
+					err: stripeError,
+					userId,
+					stripeSubscriptionId: user.stripeSubscriptionId,
+				},
+				"Failed to cancel Stripe subscription (may already be inactive)",
+			);
+		}
+	}
+
+	// Update DB status
+	const { data, error } = await supabase
+		.from("User")
+		.update({
+			subscriptionStatus: "cancelled" as SubscriptionStatus,
+			stripeSubscriptionId: null,
+			profileUpdatedAt: new Date().toISOString(),
+		})
+		.eq("id", userId)
+		.select()
+		.single();
+
+	if (error) throw error;
+	return data;
+}
+
 // Expire all subscriptions (including trials) that have passed their end date
 export async function expireSubscriptions() {
 	const supabase = createServiceClient();

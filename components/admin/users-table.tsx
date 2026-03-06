@@ -2,6 +2,7 @@
 
 import {
 	ArrowUpDown,
+	Ban,
 	Calendar,
 	Clock,
 	CreditCard,
@@ -56,6 +57,7 @@ interface UsersTableProps {
 		userId: string,
 		subscriptionType: SubscriptionType,
 	) => Promise<void>;
+	onCancelSubscription: (userId: string) => Promise<void>;
 }
 
 // Helper to format subscription display
@@ -101,12 +103,14 @@ export function UsersTable({
 	onToggleAdmin,
 	onCreateUser,
 	onChangeSubscription,
+	onCancelSubscription,
 }: UsersTableProps) {
 	const [search, setSearch] = useState("");
 	const [isPending, startTransition] = useTransition();
 	const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [createError, setCreateError] = useState<string | null>(null);
+	const [cancelUserId, setCancelUserId] = useState<string | null>(null);
 	const [subscriptionUserId, setSubscriptionUserId] = useState<string | null>(
 		null,
 	);
@@ -182,6 +186,14 @@ export function UsersTable({
 			} else {
 				setCreateError(result.error || "Failed to create user");
 			}
+		});
+	};
+
+	const handleCancelSubscription = () => {
+		if (!cancelUserId) return;
+		startTransition(async () => {
+			await onCancelSubscription(cancelUserId);
+			setCancelUserId(null);
 		});
 	};
 
@@ -458,6 +470,16 @@ export function UsersTable({
 														<CreditCard className="h-4 w-4 mr-2" />
 														Change Subscription
 													</DropdownMenuItem>
+													{(user.subscriptionStatus === "active" ||
+														user.subscriptionStatus === "trialing") && (
+														<DropdownMenuItem
+															onClick={() => setCancelUserId(user.id)}
+															className="text-orange-600 focus:text-orange-600 cursor-pointer"
+														>
+															<Ban className="h-4 w-4 mr-2" />
+															Cancel Subscription
+														</DropdownMenuItem>
+													)}
 													<DropdownMenuSeparator />
 													<DropdownMenuItem
 														onClick={() => setDeleteUserId(user.id)}
@@ -588,6 +610,44 @@ export function UsersTable({
 							className="bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700"
 						>
 							{isPending ? "Creating..." : "Create User"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			{/* Cancel Subscription Dialog */}
+			<Dialog open={!!cancelUserId} onOpenChange={() => setCancelUserId(null)}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Cancel Subscription</DialogTitle>
+						<DialogDescription>
+							This will cancel the user&apos;s subscription immediately. If they
+							have an active Stripe subscription, it will be cancelled in Stripe
+							as well.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="py-4">
+						<div className="text-sm text-orange-700 bg-orange-50 border border-orange-200 p-3 rounded-lg">
+							<p className="font-medium mb-1">What happens:</p>
+							<ul className="list-disc list-inside space-y-1">
+								<li>
+									Stripe subscription cancelled immediately (if connected)
+								</li>
+								<li>User loses access to premium features</li>
+								<li>Subscription status set to &quot;cancelled&quot;</li>
+							</ul>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button variant="ghost" onClick={() => setCancelUserId(null)}>
+							Keep Active
+						</Button>
+						<Button
+							onClick={handleCancelSubscription}
+							disabled={isPending}
+							className="bg-orange-600 hover:bg-orange-700"
+						>
+							{isPending ? "Cancelling..." : "Cancel Subscription"}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
