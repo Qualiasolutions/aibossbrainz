@@ -1,5 +1,6 @@
 import "server-only";
 
+import { sendCancellationEmail } from "../email/subscription-emails";
 import { logger } from "../logger";
 import { createServiceClient } from "../supabase/server";
 import type {
@@ -239,10 +240,12 @@ export async function updateUserSubscription(
 export async function cancelSubscriptionByAdmin(userId: string) {
 	const supabase = createServiceClient();
 
-	// Get current user data
+	// Get current user data (include email/displayName for notification)
 	const { data: user } = await supabase
 		.from("User")
-		.select("stripeSubscriptionId, stripeCustomerId, subscriptionStatus")
+		.select(
+			"email, displayName, stripeSubscriptionId, stripeCustomerId, subscriptionStatus, subscriptionEndDate",
+		)
 		.eq("id", userId)
 		.single();
 
@@ -284,6 +287,23 @@ export async function cancelSubscriptionByAdmin(userId: string) {
 		.single();
 
 	if (error) throw error;
+
+	// Send cancellation email to the user
+	if (user.email) {
+		try {
+			await sendCancellationEmail({
+				email: user.email,
+				displayName: user.displayName,
+				subscriptionEndDate: user.subscriptionEndDate,
+			});
+		} catch (emailError) {
+			logger.error(
+				{ err: emailError, userId, email: user.email },
+				"Failed to send admin cancellation email",
+			);
+		}
+	}
+
 	return data;
 }
 

@@ -112,7 +112,10 @@ export async function createContentCalendarPosts(
 		if (error) throw error;
 
 		logger.info(
-			{ count: (data as ContentCalendar[])?.length ?? 0, userId: posts[0]?.userId },
+			{
+				count: (data as ContentCalendar[])?.length ?? 0,
+				userId: posts[0]?.userId,
+			},
 			"Content calendar posts created successfully",
 		);
 

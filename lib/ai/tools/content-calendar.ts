@@ -45,10 +45,7 @@ function normalizeDate(input: string): string {
  * Shift all dates in a batch so the earliest date lands on today.
  * Preserves the relative spacing between posts.
  */
-function shiftDatesToPresent(
-	dates: string[],
-	today: string,
-): string[] {
+function shiftDatesToPresent(dates: string[], today: string): string[] {
 	const earliest = dates.reduce((min, d) => (d < min ? d : min), dates[0]);
 	if (earliest >= today) return dates;
 
@@ -223,7 +220,9 @@ Call this tool ONCE with all posts in the posts array.`,
 				if (normalizedDates[0] !== shiftedDates[0]) {
 					logger.info(
 						{
-							originalEarliest: normalizedDates.reduce((a, b) => (a < b ? a : b)),
+							originalEarliest: normalizedDates.reduce((a, b) =>
+								a < b ? a : b,
+							),
 							shiftedEarliest: shiftedDates.reduce((a, b) => (a < b ? a : b)),
 							postCount: posts.length,
 						},

@@ -2,7 +2,10 @@ import { headers } from "next/headers";
 import { after, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getUserFullProfile } from "@/lib/db/queries";
-import { sendTrialStartedEmail } from "@/lib/email/subscription-emails";
+import {
+	sendCancellationEmail,
+	sendTrialStartedEmail,
+} from "@/lib/email/subscription-emails";
 import { createRequestLogger, logger } from "@/lib/logger";
 import { applyPaidTag, applyTrialTags } from "@/lib/mailchimp/tags";
 import { checkWebhookRateLimit } from "@/lib/security/rate-limiter";
@@ -511,6 +514,7 @@ export async function POST(request: Request) {
 			case "customer.subscription.deleted": {
 				const subscription = event.data.object as Stripe.Subscription;
 				const subscriptionType = subscription.metadata?.subscriptionType;
+				const userId = subscription.metadata?.userId;
 
 				// Don't expire lifetime/annual subscriptions when they "end" - they're still valid
 				if (subscriptionType === "lifetime" || subscriptionType === "annual") {
@@ -524,6 +528,28 @@ export async function POST(request: Request) {
 						{ subscriptionId: subscription.id },
 						"Subscription expired",
 					);
+
+					// Send cancellation email (non-blocking)
+					if (userId) {
+						after(async () => {
+							try {
+								const profile = await getUserFullProfile({ userId });
+								if (profile?.email) {
+									await sendCancellationEmail({
+										email: profile.email,
+										displayName: profile.displayName,
+										subscriptionEndDate:
+											profile.subscriptionEndDate ?? null,
+									});
+								}
+							} catch (err) {
+								logger.error(
+									{ err, userId, phase: "after" },
+									"Subscription deleted cancellation email error",
+								);
+							}
+						});
+					}
 				}
 				break;
 			}
