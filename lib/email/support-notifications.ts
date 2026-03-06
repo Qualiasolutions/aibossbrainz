@@ -2,7 +2,10 @@ import "server-only";
 import { PRODUCTION_URL } from "@/lib/constants";
 import { sendViaMandrill } from "./mandrill";
 
-const SUPPORT_EMAIL = "info@qualiasolutions.net";
+const SUPPORT_RECIPIENTS = [
+	"info@qualiasolutions.net",
+	"alexandria@aleccimedia.com",
+];
 
 export async function sendTicketNotificationEmail({
 	ticketId,
@@ -18,7 +21,7 @@ export async function sendTicketNotificationEmail({
 	const appUrl = process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_URL;
 
 	return sendViaMandrill({
-		to: SUPPORT_EMAIL,
+		to: SUPPORT_RECIPIENTS,
 		subject: `[New Support Ticket] ${subject}`,
 		html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
