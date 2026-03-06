@@ -668,9 +668,9 @@ export async function getSubscriptionStats(options?: {
 		.select("subscriptionType, subscriptionStatus, subscriptionStartDate")
 		.is("deletedAt", null);
 
-	// Exclude internal team accounts from revenue/subscriber metrics
+	// Exclude internal accounts (team + client) from revenue/subscriber metrics
 	if (options?.excludeTeam) {
-		query = query.or("userType.is.null,userType.neq.team");
+		query = query.or("userType.is.null,userType.eq.none");
 	}
 
 	// Filter by user type when specified (e.g., 'client' to exclude team users from revenue)
@@ -721,8 +721,7 @@ export async function getSubscriptionStats(options?: {
 					stats.activeSubscribers++;
 					// YTD: count full months billed since max(startDate, Jan 1)
 					if (startDate) {
-						const billingStart =
-							startDate > yearStart ? startDate : yearStart;
+						const billingStart = startDate > yearStart ? startDate : yearStart;
 						const monthsActive =
 							(now.getFullYear() - billingStart.getFullYear()) * 12 +
 							(now.getMonth() - billingStart.getMonth()) +
