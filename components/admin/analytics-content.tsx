@@ -68,6 +68,7 @@ interface SubscriptionStats {
 	lifetime: number;
 	expired: number;
 	mrr: number;
+	ytdRevenue: number;
 	activeSubscribers: number;
 }
 

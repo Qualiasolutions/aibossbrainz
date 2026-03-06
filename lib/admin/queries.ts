@@ -438,11 +438,13 @@ export async function getAdminStats(): Promise<AdminStats> {
 		supabase
 			.from("User")
 			.select("*", { count: "exact", head: true })
-			.is("deletedAt", null),
+			.is("deletedAt", null)
+			.or("userType.is.null,userType.eq.none"),
 		supabase
 			.from("User")
 			.select("*", { count: "exact", head: true })
 			.is("deletedAt", null)
+			.or("userType.is.null,userType.eq.none")
 			.not("onboardedAt", "is", null),
 		supabase
 			.from("Chat")
@@ -650,6 +652,7 @@ export interface SubscriptionStats {
 	lifetime: number;
 	expired: number;
 	mrr: number;
+	ytdRevenue: number;
 	activeSubscribers: number;
 }
 
@@ -662,7 +665,7 @@ export async function getSubscriptionStats(options?: {
 	// Get subscription counts by type
 	let query = supabase
 		.from("User")
-		.select("subscriptionType, subscriptionStatus")
+		.select("subscriptionType, subscriptionStatus, subscriptionStartDate")
 		.is("deletedAt", null);
 
 	// Exclude internal team accounts from revenue/subscriber metrics
@@ -688,6 +691,14 @@ export async function getSubscriptionStats(options?: {
 		activeSubscribers: 0,
 	};
 
+	// YTD revenue: sum payments received since Jan 1 of current year
+	const MONTHLY_PRICE = 297;
+	const ANNUAL_PRICE = 2500;
+	const LIFETIME_PRICE = 3500;
+	const yearStart = new Date(new Date().getFullYear(), 0, 1);
+	const now = new Date();
+	let ytdRevenue = 0;
+
 	for (const user of users || []) {
 		if (user.subscriptionStatus === "expired") {
 			stats.expired++;
@@ -695,35 +706,59 @@ export async function getSubscriptionStats(options?: {
 			// Trial users: count separately, NOT as active (paying) subscribers
 			stats.trial++;
 		} else if (user.subscriptionStatus === "active") {
+			const startDate = user.subscriptionStartDate
+				? new Date(user.subscriptionStartDate)
+				: null;
+
 			// Only paying users count as active subscribers
 			switch (user.subscriptionType) {
 				case "trial":
 					// Active trial (shouldn't normally happen, but handle gracefully)
 					stats.trial++;
 					break;
-				case "monthly":
+				case "monthly": {
 					stats.monthly++;
 					stats.activeSubscribers++;
+					// YTD: count full months billed since max(startDate, Jan 1)
+					if (startDate) {
+						const billingStart =
+							startDate > yearStart ? startDate : yearStart;
+						const monthsActive =
+							(now.getFullYear() - billingStart.getFullYear()) * 12 +
+							(now.getMonth() - billingStart.getMonth()) +
+							1; // +1 for current month
+						ytdRevenue += Math.max(0, monthsActive) * MONTHLY_PRICE;
+					}
 					break;
-				case "annual":
+				}
+				case "annual": {
 					stats.annual++;
 					stats.activeSubscribers++;
+					// YTD: count if subscription started this year
+					if (startDate && startDate >= yearStart) {
+						ytdRevenue += ANNUAL_PRICE;
+					}
 					break;
-				case "lifetime":
+				}
+				case "lifetime": {
 					stats.lifetime++;
 					stats.activeSubscribers++;
+					// YTD: count if purchased this year
+					if (startDate && startDate >= yearStart) {
+						ytdRevenue += LIFETIME_PRICE;
+					}
 					break;
+				}
 			}
 		}
 	}
 
 	// MRR: monthly price + annual price prorated to monthly
-	const MONTHLY_PRICE = 297;
 	const ANNUAL_MONTHLY_EQUIVALENT = 208; // $2500/12
 	const mrr =
 		stats.monthly * MONTHLY_PRICE + stats.annual * ANNUAL_MONTHLY_EQUIVALENT;
 
-	return { ...stats, mrr };
+	return { ...stats, mrr, ytdRevenue };
 }
 
 // Get subscription stats filtered to clients only (excludes team/internal users from revenue)

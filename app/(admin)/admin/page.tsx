@@ -244,6 +244,7 @@ export default async function AdminDashboard() {
 							lifetime: 0,
 							expired: 0,
 							mrr: 0,
+							ytdRevenue: 0,
 							activeSubscribers: 0,
 						}
 					}

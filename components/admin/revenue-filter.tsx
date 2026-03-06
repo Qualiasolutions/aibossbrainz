@@ -19,11 +19,17 @@ export function RevenueFilter({ stats }: RevenueFilterProps) {
 				</p>
 			</div>
 			<div className="p-6">
-				<div className="grid grid-cols-2 gap-4 mb-6">
+				<div className="grid grid-cols-3 gap-4 mb-6">
 					<div className="rounded-lg bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 p-4">
 						<p className="text-sm text-rose-600 font-medium">MRR</p>
 						<p className="text-3xl font-bold text-rose-900">
 							${stats.mrr.toLocaleString()}
+						</p>
+					</div>
+					<div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-4">
+						<p className="text-sm text-emerald-600 font-medium">YTD Revenue</p>
+						<p className="text-3xl font-bold text-emerald-900">
+							${stats.ytdRevenue.toLocaleString()}
 						</p>
 					</div>
 					<div className="rounded-lg bg-neutral-50 border border-neutral-100 p-4">
