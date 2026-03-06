@@ -334,17 +334,19 @@ export async function renewSubscription({
 }
 
 /**
- * Expire subscription (called by webhook when subscription ends)
+ * Expire or cancel subscription (called by webhook when subscription ends)
+ * @param status - "expired" for natural expiration, "cancelled" for explicit cancellation
  */
 export async function expireSubscription(
 	stripeSubscriptionId: string,
+	status: "expired" | "cancelled" = "expired",
 ): Promise<void> {
 	const supabase = createServiceClient();
 
 	const { error } = await supabase
 		.from("User")
 		.update({
-			subscriptionStatus: "expired",
+			subscriptionStatus: status,
 			stripeSubscriptionId: null,
 		})
 		.eq("stripeSubscriptionId", stripeSubscriptionId);

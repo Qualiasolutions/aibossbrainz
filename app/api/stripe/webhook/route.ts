@@ -523,10 +523,16 @@ export async function POST(request: Request) {
 						"Subscription ended (user retains access)",
 					);
 				} else {
-					await expireSubscription(subscription.id);
+					// Distinguish explicit cancellation from natural expiration
+					const wasCancelled =
+						subscription.cancellation_details?.reason ===
+						"cancellation_requested";
+					const status = wasCancelled ? "cancelled" : "expired";
+
+					await expireSubscription(subscription.id, status);
 					reqLog.info(
-						{ subscriptionId: subscription.id },
-						"Subscription expired",
+						{ subscriptionId: subscription.id, status },
+						`Subscription ${status}`,
 					);
 
 					// Send cancellation email (non-blocking)
@@ -538,8 +544,7 @@ export async function POST(request: Request) {
 									await sendCancellationEmail({
 										email: profile.email,
 										displayName: profile.displayName,
-										subscriptionEndDate:
-											profile.subscriptionEndDate ?? null,
+										subscriptionEndDate: profile.subscriptionEndDate ?? null,
 									});
 								}
 							} catch (err) {

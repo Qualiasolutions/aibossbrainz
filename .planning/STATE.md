@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 Phase: 32 of 32 (Voice Call Redesign)
 Plan: 4 of 4 complete
 Status: ✓ Phase complete
-Last activity: 2026-03-06 - Completed quick task 16: admin panel subscription management — cancel/change via Stripe
+Last activity: 2026-03-06 - Completed quick task 17: fix trial cancellation sets cancelled status instead of expired in webhook
 
 Progress: [██████████] 100% (32/32 phases complete, Phase 31 skipped)
 
@@ -123,16 +123,16 @@ None yet.
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 16 completed
+**Quick tasks:** 17 completed
 
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Quick task 16 complete (admin subscription management via Stripe)
-Resume file: .planning/quick/16-admin-panel-subscription-management-canc/16-SUMMARY.md
-Next action: Deploy and verify admin subscription management in production
+Stopped at: Quick task 17 complete (fix trial cancellation status)
+Resume file: .planning/quick/17-fix-trial-cancellation-sets-cancelled-st/17-SUMMARY.md
+Next action: Deploy and verify fix in production
 
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-03-06 after Quick Task 16 completion*
+*Last updated: 2026-03-06 after Quick Task 17 completion*
