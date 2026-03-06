@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 Phase: 32 of 32 (Voice Call Redesign)
 Plan: 4 of 4 complete
 Status: ✓ Phase complete
-Last activity: 2026-03-06 - Completed quick task 17: fix trial cancellation sets cancelled status instead of expired in webhook
+Last activity: 2026-03-06 - Completed quick task 18: admin analytics — add YTD revenue, exclude team/client from total users
 
 Progress: [██████████] 100% (32/32 phases complete, Phase 31 skipped)
 
@@ -114,6 +114,12 @@ None yet.
 - Stripe payment flow testing required in production builds before deploying dynamic imports (Phase 30)
 - Large codebase (240+ routes) with Turbopack may show build performance issues (monitor during Phase 27)
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 18 | admin analytics — add YTD revenue, exclude team/client from total users | 2026-03-06 | pending | [18-admin-analytics-add-ytd-revenue-exclude-](./quick/18-admin-analytics-add-ytd-revenue-exclude-/) |
+
 ### Completed
 
 **Phase 32 (Complete 2026-03-03):** Voice Call Redesign - 4 plans. Removed all voice features from chat (text-only), built dedicated call modal with executive selector, real-time voice loop (SpeechRecognition → AI → TTS), and integrated Call button in sidebar.
@@ -123,7 +129,7 @@ None yet.
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 17 completed
+**Quick tasks:** 18 completed
 
 ## Session Continuity
 
@@ -135,4 +141,4 @@ Next action: Deploy and verify fix in production
 ---
 
 *State initialized: 2026-02-28*
-*Last updated: 2026-03-06 after Quick Task 17 completion*
+*Last updated: 2026-03-06 after Quick Task 18 completion*
