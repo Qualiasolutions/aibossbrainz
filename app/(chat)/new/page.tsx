@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { ChatWithErrorBoundary } from "@/components/chat-with-error-boundary";
-import { DataStreamHandler } from "@/components/data-stream-handler";
+import { DataStreamHandlerWrapper } from "@/components/data-stream-handler-wrapper";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { generateUUID } from "@/lib/utils";
 
@@ -20,7 +20,7 @@ export default async function Page() {
 				isReadonly={false}
 				key={id}
 			/>
-			<DataStreamHandler />
+			<DataStreamHandlerWrapper />
 		</>
 	);
 }

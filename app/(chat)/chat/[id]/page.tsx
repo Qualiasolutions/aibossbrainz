@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { ChatWithErrorBoundary } from "@/components/chat-with-error-boundary";
-import { DataStreamHandler } from "@/components/data-stream-handler";
+import { DataStreamHandlerWrapper } from "@/components/data-stream-handler-wrapper";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import type { BotType } from "@/lib/bot-personalities";
@@ -85,7 +85,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 				initialVisibilityType={chat.visibility as VisibilityType}
 				isReadonly={sessionUser?.id !== chat.userId}
 			/>
-			<DataStreamHandler />
+			<DataStreamHandlerWrapper />
 		</>
 	);
 }
