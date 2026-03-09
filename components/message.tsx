@@ -1,14 +1,13 @@
 "use client";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
+import dynamic from "next/dynamic";
 import { memo, useMemo, useState } from "react";
 import { parseSuggestions } from "@/lib/ai/parse-suggestions";
 import type { BotType } from "@/lib/bot-personalities";
 import type { Vote } from "@/lib/supabase/types";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
-import { DocumentToolResult } from "./document";
-import { DocumentPreview } from "./document-preview";
 import { MessageContent } from "./elements/message";
 import { Response } from "./elements/response";
 import {
@@ -20,12 +19,51 @@ import {
 } from "./elements/tool";
 import { EnhancedChatMessage } from "./enhanced-chat-message";
 import { MessageActions } from "./message-actions";
-import { MessageEditor } from "./message-editor";
-import { MessageReasoning } from "./message-reasoning";
 import { MessageSuggestions } from "./message-suggestions";
 import { PreviewAttachment } from "./preview-attachment";
-import { DeepResearchResults, WebSearchResults } from "./search-results";
-import { Weather } from "./weather";
+
+// Heavy sub-components — dynamically imported to keep initial chat bundle lean
+const DocumentToolResult = dynamic(
+	() => import("./document").then((mod) => ({ default: mod.DocumentToolResult })),
+	{ ssr: false, loading: () => null },
+);
+const DocumentPreview = dynamic(
+	() =>
+		import("./document-preview").then((mod) => ({
+			default: mod.DocumentPreview,
+		})),
+	{ ssr: false, loading: () => null },
+);
+const MessageEditor = dynamic(
+	() =>
+		import("./message-editor").then((mod) => ({ default: mod.MessageEditor })),
+	{ ssr: false, loading: () => null },
+);
+const MessageReasoning = dynamic(
+	() =>
+		import("./message-reasoning").then((mod) => ({
+			default: mod.MessageReasoning,
+		})),
+	{ ssr: false, loading: () => null },
+);
+const WebSearchResults = dynamic(
+	() =>
+		import("./search-results").then((mod) => ({
+			default: mod.WebSearchResults,
+		})),
+	{ ssr: false, loading: () => null },
+);
+const DeepResearchResults = dynamic(
+	() =>
+		import("./search-results").then((mod) => ({
+			default: mod.DeepResearchResults,
+		})),
+	{ ssr: false, loading: () => null },
+);
+const Weather = dynamic(
+	() => import("./weather").then((mod) => ({ default: mod.Weather })),
+	{ ssr: false, loading: () => null },
+);
 
 const PurePreviewMessage = ({
 	chatId,
