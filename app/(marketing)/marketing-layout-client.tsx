@@ -5,15 +5,15 @@ import { Globe, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { LandingPageCMSContent } from "@/lib/cms/landing-page-types";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 interface MarketingLayoutClientProps {
 	children: React.ReactNode;
 	content: LandingPageCMSContent;
-	isLoggedIn?: boolean;
 }
 
 const navLinks = [
@@ -28,7 +28,7 @@ function Header({
 	isLoggedIn,
 }: {
 	content: LandingPageCMSContent;
-	isLoggedIn?: boolean;
+	isLoggedIn: boolean;
 }) {
 	const pathname = usePathname();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -334,8 +334,17 @@ function Footer({ content }: { content: LandingPageCMSContent }) {
 export function MarketingLayoutClient({
 	children,
 	content,
-	isLoggedIn,
 }: MarketingLayoutClientProps) {
+	const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+	useEffect(() => {
+		const supabase = createClient();
+
+		void supabase.auth.getSession().then(({ data }) => {
+			setIsLoggedIn(Boolean(data.session));
+		});
+	}, []);
+
 	return (
 		<div className="min-h-screen bg-white">
 			<Header content={content} isLoggedIn={isLoggedIn} />

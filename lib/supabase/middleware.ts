@@ -72,21 +72,26 @@ export async function updateSession(request: NextRequest) {
 		return NextResponse.redirect(url);
 	}
 
-	// Skip auth check entirely for marketing/static pages that never need auth.
-	// This avoids the supabase.auth.getUser() round-trip on public pages.
-	const marketingPaths = [
+	const publicPageRoutes = [
+		"/",
+		"/login",
+		"/signup",
+		"/register",
+		"/forgot-password",
+		"/reset-password",
+		"/auth/callback",
 		"/pricing",
 		"/contact",
 		"/terms",
 		"/privacy",
+		"/subscribe",
 		"/about",
 	];
 	const reqPathname = request.nextUrl.pathname;
-	if (
-		marketingPaths.some(
-			(p) => reqPathname === p || reqPathname.startsWith(`${p}/`),
-		)
-	) {
+	const isPublicPageRoute = publicPageRoutes.some(
+		(route) => reqPathname === route || reqPathname.startsWith(`${route}/`),
+	);
+	if (isPublicPageRoute) {
 		return supabaseResponse;
 	}
 
@@ -106,24 +111,9 @@ export async function updateSession(request: NextRequest) {
 		Sentry.setUser(null);
 	}
 
-	// Define public routes that don't require authentication
-	const publicRoutes = [
-		"/login",
-		"/signup",
-		"/register",
-		"/forgot-password",
-		"/reset-password",
-		"/auth/callback",
-		"/api/auth",
-		"/pricing",
-		"/contact",
-		"/terms",
-		"/privacy",
-		"/subscribe",
-	];
 	const isPublicRoute =
 		request.nextUrl.pathname === "/" ||
-		publicRoutes.some((route) => request.nextUrl.pathname.startsWith(route));
+		request.nextUrl.pathname.startsWith("/api/auth");
 
 	// API routes accessible without user authentication.
 	// All other /api/ routes require an authenticated session (defense-in-depth).
