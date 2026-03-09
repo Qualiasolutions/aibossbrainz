@@ -64,8 +64,24 @@ const FocusModeChips = dynamic(
 	{ ssr: false, loading: () => null },
 );
 
-import { Messages } from "./messages";
-import { MultimodalInput } from "./multimodal-input";
+const Messages = dynamic(
+	() => import("./messages").then((mod) => ({ default: mod.Messages })),
+	{
+		ssr: false,
+		loading: () => (
+			<div className="flex h-full items-center justify-center">
+				<div className="size-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+			</div>
+		),
+	},
+);
+const MultimodalInput = dynamic(
+	() =>
+		import("./multimodal-input").then((mod) => ({
+			default: mod.MultimodalInput,
+		})),
+	{ ssr: false, loading: () => null },
+);
 
 const OnboardingModal = dynamic(
 	() =>
