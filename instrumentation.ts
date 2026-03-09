@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { registerOTel } from "@vercel/otel";
+import { isTestEnvironment } from "@/lib/constants";
 import { env } from "@/lib/env";
 
 export async function register() {
@@ -8,7 +9,7 @@ export async function register() {
 
 	// PERFORMANCE: Preload knowledge base on server startup
 	// This eliminates cold start latency for the first chat request
-	if (process.env.NEXT_RUNTIME === "nodejs") {
+	if (process.env.NEXT_RUNTIME === "nodejs" && !isTestEnvironment) {
 		import("@/lib/ai/knowledge-base")
 			.then(({ preloadKnowledgeBase }) => {
 				preloadKnowledgeBase().catch((err) => {
