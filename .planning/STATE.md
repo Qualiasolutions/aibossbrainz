@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 Phase: 32 of 32 (Voice Call Redesign)
 Plan: 4 of 4 complete
 Status: ✓ Phase complete
-Last activity: 2026-03-06 - Completed quick task 18: admin analytics — add YTD revenue, exclude team/client from total users
+Last activity: 2026-03-10 - Completed quick task 19: reduce chat route bundle via dynamic imports (-631KB, 429KB final)
 
 Progress: [██████████] 100% (32/32 phases complete, Phase 31 skipped)
 
@@ -118,7 +118,8 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 18 | admin analytics — add YTD revenue, exclude team/client from total users | 2026-03-06 | pending | [18-admin-analytics-add-ytd-revenue-exclude-](./quick/18-admin-analytics-add-ytd-revenue-exclude-/) |
+| 18 | admin analytics — add YTD revenue, exclude team/client from total users | 2026-03-06 | 28bce24 | [18-admin-analytics-add-ytd-revenue-exclude-](./quick/18-admin-analytics-add-ytd-revenue-exclude-/) |
+| 19 | reduce chat route bundle via dynamic imports (1.06MB → 429KB, -59%) | 2026-03-10 | 2c7fa99 | [19-reduce-chat-route-bundle-dynamic-imports](./quick/19-reduce-chat-route-bundle-dynamic-imports/) |
 
 ### Completed
 
@@ -133,10 +134,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-06
-Stopped at: Quick task 17 complete (fix trial cancellation status)
-Resume file: .planning/quick/17-fix-trial-cancellation-sets-cancelled-st/17-SUMMARY.md
-Next action: Deploy and verify fix in production
+Last session: 2026-03-10
+Stopped at: Quick task 19 complete (chat bundle reduction)
+Resume file: .planning/quick/19-reduce-chat-route-bundle-dynamic-imports/19-SUMMARY.md
+Next action: Deploy to production and verify bundle sizes
 
 ---
 
