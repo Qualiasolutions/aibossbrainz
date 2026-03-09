@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-02-28)
 Phase: 32 of 32 (Voice Call Redesign)
 Plan: 4 of 4 complete
 Status: ✓ Phase complete
-Last activity: 2026-03-10 - Completed quick task 21: fix audit findings (marketing loading.tsx)
+Last activity: 2026-03-10 - Completed quick task 22: fix: enable cross-chat memory recall
 
 Progress: [██████████] 100% (32/32 phases complete, Phase 31 skipped)
 
@@ -122,6 +122,7 @@ None yet.
 | 19 | reduce chat route bundle via dynamic imports (1.06MB → 429KB, -59%) | 2026-03-10 | 2c7fa99 | [19-reduce-chat-route-bundle-dynamic-imports](./quick/19-reduce-chat-route-bundle-dynamic-imports/) |
 | 20 | fix @next/swc version mismatch (next 15.5.11→15.5.12) | 2026-03-10 | e51c577 | [20-fix-next-swc-version-mismatch-warnings](./quick/20-fix-next-swc-version-mismatch-warnings/) |
 | 21 | fix audit findings: add marketing loading.tsx | 2026-03-10 | 0bfe7b7 | [21-fix-audit-findings-add-marketing-loading](./quick/21-fix-audit-findings-add-marketing-loading/) |
+| 22 | fix: enable cross-chat memory recall | 2026-03-10 | pending | [22-fix-enable-cross-chat-memory-recall](./quick/22-fix-enable-cross-chat-memory-recall/) |
 
 ### Completed
 
@@ -132,7 +133,7 @@ None yet.
 **v1.3 (Shipped 2026-02-18):** Phases 16-20, 10 plans -- AI Production Hardening
 **v1.2 (Shipped 2026-02-11):** Phases 11-15, 11 plans -- Client Feedback Sweep
 **v1.1 (Shipped 2026-02-02):** Phases 6-10, 8 plans -- Alexandria Requests
-**Quick tasks:** 21 completed
+**Quick tasks:** 22 completed
 
 ## Session Continuity
 

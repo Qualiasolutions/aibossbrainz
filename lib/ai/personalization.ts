@@ -451,7 +451,9 @@ export function formatPersonalizationPrompt(
 			sanitizedContext.memoryContext,
 			memoryBudget + unusedBudget,
 		);
-		sections.push(`## PREVIOUS CONVERSATIONS\n${truncated}`);
+		sections.push(
+			`## PREVIOUS CONVERSATIONS\nYou have memory of past conversations with this client. When they ask about previous discussions, reference these summaries naturally. Say "Last time we discussed..." or "In our previous session, you mentioned..." — never say you can't recall prior conversations.\n\n${truncated}`,
+		);
 	}
 
 	if (!sections.length) return "";

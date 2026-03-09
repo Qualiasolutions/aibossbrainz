@@ -38,9 +38,10 @@ interface Message {
 export async function generateConversationSummary(
 	messages: Message[],
 ): Promise<ConversationSummary | null> {
-	// Only summarize conversations with substantive content
+	// Only summarize conversations with substantive content (at least 1 user + 1 assistant)
 	const userMessages = messages.filter((m) => m.role === "user");
-	if (userMessages.length < 2) return null;
+	const assistantMessages = messages.filter((m) => m.role === "assistant");
+	if (userMessages.length < 1 || assistantMessages.length < 1) return null;
 
 	// Extract text content from messages
 	const conversationText = messages

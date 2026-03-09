@@ -201,9 +201,11 @@ export const systemPrompt = async ({
 		return `${botSystemPrompt}\n\n${requestPrompt}`;
 	}
 
-	// PERFORMANCE: Skip expensive personalization for short messages (< 100 chars, first 2 messages)
-	const shouldLoadPersonalization =
-		userId && (messageText.length > 100 || messageCount > 2);
+	// Load personalization (profile, canvas, conversation summaries) for all non-simple messages.
+	// The isSimpleMessage early return above already handles greetings.
+	// Previous gate (messageText > 100 chars OR messageCount > 2) was too aggressive —
+	// it blocked cross-chat memory for short questions in new chats like "what did we discuss last time?"
+	const shouldLoadPersonalization = !!userId;
 
 	if (shouldLoadPersonalization) {
 		try {

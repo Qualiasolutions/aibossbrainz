@@ -588,12 +588,12 @@ export const POST = withCsrf(async (request: Request) => {
 				after(() => recordAnalytics(user.id, "message", messages.length));
 
 				// Generate conversation summary for cross-chat memory (in background)
-				// PERF-02: Only summarize at intervals (4, 10, 20, 30...) instead of every response
+				// Summarize at first meaningful exchange (2+ messages) and then at intervals
 				const finishedMessages = messages;
 				const messageCount = finishedMessages.length;
 				const shouldSummarize =
-					messageCount >= 4 &&
-					(messageCount === 4 || messageCount % SUMMARY_INTERVAL === 0);
+					messageCount >= 2 &&
+					(messageCount <= 4 || messageCount % SUMMARY_INTERVAL === 0);
 
 				if (shouldSummarize) {
 					after(async () => {
