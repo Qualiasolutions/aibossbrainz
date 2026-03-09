@@ -10,11 +10,10 @@ import {
 	getMessageCountByChatId,
 	getMessagesByChatId,
 } from "@/lib/db/queries";
-
-const INITIAL_MESSAGE_LIMIT = 50;
-
 import { createClient } from "@/lib/supabase/server";
 import { convertToUIMessages } from "@/lib/utils";
+
+const INITIAL_MESSAGE_LIMIT = 50;
 
 // Type guard for BotType validation
 function isBotType(value: unknown): value is BotType {
@@ -27,13 +26,17 @@ function isBotType(value: unknown): value is BotType {
 export default async function Page(props: { params: Promise<{ id: string }> }) {
 	const params = await props.params;
 	const { id } = params;
-	const chat = await getChatById({ id });
+
+	// Parallel: fetch chat and create auth client at the same time
+	const [chat, supabase] = await Promise.all([
+		getChatById({ id }),
+		createClient(),
+	]);
 
 	if (!chat) {
 		notFound();
 	}
 
-	const supabase = await createClient();
 	const {
 		data: { user: sessionUser },
 	} = await supabase.auth.getUser();
@@ -42,23 +45,20 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 		redirect("/login");
 	}
 
-	if (chat.visibility === "private") {
-		if (!sessionUser) {
-			return notFound();
-		}
-
-		if (sessionUser.id !== chat.userId) {
-			return notFound();
-		}
+	if (chat.visibility === "private" && sessionUser.id !== chat.userId) {
+		return notFound();
 	}
 
-	const [messagesFromDb, totalMessageCount] = await Promise.all([
+	// Parallel: fetch messages, count, and cookies simultaneously
+	const [messagesFromDb, totalMessageCount, cookieStore] = await Promise.all([
 		getMessagesByChatId({ id, limit: INITIAL_MESSAGE_LIMIT }),
 		getMessageCountByChatId({ id }),
+		cookies(),
 	]);
 
 	const uiMessages = convertToUIMessages(messagesFromDb);
 	const hasMoreMessages = totalMessageCount > messagesFromDb.length;
+	const chatModelFromCookie = cookieStore.get("chat-model");
 
 	// Get the bot type from the last assistant message with type safety
 	const lastAssistantMessage = messagesFromDb
@@ -68,8 +68,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 		? lastAssistantMessage.botType
 		: "collaborative";
 
-	const cookieStore = await cookies();
-	const chatModelFromCookie = cookieStore.get("chat-model");
+	const isReadonly = sessionUser.id !== chat.userId;
 
 	return (
 		<>
@@ -83,7 +82,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 				initialLastContext={(chat.lastContext as any) ?? undefined}
 				initialMessages={uiMessages}
 				initialVisibilityType={chat.visibility as VisibilityType}
-				isReadonly={sessionUser?.id !== chat.userId}
+				isReadonly={isReadonly}
 			/>
 			<DataStreamHandlerWrapper />
 		</>
