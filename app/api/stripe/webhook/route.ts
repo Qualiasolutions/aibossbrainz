@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { after, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getUserFullProfile } from "@/lib/db/queries";
+import { sendAdminNotification } from "@/lib/email/admin-notifications";
 import {
 	sendCancellationEmail,
 	sendTrialStartedEmail,
@@ -559,12 +560,44 @@ export async function POST(request: Request) {
 				break;
 			}
 
-			// DESIGN(DOC-04): Only logs warning, no user/admin notification. Stripe handles
-			// user-facing dunning emails natively. Custom emails would duplicate and potentially
-			// conflict with Stripe's retry communications. Admin payment failure dashboard deferred to v2.
+			// DESIGN(DOC-04): Stripe handles user-facing dunning emails natively.
+			// We only notify the admin so they have visibility into payment issues.
 			case "invoice.payment_failed": {
 				const invoice = event.data.object as Stripe.Invoice;
-				reqLog.warn({ invoiceId: invoice.id }, "Payment failed");
+				const customerEmail =
+					typeof invoice.customer_email === "string"
+						? invoice.customer_email
+						: "unknown";
+				const amountDue = invoice.amount_due
+					? `$${(invoice.amount_due / 100).toFixed(2)}`
+					: "unknown";
+
+				reqLog.warn(
+					{ invoiceId: invoice.id, customerEmail, amountDue },
+					"Payment failed",
+				);
+
+				// Notify admin (non-blocking)
+				after(async () => {
+					try {
+						await sendAdminNotification({
+							subject: "Payment Failed",
+							message: [
+								`Invoice: ${invoice.id}`,
+								`Customer: ${customerEmail}`,
+								`Amount: ${amountDue}`,
+								`Attempt: ${invoice.attempt_count ?? "unknown"}`,
+								`Next retry: Stripe will handle automatically`,
+							].join("\n"),
+							type: "alert",
+						});
+					} catch (err) {
+						logger.error(
+							{ err, invoiceId: invoice.id },
+							"Failed to send payment failure admin notification",
+						);
+					}
+				});
 				break;
 			}
 
