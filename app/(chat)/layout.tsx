@@ -1,4 +1,3 @@
-import { unstable_cache } from "next/cache";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 
@@ -27,22 +26,7 @@ import {
 	SubscriptionProvider,
 } from "@/components/subscription";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-
-// Cache isAdmin check for 5 minutes to reduce DB queries
-const getIsAdmin = unstable_cache(
-	async (userId: string): Promise<boolean> => {
-		const serviceClient = createServiceClient();
-		const { data: userData } = await serviceClient
-			.from("User")
-			.select("isAdmin")
-			.eq("id", userId)
-			.single();
-		return userData?.isAdmin === true;
-	},
-	["user-admin-status"],
-	{ revalidate: 300 }, // 5 minutes
-);
+import { createClient } from "@/lib/supabase/server";
 
 export default async function Layout({
 	children,
@@ -53,9 +37,6 @@ export default async function Layout({
 	const {
 		data: { user },
 	} = await supabase.auth.getUser();
-
-	// Check if user is admin (cached for 5 minutes)
-	const isAdmin = user ? await getIsAdmin(user.id) : false;
 
 	return (
 		<>
@@ -71,7 +52,7 @@ export default async function Layout({
 							defaultOpen={true}
 							className="!min-h-0 h-dvh overflow-hidden"
 						>
-							<AppSidebar user={user || undefined} isAdmin={isAdmin} />
+							<AppSidebar user={user || undefined} />
 							<SidebarInset className="min-h-0">
 								<SubscriptionLayout>
 									<Suspense

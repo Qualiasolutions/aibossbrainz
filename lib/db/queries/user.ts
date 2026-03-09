@@ -399,7 +399,7 @@ export async function getUserProfile({ userId }: { userId: string }) {
 		const { data, error } = await supabase
 			.from("User")
 			.select(
-				"id, email, displayName, companyName, industry, businessGoals, preferredBotType, onboardedAt, productsServices, websiteUrl, targetMarket, competitors, annualRevenue, yearsInBusiness, employeeCount",
+				"id, email, isAdmin, displayName, companyName, industry, businessGoals, preferredBotType, onboardedAt, productsServices, websiteUrl, targetMarket, competitors, annualRevenue, yearsInBusiness, employeeCount",
 			)
 			.eq("id", userId)
 			.is("deletedAt", null)

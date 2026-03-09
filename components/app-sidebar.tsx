@@ -6,7 +6,7 @@ import { Phone, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CallModal } from "@/components/call/call-modal";
 import { useMobileSidebar } from "@/components/mobile-sidebar-context";
 import { SidebarHistory } from "@/components/sidebar-history";
@@ -38,6 +38,31 @@ export function AppSidebar({
 	const { setOpenMobile } = useSidebar();
 	const [showCallModal, setShowCallModal] = useState(false);
 	const { isMobileSidebarOpen, setIsMobileSidebarOpen } = useMobileSidebar();
+	const [adminState, setAdminState] = useState(isAdmin);
+
+	useEffect(() => {
+		if (!user) return;
+
+		let isMounted = true;
+
+		void fetch("/api/profile")
+			.then(async (response) => {
+				if (!response.ok) return null;
+				return response.json();
+			})
+			.then((profile) => {
+				if (isMounted && profile?.isAdmin === true) {
+					setAdminState(true);
+				}
+			})
+			.catch(() => {
+				// Non-blocking enhancement for admin navigation.
+			});
+
+		return () => {
+			isMounted = false;
+		};
+	}, [user]);
 
 	const handleNewChat = () => {
 		setOpenMobile(false);
@@ -113,7 +138,7 @@ export function AppSidebar({
 				<SidebarFooter className="border-t border-border bg-background px-3 py-2">
 					{user && (
 						<div className="w-full">
-							<SidebarUserNav user={user} isAdmin={isAdmin} />
+							<SidebarUserNav user={user} isAdmin={adminState} />
 						</div>
 					)}
 					<p className="text-center text-[10px] tracking-wide text-muted-foreground/50">
@@ -190,7 +215,7 @@ export function AppSidebar({
 						<div className="border-t border-border bg-background px-3 py-2">
 							{user && (
 								<div className="w-full">
-									<SidebarUserNav user={user} isAdmin={isAdmin} />
+									<SidebarUserNav user={user} isAdmin={adminState} />
 								</div>
 							)}
 							<p className="text-center text-[10px] tracking-wide text-muted-foreground/50">

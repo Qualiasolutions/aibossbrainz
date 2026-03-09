@@ -102,6 +102,7 @@ export async function GET() {
 		return Response.json({
 			id: user.id,
 			email: user.email,
+			isAdmin: profile?.isAdmin ?? false,
 			displayName: profile?.displayName ?? null,
 			companyName: profile?.companyName ?? null,
 			industry: profile?.industry ?? null,
