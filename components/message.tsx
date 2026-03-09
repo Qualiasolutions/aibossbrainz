@@ -24,7 +24,8 @@ import { PreviewAttachment } from "./preview-attachment";
 
 // Heavy sub-components — dynamically imported to keep initial chat bundle lean
 const DocumentToolResult = dynamic(
-	() => import("./document").then((mod) => ({ default: mod.DocumentToolResult })),
+	() =>
+		import("./document").then((mod) => ({ default: mod.DocumentToolResult })),
 	{ ssr: false, loading: () => null },
 );
 const DocumentPreview = dynamic(
