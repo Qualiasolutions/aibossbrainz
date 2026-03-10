@@ -216,9 +216,7 @@ export async function GET(request: Request) {
 				return response;
 			}
 			if (isPasswordResetPending) {
-				const response = NextResponse.redirect(
-					`${origin}/reset-password`,
-				);
+				const response = NextResponse.redirect(`${origin}/reset-password`);
 				response.cookies.delete("password_reset_pending");
 				return response;
 			}
@@ -241,9 +239,7 @@ export async function GET(request: Request) {
 		if (!error && data.user) {
 			// Recovery flow: detect via `type` param, `next` param, or cookie
 			if (type === "recovery") {
-				const response = NextResponse.redirect(
-					`${origin}/reset-password`,
-				);
+				const response = NextResponse.redirect(`${origin}/reset-password`);
 				response.cookies.delete("password_reset_pending");
 				return response;
 			}
@@ -253,9 +249,7 @@ export async function GET(request: Request) {
 				return response;
 			}
 			if (isPasswordResetPending) {
-				const response = NextResponse.redirect(
-					`${origin}/reset-password`,
-				);
+				const response = NextResponse.redirect(`${origin}/reset-password`);
 				response.cookies.delete("password_reset_pending");
 				return response;
 			}

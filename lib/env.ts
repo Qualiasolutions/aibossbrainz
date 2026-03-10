@@ -65,6 +65,8 @@ export const env = createEnv({
 		ELEVENLABS_VOICE_ID_KIM: z.string().optional(),
 		// Fireflies
 		FIREFLIES_API_KEY: z.string().optional(),
+		// ThriveCart
+		THRIVECART_SECRET: z.string().optional(),
 		// Testing
 		PLAYWRIGHT: z.string().optional(),
 		CI_PLAYWRIGHT: z.string().optional(),
@@ -118,6 +120,7 @@ export const env = createEnv({
 		ELEVENLABS_VOICE_ID_ALEXANDRIA: process.env.ELEVENLABS_VOICE_ID_ALEXANDRIA,
 		ELEVENLABS_VOICE_ID_KIM: process.env.ELEVENLABS_VOICE_ID_KIM,
 		FIREFLIES_API_KEY: process.env.FIREFLIES_API_KEY,
+		THRIVECART_SECRET: process.env.THRIVECART_SECRET,
 		PLAYWRIGHT: process.env.PLAYWRIGHT,
 		CI_PLAYWRIGHT: process.env.CI_PLAYWRIGHT,
 		PLAYWRIGHT_TEST_BASE_URL: process.env.PLAYWRIGHT_TEST_BASE_URL,
