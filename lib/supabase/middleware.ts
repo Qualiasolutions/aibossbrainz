@@ -121,6 +121,7 @@ export async function updateSession(request: NextRequest) {
 	const publicApiRoutes = [
 		"/api/auth", // Supabase auth callbacks
 		"/api/stripe/webhook", // Stripe webhook (has signature verification)
+		"/api/thrivecart/webhook", // ThriveCart IPN webhook (has shared secret verification)
 		"/api/health", // Monitoring probes (returns minimal info after SEC-04)
 		"/api/demo/chat", // Demo chat for unauthenticated visitors
 		"/api/csrf", // CSRF token endpoint (needed by unauthenticated demo visitors)
