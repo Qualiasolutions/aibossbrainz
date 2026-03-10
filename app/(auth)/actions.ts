@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { z } from "zod";
 import { PRODUCTION_URL } from "@/lib/constants";
 import { logger } from "@/lib/logger";
@@ -208,6 +208,17 @@ export const requestPasswordReset = async (
 			// Don't reveal if email exists or not for security
 			return { status: "success" };
 		}
+
+		// Set a cookie so the auth callback knows to redirect to /reset-password.
+		// The `next` query param in redirectTo can get lost during Supabase's PKCE redirect.
+		const cookieStore = await cookies();
+		cookieStore.set("password_reset_pending", "1", {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "lax",
+			maxAge: 3600,
+			path: "/",
+		});
 
 		return { status: "success" };
 	} catch (error) {

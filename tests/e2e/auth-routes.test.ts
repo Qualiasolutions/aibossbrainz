@@ -32,6 +32,17 @@ test.describe("Auth Route Rendering", () => {
 		).toBeVisible();
 	});
 
+	test("reset password page renders new password form", async ({ page }) => {
+		await page.goto("/reset-password");
+
+		await expect(
+			page.getByRole("heading", { name: "Create New Password" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Reset Password" }),
+		).toBeVisible();
+	});
+
 	test("reset password page renders invalid link state from query params", async ({
 		page,
 	}) => {

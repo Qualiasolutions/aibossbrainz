@@ -1,4 +1,5 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 import { after, NextResponse } from "next/server";
 import {
 	checkUserSubscription,
@@ -194,6 +195,9 @@ export async function GET(request: Request) {
 	const next = searchParams.get("next");
 
 	const supabase = await createClient();
+	const cookieStore = await cookies();
+	const isPasswordResetPending =
+		cookieStore.get("password_reset_pending")?.value === "1";
 
 	// Flow 1: PKCE code exchange (from OAuth or Supabase redirect with ?code=)
 	if (code) {
@@ -204,9 +208,19 @@ export async function GET(request: Request) {
 		}
 
 		if (!error && data.user) {
-			// Recovery flow: redirect to next page (e.g. /reset-password) with session established
+			// Recovery flow: redirect to /reset-password.
+			// Check `next` param (may survive PKCE redirect) OR cookie fallback.
 			if (next && ALLOWED_REDIRECT_PATHS.includes(next)) {
-				return NextResponse.redirect(`${origin}${next}`);
+				const response = NextResponse.redirect(`${origin}${next}`);
+				response.cookies.delete("password_reset_pending");
+				return response;
+			}
+			if (isPasswordResetPending) {
+				const response = NextResponse.redirect(
+					`${origin}/reset-password`,
+				);
+				response.cookies.delete("password_reset_pending");
+				return response;
 			}
 			return handleAuthenticatedUser(data.user, origin, plan);
 		}
@@ -225,9 +239,25 @@ export async function GET(request: Request) {
 		}
 
 		if (!error && data.user) {
-			// Recovery flow: redirect to next page with session established
+			// Recovery flow: detect via `type` param, `next` param, or cookie
+			if (type === "recovery") {
+				const response = NextResponse.redirect(
+					`${origin}/reset-password`,
+				);
+				response.cookies.delete("password_reset_pending");
+				return response;
+			}
 			if (next && ALLOWED_REDIRECT_PATHS.includes(next)) {
-				return NextResponse.redirect(`${origin}${next}`);
+				const response = NextResponse.redirect(`${origin}${next}`);
+				response.cookies.delete("password_reset_pending");
+				return response;
+			}
+			if (isPasswordResetPending) {
+				const response = NextResponse.redirect(
+					`${origin}/reset-password`,
+				);
+				response.cookies.delete("password_reset_pending");
+				return response;
 			}
 			return handleAuthenticatedUser(data.user, origin, plan);
 		}
