@@ -11,6 +11,10 @@
 		{
 			"path": "/api/cron/cost-check",
 			"schedule": "0 23 * * *"
+		},
+		{
+			"path": "/api/cron/trend-scanner",
+			"schedule": "0 */8 * * *"
 		}
 	],
 	"functions": {
