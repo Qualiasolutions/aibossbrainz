@@ -126,7 +126,7 @@ export async function updateSession(request: NextRequest) {
 		"/api/demo/chat", // Demo chat for unauthenticated visitors
 		"/api/csrf", // CSRF token endpoint (needed by unauthenticated demo visitors)
 		"/api/admin/landing-page", // Landing page content (GET is public, POST has isUserAdmin check)
-		"/api/cron/", // Vercel cron jobs (have CRON_SECRET auth)
+		"/api/cron", // Vercel cron jobs (have CRON_SECRET auth)
 	];
 
 	const isPublicApiRoute =
