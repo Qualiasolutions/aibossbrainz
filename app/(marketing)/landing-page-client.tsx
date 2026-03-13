@@ -28,7 +28,7 @@ const revealVariants = {
 		opacity: 1,
 		y: 0,
 		transition: {
-			duration: 0.8,
+			duration: 0.7,
 			delay,
 			ease: [0.25, 0.46, 0.45, 0.94],
 		},
@@ -36,7 +36,7 @@ const revealVariants = {
 };
 
 // ─────────────────────────────────────────────────────────────
-// HERO SECTION — Split layout: text left, demo right, 90vh
+// HERO SECTION — Cinematic split with floating orbs
 // ─────────────────────────────────────────────────────────────
 function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
@@ -45,17 +45,18 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 	return (
 		<section
 			ref={ref}
-			className="relative flex min-h-svh lg:min-h-[90svh] lg:max-h-[90svh] bg-white overflow-x-hidden"
+			className="relative flex min-h-svh lg:min-h-[92svh] lg:max-h-[92svh] bg-white overflow-hidden"
 		>
-			{/* Background texture */}
-			<div className="absolute inset-0 z-0 pointer-events-none">
-				<div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e5e506_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e506_1px,transparent_1px)] bg-[size:32px_32px]" />
-				{/* Subtle radial glow behind text side */}
-				<div className="absolute -left-40 top-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-500/[0.03] rounded-full blur-[120px]" />
+			{/* Floating orb background */}
+			<div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+				<div className="absolute -left-32 top-1/4 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-red-500/[0.06] to-rose-400/[0.03] blur-[100px] animate-orb-float" />
+				<div className="absolute -right-20 bottom-1/4 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-stone-400/[0.04] to-red-500/[0.02] blur-[80px] animate-orb-float-delayed" />
+				{/* Grid texture */}
+				<div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e5e504_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e504_1px,transparent_1px)] bg-[size:48px_48px]" />
 			</div>
 
 			{/* Split container */}
-			<div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col lg:flex-row lg:items-center lg:gap-8 xl:gap-12 px-4 sm:px-6 pt-24 pb-12 sm:pt-32 sm:pb-8 lg:pt-24 lg:px-10 xl:px-16">
+			<div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-col lg:flex-row lg:items-center lg:gap-8 xl:gap-16 px-4 sm:px-6 pt-24 pb-12 sm:pt-32 sm:pb-8 lg:pt-24 lg:px-10 xl:px-16">
 				{/* LEFT — Text content */}
 				<div className="flex flex-col justify-center lg:w-[48%] xl:w-[45%] shrink-0">
 					{/* Pill Badge */}
@@ -64,18 +65,18 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						initial="hidden"
 						animate={isInView ? "visible" : "hidden"}
 						custom={0.05}
-						className="mb-6 inline-flex w-fit items-center gap-2.5 rounded-full border border-stone-200 bg-stone-50/60 px-4 py-1.5 backdrop-blur-sm"
+						className="mb-6 inline-flex w-fit items-center gap-2.5 rounded-full border border-stone-200/80 bg-white/60 px-4 py-1.5 backdrop-blur-sm shadow-sm"
 					>
 						<span className="relative flex h-1.5 w-1.5">
 							<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
 							<span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500" />
 						</span>
-						<span className="text-[11px] font-semibold tracking-[0.15em] text-stone-600 uppercase">
+						<span className="text-[11px] font-semibold tracking-[0.15em] text-stone-500 uppercase">
 							AI Executive Consulting
 						</span>
 					</motion.div>
 
-					{/* Headline */}
+					{/* Headline — Serif + Sans mix for editorial feel */}
 					<motion.h1
 						variants={revealVariants}
 						initial="hidden"
@@ -84,15 +85,9 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						className="text-[2.25rem] font-bold tracking-[-0.035em] text-stone-950 sm:text-5xl lg:text-[3.25rem] xl:text-6xl leading-[1.08]"
 					>
 						<span className="block">{content.hero.title_main}</span>
-						<motion.span
-							className="block bg-gradient-to-r from-red-600 via-red-500 to-red-600 bg-clip-text text-transparent"
-							initial={{ backgroundPosition: "0% 50%" }}
-							animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-							transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-							style={{ backgroundSize: "200% 200%" }}
-						>
+						<span className="block font-serif italic text-[1.05em] bg-gradient-to-r from-red-600 via-red-500 to-rose-500 bg-clip-text text-transparent">
 							{content.hero.title_highlight}
-						</motion.span>
+						</span>
 					</motion.h1>
 
 					{/* Subtitle */}
@@ -101,7 +96,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						initial="hidden"
 						animate={isInView ? "visible" : "hidden"}
 						custom={0.22}
-						className="mt-5 max-w-lg text-base leading-relaxed text-stone-600 sm:text-lg/relaxed lg:text-base/relaxed xl:text-lg/relaxed"
+						className="mt-6 max-w-lg text-base leading-relaxed text-stone-500 sm:text-lg/relaxed lg:text-base/relaxed xl:text-lg/relaxed"
 					>
 						{content.hero.subtitle}
 					</motion.p>
@@ -117,7 +112,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						<Link href={content.hero.cta_primary_link}>
 							<Button
 								size="lg"
-								className="group h-12 w-full sm:w-auto px-8 text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-2xl shadow-lg shadow-stone-900/10 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-stone-900/15 active:translate-y-0"
+								className="group h-12 w-full sm:w-auto px-8 text-sm font-semibold text-white bg-stone-950 hover:bg-stone-800 rounded-xl shadow-lg shadow-stone-900/15 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-stone-900/20 active:translate-y-0"
 							>
 								{content.hero.cta_primary_text}
 								<ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -127,7 +122,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							<Button
 								variant="outline"
 								size="lg"
-								className="h-12 w-full sm:w-auto px-8 text-sm font-medium text-stone-700 border-stone-200 bg-white hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-2xl transition-all duration-300"
+								className="h-12 w-full sm:w-auto px-8 text-sm font-medium text-stone-600 border-stone-200 bg-white/80 hover:bg-stone-50 hover:text-stone-900 hover:border-stone-300 rounded-xl backdrop-blur-sm transition-all duration-300"
 							>
 								{content.hero.cta_secondary_text}
 							</Button>
@@ -140,7 +135,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 						initial="hidden"
 						animate={isInView ? "visible" : "hidden"}
 						custom={0.42}
-						className="mt-8 flex items-center gap-4 text-xs font-medium text-stone-600"
+						className="mt-10 flex items-center gap-4 text-xs font-medium text-stone-500"
 					>
 						<div className="flex -space-x-1.5">
 							{[...Array(4)].map((_, i) => (
@@ -154,19 +149,19 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 										delay: 0.5 + i * 0.08,
 										ease: [0.16, 1, 0.3, 1],
 									}}
-									className="h-6 w-6 rounded-full border-2 border-white bg-stone-100 ring-1 ring-stone-100"
+									className="h-7 w-7 rounded-full border-2 border-white bg-stone-100 ring-1 ring-stone-100 shadow-sm"
 								>
 									<div className="w-full h-full rounded-full bg-gradient-to-br from-stone-200 to-stone-300" />
 								</motion.div>
 							))}
 						</div>
 						<div className="flex items-center gap-1.5">
-							<div className="flex text-amber-500/80">
+							<div className="flex text-amber-400">
 								{[...Array(5)].map((_, i) => (
 									<motion.svg
 										// biome-ignore lint/suspicious/noArrayIndexKey: static star icons
 										key={`star-${i}`}
-										className="w-3 h-3 fill-current"
+										className="w-3.5 h-3.5 fill-current"
 										viewBox="0 0 20 20"
 										initial={{ opacity: 0, scale: 0 }}
 										animate={isInView ? { opacity: 1, scale: 1 } : {}}
@@ -176,7 +171,7 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 									</motion.svg>
 								))}
 							</div>
-							<span className="text-stone-500">Trusted by 500+ founders</span>
+							<span className="text-stone-400">Trusted by 500+ founders</span>
 						</div>
 					</motion.div>
 				</div>
@@ -189,9 +184,9 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 					className="relative mt-8 lg:mt-0 lg:w-[52%] xl:w-[55%] flex items-center"
 				>
 					{/* Glow behind demo */}
-					<div className="absolute -inset-4 bg-gradient-to-br from-red-500/[0.06] via-transparent to-stone-500/[0.04] rounded-[2rem] blur-2xl pointer-events-none" />
+					<div className="absolute -inset-6 bg-gradient-to-br from-red-500/[0.05] via-transparent to-stone-500/[0.03] rounded-[2rem] blur-3xl pointer-events-none" />
 
-					<div className="relative w-full rounded-2xl bg-gradient-to-b from-stone-100/80 to-stone-50/40 p-1 ring-1 ring-stone-200/60 shadow-2xl shadow-stone-900/8">
+					<div className="relative w-full rounded-2xl bg-gradient-to-b from-stone-100/60 to-white/40 p-1.5 ring-1 ring-stone-200/50 shadow-2xl shadow-stone-900/[0.08]">
 						{content.hero.media_type === "image" && content.hero.media_url ? (
 							<Image
 								src={content.hero.media_url}
@@ -228,34 +223,17 @@ function HeroSection({ content }: { content: LandingPageCMSContent }) {
 							<InteractiveChatDemo content={content} />
 						)}
 					</div>
-
-					{/* Floating accent elements */}
-					<motion.div
-						className="absolute -top-3 -right-3 size-20 rounded-full border border-red-200/40 pointer-events-none"
-						animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
-						transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-					/>
-					<motion.div
-						className="absolute -bottom-2 -left-2 size-12 rounded-full bg-red-500/[0.07] pointer-events-none"
-						animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-						transition={{
-							duration: 3,
-							repeat: Infinity,
-							ease: "easeInOut",
-							delay: 1,
-						}}
-					/>
 				</motion.div>
 			</div>
 
-			{/* Bottom edge fade */}
-			<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
+			{/* Bottom gradient fade */}
+			<div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
 		</section>
 	);
 }
 
 // ─────────────────────────────────────────────────────────────
-// EXECUTIVE CARDS — Editorial, asymmetric layout
+// EXECUTIVE CARDS — Editorial magazine layout
 // ─────────────────────────────────────────────────────────────
 function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
@@ -274,6 +252,7 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 				"Generated over $15M in online sales",
 				"Worked with top leaders from The Secret",
 			],
+			accent: "from-stone-800 to-stone-600",
 		},
 		{
 			name: content.executives.alex_name,
@@ -287,14 +266,18 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 				"Launched Alecci Media — a full-scale marketing and branding agency with a global portfolio of clients",
 				"Built content + investor strategy securing $90M in funding and driving a $700M valuation for a NYC FinTech",
 			],
+			accent: "from-red-600 to-rose-500",
 		},
 	];
 
 	return (
 		<section
 			ref={ref}
-			className="relative bg-white py-24 sm:py-32 lg:py-40 overflow-hidden"
+			className="relative bg-stone-50 py-24 sm:py-32 lg:py-40 overflow-hidden"
 		>
+			{/* Subtle texture */}
+			<div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e5e504_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e504_1px,transparent_1px)] bg-[size:48px_48px]" />
+
 			<div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-8">
 				{/* Section Header */}
 				<motion.div
@@ -302,27 +285,24 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 					initial="hidden"
 					animate={isInView ? "visible" : "hidden"}
 					custom={0}
-					className="mb-16 text-center"
+					className="mb-20 text-center"
 				>
-					{/* Red rule */}
-					<div className="mx-auto mb-8 h-px w-16 bg-red-500" />
-
-					<span className="inline-block mb-5 text-[11px] font-semibold tracking-[0.25em] uppercase text-red-600">
+					<span className="inline-block mb-5 text-[11px] font-semibold tracking-[0.25em] uppercase text-red-500/80">
 						The Experts Behind Your Growth
 					</span>
 					<h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-stone-900 leading-tight">
 						{content.executives.section_title}{" "}
-						<span className="bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">
+						<span className="font-serif italic bg-gradient-to-r from-red-600 to-rose-500 bg-clip-text text-transparent">
 							{content.executives.section_title_highlight}
 						</span>
 					</h2>
-					<p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-stone-500 font-light">
+					<p className="mt-5 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-stone-500">
 						{content.executives.section_subtitle}
 					</p>
 				</motion.div>
 
 				{/* Executive Cards */}
-				<div className="grid gap-8 md:grid-cols-2">
+				<div className="grid gap-6 md:grid-cols-2">
 					{executives.map((exec, i) => (
 						<motion.div
 							key={exec.name}
@@ -330,14 +310,14 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
 							custom={0.2 + i * 0.15}
-							className="group relative rounded-3xl border border-stone-100 bg-white p-8 sm:p-10 transition-all duration-500 hover:border-red-100 hover:shadow-xl hover:shadow-red-500/5"
+							className="group relative rounded-2xl border border-stone-200/60 bg-white p-8 sm:p-10 shadow-sm transition-all duration-500 hover:border-stone-200 hover:shadow-xl hover:shadow-stone-900/[0.06] hover:-translate-y-1"
 						>
-							{/* Top accent */}
-							<div className="absolute top-0 left-10 right-10 h-px bg-gradient-to-r from-transparent via-red-500/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+							{/* Top gradient accent */}
+							<div className={`absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl bg-gradient-to-r ${exec.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
 							{/* Avatar + Identity */}
 							<div className="flex items-center gap-5 mb-6">
-								<div className="size-20 shrink-0 overflow-hidden rounded-2xl ring-1 ring-stone-100 shadow-lg">
+								<div className="relative size-20 shrink-0 overflow-hidden rounded-2xl shadow-lg ring-1 ring-stone-100">
 									<Image
 										src={exec.image}
 										alt={exec.name}
@@ -345,12 +325,14 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 										height={80}
 										className="size-full object-cover"
 									/>
+									{/* Subtle overlay on hover */}
+									<div className={`absolute inset-0 bg-gradient-to-br ${exec.accent} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
 								</div>
 								<div>
 									<h3 className="text-xl font-bold tracking-tight text-stone-900">
 										{exec.name}
 									</h3>
-									<p className="text-sm font-medium text-stone-400 tracking-wide">
+									<p className="text-sm font-medium text-stone-400 tracking-wide uppercase text-[11px]">
 										{exec.role}
 									</p>
 								</div>
@@ -369,9 +351,9 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 								{exec.achievements.map((item) => (
 									<li
 										key={item}
-										className="flex items-start gap-3 text-sm text-stone-600"
+										className="flex items-start gap-3 text-sm text-stone-600 group-hover:text-stone-700 transition-colors"
 									>
-										<span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-red-500" />
+										<span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-red-500/70" />
 										<span className="leading-relaxed">{item}</span>
 									</li>
 								))}
@@ -391,7 +373,7 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 					<Link href="/login">
 						<Button
 							size="lg"
-							className="gap-2.5 rounded-2xl bg-stone-900 px-8 py-6 text-sm font-semibold text-white shadow-xl shadow-stone-900/10 transition-all duration-300 hover:bg-stone-800 hover:shadow-stone-900/20"
+							className="gap-2.5 rounded-xl bg-stone-950 px-8 py-6 text-sm font-semibold text-white shadow-lg shadow-stone-900/15 transition-all duration-300 hover:bg-stone-800 hover:shadow-xl hover:shadow-stone-900/20 hover:-translate-y-0.5"
 						>
 							Chat with Both Executives
 							<Users className="size-4" />
@@ -404,7 +386,7 @@ function ExecutiveCards({ content }: { content: LandingPageCMSContent }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// CHECKUP SECTION — Sophisticated red gradient, inline stats
+// CHECKUP SECTION — Bold stats with grain texture
 // ─────────────────────────────────────────────────────────────
 function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
@@ -428,10 +410,10 @@ function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 	return (
 		<section
 			ref={ref}
-			className="relative bg-gradient-to-br from-red-700 via-red-800 to-stone-900 py-24 sm:py-32 overflow-hidden"
+			className="relative grain-overlay bg-gradient-to-br from-red-700 via-red-800 to-stone-900 py-24 sm:py-32 overflow-hidden"
 		>
-			{/* Subtle texture */}
-			<div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_1px),linear-gradient(to_bottom,#ffffff04_1px,transparent_1px)] bg-[size:64px_64px]" />
+			{/* Radial glow */}
+			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-500/10 rounded-full blur-[120px]" />
 
 			<div className="relative z-10 mx-auto max-w-5xl px-6 lg:px-8">
 				{/* Title */}
@@ -442,12 +424,12 @@ function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 					custom={0}
 					className="text-center mb-16"
 				>
-					<h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
+					<h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight font-serif italic">
 						{content.checkup.section_title}
 					</h2>
 				</motion.div>
 
-				{/* Stats inline */}
+				{/* Stats row */}
 				<div className="flex flex-col sm:flex-row items-center justify-center divide-y sm:divide-y-0 sm:divide-x divide-white/10">
 					{items.map((item, i) => (
 						<motion.div
@@ -458,10 +440,15 @@ function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 							custom={0.15 + i * 0.12}
 							className="flex-1 py-8 sm:py-0 sm:px-10 text-center"
 						>
-							<div className="text-4xl sm:text-5xl font-bold text-white mb-3 tracking-tight">
+							<motion.div
+								initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+								animate={isInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
+								transition={{ duration: 0.8, delay: 0.3 + i * 0.15, ease: [0.16, 1, 0.3, 1] }}
+								className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3 tracking-tight"
+							>
 								{item.value}
-							</div>
-							<p className="text-white/60 text-sm sm:text-base leading-relaxed font-light">
+							</motion.div>
+							<p className="text-white/50 text-sm sm:text-base leading-relaxed">
 								{item.title}
 							</p>
 						</motion.div>
@@ -480,7 +467,7 @@ function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 						<Button
 							size="lg"
 							variant="ghost"
-							className="gap-2.5 rounded-2xl bg-white px-8 py-6 text-sm font-semibold text-red-700 shadow-2xl shadow-black/20 transition-all duration-300 hover:bg-white/95 hover:text-red-800 hover:shadow-black/30"
+							className="gap-2.5 rounded-xl bg-white px-8 py-6 text-sm font-semibold text-red-700 shadow-2xl shadow-black/20 transition-all duration-300 hover:bg-white/95 hover:text-red-800 hover:shadow-black/30 hover:-translate-y-0.5"
 						>
 							See All Plans
 							<ArrowRight className="size-4" />
@@ -493,7 +480,7 @@ function CheckupSection({ content }: { content: LandingPageCMSContent }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// BENEFITS GRID — Refined 2×2 layout, dark section
+// BENEFITS GRID — Premium dark with glow cards
 // ─────────────────────────────────────────────────────────────
 function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
@@ -535,11 +522,11 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 	return (
 		<section
 			ref={ref}
-			className="relative bg-stone-950 py-24 sm:py-32 lg:py-40 overflow-hidden"
+			className="relative grain-overlay bg-stone-950 py-24 sm:py-32 lg:py-40 overflow-hidden"
 		>
-			{/* Subtle ambient glow */}
-			<div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-red-500/5 rounded-full blur-[150px]" />
-			<div className="absolute bottom-0 right-1/3 w-[400px] h-[400px] bg-red-500/3 rounded-full blur-[120px]" />
+			{/* Ambient glows */}
+			<div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-red-500/[0.04] rounded-full blur-[150px]" />
+			<div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-red-500/[0.03] rounded-full blur-[100px]" />
 
 			<div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-8">
 				{/* Section Header */}
@@ -550,44 +537,47 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 					custom={0}
 					className="mb-20 max-w-2xl"
 				>
-					<div className="mb-8 h-px w-16 bg-red-500/60" />
-					<span className="inline-block mb-5 text-[11px] font-semibold tracking-[0.25em] uppercase text-red-400/70">
+					<div className="mb-6 h-px w-12 bg-red-500/50" />
+					<span className="inline-block mb-5 text-[11px] font-semibold tracking-[0.25em] uppercase text-red-400/60">
 						Why Choose AI Boss Brainz
 					</span>
 					<h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
 						{content.benefits.section_title}
 					</h2>
-					<p className="mt-6 text-base sm:text-lg text-stone-500 leading-relaxed font-light">
+					<p className="mt-6 text-base sm:text-lg text-stone-500 leading-relaxed">
 						{content.benefits.section_subtitle}
 					</p>
 				</motion.div>
 
-				{/* Benefits 2×2 Grid */}
-				<div className="grid gap-6 sm:grid-cols-2">
+				{/* Benefits 2x2 Grid */}
+				<div className="grid gap-4 sm:grid-cols-2">
 					{benefits.map((b, i) => (
 						<motion.div
 							key={b.title}
 							variants={revealVariants}
 							initial="hidden"
 							animate={isInView ? "visible" : "hidden"}
-							custom={0.1 + i * 0.12}
-							className="group relative rounded-3xl border border-white/[0.06] bg-white/[0.02] p-8 sm:p-10 transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.04]"
+							custom={0.1 + i * 0.1}
+							className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-8 sm:p-10 transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.04]"
 						>
+							{/* Hover glow */}
+							<div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
 							{/* Number */}
-							<span className="block mb-6 text-xs font-mono text-stone-700 group-hover:text-stone-600 transition-colors">
+							<span className="relative block mb-6 text-xs font-mono text-stone-700 group-hover:text-red-500/50 transition-colors duration-300">
 								{b.num}
 							</span>
 
 							{/* Icon */}
-							<div className="mb-6 flex size-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03]">
-								<b.icon className="size-5 text-red-500/80" />
+							<div className="relative mb-6 flex size-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] group-hover:border-red-500/20 group-hover:bg-red-500/[0.05] transition-all duration-500">
+								<b.icon className="size-5 text-red-500/70 group-hover:text-red-400 transition-colors duration-300" />
 							</div>
 
 							{/* Content */}
-							<h3 className="text-lg font-semibold text-white mb-3 tracking-tight">
+							<h3 className="relative text-lg font-semibold text-white mb-3 tracking-tight">
 								{b.title}
 							</h3>
-							<p className="text-sm leading-relaxed text-stone-500 group-hover:text-stone-400 transition-colors">
+							<p className="relative text-sm leading-relaxed text-stone-500 group-hover:text-stone-400 transition-colors duration-300">
 								{b.desc}
 							</p>
 						</motion.div>
@@ -599,7 +589,7 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 					variants={revealVariants}
 					initial="hidden"
 					animate={isInView ? "visible" : "hidden"}
-					custom={0.6}
+					custom={0.5}
 					className="mt-20 flex flex-wrap justify-center gap-12 sm:gap-16 lg:gap-24"
 				>
 					{[
@@ -607,15 +597,21 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 						{ value: "500+", label: "Brands Helped" },
 						{ value: "24/7", label: "Availability" },
 						{ value: "100%", label: "Focus on Results" },
-					].map((stat) => (
-						<div key={stat.label} className="text-center">
+					].map((stat, i) => (
+						<motion.div
+							key={stat.label}
+							initial={{ opacity: 0, y: 12 }}
+							animate={isInView ? { opacity: 1, y: 0 } : {}}
+							transition={{ duration: 0.6, delay: 0.6 + i * 0.1 }}
+							className="text-center"
+						>
 							<div className="text-2xl sm:text-3xl font-bold text-white/90 tracking-tight">
 								{stat.value}
 							</div>
 							<div className="mt-2 text-[11px] font-medium uppercase tracking-[0.15em] text-stone-600">
 								{stat.label}
 							</div>
-						</div>
+						</motion.div>
 					))}
 				</motion.div>
 			</div>
@@ -624,7 +620,64 @@ function BenefitsGrid({ content }: { content: LandingPageCMSContent }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// CTA SECTION — Cinematic closing, dramatic negative space
+// SOCIAL PROOF STRIP — Minimal testimonial marquee
+// ─────────────────────────────────────────────────────────────
+function SocialProofStrip() {
+	const ref = useRef(null);
+	const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+	const testimonials = [
+		{ quote: "BossBrainz gave me a complete go-to-market strategy in 20 minutes. My agency charged $5K for less.", author: "Sarah M.", role: "Founder, DTC Brand" },
+		{ quote: "Like having a CMO and CSO on speed dial. The voice feature makes it feel like a real strategy call.", author: "Marcus T.", role: "CEO, SaaS Startup" },
+		{ quote: "I used the pricing strategy Kim gave me and increased my average deal size by 40% in one quarter.", author: "Priya K.", role: "Sales Director" },
+	];
+
+	return (
+		<section ref={ref} className="relative bg-white py-20 sm:py-24 overflow-hidden border-y border-stone-100">
+			<div className="mx-auto max-w-6xl px-6 lg:px-8">
+				<motion.div
+					variants={revealVariants}
+					initial="hidden"
+					animate={isInView ? "visible" : "hidden"}
+					custom={0}
+					className="text-center mb-14"
+				>
+					<span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-stone-400">
+						What Founders Are Saying
+					</span>
+				</motion.div>
+
+				<div className="grid gap-6 md:grid-cols-3">
+					{testimonials.map((t, i) => (
+						<motion.div
+							key={t.author}
+							variants={revealVariants}
+							initial="hidden"
+							animate={isInView ? "visible" : "hidden"}
+							custom={0.1 + i * 0.12}
+							className="relative rounded-2xl border border-stone-100 bg-stone-50/50 p-6 sm:p-8"
+						>
+							{/* Quote mark */}
+							<svg className="mb-4 h-6 w-6 text-red-500/30" fill="currentColor" viewBox="0 0 24 24">
+								<path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+							</svg>
+							<p className="text-sm text-stone-600 leading-relaxed mb-6">
+								{t.quote}
+							</p>
+							<div>
+								<p className="text-sm font-semibold text-stone-900">{t.author}</p>
+								<p className="text-xs text-stone-400">{t.role}</p>
+							</div>
+						</motion.div>
+					))}
+				</div>
+			</div>
+		</section>
+	);
+}
+
+// ─────────────────────────────────────────────────────────────
+// CTA SECTION — Cinematic closing
 // ─────────────────────────────────────────────────────────────
 function CTASection({ content }: { content: LandingPageCMSContent }) {
 	const ref = useRef(null);
@@ -633,19 +686,20 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
 	return (
 		<section
 			ref={ref}
-			className="relative bg-stone-950 py-32 sm:py-40 lg:py-48 overflow-hidden"
+			className="relative grain-overlay bg-stone-950 py-32 sm:py-40 lg:py-48 overflow-hidden"
 		>
-			{/* Ambient glow */}
-			<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-red-500/[0.06] rounded-full blur-[150px]" />
+			{/* Dramatic radial glow */}
+			<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-red-500/[0.07] rounded-full blur-[150px]" />
+			<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-red-400/[0.05] rounded-full blur-[80px]" />
 
 			<div className="relative z-10 mx-auto max-w-4xl px-6 lg:px-8 text-center">
-				{/* Red rule */}
+				{/* Decorative rule */}
 				<motion.div
 					variants={revealVariants}
 					initial="hidden"
 					animate={isInView ? "visible" : "hidden"}
 					custom={0}
-					className="mx-auto mb-12 h-px w-16 bg-red-500/50"
+					className="mx-auto mb-12 h-px w-16 bg-gradient-to-r from-transparent via-red-500/50 to-transparent"
 				/>
 
 				{/* Badge */}
@@ -660,13 +714,13 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
 					Ready to Scale Your Business?
 				</motion.span>
 
-				{/* Heading */}
+				{/* Heading — Serif for drama */}
 				<motion.h2
 					variants={revealVariants}
 					initial="hidden"
 					animate={isInView ? "visible" : "hidden"}
 					custom={0.2}
-					className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-bold tracking-tight text-white leading-[1.15]"
+					className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-bold tracking-tight text-white leading-[1.15] font-serif italic"
 				>
 					{content.cta.title}
 				</motion.h2>
@@ -677,7 +731,7 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
 					initial="hidden"
 					animate={isInView ? "visible" : "hidden"}
 					custom={0.35}
-					className="mx-auto mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-stone-500 font-light"
+					className="mx-auto mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-stone-500"
 				>
 					{content.cta.subtitle}
 				</motion.p>
@@ -693,7 +747,7 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
 					<Link href={content.cta.cta_primary_link}>
 						<Button
 							size="lg"
-							className="group gap-2.5 rounded-2xl bg-red-600 px-10 py-6 text-sm font-semibold tracking-wide text-white shadow-2xl shadow-red-600/20 transition-all duration-300 hover:bg-red-500 hover:shadow-red-500/30"
+							className="group gap-2.5 rounded-xl bg-red-600 px-10 py-6 text-sm font-semibold tracking-wide text-white shadow-2xl shadow-red-600/25 transition-all duration-300 hover:bg-red-500 hover:shadow-red-500/35 hover:-translate-y-0.5"
 						>
 							<span>{content.cta.cta_primary_text}</span>
 							<ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -703,7 +757,7 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
 						<Button
 							variant="outline"
 							size="lg"
-							className="rounded-2xl border-white/10 bg-white/[0.03] backdrop-blur-sm px-10 py-6 text-sm font-medium text-white/60 hover:border-white/20 hover:bg-white/[0.06] hover:text-white/80 transition-all duration-300"
+							className="rounded-xl border-white/10 bg-white/[0.03] backdrop-blur-sm px-10 py-6 text-sm font-medium text-white/60 hover:border-white/20 hover:bg-white/[0.06] hover:text-white/80 transition-all duration-300"
 						>
 							{content.cta.cta_secondary_text}
 						</Button>
@@ -720,7 +774,7 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
 				>
 					<div className="flex items-center gap-2">
 						<svg
-							className="w-4 h-4 text-red-500/60"
+							className="w-4 h-4 text-red-500/50"
 							fill="none"
 							viewBox="0 0 24 24"
 							stroke="currentColor"
@@ -737,7 +791,7 @@ function CTASection({ content }: { content: LandingPageCMSContent }) {
 					<div className="w-px h-3 bg-white/[0.06]" />
 					<div className="flex items-center gap-2">
 						<svg
-							className="w-4 h-4 text-red-500/60"
+							className="w-4 h-4 text-red-500/50"
 							fill="none"
 							viewBox="0 0 24 24"
 							stroke="currentColor"
@@ -764,6 +818,7 @@ export function LandingPageClient({ content }: LandingPageClientProps) {
 			<ExecutiveCards content={content} />
 			<CheckupSection content={content} />
 			<BenefitsGrid content={content} />
+			<SocialProofStrip />
 			<CTASection content={content} />
 		</>
 	);

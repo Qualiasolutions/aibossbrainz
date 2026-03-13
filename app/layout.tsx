@@ -3,11 +3,19 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
+import { Instrument_Serif } from "next/font/google";
 import Script from "next/script";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PRODUCTION_URL } from "@/lib/constants";
+
+const instrumentSerif = Instrument_Serif({
+	weight: "400",
+	subsets: ["latin"],
+	display: "swap",
+	variable: "--font-instrument-serif",
+});
 
 import "./globals.css";
 
@@ -103,7 +111,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html
-			className={`${GeistSans.variable} ${GeistMono.variable}`}
+			className={`${GeistSans.variable} ${GeistMono.variable} ${instrumentSerif.variable}`}
 			// `next-themes` injects an extra classname to the body element to avoid
 			// visual flicker before hydration. Hence the `suppressHydrationWarning`
 			// prop is necessary to avoid the React hydration mismatch warning.

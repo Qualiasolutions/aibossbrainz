@@ -245,7 +245,7 @@ export function AuthShell({
 
 						{/* Title & description */}
 						<div className="space-y-5">
-							<h1 className="animate-fade-in font-light text-4xl text-stone-900 leading-[1.15] tracking-tight sm:text-5xl [animation-delay:100ms]">
+							<h1 className="animate-fade-in font-serif italic text-4xl text-stone-900 leading-[1.15] tracking-tight sm:text-5xl [animation-delay:100ms]">
 								{title}
 							</h1>
 
@@ -284,9 +284,9 @@ export function AuthShell({
 					{/* Right side - Form card */}
 					<div className="animate-fade-slide-up relative [animation-delay:200ms]">
 						{/* Premium card with subtle border */}
-						<div className="relative rounded-2xl border border-stone-200/60 bg-white p-8 shadow-xl shadow-stone-200/20">
+						<div className="relative rounded-2xl border border-stone-200/50 bg-white p-8 shadow-xl shadow-stone-900/[0.06]">
 							{/* Top accent line */}
-							<div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-stone-900/20 to-transparent" />
+							<div className="absolute inset-x-0 top-0 h-[2px] rounded-t-2xl bg-gradient-to-r from-transparent via-red-500/40 to-transparent" />
 
 							{/* Content */}
 							<div className="flex flex-col gap-6">{children}</div>

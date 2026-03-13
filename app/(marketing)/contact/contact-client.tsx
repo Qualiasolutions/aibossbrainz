@@ -74,7 +74,7 @@ export function ContactPageClient() {
 						<div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-red-700 shadow-xl shadow-red-500/25">
 							<MessageSquare className="size-8 text-white" />
 						</div>
-						<h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+						<h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl font-serif italic">
 							Get in Touch
 						</h1>
 						<p className="mx-auto max-w-2xl text-lg font-medium text-red-600">

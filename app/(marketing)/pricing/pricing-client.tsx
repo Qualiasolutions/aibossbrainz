@@ -159,9 +159,9 @@ function PricingCard({
 			animate={isInView ? { opacity: 1, y: 0 } : {}}
 			transition={{ duration: 0.6, delay: index * 0.15 }}
 			className={cn(
-				"relative flex flex-col overflow-hidden rounded-3xl border bg-white shadow-sm transition-all hover:shadow-xl",
+				"relative flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1",
 				plan.popular
-					? "border-red-300 shadow-lg shadow-red-500/10"
+					? "border-red-200 shadow-lg shadow-red-500/10 ring-1 ring-red-100"
 					: "border-stone-200",
 			)}
 		>
@@ -336,7 +336,7 @@ function FAQSection() {
 					transition={{ duration: 0.6 }}
 					className="text-center"
 				>
-					<h2 className="font-bold text-3xl tracking-tight text-stone-900 sm:text-4xl">
+					<h2 className="font-bold text-3xl tracking-tight text-stone-900 sm:text-4xl font-serif italic">
 						Frequently Asked Questions
 					</h2>
 					<p className="mt-4 text-lg text-stone-600">
@@ -505,7 +505,7 @@ export function PricingPageClient() {
 						</span>
 						<h1 className="mt-8 font-bold text-4xl tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
 							Invest in Your{" "}
-							<span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+							<span className="font-serif italic bg-gradient-to-r from-red-600 to-rose-500 bg-clip-text text-transparent">
 								Business Growth
 							</span>
 						</h1>

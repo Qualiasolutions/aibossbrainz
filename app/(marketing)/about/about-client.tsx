@@ -78,7 +78,7 @@ export function AboutPageClient({ content }: AboutPageClientProps) {
 						className="text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl lg:text-6xl"
 					>
 						Your 24/7 AI-Powered
-						<span className="mt-2 block bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+						<span className="mt-2 block font-serif italic bg-gradient-to-r from-red-600 to-rose-500 bg-clip-text text-transparent">
 							Executive Consulting Team
 						</span>
 					</motion.h1>
