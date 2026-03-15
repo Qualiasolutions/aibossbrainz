@@ -125,6 +125,7 @@ export async function updateSession(request: NextRequest) {
 		"/api/health", // Monitoring probes (returns minimal info after SEC-04)
 		"/api/demo/chat", // Demo chat for unauthenticated visitors
 		"/api/csrf", // CSRF token endpoint (needed by unauthenticated demo visitors)
+		"/api/stripe/checkout", // Stripe checkout (returns JSON 401 for unauthenticated users; pricing page handles redirect)
 		"/api/admin/landing-page", // Landing page content (GET is public, POST has isUserAdmin check)
 		"/api/cron", // Vercel cron jobs (have CRON_SECRET auth)
 	];
